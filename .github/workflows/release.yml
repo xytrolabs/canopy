@@ -1,0 +1,75 @@
+name: release
+
+# Tag a commit (v2026.11.01) and this builds the self-extracting installer,
+# checksums it, and publishes both as a GitHub Release. That release is what
+# `canopy-update` reads: it asks the API for the newest tag and downloads
+#   <tag>/canopy-<version>.run
+#   <tag>/SHA256SUMS
+# so the asset names below must not change.
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version to build (e.g. 2026.11.01)"
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Resolve version
+        id: ver
+        run: |
+          if [ -n "${{ github.event.inputs.version }}" ]; then
+            v="${{ github.event.inputs.version }}"
+          else
+            v="${GITHUB_REF_NAME#v}"
+          fi
+          echo "version=$v" >> "$GITHUB_OUTPUT"
+          echo "building $v"
+
+      - name: Build the installer
+        env:
+          CANOPY_VERSION: ${{ steps.ver.outputs.version }}
+        run: |
+          sh scripts/build-release.sh
+          ls -l dist/
+
+      - name: Checksums
+        working-directory: dist
+        run: |
+          sha256sum "canopy-${{ steps.ver.outputs.version }}.run" > SHA256SUMS
+          cat SHA256SUMS
+
+      - name: Publish release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ steps.ver.outputs.version }}
+          name: Canopy ${{ steps.ver.outputs.version }}
+          generate_release_notes: true
+          body: |
+            Canopy ${{ steps.ver.outputs.version }}
+
+            Install or upgrade:
+
+                curl -fsSL https://canopy.xytro.site/install.sh | sh
+
+            or, without the site:
+
+                curl -fsSLO https://github.com/${{ github.repository }}/releases/download/v${{ steps.ver.outputs.version }}/canopy-${{ steps.ver.outputs.version }}.run
+                sha256sum -c <(curl -fsSL https://github.com/${{ github.repository }}/releases/download/v${{ steps.ver.outputs.version }}/SHA256SUMS)
+                sh canopy-${{ steps.ver.outputs.version }}.run
+
+            Automatic updates (`canopy-update`, and the shell's Software updates
+            card) read this release directly.
+          files: |
+            dist/canopy-${{ steps.ver.outputs.version }}.run
+            dist/SHA256SUMS

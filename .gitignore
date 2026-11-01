@@ -1,0 +1,12 @@
+# Build output. Releases are GitHub Release assets, not repository content:
+# scripts/build-release.sh writes dist/, and .github/workflows/release.yml
+# uploads dist/canopy-<version>.run + SHA256SUMS to the tag's release.
+dist/
+*.run
+
+# Interpreter/loader scratch (if Canopy is ever loaded from a checkout)
+__incache__/
+
+# Logs and local scratch
+*.log
+*.tmp

@@ -1,0 +1,7 @@
+[Desktop Entry]
+Type=Application
+Name=Canopy
+Comment=Canopy desktop environment (Xytro Labs)
+Exec=labwc
+TryExec=labwc
+DesktopNames=Canopy

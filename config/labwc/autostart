@@ -1,0 +1,11 @@
+# Canopy session autostart (Labwc)
+# Kill any stale shell first, then start exactly one instance. Running two
+# shells is what produces a duplicate panel / duplicate tray.
+#
+# Kill by process NAME (-x), not by command line: a `pkill -f` pattern also
+# matches the `sh -c` wrapper that performs the kill, and "quickshell.*-c canopy"
+# does not match `quickshell -p <dir>` or a differently ordered launch at all.
+# `-x quickshell` catches every launch form and only the shell binary.
+pkill -x quickshell 2>/dev/null
+sleep 1
+quickshell -n -c canopy >"$HOME/.cache/canopy-shell.log" 2>&1 &

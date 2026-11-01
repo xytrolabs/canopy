@@ -1,0 +1,7 @@
+module Canopy.Settings.Components
+ToggleSwitch 1.0 ToggleSwitch.qml
+SectionCard 1.0 SectionCard.qml
+SettingRow 1.0 SettingRow.qml
+ChoiceRow 1.0 ChoiceRow.qml
+SliderRow 1.0 SliderRow.qml
+ColorRow 1.0 ColorRow.qml

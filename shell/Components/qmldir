@@ -1,0 +1,9 @@
+module Canopy.Components
+singleton Tooltip 1.0 Tooltip.qml
+singleton MenuController 1.0 MenuController.qml
+singleton Coords 1.0 Coords.qml
+CanopyTooltipCard 1.0 CanopyTooltipCard.qml
+CanopyMenuCard 1.0 CanopyMenuCard.qml
+MenuItemRow 1.0 MenuItemRow.qml
+IconButton 1.0 IconButton.qml
+InteractionOverlay 1.0 InteractionOverlay.qml

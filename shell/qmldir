@@ -1,0 +1,3 @@
+module Canopy
+singleton Theme 1.0 Theme.qml
+CanopyIcon 1.0 CanopyIcon.qml
