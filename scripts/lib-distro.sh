@@ -84,13 +84,13 @@ canopy_pkgs() {
     case "$_cp_family:$_cp_role" in
         # ---------------------------------------------------------------- arch
         arch:runtime)
-            printf '%s\n' "labwc quickshell qt6-declarative qt6-wayland qt6-5compat qt6-svg xorg-xwayland pipewire networkmanager bluez upower grim" ;;
+            printf '%s\n' "labwc quickshell qt6-declarative qt6-wayland qt6-5compat qt6-svg xorg-xwayland pipewire networkmanager bluez upower grim wl-clipboard slurp qt6ct wl-clipboard slurp qt6ct wl-clipboard slurp qt6ct" ;;
         arch:build)
             printf '%s\n' "base-devel cmake ninja git qt6-base qt6-declarative qt6-wayland qt6-shadertools jemalloc wayland wayland-protocols libxkbcommon pipewire networkmanager bluez upower" ;;
 
         # -------------------------------------------------------------- fedora
         fedora:runtime)
-            printf '%s\n' "labwc quickshell qt6-qtdeclarative qt6-qtwayland qt6-qt5compat qt6-qtbase NetworkManager bluez pipewire grim upower" ;;
+            printf '%s\n' "labwc quickshell qt6-qtdeclarative qt6-qtwayland qt6-qt5compat qt6-qtsvg qt6-qtbase NetworkManager bluez pipewire grim upower wl-clipboard slurp qt6ct" ;;
         fedora:build)
             printf '%s\n' "cmake ninja-build gcc-c++ git qt6-qtbase-devel qt6-qtdeclarative-devel qt6-qtwayland-devel qt6-qt5compat-devel jemalloc-devel wayland-devel wayland-protocols-devel libxkbcommon-devel pipewire-devel pulseaudio-libs-devel NetworkManager-libnm-devel upower-devel" ;;
 
@@ -98,7 +98,7 @@ canopy_pkgs() {
         # qml6-module-* names verified against the trixie Packages index;
         # quickshell itself only exists in trixie-backports and forky.
         debian:runtime)
-            printf '%s\n' "labwc quickshell qt6-wayland qml6-module-qtquick qml6-module-qtqml qml6-module-qtqml-workerscript qml6-module-qtquick-controls qml6-module-qtquick-layouts qml6-module-qtquick-window qml6-module-qtquick-dialogs qml6-module-qt5compat-graphicaleffects libqt6svg6 xwayland pipewire network-manager bluez upower grim" ;;
+            printf '%s\n' "labwc quickshell qt6-wayland qml6-module-qtquick qml6-module-qtqml qml6-module-qtqml-workerscript qml6-module-qtquick-controls qml6-module-qtquick-layouts qml6-module-qtquick-window qml6-module-qtquick-dialogs qml6-module-qt5compat-graphicaleffects libqt6svg6 xwayland pipewire network-manager bluez upower grim wl-clipboard slurp qt6ct wl-clipboard slurp qt6ct wl-clipboard slurp qt6ct" ;;
         debian:build)
             printf '%s\n' "build-essential cmake ninja-build git qt6-base-dev qt6-declarative-dev qt6-wayland-dev qml6-module-qtquick qt6-svg-dev libjemalloc-dev libwayland-dev wayland-protocols libxkbcommon-dev libpipewire-0.3-dev libpulse-dev libnm-dev libupower-glib-dev" ;;
 
@@ -106,7 +106,7 @@ canopy_pkgs() {
         # Not exercised: openSUSE does not package the shell runtime in a way
         # that has been verified, so only the base compositor is listed.
         suse:runtime)
-            printf '%s\n' "labwc qt6-wayland qt6-declarative-imports pipewire NetworkManager bluez upower grim" ;;
+            printf '%s\n' "labwc qt6-wayland qt6-declarative-imports pipewire networkmanager bluez upower grim wl-clipboard slurp qt6ct" ;;
         suse:build)
             printf '%s\n' "gcc-c++ cmake ninja git qt6-base-devel qt6-declarative-devel qt6-wayland-devel wayland-devel wayland-protocols-devel libxkbcommon-devel" ;;
 
