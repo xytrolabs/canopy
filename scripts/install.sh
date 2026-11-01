@@ -13,6 +13,7 @@ PROJECT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 # Regenerate the system icon index (name -> file path) used by CanopyIcon.
 if command -v python3 >/dev/null 2>&1 && [ -f "$PROJECT_DIR/scripts/gen-icon-map.py" ]; then
     python3 "$PROJECT_DIR/scripts/gen-icon-map.py" "$PROJECT_DIR/shell/icon-map.js" >/dev/null 2>&1 || true
+    cp -f "$PROJECT_DIR/shell/icon-map.js" "$HOME/.config/quickshell/canopy/icon-map.js" 2>/dev/null || true
 fi
 XDG_CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}"
 XDG_DATA_HOME="${XDG_DATA_HOME:-$HOME/.local/share}"

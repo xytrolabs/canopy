@@ -1,6 +1,15 @@
 import os, json, collections
 
 import os as _os
+# ICON_PREFIX lets an image build index themes inside a staging root
+# (DESTDIR=/tmp/img) while still writing the paths the shell will see at
+# runtime (/usr/share/icons/...). Without it the map would be generated from the
+# build machine and point at files that do not exist in the image, which shows
+# up as every icon falling back to a letter glyph.
+PREFIX = _os.environ.get("ICON_PREFIX", "")
+def rooted(p):
+    return _os.path.join(PREFIX, p.lstrip("/")) if PREFIX else p
+
 HOME = _os.path.expanduser("~")
 USER_ICONS = _os.path.join(HOME, ".local/share/icons")
 
@@ -26,7 +35,9 @@ PREFERRED = [
 
 _roots = []
 _rank = 0
-for base in (_os.path.join(HOME, ".local/share/icons"), "/usr/share/icons"):
+# With a prefix the user's own icons are irrelevant: only the staged root counts.
+_bases = [rooted("/usr/share/icons")] if PREFIX else [_os.path.join(HOME, ".local/share/icons"), "/usr/share/icons"]
+for base in _bases:
     if not _os.path.isdir(base):
         continue
     for name in sorted(_os.listdir(base)):
@@ -42,8 +53,9 @@ for base in (_os.path.join(HOME, ".local/share/icons"), "/usr/share/icons"):
         _roots.append((d, r))
         _rank += 1
 
-ROOTS = _roots + [(_os.path.join(HOME, ".local/share/pixmaps"), len(PREFERRED) + 5),
-                  ("/usr/share/pixmaps", len(PREFERRED) + 6)]
+PIXMAP_ROOTS = [rooted("/usr/share/pixmaps")] if PREFIX else \
+               [_os.path.join(HOME, ".local/share/pixmaps"), "/usr/share/pixmaps"]
+ROOTS = _roots + [(p, len(PREFERRED) + 5 + i) for i, p in enumerate(PIXMAP_ROOTS)]
 SUBDIRS = ("apps","status","devices","places","actions","categories","mimetypes","preferences","legacy","symbolic","notifications","panel","emotes")
 
 best = {}
@@ -89,6 +101,10 @@ for root, rank in ROOTS:
                 best[name] = (sc, p)
 
 m = {k: v[1] for k, v in best.items()}
+# Strip the staging prefix so the map holds runtime paths (/usr/share/...).
+if PREFIX:
+    _pref = PREFIX.rstrip("/")
+    m = {k: (v[len(_pref):] if v.startswith(_pref) else v) for k, v in m.items()}
 import sys
 out = sys.argv[1] if len(sys.argv) > 1 else "/run/media/raf/Z/Willow-Canopy/shell/icon-map.js"
 with open(out, "w") as fh:

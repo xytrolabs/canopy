@@ -356,6 +356,17 @@ ShellRoot {
     Component.onCompleted: {
         wallpaperScan.running = true
         settingsReader.running = true
+        // DesktopEntries is populated asynchronously; wait for it rather than
+        // racing a first run that would otherwise pin nothing.
+        defaultPinTimer.running = true
+    }
+
+    Timer {
+        id: defaultPinTimer
+        interval: 1500
+        repeat: false
+        running: false
+        onTriggered: rootShell.applyDefaultPins()
     }
 
     readonly property int appCount: DesktopEntries.applications.values
@@ -590,7 +601,7 @@ ShellRoot {
         confirmReset = false
         resetAppearance()
         store.dockedReset = true
-        pinnedIds = ["firefox", "thunar", "code-oss", "kitty", "google-chrome", "discord", "steam", "mpv"]
+        pinnedIds = defaultPinnedIds()
         store.pinned = pinnedIds.join(",")
     }
 
@@ -1173,7 +1184,42 @@ ShellRoot {
     }
     property bool quickSettingsOpen: false
 
-    property var pinnedIds: ["firefox", "thunar", "code-oss", "kitty", "google-chrome", "discord", "steam", "mpv", "alacritty"]
+    property var pinnedIds: []
+
+    // Pin what is actually installed. The old list (firefox, thunar, code-oss,
+    // kitty, chrome, discord, steam, mpv) is Arch-specific and left the dock
+    // empty - or full of dead entries - on any machine without those exact
+    // apps. Discovery asks the desktop database instead, one app per role,
+    // terminal first because that is the one thing a desktop must offer.
+    function defaultPinnedIds() {
+        const apps = DesktopEntries.applications.values ? DesktopEntries.applications.values : []
+        const out = []
+        const seen = {}
+        function take(re) {
+            for (let i = 0; i < apps.length; i++) {
+                const a = apps[i]
+                if (!a || a.noDisplay || seen[a.id]) continue
+                const hay = ((a.id || "") + " " + (a.name || "") + " " + (a.genericName || "")).toLowerCase()
+                if (re.test(hay)) { seen[a.id] = true; out.push(a.id); return true }
+            }
+            return false
+        }
+        take(/terminal|alacritty|kitty|foot|console|konsole|xterm|wezterm|tilix/)
+        take(/zen/)
+        take(/firefox|chromium|chrome|browser/)
+        take(/nautilus|thunar|dolphin|nemo|pcmanfm|file manager|files/)
+        take(/text editor|kate|gedit|zed|code|writer/)
+        take(/settings|control center/)
+        return out
+    }
+
+    // A first run, or a reset, ends up here.
+    function applyDefaultPins() {
+        if (pinnedIds.length === 0) {
+            pinnedIds = defaultPinnedIds()
+            store.pinned = pinnedIds.join(",")
+        }
+    }
 
     function isPinnedAppId(appId) {
         if (!appId) return false
@@ -2633,6 +2679,10 @@ ShellRoot {
                 color: Theme.darkMode ? "#F01B1B22" : "#F7FFFFFF"
                 border.color: Theme.darkMode ? "#33FFFFFF" : "#1A000000"
                 border.width: 1
+                // Nothing may cross the rounded corners, no matter how many
+                // results the search produces or how tall the recommended list gets.
+                clip: true
+                clip: true
 
                 // ---- content ----
                 Column {
@@ -2646,7 +2696,7 @@ ShellRoot {
                     readonly property real cellH: Math.min(100, Math.floor(cellW * 0.92))
                     readonly property int gridRows: Math.min(3, Math.max(1, Math.ceil(launcherWin.pinnedSlice.length / 6)))
                     readonly property real gridH: cellH * gridRows + 6
-                    readonly property real recH: Math.max(46, height - 38 - 24 - gridH - 20 - 44 - 12 * 4)
+                    readonly property real recH: Math.max(46, height - 38 - 24 - gridH - 20 - 44 - 12 * 5)
                     readonly property var allList: rootShell.filteredApps("")
 
                     // search capsule
@@ -2658,10 +2708,8 @@ ShellRoot {
                         border.color: searchInput.activeFocus ? Theme.accent
                                                               : (Theme.darkMode ? "#33FFFFFF" : "#1F000000")
                         border.width: 1
-
-                        CanopyIcon {
-                            size: 16
-                            anchors.left: parent.left
+                clip: true
+                // Cabinet contents never spill past the rounded corners.
                             anchors.leftMargin: 14
                             anchors.verticalCenter: parent.verticalCenter
                             iconName: "edit-find-symbolic"
@@ -2919,7 +2967,7 @@ ShellRoot {
                     ListView {
                         visible: launcherWin.allAppsView
                         width: parent.width
-                        height: Math.max(120, parent.height - 38 - 24 - 44 - 12 * 3)
+                        height: Math.max(120, parent.height - 38 - 24 - 44 - 12 * 4)
                         clip: true
                         model: startColumn.allList
                         boundsBehavior: Flickable.StopAtBounds

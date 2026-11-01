@@ -26,7 +26,8 @@ Item {
         // Quickshell hands StatusNotifierItem icons over as an image provider
         // URL: "image://icon/<theme name>". Rendering that URL directly
         // produced magenta/garbage pixmaps under this Qt build, so the name is
-        // unwrapped and resolved through our own index instead.
+        // unwrapped and resolved through our own index instead. We only use it as
+        // a last resort, and only for names that look like real icon names.
         const iconProvider = "image://icon/"
         if (iconName.indexOf(iconProvider) === 0) {
             const n = iconName.substring(iconProvider.length)
@@ -41,11 +42,29 @@ Item {
         if (iconName.indexOf("image://") === 0 || iconName.indexOf("qrc:/") === 0) return iconName
         let p = IconMap.map[iconName]
         if (!p) p = IconMap.map[iconName + "-symbolic"]
-        return p ? p : ""
+        if (p) return p
+        // Themes usually ship a non-symbolic and a -symbolic variant under the
+        // same base name; our index is generated from whatever was installed on
+        // the machine that ran gen-icon-map.py, so a thin set can miss one of
+        // them. Try the common aliases before giving up.
+        const base = iconName.endsWith("-symbolic") ? iconName.slice(0, -9) : iconName
+        if (IconMap.map[base]) return IconMap.map[base]
+        if (IconMap.map[base + "-symbolic"]) return IconMap.map[base + "-symbolic"]
+        if (IconMap.map[base + "-plain"]) return IconMap.map[base + "-plain"]
+        return ""
     }
     readonly property string source: {
         const r = resolvedPath
-        if (r === "") return ""
+        if (r === "") {
+            // Qt's own icon provider knows every base name the theme declares,
+            // including ones our map never saw. Fall back to it so a missing
+            // entry (or a stale map) does not become a letter glyph - the
+            // reported symptom of "a lot of apps are still missing icons".
+            const n = iconName.indexOf("image://icon/") === 0 ? iconName.substring(13)
+                                                                     : iconName
+            if (n !== "" && n.indexOf("/") < 0 && n.indexOf("://") < 0) return "image://icon/" + n
+            return ""
+        }
         if (r.indexOf("://") >= 0) return r
         return "file://" + r
     }
