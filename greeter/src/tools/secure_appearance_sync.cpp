@@ -35,8 +35,8 @@ namespace greeter::secure_sync {
 
   namespace {
 
-    constexpr std::string_view kStagingDirectoryName = "noctalia-greeter-sync";
-    constexpr std::string_view kSyncLockPath = "/run/noctalia-greeter-sync.lock";
+    constexpr std::string_view kStagingDirectoryName = "canopy-greeter-sync";
+    constexpr std::string_view kSyncLockPath = "/run/canopy-greeter-sync.lock";
     constexpr std::uint64_t kConfigSizeLimit = 256U * 1024U;
     // greeter_compositor_config stores each serialized output value in a 2048-byte buffer.
     constexpr std::uint64_t kOutputMetadataSizeLimit = 2047U;
@@ -110,7 +110,7 @@ namespace greeter::secure_sync {
       [[nodiscard]] int fd() const { return m_fd.get(); }
 
       [[nodiscard]] bool create(std::string& errorOut) {
-        std::string pathTemplate = "/tmp/noctalia-greeter-sync.XXXXXX";
+        std::string pathTemplate = "/tmp/canopy-greeter-sync.XXXXXX";
         char* created = ::mkdtemp(pathTemplate.data());
         if (created == nullptr) {
           errorOut = std::string("failed to create private staging directory: ") + std::strerror(errno);
@@ -1078,7 +1078,7 @@ namespace greeter::secure_sync {
 
   } // namespace
 
-#ifdef NOCTALIA_GREETER_TESTING
+#ifdef CANOPY_GREETER_TESTING
   namespace detail {
 
     bool validateLegacyStagingForTesting(
@@ -1156,7 +1156,7 @@ namespace greeter::secure_sync {
 
     // The generic logger supports an environment-selected file target. Do not let a
     // caller-controlled value become a root file open on an early validation error.
-    ::unsetenv("NOCTALIA_GREETER_LOG");
+    ::unsetenv("CANOPY_GREETER_LOG");
 
     uid_t callerUid = 0;
     if (!parseCallingUid(callerUid, errorOut)) {
@@ -1222,7 +1222,7 @@ namespace greeter::secure_sync {
       return false;
     }
 
-    ::unsetenv("NOCTALIA_GREETER_LOG");
+    ::unsetenv("CANOPY_GREETER_LOG");
 
     UniqueFd syncLock;
     if (!acquireSyncLock(syncLock, errorOut)) {

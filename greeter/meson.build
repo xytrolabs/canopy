@@ -1,4 +1,4 @@
-project('noctalia-greeter', ['c', 'cpp'],
+project('canopy-greeter', ['c', 'cpp'],
   version: '1.7.0',
   default_options: [
     'cpp_std=c++20',
@@ -205,38 +205,38 @@ _greeter_dependencies = [
   tomlplusplus_dep,
 ]
 
-noctalia_greeter_executable = executable('noctalia-greeter',
+canopy_greeter_executable = executable('canopy-greeter',
   sources: _greeter_sources + files('src/main.cpp'),
   dependencies: _greeter_dependencies,
   include_directories: _greeter_inc,
   cpp_args: [
     '-Wall', '-Wextra', '-Wpedantic', '-Wconversion', '-Wshadow',
-    '-DNOCTALIA_GREETER_VERSION="' + meson.project_version() + '"',
-    '-DNOCTALIA_GREETER_ASSETS_DIR="' + meson.project_source_root() / 'assets' + '"',
-    '-DNOCTALIA_GREETER_INSTALLED_ASSETS_DIR="' + get_option('datadir') / 'noctalia-greeter' / 'assets' + '"',
-    '-DNOCTALIA_GREETER_INSTALLED_POLICY_PATH="' + get_option('prefix') / get_option('datadir') / 'polkit-1' / 'actions' / 'org.noctalia.greeter.apply-appearance.policy' + '"',
+    '-DCANOPY_GREETER_VERSION="' + meson.project_version() + '"',
+    '-DCANOPY_GREETER_ASSETS_DIR="' + meson.project_source_root() / 'assets' + '"',
+    '-DCANOPY_GREETER_INSTALLED_ASSETS_DIR="' + get_option('datadir') / 'canopy-greeter' / 'assets' + '"',
+    '-DCANOPY_GREETER_INSTALLED_POLICY_PATH="' + get_option('prefix') / get_option('datadir') / 'polkit-1' / 'actions' / 'org.canopy.greeter.apply-appearance.policy' + '"',
   ],
   install: true,
 )
 
 install_subdir('assets',
-  install_dir: get_option('datadir') / 'noctalia-greeter',
+  install_dir: get_option('datadir') / 'canopy-greeter',
 )
 
 install_data(
-  'scripts/noctalia-greeter-session',
+  'scripts/canopy-greeter-session',
   install_dir: get_option('bindir'),
   install_mode: 'rwxr-xr-x',
 )
 
 install_data(
-  'scripts/noctalia-greeter-print-greetd-config',
+  'scripts/canopy-greeter-print-greetd-config',
   install_dir: get_option('bindir'),
   install_mode: 'rwxr-xr-x',
 )
 
 install_data(
-  'scripts/noctalia-greeter-xsession',
+  'scripts/canopy-greeter-xsession',
   install_dir: get_option('bindir'),
   install_mode: 'rwxr-xr-x',
 )
@@ -248,7 +248,7 @@ install_data(
     'scripts/setup_greetd_pam.sh',
     'scripts/setup_greeter_system.sh',
   ],
-  install_dir: get_option('datadir') / 'noctalia-greeter',
+  install_dir: get_option('datadir') / 'canopy-greeter',
   install_mode: 'rwxr-xr-x',
 )
 
@@ -266,7 +266,7 @@ _apply_appearance_sources = _apply_appearance_support_sources + files('src/tools
 
 _greeter_tools_inc = include_directories('src')
 
-apply_appearance_executable = executable('noctalia-greeter-apply-appearance',
+apply_appearance_executable = executable('canopy-greeter-apply-appearance',
   sources: _apply_appearance_sources,
   dependencies: [nlohmann_dep, tomlplusplus_dep],
   include_directories: _greeter_tools_inc,
@@ -277,8 +277,8 @@ apply_appearance_executable = executable('noctalia-greeter-apply-appearance',
 )
 
 installed_polkit_policy = configure_file(
-  input: 'data/org.noctalia.greeter.apply-appearance.policy.in',
-  output: 'org.noctalia.greeter.apply-appearance.policy',
+  input: 'data/org.canopy.greeter.apply-appearance.policy.in',
+  output: 'org.canopy.greeter.apply-appearance.policy',
   configuration: {
     'bindir': get_option('prefix') / get_option('bindir'),
   },
@@ -289,11 +289,11 @@ installed_polkit_policy = configure_file(
 # Optional systemd/opentmpfiles drop-in (hardcoded greeter:greeter).
 # Portable installs should run setup_greeter_system.sh in postinst instead.
 install_data(
-  'data/tmpfiles.d/noctalia-greeter.conf',
+  'data/tmpfiles.d/canopy-greeter.conf',
   install_dir: get_option('prefix') / 'lib' / 'tmpfiles.d',
 )
 
-noctalia_greeter_compositor_executable = executable('noctalia-greeter-compositor',
+canopy_greeter_compositor_executable = executable('canopy-greeter-compositor',
   sources: files(
     'src/compositor/noctalia_compositor.c',
     'src/compositor/system_keyboard_config.c',
@@ -312,7 +312,7 @@ noctalia_greeter_compositor_executable = executable('noctalia-greeter-compositor
   c_args: [
     '-Wall', '-Wextra', '-Wpedantic', '-Wconversion',
     '-DWLR_USE_UNSTABLE',
-    '-DNOCTALIA_GREETER_INSTALLED_BINDIR="' + get_option('prefix') / get_option('bindir') + '"',
+    '-DCANOPY_GREETER_INSTALLED_BINDIR="' + get_option('prefix') / get_option('bindir') + '"',
   ],
   install: true,
 )
@@ -348,13 +348,13 @@ test(
   passwordless_sync_policy_xml_test,
   args: [
     installed_polkit_policy,
-    get_option('prefix') / get_option('bindir') / 'noctalia-greeter-apply-appearance',
+    get_option('prefix') / get_option('bindir') / 'canopy-greeter-apply-appearance',
   ],
 )
 
 test(
   'passwordless-sync-help',
-  noctalia_greeter_executable,
+  canopy_greeter_executable,
   args: ['passwordless-sync', '--help'],
 )
 
@@ -378,7 +378,7 @@ legacy_staging_compatibility_test = executable(
   include_directories: _greeter_tools_inc,
   cpp_args: [
     '-Wall', '-Wextra', '-Wpedantic', '-Wconversion', '-Wshadow',
-    '-DNOCTALIA_GREETER_TESTING',
+    '-DCANOPY_GREETER_TESTING',
   ],
   build_by_default: false,
 )
@@ -453,7 +453,7 @@ test(
   find_program('sh'),
   args: [
     meson.project_source_root() / 'tests/compositor_headless_test.sh',
-    noctalia_greeter_compositor_executable,
+    canopy_greeter_compositor_executable,
     find_program('true').full_path(),
   ],
 )
@@ -483,7 +483,7 @@ greeter_frame_loop_test = executable(
   sources: files('tests/greeter_frame_loop_test.cpp'),
   # Exercise the production window, rendering, and animation code without
   # recompiling it or linking the greeter's main().
-  objects: noctalia_greeter_executable.extract_objects(_greeter_sources),
+  objects: canopy_greeter_executable.extract_objects(_greeter_sources),
   dependencies: _greeter_dependencies,
   include_directories: _greeter_inc,
   cpp_args: ['-Wall', '-Wextra', '-Wpedantic', '-Wconversion', '-Wshadow'],
@@ -496,7 +496,7 @@ test(
   find_program('sh'),
   args: [
     meson.project_source_root() / 'tests/greeter_frame_loop_test.sh',
-    noctalia_greeter_compositor_executable,
+    canopy_greeter_compositor_executable,
     greeter_frame_loop_test,
   ],
   timeout: 30,

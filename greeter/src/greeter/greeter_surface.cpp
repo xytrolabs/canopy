@@ -117,7 +117,7 @@ namespace {
   }
 
   void appendDummyUsers(std::vector<std::string>& users, std::vector<uid_t>& uids) {
-    const char* dummyEnv = std::getenv("NOCTALIA_GREETER_DUMMY_USERS");
+    const char* dummyEnv = std::getenv("CANOPY_GREETER_DUMMY_USERS");
     if (dummyEnv == nullptr) {
       return;
     }
@@ -617,7 +617,7 @@ void GreeterSurface::initialize(RenderContext* context) {
   loadPreferences();
   (void)updateClock();
   if (m_selectedScheme >= m_schemeNames.size()) {
-    if (const auto fallback = findSchemeIndex("Noctalia")) {
+    if (const auto fallback = findSchemeIndex("Canopy")) {
       m_selectedScheme = *fallback;
     } else {
       m_selectedScheme = 0;
@@ -1640,7 +1640,7 @@ void GreeterSurface::beginSessionStart() {
   }
 
   // greetd cmd is argv; Exec= may be multiple tokens (e.g. "dbus-run-session gnome-session").
-  // x11 sessions are wrapped in noctalia-greeter-xsession to bootstrap Xorg first.
+  // x11 sessions are wrapped in canopy-greeter-xsession to bootstrap Xorg first.
   {
     const std::vector<std::string> argv = greeter::sessionArgv(session);
     if (argv.empty()) {
@@ -1854,7 +1854,7 @@ void GreeterSurface::refreshSelectionLabels() {
   syncPanelSessionChrome();
   if (m_schemeSelectLabel != nullptr) {
     const std::string schemeLabel =
-        m_schemeNames.empty() ? "Noctalia" : m_schemeNames[std::min(m_selectedScheme, m_schemeNames.size() - 1)];
+        m_schemeNames.empty() ? "Canopy" : m_schemeNames[std::min(m_selectedScheme, m_schemeNames.size() - 1)];
     m_schemeSelectLabel->setText(schemeLabel);
     m_schemeSelectLabel->setColor(colorForRole(ColorRole::OnSurface));
   }
@@ -1878,7 +1878,7 @@ void GreeterSurface::buildSchemeNames() {
 
   for (const auto& builtinPalette : noctalia::theme::builtinPalettes()) {
     m_schemeNames.emplace_back(builtinPalette.name);
-    if (!m_syncedAppearance.has_value() && builtinPalette.name == "Noctalia") {
+    if (!m_syncedAppearance.has_value() && builtinPalette.name == "Canopy") {
       m_selectedScheme = m_schemeNames.size() - 1;
     }
   }
@@ -1956,7 +1956,7 @@ void GreeterSurface::applyScheme(const std::size_t schemeIndex) {
       m_syncedAppearance = loadGreeterSyncedAppearance();
     }
     if (!m_syncedAppearance.has_value()) {
-      if (const auto fallback = findSchemeIndex("Noctalia")) {
+      if (const auto fallback = findSchemeIndex("Canopy")) {
         applyScheme(*fallback);
       }
       return;

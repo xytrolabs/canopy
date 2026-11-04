@@ -5,10 +5,10 @@ sidebar:
   order: 4
 ---
 
-Noctalia Greeter uses its bundled wlroots compositor to configure displays. Put
+Canopy Greeter uses its bundled wlroots compositor to configure displays. Put
 the settings on this page under `[output]` in
-`/var/lib/noctalia-greeter/greeter.toml`. On NixOS, use
-`services.displayManager.noctalia-greeter.settings.output` with the nixpkgs
+`/var/lib/canopy-greeter/greeter.toml`. On NixOS, use
+`services.displayManager.canopy-greeter.settings.output` with the nixpkgs
 and project flake modules.
 
 - [Find connector names](#find-connector-names)
@@ -26,7 +26,7 @@ and project flake modules.
 Run this from a graphical Wayland session:
 
 ```sh
-noctalia-greeter outputs --details
+canopy-greeter outputs --details
 ```
 
 The first column is the connector name, such as `DP-1` or `HDMI-A-1`. When the
@@ -54,7 +54,7 @@ name = "DP-2"
 ```
 
 If connector numbers change across boots, use the stable identifier shown by
-`noctalia-greeter outputs --details` instead:
+`canopy-greeter outputs --details` instead:
 
 ```toml
 [output]
@@ -135,7 +135,7 @@ refresh_rate = "DP-1:120; HDMI-A-1:60"
 ```
 
 Entries are separated by semicolons and may use either connector names or the
-stable identifiers reported by `noctalia-greeter outputs --details`. Use either
+stable identifiers reported by `canopy-greeter outputs --details`. Use either
 the numeric global form or the per-output mapping form, not both.
 
 :::note
@@ -253,19 +253,19 @@ motion and scrolling wake an already blanked screen, but do not reset the timer
 while the screen is on. This prevents motion noise from a wireless mouse from
 keeping the greeter awake indefinitely.
 
-`NOCTALIA_GREETER_IDLE_TIMEOUT` overrides the config value when set. Because
+`CANOPY_GREETER_IDLE_TIMEOUT` overrides the config value when set. Because
 greetd starts the greeter with an empty environment, add the variable to its
 session command with `env`:
 
 ```toml
 [default_session]
-command = "env NOCTALIA_GREETER_IDLE_TIMEOUT=300 /usr/bin/noctalia-greeter-session"
+command = "env CANOPY_GREETER_IDLE_TIMEOUT=300 /usr/bin/canopy-greeter-session"
 ```
 
 On NixOS with the nixpkgs and project flake modules:
 
 ```nix
-services.displayManager.noctalia-greeter.settings = {
+services.displayManager.canopy-greeter.settings = {
   idle.timeout = 300;
 };
 ```

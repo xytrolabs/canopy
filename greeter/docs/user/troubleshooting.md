@@ -5,7 +5,7 @@ sidebar:
   order: 6
 ---
 
-Start with the greetd and Noctalia Greeter logs. The message immediately before a blank screen, failed login, or failed sync is usually more useful than the visible symptom.
+Start with the greetd and Canopy Greeter logs. The message immediately before a blank screen, failed login, or failed sync is usually more useful than the visible symptom.
 
 - [Logging](#logging)
 - [Startup and display](#startup-and-display)
@@ -15,17 +15,17 @@ Start with the greetd and Noctalia Greeter logs. The message immediately before 
 
 ## Logging
 
-Under greetd, Noctalia Greeter logs to **syslog** by default. On systemd the messages go to journald; OpenRC systems commonly use syslog-ng, metalog, or another system logger. The session wrapper parks stdout and stderr so wlroots and libseat messages do not flash on the virtual terminal before DRM takes over.
+Under greetd, Canopy Greeter logs to **syslog** by default. On systemd the messages go to journald; OpenRC systems commonly use syslog-ng, metalog, or another system logger. The session wrapper parks stdout and stderr so wlroots and libseat messages do not flash on the virtual terminal before DRM takes over.
 
-On systemd, inspect the current boot's greetd log and look for the `noctalia-greeter` identifier:
+On systemd, inspect the current boot's greetd log and look for the `canopy-greeter` identifier:
 
 ```sh
-journalctl -u greetd -b | grep noctalia-greeter
+journalctl -u greetd -b | grep canopy-greeter
 ```
 
 The service may have a different unit name on a distribution-provided setup. On a non-systemd installation, use that system's greetd service log or system log.
 
-`NOCTALIA_GREETER_LOG` changes the destination:
+`CANOPY_GREETER_LOG` changes the destination:
 
 | Value                 | Effect                                                                             |
 | --------------------- | ---------------------------------------------------------------------------------- |
@@ -40,7 +40,7 @@ For temporary console diagnostics, add the variable to the greetd session comman
 
 ```toml
 [default_session]
-command = "env NOCTALIA_GREETER_LOG=stderr WLR_LOG=info /usr/bin/noctalia-greeter-session"
+command = "env CANOPY_GREETER_LOG=stderr WLR_LOG=info /usr/bin/canopy-greeter-session"
 ```
 
 greetd does not interpret a bare environment assignment as a command, so keep the explicit `env`. Remove debug logging after diagnosing the problem.
@@ -49,9 +49,9 @@ greetd does not interpret a bare environment assignment as a command, so keep th
 
 ### Blank screen
 
-Check the logs first. Confirm that `/var/lib/noctalia-greeter` exists, is mode `0750`, and is owned by the account configured as greetd's greeter user. Also verify that the greeter package's required `assets/` tree was installed.
+Check the logs first. Confirm that `/var/lib/canopy-greeter` exists, is mode `0750`, and is owned by the account configured as greetd's greeter user. Also verify that the greeter package's required `assets/` tree was installed.
 
-Follow [greeter state initialization](installation.md#initialize-greeter-state), including the tmpfiles override if greetd uses a custom greeter account. Run `sudo noctalia-greeter-apply-appearance --setup-system` to initialize or repair the configuration files after fixing directory ownership. Whether reinstalling a package performs this setup depends on the distribution's packaging.
+Follow [greeter state initialization](installation.md#initialize-greeter-state), including the tmpfiles override if greetd uses a custom greeter account. Run `sudo canopy-greeter-apply-appearance --setup-system` to initialize or repair the configuration files after fixing directory ownership. Whether reinstalling a package performs this setup depends on the distribution's packaging.
 
 For a source checkout, `sudo ./scripts/setup_greeter_system.sh` performs the complete system setup, including its PAM adjustment; `just setup-log-dir` repairs only the state directory. Follow your distribution's PAM integration and setup procedure. See [Installation](installation.md#3-configure-greetd).
 
@@ -87,22 +87,22 @@ the related [upstream Intel DRM PSR report](https://gitlab.freedesktop.org/drm/i
 
 ### Failed to spawn client or wrong executable path
 
-The greetd `command` must use the full installed path to `noctalia-greeter-session`, often `/usr/bin/noctalia-greeter-session` for a package and `/usr/local/bin/noctalia-greeter-session` for a manual install. Find it with:
+The greetd `command` must use the full installed path to `canopy-greeter-session`, often `/usr/bin/canopy-greeter-session` for a package and `/usr/local/bin/canopy-greeter-session` for a manual install. Find it with:
 
 ```sh
-command -v noctalia-greeter-session
+command -v canopy-greeter-session
 ```
 
 Update `/etc/greetd/config.toml` as shown in [Configure greetd](installation.md#3-configure-greetd).
 
 ### `WAYLAND_DISPLAY is not set`
 
-greetd must launch `noctalia-greeter-session`, not the `noctalia-greeter` client directly. The session wrapper starts the bundled compositor, which creates `WAYLAND_DISPLAY` before launching the client. Correct the session command in `/etc/greetd/config.toml`.
+greetd must launch `canopy-greeter-session`, not the `canopy-greeter` client directly. The session wrapper starts the bundled compositor, which creates `WAYLAND_DISPLAY` before launching the client. Correct the session command in `/etc/greetd/config.toml`.
 
 ### Wrong size or only one monitor looks right
 
 Check that `[output].name` matches a connector or stable identifier reported by
-`noctalia-greeter outputs --details`. Review the configured layout and scales
+`canopy-greeter outputs --details`. Review the configured layout and scales
 when using more than one monitor. See [Displays](displays.md).
 
 ### Blank flash or modeset during login
@@ -117,7 +117,7 @@ mapping such as `"DP-1:120; HDMI-A-1:60"`.
 
 ### Atomic commit failure during direct scan-out
 
-Noctalia Greeter disables wlroots direct scan-out by default. The optimization
+Canopy Greeter disables wlroots direct scan-out by default. The optimization
 is not needed for a short-lived login session, and avoiding it removes a
 driver-sensitive path from multi-output presentation. An explicit
 `WLR_SCENE_DISABLE_DIRECT_SCANOUT` value is still honored; set it to `0` only
@@ -130,7 +130,7 @@ Upgrade first. To test the same mitigation temporarily on 1.5.0, use:
 
 ```toml
 [default_session]
-command = "env WLR_SCENE_DISABLE_DIRECT_SCANOUT=1 /usr/bin/noctalia-greeter-session"
+command = "env WLR_SCENE_DISABLE_DIRECT_SCANOUT=1 /usr/bin/canopy-greeter-session"
 ```
 
 If the current version still exits, capture the subsequent compositor line
@@ -167,7 +167,7 @@ GNOME Keyring and KWallet store passwords used by applications, such as saved
 Wi-Fi or browser credentials. Their unlock password is separate from your
 account password, so a successful login does not necessarily unlock them.
 Automatic unlocking needs integration between your secret store and greetd,
-the login service behind Noctalia Greeter.
+the login service behind Canopy Greeter.
 
 #### Password login
 
@@ -272,7 +272,7 @@ watchdog does not expire before PAM reaches the password fallback.
 
 ### Wrong session is selected on startup
 
-Use the desktop entry's **`Name=`** value from `noctalia-greeter sessions`, or its `.desktop` filename without the extension. A `Name=` match wins if both apply. Command-line `--session` takes precedence over `[session].default`, which takes precedence over the last-used `[session].last` value in `sync.toml`.
+Use the desktop entry's **`Name=`** value from `canopy-greeter sessions`, or its `.desktop` filename without the extension. A `Name=` match wins if both apply. Command-line `--session` takes precedence over `[session].default`, which takes precedence over the last-used `[session].last` value in `sync.toml`.
 
 Put names containing spaces or punctuation in `greeter.toml` instead of leaving them unquoted in the greetd command. See [Default session](configuration.md#default-session).
 
@@ -282,16 +282,16 @@ GNOME expects a systemd-managed user session and may fail with a `graphical-sess
 
 ### X11 session doesn't start
 
-`xsessions` entries run through `noctalia-greeter-xsession`, which needs
+`xsessions` entries run through `canopy-greeter-xsession`, which needs
 `startx` (from `xinit`) installed. `startx: command not found` (or
-noctalia-greeter's own "startx not found" error) in the session log means
+canopy-greeter's own "startx not found" error) in the session log means
 `xinit` is missing.
 
 If `startx` is present but Xorg itself fails, reproduce the exact wrapper
 invocation by hand from a terminal to see the real Xorg error:
 
 ```sh
-noctalia-greeter-xsession /path/to/session/binary
+canopy-greeter-xsession /path/to/session/binary
 ```
 
 A `parse_vt_settings: Cannot open /dev/tty0 (Permission denied)` error here
@@ -304,7 +304,7 @@ through the greeter.
 If Xorg starts but the screen shows a terminal instead of the desktop, with
 an error like `xterm: bad command line option`, the wrapper's `startx` fell
 back to its default client instead of running the session — this is handled
-automatically since noctalia-greeter resolves `Exec=` to an absolute path
+automatically since canopy-greeter resolves `Exec=` to an absolute path
 before calling `startx`, but a very old or unusual `startx` implementation
 may still behave differently. See
 [Default session](configuration.md#default-session) for what the wrapper
@@ -315,15 +315,15 @@ does and why.
 ### Appearance sync
 
 If the synced look is missing, first check the installed versions. The
-constrained `--sync` path requires Noctalia Greeter 1.5.0 or newer together
+constrained `--sync` path requires Canopy Greeter 1.5.0 or newer together
 with the next Noctalia release after 5.0.1; current `-git` packages, `main`
 checkouts, or manual builds from current `main` work when both projects are up
 to date. Older and mixed-version combinations use the permanently supported
 administrator-authenticated legacy positional path instead.
 
-Confirm that `noctalia-greeter-apply-appearance` and an appropriate privilege
+Confirm that `canopy-greeter-apply-appearance` and an appropriate privilege
 tool are installed. The constrained path also requires `pkexec` and the
-packaged Polkit action. Run **Settings → Security → Noctalia Greeter → Sync
+packaged Polkit action. Run **Settings → Security → Canopy Greeter → Sync
 Now** again, then log out or restart greetd. See [Sync with Noctalia](sync.md).
 Noctalia rejects a helper in a user-owned checkout or writable prefix; manual
 builds must be installed into a root-owned, non-user-writable system prefix.
@@ -345,16 +345,16 @@ On a conventional packaged distribution, check whether the selected account is
 present in the greeter-managed rule:
 
 ```sh
-noctalia-greeter passwordless-sync status alice
+canopy-greeter passwordless-sync status alice
 ```
 
 Rerun status with `sudo` if the distribution restricts reads of its Polkit
 rules directory.
 
 If needed, add it with
-`sudo noctalia-greeter passwordless-sync enable alice`. The installed Greeter
+`sudo canopy-greeter passwordless-sync enable alice`. The installed Greeter
 must be 1.5.0 or newer, the package must include the dedicated
-`org.noctalia.greeter.sync-appearance` action, and Polkit must see the caller as
+`org.canopy.greeter.sync-appearance` action, and Polkit must see the caller as
 an active local session. A seatd-only session without logind or elogind cannot
 match this rule.
 
@@ -366,7 +366,7 @@ setup models and the exact rule constraints.
 To remove the account from the CLI-managed authorization, run:
 
 ```sh
-sudo noctalia-greeter passwordless-sync disable alice
+sudo canopy-greeter passwordless-sync disable alice
 ```
 
 Administrator-prompted constrained sync and the permanently authenticated
@@ -377,7 +377,7 @@ separate administrator-authored Polkit rule also authorizes that account.
 
 Noctalia first probes the helper's protocol. A compatible pair with the default
 state directory stages appearance data and waits for Polkit to authorize
-`noctalia-greeter-apply-appearance --sync <staging-dir>`; a recognized older
+`canopy-greeter-apply-appearance --sync <staging-dir>`; a recognized older
 helper or a custom state directory uses the authenticated positional call
 instead. An unrecognized or malformed probe response stops safely rather than
 guessing a protocol. Inspect the Noctalia notification and logs for the probe,

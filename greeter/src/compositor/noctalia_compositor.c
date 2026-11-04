@@ -52,8 +52,8 @@
 #include <xkbcommon/xkbcommon-names.h>
 #include <xkbcommon/xkbcommon.h>
 
-#ifndef NOCTALIA_GREETER_INSTALLED_BINDIR
-#define NOCTALIA_GREETER_INSTALLED_BINDIR "/usr/local/bin"
+#ifndef CANOPY_GREETER_INSTALLED_BINDIR
+#define CANOPY_GREETER_INSTALLED_BINDIR "/usr/local/bin"
 #endif
 
 static bool compositor_syslog_enabled = false;
@@ -117,7 +117,7 @@ static void compositor_wlr_log(enum wlr_log_importance importance, const char* f
 static void compositor_init_logging(void) {
   compositor_syslog_enabled = getenv("GREETD_SOCK") != NULL || getenv("XDG_VTNR") != NULL;
   if (compositor_syslog_enabled) {
-    openlog("noctalia-greeter-compositor", LOG_PID | LOG_NDELAY, LOG_DAEMON);
+    openlog("canopy-greeter-compositor", LOG_PID | LOG_NDELAY, LOG_DAEMON);
   }
 }
 
@@ -706,7 +706,7 @@ static void read_greeter_config(struct greeter_server* server) {
   server->keyboard_options[0] = '\0';
   server->output_placement_count = 0;
 
-  const char* state_dir = getenv("NOCTALIA_GREETER_STATE_DIR");
+  const char* state_dir = getenv("CANOPY_GREETER_STATE_DIR");
   struct greeter_compositor_config config;
   greeter_compositor_config_load(state_dir, &config);
 
@@ -728,7 +728,7 @@ static void read_greeter_config(struct greeter_server* server) {
   if (config.idle_timeout_sec > 0) {
     server->idle_timeout_sec = config.idle_timeout_sec;
   }
-  const char* env_idle = getenv("NOCTALIA_GREETER_IDLE_TIMEOUT");
+  const char* env_idle = getenv("CANOPY_GREETER_IDLE_TIMEOUT");
   if (env_idle != NULL && env_idle[0] != '\0') {
     const char* cursor = env_idle;
     while (isspace((unsigned char)*cursor)) {
@@ -744,7 +744,7 @@ static void read_greeter_config(struct greeter_server* server) {
     if (end != cursor && *end == '\0' && parsed >= 0 && parsed <= 86400) {
       server->idle_timeout_sec = (int)parsed;
     } else {
-      wlr_log(WLR_ERROR, "invalid NOCTALIA_GREETER_IDLE_TIMEOUT='%s' (expected 0..86400)", env_idle);
+      wlr_log(WLR_ERROR, "invalid CANOPY_GREETER_IDLE_TIMEOUT='%s' (expected 0..86400)", env_idle);
     }
   }
   if (server->idle_timeout_sec > 0) {
@@ -2406,7 +2406,7 @@ static int handle_sigchld(int signal, void* data) {
 static char** child_argv(int argc, char** argv) {
   const char* greeter_bin = getenv("GREETER_BIN");
   if (greeter_bin == NULL || greeter_bin[0] == '\0') {
-    greeter_bin = NOCTALIA_GREETER_INSTALLED_BINDIR "/noctalia-greeter";
+    greeter_bin = CANOPY_GREETER_INSTALLED_BINDIR "/canopy-greeter";
   }
 
   if (argc > 1 && strcmp(argv[1], "--") == 0) {
@@ -2465,7 +2465,7 @@ static void try_launch_greeter(void* data) {
   server->child_launched = true;
   const char* greeter_bin = getenv("GREETER_BIN");
   if (greeter_bin == NULL || greeter_bin[0] == '\0') {
-    greeter_bin = NOCTALIA_GREETER_INSTALLED_BINDIR "/noctalia-greeter";
+    greeter_bin = CANOPY_GREETER_INSTALLED_BINDIR "/canopy-greeter";
   }
   wlr_log(WLR_INFO, "started greeter: %s", greeter_bin);
 }

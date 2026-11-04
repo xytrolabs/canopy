@@ -1,19 +1,19 @@
 ---
-title: Noctalia Greeter
+title: Canopy Greeter
 description: Install, configure, and use the Noctalia login greeter for greetd.
 sidebar:
   order: 0
 ---
 
-[Noctalia Greeter](https://github.com/noctalia-dev/noctalia-greeter) is a graphical login screen for **[greetd](https://github.com/kennylevinsen/greetd)**. It lets you select a user and Wayland session, authenticate, and choose a color scheme using the same visual language as Noctalia.
+[Canopy Greeter](https://github.com/noctalia-dev/canopy-greeter) is a graphical login screen for **[greetd](https://github.com/kennylevinsen/greetd)**. It lets you select a user and Wayland session, authenticate, and choose a color scheme using the same visual language as Noctalia.
 
-greetd launches `noctalia-greeter-session`, which starts the bundled wlroots compositor and runs the greeter UI. It is a focused login environment, not a desktop shell or a general-purpose compositor.
+greetd launches `canopy-greeter-session`, which starts the bundled wlroots compositor and runs the greeter UI. It is a focused login environment, not a desktop shell or a general-purpose compositor.
 
 ## Start here
 
 1. [Install a distribution package or configure NixOS](installation.md).
 2. If no package is available, [build the greeter from source](building-from-source.md).
-3. If your package or module did not configure greetd, [point it at `noctalia-greeter-session`](installation.md#3-configure-greetd).
+3. If your package or module did not configure greetd, [point it at `canopy-greeter-session`](installation.md#3-configure-greetd).
 4. [Choose any administrator-controlled defaults](configuration.md), such as the initial user, session, or cursor.
 5. Optionally [sync your Noctalia appearance](sync.md) to the login screen.
 
@@ -39,4 +39,4 @@ The following integrations are optional:
 - **AccountsService** for user avatars
 - **Noctalia Shell** for copying wallpaper, palette, font, and output settings
 
-For packager-specific dependencies and filesystem layout, see the repository's [packaging guide](https://github.com/noctalia-dev/noctalia-greeter/blob/main/PACKAGING.md).
+For packager-specific dependencies and filesystem layout, see the repository's [packaging guide](https://github.com/noctalia-dev/canopy-greeter/blob/main/PACKAGING.md).

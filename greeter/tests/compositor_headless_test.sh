@@ -21,12 +21,12 @@ EOF
 run_compositor() {
   env \
     XDG_RUNTIME_DIR="$runtime_dir" \
-    NOCTALIA_GREETER_STATE_DIR="$state_dir" \
+    CANOPY_GREETER_STATE_DIR="$state_dir" \
     WLR_BACKENDS=headless \
     WLR_HEADLESS_OUTPUTS=2 \
     WLR_RENDERER=pixman \
     GREETER_BIN="$true_program" \
-    NOCTALIA_GREETER_LOG=stderr \
+    CANOPY_GREETER_LOG=stderr \
     "$compositor" >"$log_file" 2>&1
 }
 

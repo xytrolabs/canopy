@@ -23,10 +23,12 @@ BUILD_DIR="${CANOPY_BUILD_DIR:-$PROJECT_DIR/build-release}"
 VERSION="$(tr -d ' \t\r\n' < "$PROJECT_DIR/VERSION" 2>/dev/null || echo dev)"
 DRY_RUN=0
 REFRESH_CONFIG=0
+WITH_GREETER=0
 for a in "$@"; do
     case "$a" in
         --dry-run|-n) DRY_RUN=1 ;;
         --refresh-config) REFRESH_CONFIG=1 ;;
+        --with-greeter) WITH_GREETER=1 ;;
     esac
 done
 
@@ -276,6 +278,45 @@ seed_assets() {
     fi
 }
 
+# ---------------------------------------------------------------- greeter ----
+# The login screen is Canopy Greeter (the vendored fork in greeter/). It needs
+# greetd and its own compositor, so it is opt-in per install and never replaces
+# a display manager silently.
+install_greeter() {
+    [ "$WITH_GREETER" -eq 1 ] || return 0
+
+    GREETER_BUILD="${CANOPY_GREETER_BUILD:-$PROJECT_DIR/greeter/build}"
+    [ -x "$GREETER_BUILD/canopy-greeter" ] || {
+        say "greeter: $GREETER_BUILD/canopy-greeter is missing; build it with:"
+        say "  meson setup greeter/build --buildtype=release && meson compile -C greeter/build"
+        return 0
+    }
+
+    if [ "$is_system" -eq 1 ]; then
+        for b in canopy-greeter canopy-greeter-compositor canopy-greeter-apply-appearance; do
+            run install -Dm755 "$GREETER_BUILD/$b" "/usr/local/bin/$b"
+        done
+        run install -Dm755 "$PROJECT_DIR/greeter/scripts/canopy-greeter-session" \
+            /usr/local/bin/canopy-greeter-session
+        run mkdir -p /usr/local/share/canopy-greeter
+        run cp -a "$PROJECT_DIR/greeter/assets" /usr/local/share/canopy-greeter/assets
+
+        if [ -d /etc/greetd ]; then
+            if [ -f /etc/greetd/config.toml ]; then
+                say "greeter: /etc/greetd/config.toml exists; leaving it alone"
+                say "         point its [default_session] command at /usr/local/bin/canopy-greeter-session"
+            else
+                run install -Dm644 "$PROJECT_DIR/config/greetd-config.toml" /etc/greetd/config.toml
+                say "greeter: configured /etc/greetd/config.toml"
+            fi
+        else
+            say "greeter: greetd is not installed; install it and point it at canopy-greeter-session"
+        fi
+    else
+        say "greeter: a login screen must be installed system-wide; run 'sudo sh scripts/install.sh --with-greeter'"
+    fi
+}
+
 # ---------------------------------------------------------------- helpers ----
 install_helpers() {
     run mkdir -p "$HOME/.local/bin"
@@ -295,6 +336,8 @@ install_helpers() {
 install_binary
 install_session
 install_helpers
+install_greeter
+install_greeter
 seed_config
 seed_labwc
 seed_toolkits

@@ -1020,7 +1020,7 @@ namespace greeter::config {
     const toml::table table = buildTomlTable(declarative);
 
     std::ostringstream out;
-    out << "# noctalia-greeter greeter.toml (declarative; Nix-safe; UI and Sync never write this)\n";
+    out << "# canopy-greeter greeter.toml (declarative; Nix-safe; UI and Sync never write this)\n";
     out << "# Last-used session lives in sync.toml; UI/Sync also fall back to sync.toml for scheme.\n";
     out << "# Output layout/transforms/scales fall back to sync.toml when not set here and\n";
     out << "# output.use_synced_settings is true (default). Session power actions/menu entries are\n";
@@ -1067,7 +1067,7 @@ namespace greeter::config {
     const toml::table table = buildSyncTomlTable(sync);
 
     std::ostringstream out;
-    out << "# noctalia-greeter sync.toml (UI + Sync; not managed by Nix)\n";
+    out << "# canopy-greeter sync.toml (UI + Sync; not managed by Nix)\n";
     out << "# [session] last, [session.power] suspend/reboot/shutdown, [[session.actions]] "
            "action/command/label/glyph\n";
     out << "# [appearance] scheme, theme_mode, corner_radius_scale, font_family\n";

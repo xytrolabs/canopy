@@ -1,13 +1,13 @@
 ---
 title: Building from source
-description: Build and install Noctalia Greeter on distributions without a package.
+description: Build and install Canopy Greeter on distributions without a package.
 sidebar:
   order: 1.5
 ---
 
-Use this route when your distribution does not provide a Noctalia Greeter
+Use this route when your distribution does not provide a Canopy Greeter
 package. Install the build dependencies for your distribution, then build from
-a cloned Noctalia Greeter checkout.
+a cloned Canopy Greeter checkout.
 
 ## Build dependencies
 
@@ -80,7 +80,7 @@ sudo xbps-install meson ninja pkg-config git \
 
 ## Build and install
 
-From a cloned Noctalia Greeter checkout, build and install a release under the
+From a cloned Canopy Greeter checkout, build and install a release under the
 system prefix:
 
 ```sh
@@ -93,14 +93,14 @@ After configuring greetd's session user, initialize greeter state with the
 installed helper:
 
 ```sh
-sudo noctalia-greeter-apply-appearance --setup-system
+sudo canopy-greeter-apply-appearance --setup-system
 ```
 
 See [state initialization](installation.md#initialize-greeter-state) for
 directory ownership and tmpfiles overrides for custom greeter accounts.
 
 The portable setup script also prepares
-`/var/lib/noctalia-greeter/`, `greeter.toml`, and `sync.toml` for the greetd user
+`/var/lib/canopy-greeter/`, `greeter.toml`, and `sync.toml` for the greetd user
 and adjusts greetd's PAM stack for the detected systemd or elogind runtime
 module. Run it when that PAM adjustment is appropriate for your distribution:
 

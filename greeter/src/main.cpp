@@ -97,7 +97,7 @@ int main(int argc, char* argv[]) {
   if (argc >= 2 && std::strcmp(argv[1], "outputs") == 0) {
     const bool details = argc >= 3 && std::strcmp(argv[2], "--details") == 0;
     if (argc > (details ? 3 : 2)) {
-      std::fputs("error: usage: noctalia-greeter outputs [--details]\n", stderr);
+      std::fputs("error: usage: canopy-greeter outputs [--details]\n", stderr);
       return 1;
     }
     WaylandClient client;
@@ -148,7 +148,7 @@ int main(int argc, char* argv[]) {
       continue;
     }
     if (std::strcmp(argv[i], "--version") == 0 || std::strcmp(argv[i], "-v") == 0) {
-      std::printf("noctalia-greeter %s\n", NOCTALIA_GREETER_VERSION);
+      std::printf("canopy-greeter %s\n", CANOPY_GREETER_VERSION);
       return 0;
     }
     if (std::strcmp(argv[i], "--log-test") == 0) {
@@ -158,20 +158,20 @@ int main(int argc, char* argv[]) {
       kLog.warn("log-test warn line");
       kLog.error("log-test error line");
       std::printf(
-          "Under greetd, logs go to syslog by default; set NOCTALIA_GREETER_LOG=stderr or =/path to override\n"
+          "Under greetd, logs go to syslog by default; set CANOPY_GREETER_LOG=stderr or =/path to override\n"
       );
       return 0;
     }
     if (std::strcmp(argv[i], "--help") == 0 || std::strcmp(argv[i], "-h") == 0) {
       std::puts(
-          "Usage: noctalia-greeter [OPTIONS]\n"
-          "       noctalia-greeter sessions\n"
-          "       noctalia-greeter outputs [--details]\n"
-          "       noctalia-greeter passwordless-sync enable USER\n"
-          "       noctalia-greeter passwordless-sync disable USER\n"
-          "       noctalia-greeter passwordless-sync status [USER]\n"
+          "Usage: canopy-greeter [OPTIONS]\n"
+          "       canopy-greeter sessions\n"
+          "       canopy-greeter outputs [--details]\n"
+          "       canopy-greeter passwordless-sync enable USER\n"
+          "       canopy-greeter passwordless-sync disable USER\n"
+          "       canopy-greeter passwordless-sync status [USER]\n"
           "\n"
-          "Without a command, run as a Wayland client under noctalia-greeter-compositor.\n"
+          "Without a command, run as a Wayland client under canopy-greeter-compositor.\n"
           "\n"
           "Commands:\n"
           "  sessions              List available session names and exit\n"
@@ -188,16 +188,16 @@ int main(int argc, char* argv[]) {
           "Environment:\n"
           "  GREETD_SOCK           Path to greetd Unix socket\n"
           "  WAYLAND_DISPLAY       Wayland display (set by compositor)\n"
-          "  NOCTALIA_GREETER_LOG  Under greetd: unset → syslog (fds parked);\n"
+          "  CANOPY_GREETER_LOG  Under greetd: unset → syslog (fds parked);\n"
           "                        stderr/none/- → console (info → stdout,\n"
           "                        debug/warn/error → stderr); /path → log file\n"
           "\n"
           "Greetd example:\n"
-          "  command = \"/usr/local/bin/noctalia-greeter-session -- --session "
+          "  command = \"/usr/local/bin/canopy-greeter-session -- --session "
           "niri --user lysec\"\n"
           "  user = \"greeter\"\n"
           "\n"
-          "For more information, visit https://noctalia.dev"
+          "For more information, visit https://canopy.xytro.site"
       );
       return 0;
     }
@@ -209,7 +209,7 @@ int main(int argc, char* argv[]) {
   std::signal(SIGTERM, signalHandler);
   std::signal(SIGINT, signalHandler);
 
-  kLog.info("noctalia-greeter {}", NOCTALIA_GREETER_VERSION);
+  kLog.info("canopy-greeter {}", CANOPY_GREETER_VERSION);
   kLog.debug("build fingerprint {}", kBuildFingerprint);
 
   const bool greetdLaunched = std::getenv("GREETD_SOCK") != nullptr;
@@ -217,7 +217,7 @@ int main(int argc, char* argv[]) {
     const char* paths = loggingPaths();
     if (paths[0] != '\0') {
       kLog.info("greetd session: file logs at {}", paths);
-    } else if (std::getenv("NOCTALIA_GREETER_LOG") != nullptr) {
+    } else if (std::getenv("CANOPY_GREETER_LOG") != nullptr) {
       kLog.info("greetd session: console logging");
     } else {
       kLog.info("greetd session: syslog logging");
@@ -226,7 +226,7 @@ int main(int argc, char* argv[]) {
   }
 
   if (std::getenv("WAYLAND_DISPLAY") == nullptr) {
-    kLog.error("WAYLAND_DISPLAY is not set; run via noctalia-greeter-session");
+    kLog.error("WAYLAND_DISPLAY is not set; run via canopy-greeter-session");
     if (greetdLaunched) {
       preventGreetdRespawnLoop();
     }

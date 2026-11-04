@@ -12,7 +12,7 @@
 namespace greeter::appearance {
 
   inline constexpr int kManifestVersion = 1;
-  // State dir (/var/lib/noctalia-greeter by default):
+  // State dir (/var/lib/canopy-greeter by default):
   //   greeter.toml     — full declarative config (Nix-safe C+ overwrite)
   //   sync.toml        — Sync + UI mutable: palette/wallpaper/theme/font, session power/menu,
   //                      last session/scheme, synced layout/transforms/scales
@@ -20,7 +20,7 @@ namespace greeter::appearance {
   // Staging: shell writes sync.toml (+ wallpapers, optional layout/transforms/scales text files).
   // Legacy shells may still stage appearance.json; apply accepts either.
   // Precedence: greeter.toml wins over sync.toml when both set.
-  inline constexpr const char* kDefaultSyncedDataDir = "/var/lib/noctalia-greeter";
+  inline constexpr const char* kDefaultSyncedDataDir = "/var/lib/canopy-greeter";
   inline constexpr const char* kManifestFileName = "appearance.json";
   inline constexpr const char* kOutputLayoutFileName = "output_layout";
   inline constexpr const char* kOutputTransformsFileName = "output_transforms";
@@ -29,7 +29,7 @@ namespace greeter::appearance {
   inline constexpr const char* kSyncTomlFileName = "sync.toml";
   inline constexpr const char* kWallpaperBaseName = "wallpaper";
   inline constexpr const char* kSyncedSchemeDisplayName = "Synced";
-  inline constexpr const char* kSyncedDataDirEnv = "NOCTALIA_GREETER_STATE_DIR";
+  inline constexpr const char* kSyncedDataDirEnv = "CANOPY_GREETER_STATE_DIR";
 
   [[nodiscard]] std::filesystem::path syncedDataDirectory();
   [[nodiscard]] std::filesystem::path packageConfPath();

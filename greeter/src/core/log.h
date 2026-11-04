@@ -3,11 +3,11 @@
 #include <format>
 #include <string_view>
 
-// Early bootstrap line (stderr, syslog, and/or NOCTALIA_GREETER_LOG file).
+// Early bootstrap line (stderr, syslog, and/or CANOPY_GREETER_LOG file).
 void emergencyLogBootstrap(int argc, char* argv[]);
 
 // Initialize logging. Under greetd: syslog by default. Optional file via
-// NOCTALIA_GREETER_LOG=/path; console debug via NOCTALIA_GREETER_LOG=stderr.
+// CANOPY_GREETER_LOG=/path; console debug via CANOPY_GREETER_LOG=stderr.
 void initLogging();
 
 // Comma-separated list of file paths logging was opened to (empty if none).

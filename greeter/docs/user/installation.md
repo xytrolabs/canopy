@@ -1,6 +1,6 @@
 ---
 title: Installation
-description: Install Noctalia Greeter from distribution packages, NixOS, or source and connect it to greetd.
+description: Install Canopy Greeter from distribution packages, NixOS, or source and connect it to greetd.
 sidebar:
   order: 1
 ---
@@ -17,7 +17,7 @@ greeter runs. Install desktop sessions such as niri or Hyprland separately.
 
 Choose the method for your system:
 
-- [Install a distribution package](#2-install-noctalia-greeter) on Arch Linux,
+- [Install a distribution package](#2-install-canopy-greeter) on Arch Linux,
   CachyOS, KaOS, Fedora, openSUSE, Debian, or Ubuntu.
 - [Build from source](building-from-source.md) if no package is available.
 - Follow the separate [NixOS declarative setup](#nixos-declarative-setup) on
@@ -33,7 +33,7 @@ maintainers' own packaging processes. Review a third-party repository before
 installing from it.
 :::
 
-## 2. Install Noctalia Greeter
+## 2. Install Canopy Greeter
 
 Use one of the package options below. After it finishes, continue to
 [Configure greetd](#3-configure-greetd).
@@ -42,20 +42,20 @@ Use one of the package options below. After it finishes, continue to
 
 Tagged releases are moving from the AUR to Arch Linux's official Extra
 repository. During the transition, the package is in `extra-testing`; check the
-[package status](https://archlinux.org/packages/?name=noctalia-greeter) for its
+[package status](https://archlinux.org/packages/?name=canopy-greeter) for its
 current repository. Once it is available in your enabled repositories, install it
 with:
 
 ```sh
-sudo pacman -Syu noctalia-greeter
+sudo pacman -Syu canopy-greeter
 ```
 
 Development snapshots from `main` remain available as
-[`noctalia-greeter-git`](https://aur.archlinux.org/packages/noctalia-greeter-git)
+[`canopy-greeter-git`](https://aur.archlinux.org/packages/canopy-greeter-git)
 in the AUR. Install them with an AUR helper, for example:
 
 ```sh
-paru -S noctalia-greeter-git
+paru -S canopy-greeter-git
 ```
 
 The development package replaces the stable package. Both use the same greetd
@@ -69,20 +69,20 @@ Optional packages are `polkit` for appearance-sync authorization and
 
 ### CachyOS
 
-Noctalia Greeter is available from the
-[official CachyOS repository](https://packages.cachyos.org/package/cachyos/x86_64/noctalia-greeter):
+Canopy Greeter is available from the
+[official CachyOS repository](https://packages.cachyos.org/package/cachyos/x86_64/canopy-greeter):
 
 ```sh
-sudo pacman -Syu noctalia-greeter
+sudo pacman -Syu canopy-greeter
 ```
 
 ### KaOS
 
-Noctalia Greeter is available from the
-[KaOS `apps` repository](https://kaosx.us/packages/packages.php?exact=1&search=noctalia-greeter):
+Canopy Greeter is available from the
+[KaOS `apps` repository](https://kaosx.us/packages/packages.php?exact=1&search=canopy-greeter):
 
 ```sh
-sudo pacman -Syu noctalia-greeter
+sudo pacman -Syu canopy-greeter
 ```
 
 ### Fedora
@@ -93,28 +93,28 @@ install the greeter:
 
 ```sh
 sudo dnf install --nogpgcheck --repofrompath 'terra,https://repos.fyralabs.com/terra$releasever' terra-release
-sudo dnf install noctalia-greeter
+sudo dnf install canopy-greeter
 ```
 
 Automated development snapshots are also available from the
 [LionHeartP Copr](https://copr.fedorainfracloud.org/coprs/lionheartp/Hyprland/).
 The snapshot package is being renamed to distinguish it from stable builds, so
 check the Copr package page for its current name. Fedora's default repositories
-do not currently carry Noctalia Greeter.
+do not currently carry Canopy Greeter.
 
 ### openSUSE
 
-Noctalia Greeter is available from the [official openSUSE repository](https://build.opensuse.org/package/show/openSUSE:Factory/noctalia-greeter):
+Canopy Greeter is available from the [official openSUSE repository](https://build.opensuse.org/package/show/openSUSE:Factory/canopy-greeter):
 
 ```sh
 sudo zypper refresh
-sudo zypper install noctalia-greeter
+sudo zypper install canopy-greeter
 ```
 
 The development snapshots from `main` branch is also available via
 [home:neifua:Noctalia](https://build.opensuse.org/package/show/home:neifua:Noctalia)
 OBS repository as
-[`noctalia-greeter-git`](https://build.opensuse.org/package/show/home:neifua:Noctalia/noctalia-greeter-git),
+[`canopy-greeter-git`](https://build.opensuse.org/package/show/home:neifua:Noctalia/canopy-greeter-git),
 to install it:
 
 **Step 1**: Add the OBS repository
@@ -132,19 +132,19 @@ to install it:
   </TabItem>
 </Tabs>
 
-**Step 2**: Refresh and install noctalia-greeter-git
+**Step 2**: Refresh and install canopy-greeter-git
 
 ```bash
 sudo zypper refresh
-sudo zypper install noctalia-greeter-git
+sudo zypper install canopy-greeter-git
 ```
 :::note
-`noctalia-greeter` is only available for **Tumbleweed** and **Slowroll**.
+`canopy-greeter` is only available for **Tumbleweed** and **Slowroll**.
 :::
 
 ### Debian and Ubuntu
 
-The community-maintained Noctalia APT repository provides `noctalia-greeter`
+The community-maintained Noctalia APT repository provides `canopy-greeter`
 for Debian Trixie, Debian Sid, and Ubuntu 26.04. Follow the shared
 [Debian repository setup instructions](https://docs.noctalia.dev/noctalia/getting-started/installation/#debian),
 then install:
@@ -153,13 +153,13 @@ then install:
 <TabItem label="Debian Trixie">
 ```sh
 sudo apt update
-sudo apt install -t trixie-backports noctalia-greeter
+sudo apt install -t trixie-backports canopy-greeter
 ```
 </TabItem>
 <TabItem label="Debian Sid or Ubuntu 26.04">
 ```sh
 sudo apt update
-sudo apt install noctalia-greeter
+sudo apt install canopy-greeter
 ```
 </TabItem>
 </Tabs>
@@ -169,11 +169,11 @@ If using the Debian or Ubuntu packages, `greetd` will have already been
 configured, so skip this step and proceed to
 [Replace the current display manager safely](#4-replace-the-current-display-manager-safely).
 
-greetd must launch **`noctalia-greeter-session`**, not the
-`noctalia-greeter` executable. Find the wrapper installed on your system:
+greetd must launch **`canopy-greeter-session`**, not the
+`canopy-greeter` executable. Find the wrapper installed on your system:
 
 ```sh
-command -v noctalia-greeter-session
+command -v canopy-greeter-session
 ```
 
 Open `/etc/greetd/config.toml` and merge the following values into its existing
@@ -182,7 +182,7 @@ configuration:
 
 ```toml
 [default_session]
-command = "/usr/bin/noctalia-greeter-session"
+command = "/usr/bin/canopy-greeter-session"
 user = "greeter"
 ```
 
@@ -192,7 +192,7 @@ Keep the existing greeter account if your configuration uses a user other than
 `greeter`.
 
 Some packages configure greetd automatically. In that case, verify that the
-existing `command` points to `noctalia-greeter-session` and leave the rest of
+existing `command` points to `canopy-greeter-session` and leave the rest of
 the configuration intact.
 
 ### Initialize greeter state
@@ -201,27 +201,27 @@ Some packages and declarative modules prepare greeter state automatically.
 If yours does, verify its configured account and state directory. Otherwise,
 initialize the state after configuring greetd's session user.
 
-The shipped tmpfiles rule creates `/var/lib/noctalia-greeter` with mode `0750`
+The shipped tmpfiles rule creates `/var/lib/canopy-greeter` with mode `0750`
 and ownership `greeter:greeter` on systems that process it. If greetd uses a
-different greeter account, create `/etc/tmpfiles.d/noctalia-greeter.conf` with
+different greeter account, create `/etc/tmpfiles.d/canopy-greeter.conf` with
 this line, replacing `ACCOUNT` and `GROUP` with that account's name and primary
 group:
 
 ```text
-d /var/lib/noctalia-greeter 0750 ACCOUNT GROUP -
+d /var/lib/canopy-greeter 0750 ACCOUNT GROUP -
 ```
 
 On systemd, apply the override so the directory has the right owner now and
 after reboot:
 
 ```sh
-sudo systemd-tmpfiles --create noctalia-greeter.conf
+sudo systemd-tmpfiles --create canopy-greeter.conf
 ```
 
 Initialize the configuration files, or migrate state from an older installation:
 
 ```sh
-sudo noctalia-greeter-apply-appearance --setup-system
+sudo canopy-greeter-apply-appearance --setup-system
 ```
 
 This creates or updates `greeter.toml` and `sync.toml` without editing PAM.
@@ -232,7 +232,7 @@ user in greetd's configuration when the helper resolves the account. Pass
 `GREETER_USER` explicitly if the existing owner differs from the intended user:
 
 ```sh
-sudo env GREETER_USER=ACCOUNT noctalia-greeter-apply-appearance --setup-system
+sudo env GREETER_USER=ACCOUNT canopy-greeter-apply-appearance --setup-system
 ```
 
 ## 4. Replace the current display manager safely
@@ -278,7 +278,7 @@ Reboot to confirm greetd starts cleanly:
 sudo reboot
 ```
 
-The Noctalia Greeter login screen should appear and list the desktop sessions
+The Canopy Greeter login screen should appear and list the desktop sessions
 installed on the system. If it does not, return to the TTY or root shell you
 kept available and inspect greetd:
 
@@ -295,18 +295,18 @@ NixOS users should configure both the package and display-manager selection in
 their system configuration. Do not use the imperative systemd cutover from
 sections 4–5. Keep a TTY or another root-capable shell available while applying
 the change. Remove or disable any other display-manager module in the same
-configuration, enable exactly one Noctalia Greeter module, and rebuild the
+configuration, enable exactly one Canopy Greeter module, and rebuild the
 system through the normal NixOS workflow.
 
 ### nixpkgs module
 
-Noctalia Greeter is packaged in
-[nixpkgs unstable](https://search.nixos.org/packages?channel=unstable&show=noctalia-greeter&query=noctalia-greeter).
+Canopy Greeter is packaged in
+[nixpkgs unstable](https://search.nixos.org/packages?channel=unstable&show=canopy-greeter&query=canopy-greeter).
 The nixpkgs module installs the package, enables greetd, Polkit, and
 AccountsService, and configures the greeter session:
 
 ```nix
-services.displayManager.noctalia-greeter = {
+services.displayManager.canopy-greeter = {
   enable = true;
   settings = {
     cursor.size = 24;
@@ -326,17 +326,17 @@ package or for following the greeter repository directly. Add it to
 `flake.nix`:
 
 ```nix
-inputs.noctalia-greeter = {
-  url = "github:noctalia-dev/noctalia-greeter";
+inputs.canopy-greeter = {
+  url = "github:noctalia-dev/canopy-greeter";
   inputs.nixpkgs.follows = "nixpkgs";
 };
 ```
 
-Import `inputs.noctalia-greeter.nixosModules.default`, then enable the project
+Import `inputs.canopy-greeter.nixosModules.default`, then enable the project
 module:
 
 ```nix
-services.displayManager.noctalia-greeter = {
+services.displayManager.canopy-greeter = {
   enable = true;
   settings = {
     cursor = {
@@ -349,7 +349,7 @@ services.displayManager.noctalia-greeter = {
 ```
 
 The project module enables greetd, AccountsService, and Polkit, and configures
-greetd to launch the packaged `noctalia-greeter-session`. The two modules use
+greetd to launch the packaged `canopy-greeter-session`. The two modules use
 different option paths and cursor-theme interfaces, so enable only one.
 
 Rebuild and reboot through the normal NixOS workflow to verify that the greeter
@@ -371,12 +371,12 @@ Noctalia greeter is available in the third-party [`midnight`](https://codeberg.o
                 "640A 2C3C E948 22D3 394B 40C3 CAFA EECA 00FF 9B1E"))))
 ```
 
-Then, add `(midnight services noctalia-greeter)` to your list of imported modules
+Then, add `(midnight services canopy-greeter)` to your list of imported modules
 
 For Noctalia greeter to work correctly, you have to:
-1. Add and configure the `greetd-service-type` to use `greetd-noctalia-greeter-session`,
+1. Add and configure the `greetd-service-type` to use `greetd-canopy-greeter-session`,
 2. Add `elogind-service-type`, and `polkit-service-type`,
-3. Add the `noctalia-greeter-service-type`, which sets up the state directory, manages `greeter.toml` config file, adds the Polkit actions, and automatically adds the `noctalia-greeter` package to the system profile,
+3. Add the `canopy-greeter-service-type`, which sets up the state directory, manages `greeter.toml` config file, adds the Polkit actions, and automatically adds the `canopy-greeter` package to the system profile,
 4. Finally, remove any service that would conflict with greetd, like `mingetty-service-type` which is provided by `%base-services`, or SDDM/GDM which are provided by `%desktop-services`
 
 An example `services` section of the system configuration would look something like this:
@@ -391,9 +391,9 @@ An example `services` section of the system configuration would look something l
             (service polkit-service-type) ; omit if using %desktop-services
             (service elogind-service-type) ; omit if using %desktop-services
             
-            (service noctalia-greeter-service-type
-                (noctalia-greeter-configuration
-                    (cursor (noctalia-greeter-cursor-configuration
+            (service canopy-greeter-service-type
+                (canopy-greeter-configuration
+                    (cursor (canopy-greeter-cursor-configuration
                         (package bibata-cursor-theme)
                         (theme "Bibata-Modern-Ice")
                         (size 24)))
@@ -409,7 +409,7 @@ An example `services` section of the system configuration would look something l
                                 (extra-shepherd-requirement '(elogind))
                                 (terminal-vt "1")
                                 (terminal-switch #t)
-                                (default-session-command (greetd-noctalia-greeter-session)))
+                                (default-session-command (greetd-canopy-greeter-session)))
                             (greetd-terminal-configuration (terminal-vt "2"))
                             (greetd-terminal-configuration (terminal-vt "3"))
                             (greetd-terminal-configuration (terminal-vt "4"))

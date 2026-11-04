@@ -9,7 +9,7 @@
 
 namespace {
 
-  constexpr std::string_view kHelper = "/usr/bin/noctalia-greeter-apply-appearance";
+  constexpr std::string_view kHelper = "/usr/bin/canopy-greeter-apply-appearance";
 
   [[nodiscard]] std::string policyWith(std::string_view body) {
     return "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
@@ -33,9 +33,9 @@ namespace {
 } // namespace
 
 int main(const int argc, char* argv[]) {
-  const std::string validAction = "  <action id=\"org.noctalia.greeter.sync-appearance\">\n"
+  const std::string validAction = "  <action id=\"org.canopy.greeter.sync-appearance\">\n"
                                   "    <annotate key=\"org.freedesktop.policykit.exec.path\">"
-                                  "/usr/bin/noctalia-greeter-apply-appearance</annotate>\n"
+                                  "/usr/bin/canopy-greeter-apply-appearance</annotate>\n"
                                   "    <annotate key=\"org.freedesktop.policykit.exec.argv1\">--sync</annotate>\n"
                                   "  </action>";
 
@@ -44,9 +44,9 @@ int main(const int argc, char* argv[]) {
   passed &= expectValidation(
       "commented argv annotation",
       policyWith(
-          "  <action id=\"org.noctalia.greeter.sync-appearance\">\n"
+          "  <action id=\"org.canopy.greeter.sync-appearance\">\n"
           "    <annotate key=\"org.freedesktop.policykit.exec.path\">"
-          "/usr/bin/noctalia-greeter-apply-appearance</annotate>\n"
+          "/usr/bin/canopy-greeter-apply-appearance</annotate>\n"
           "    <!-- <annotate key=\"org.freedesktop.policykit.exec.argv1\">--sync</annotate> -->\n"
           "  </action>"
       ),
@@ -55,9 +55,9 @@ int main(const int argc, char* argv[]) {
   passed &= expectValidation(
       "suffix action attribute",
       policyWith(
-          "  <action notid=\"org.noctalia.greeter.sync-appearance\">\n"
+          "  <action notid=\"org.canopy.greeter.sync-appearance\">\n"
           "    <annotate key=\"org.freedesktop.policykit.exec.path\">"
-          "/usr/bin/noctalia-greeter-apply-appearance</annotate>\n"
+          "/usr/bin/canopy-greeter-apply-appearance</annotate>\n"
           "    <annotate key=\"org.freedesktop.policykit.exec.argv1\">--sync</annotate>\n"
           "  </action>"
       ),
@@ -66,9 +66,9 @@ int main(const int argc, char* argv[]) {
   passed &= expectValidation(
       "nested argv annotation",
       policyWith(
-          "  <action id=\"org.noctalia.greeter.sync-appearance\">\n"
+          "  <action id=\"org.canopy.greeter.sync-appearance\">\n"
           "    <annotate key=\"org.freedesktop.policykit.exec.path\">"
-          "/usr/bin/noctalia-greeter-apply-appearance</annotate>\n"
+          "/usr/bin/canopy-greeter-apply-appearance</annotate>\n"
           "    <defaults><annotate key=\"org.freedesktop.policykit.exec.argv1\">--sync</annotate></defaults>\n"
           "  </action>"
       ),
@@ -78,7 +78,7 @@ int main(const int argc, char* argv[]) {
   passed &= expectValidation(
       "wrong helper",
       policyWith(
-          "  <action id=\"org.noctalia.greeter.sync-appearance\">\n"
+          "  <action id=\"org.canopy.greeter.sync-appearance\">\n"
           "    <annotate key=\"org.freedesktop.policykit.exec.path\">/tmp/helper</annotate>\n"
           "    <annotate key=\"org.freedesktop.policykit.exec.argv1\">--sync</annotate>\n"
           "  </action>"
@@ -88,9 +88,9 @@ int main(const int argc, char* argv[]) {
   passed &= expectValidation(
       "wrong argv1",
       policyWith(
-          "  <action id=\"org.noctalia.greeter.sync-appearance\">\n"
+          "  <action id=\"org.canopy.greeter.sync-appearance\">\n"
           "    <annotate key=\"org.freedesktop.policykit.exec.path\">"
-          "/usr/bin/noctalia-greeter-apply-appearance</annotate>\n"
+          "/usr/bin/canopy-greeter-apply-appearance</annotate>\n"
           "    <annotate key=\"org.freedesktop.policykit.exec.argv1\">--setup-system</annotate>\n"
           "  </action>"
       ),
@@ -99,11 +99,11 @@ int main(const int argc, char* argv[]) {
   passed &= expectValidation(
       "duplicate annotations",
       policyWith(
-          "  <action id=\"org.noctalia.greeter.sync-appearance\">\n"
+          "  <action id=\"org.canopy.greeter.sync-appearance\">\n"
           "    <annotate key=\"org.freedesktop.policykit.exec.path\">"
-          "/usr/bin/noctalia-greeter-apply-appearance</annotate>\n"
+          "/usr/bin/canopy-greeter-apply-appearance</annotate>\n"
           "    <annotate key=\"org.freedesktop.policykit.exec.path\">"
-          "/usr/bin/noctalia-greeter-apply-appearance</annotate>\n"
+          "/usr/bin/canopy-greeter-apply-appearance</annotate>\n"
           "    <annotate key=\"org.freedesktop.policykit.exec.argv1\">--sync</annotate>\n"
           "    <annotate key=\"org.freedesktop.policykit.exec.argv1\">--sync</annotate>\n"
           "  </action>"
@@ -112,9 +112,9 @@ int main(const int argc, char* argv[]) {
   );
   passed &= expectValidation(
       "namespaced policy",
-      "<policyconfig xmlns=\"urn:unexpected\"><action id=\"org.noctalia.greeter.sync-appearance\">"
+      "<policyconfig xmlns=\"urn:unexpected\"><action id=\"org.canopy.greeter.sync-appearance\">"
       "<annotate key=\"org.freedesktop.policykit.exec.path\">"
-      "/usr/bin/noctalia-greeter-apply-appearance</annotate>"
+      "/usr/bin/canopy-greeter-apply-appearance</annotate>"
       "<annotate key=\"org.freedesktop.policykit.exec.argv1\">--sync</annotate>"
       "</action></policyconfig>",
       false

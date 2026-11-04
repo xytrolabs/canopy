@@ -59,7 +59,7 @@ namespace {
     return lowered == "none" || lowered == "stderr" || lowered == "stdout";
   }
 
-  // Explicit console debug: session wrapper keeps NOCTALIA_GREETER_LOG=stderr.
+  // Explicit console debug: session wrapper keeps CANOPY_GREETER_LOG=stderr.
   [[nodiscard]] bool isExplicitConsoleLogTarget(const char* value) {
     if (value == nullptr || value[0] == '\0') {
       return false;
@@ -77,7 +77,7 @@ namespace {
   }
 
   [[nodiscard]] const char* configuredLogFilePath() {
-    const char* value = std::getenv("NOCTALIA_GREETER_LOG");
+    const char* value = std::getenv("CANOPY_GREETER_LOG");
     if (isNonFileLogTarget(value)) {
       return nullptr;
     }
@@ -88,7 +88,7 @@ namespace {
     if (g_syslogOpen) {
       return;
     }
-    openlog("noctalia-greeter", LOG_PID | LOG_NDELAY, LOG_DAEMON);
+    openlog("canopy-greeter", LOG_PID | LOG_NDELAY, LOG_DAEMON);
     g_syslogOpen = true;
   }
 
@@ -135,7 +135,7 @@ namespace {
     g_loggingInitialized = true;
 
     g_sessionMode = isSessionMode();
-    const char* logEnv = std::getenv("NOCTALIA_GREETER_LOG");
+    const char* logEnv = std::getenv("CANOPY_GREETER_LOG");
     const char* explicitPath = configuredLogFilePath();
 
     if (explicitPath != nullptr) {
@@ -177,7 +177,7 @@ void emergencyLogBootstrap(int argc, char* argv[]) {
   const ssize_t exeLen = ::readlink("/proc/self/exe", exePath, sizeof(exePath) - 1);
 
   std::ostringstream msg;
-  msg << "=== noctalia-greeter bootstrap pid=" << ::getpid() << " uid=" << ::getuid() << " euid=" << ::geteuid();
+  msg << "=== canopy-greeter bootstrap pid=" << ::getpid() << " uid=" << ::getuid() << " euid=" << ::geteuid();
   if (exeLen > 0) {
     msg << " exe=" << exePath;
   }
@@ -189,7 +189,7 @@ void emergencyLogBootstrap(int argc, char* argv[]) {
   msg << " ===";
 
   const std::string line = msg.str();
-  const char* logEnv = std::getenv("NOCTALIA_GREETER_LOG");
+  const char* logEnv = std::getenv("CANOPY_GREETER_LOG");
   const bool sessionSyslogOnly =
       isSessionMode() && configuredLogFilePath() == nullptr && !isExplicitConsoleLogTarget(logEnv);
 
@@ -224,7 +224,7 @@ void initLogging() {
         syslog(LOG_INFO, "[INF] [log] writing to: %s", g_logPaths.c_str());
       }
     } else if (g_consoleLogging) {
-      std::fprintf(stderr, "[WRN] [log] NOCTALIA_GREETER_LOG is set but no log file could be opened\n");
+      std::fprintf(stderr, "[WRN] [log] CANOPY_GREETER_LOG is set but no log file could be opened\n");
       std::fflush(stderr);
     }
   }

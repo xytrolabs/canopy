@@ -10,9 +10,9 @@ from pathlib import Path
 from typing import Any
 
 
-COMMENT_MARKER = "<!-- noctalia-greeter-pr-template-enforcement -->"
+COMMENT_MARKER = "<!-- canopy-greeter-pr-template-enforcement -->"
 TEMPLATE_URL = (
-    "https://github.com/noctalia-dev/noctalia-greeter/blob/main/.github/PULL_REQUEST_TEMPLATE.md"
+    "https://github.com/noctalia-dev/canopy-greeter/blob/main/.github/PULL_REQUEST_TEMPLATE.md"
 )
 REQUIRED_HEADINGS = (
     "## Summary",
@@ -130,7 +130,7 @@ def github_request(
             "Accept": "application/vnd.github+json",
             "Authorization": f"Bearer {token}",
             "Content-Type": "application/json",
-            "User-Agent": "noctalia-greeter-pr-template-enforcement",
+            "User-Agent": "canopy-greeter-pr-template-enforcement",
             "X-GitHub-Api-Version": "2022-11-28",
         },
     )

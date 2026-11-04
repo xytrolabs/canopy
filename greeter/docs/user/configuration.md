@@ -5,7 +5,7 @@ sidebar:
   order: 2
 ---
 
-Administrator-controlled settings live in `/var/lib/noctalia-greeter/greeter.toml`. Noctalia Sync and choices made on the login screen use the lower-priority `sync.toml`; they never rewrite `greeter.toml`.
+Administrator-controlled settings live in `/var/lib/canopy-greeter/greeter.toml`. Noctalia Sync and choices made on the login screen use the lower-priority `sync.toml`; they never rewrite `greeter.toml`.
 
 - [Configuration files](#configuration-files)
 - [Keys the greeter remembers](#keys-the-greeter-remembers)
@@ -19,13 +19,13 @@ Administrator-controlled settings live in `/var/lib/noctalia-greeter/greeter.tom
 
 | Path | Role |
 |------|------|
-| `/var/lib/noctalia-greeter/greeter.toml` | Full declarative configuration. Wins over Sync when the same value is set |
-| `/var/lib/noctalia-greeter/sync.toml` | Mutable Sync and UI state: appearance, last session/scheme, session actions, and output layout |
-| `/var/lib/noctalia-greeter/wallpaper*` | Wallpaper images installed by Sync |
+| `/var/lib/canopy-greeter/greeter.toml` | Full declarative configuration. Wins over Sync when the same value is set |
+| `/var/lib/canopy-greeter/sync.toml` | Mutable Sync and UI state: appearance, last session/scheme, session actions, and output layout |
+| `/var/lib/canopy-greeter/wallpaper*` | Wallpaper images installed by Sync |
 
 If `greeter.toml` is missing, the greeter uses built-in defaults. System setup creates the state directory and files owned by the greetd session user.
 
-On NixOS, use `services.displayManager.noctalia-greeter.settings` with both the nixpkgs, and project flake modules. Both materialize `greeter.toml` using a tmpfiles `L+` entry.
+On NixOS, use `services.displayManager.canopy-greeter.settings` with both the nixpkgs, and project flake modules. Both materialize `greeter.toml` using a tmpfiles `L+` entry.
 
 The **Synced** scheme uses a complete `[appearance.palette]` from `greeter.toml` when present, otherwise the same keys from `sync.toml`. Legacy live `appearance.json` is migrated into `sync.toml` once. See [Sync with Noctalia](sync.md) for the complete precedence and authorization model.
 
@@ -99,7 +99,7 @@ for the limitation and configuration options.
 The value is the desktop entry's **`Name=`**, which is the same text shown in the picker. The `.desktop` filename without the extension is also accepted as a fallback; a `Name=` match wins if both apply. List available names with:
 
 ```sh
-noctalia-greeter sessions
+canopy-greeter sessions
 ```
 
 Sessions are discovered from `wayland-sessions` and `xsessions` directories
@@ -109,7 +109,7 @@ case-insensitive, but using the exact picker spelling keeps the configuration
 unambiguous. If a `wayland-sessions` and an `xsessions` entry share the same
 `Name=`, the `wayland-sessions` entry wins.
 
-An `xsessions` entry's `Exec=` is run through `noctalia-greeter-xsession`,
+An `xsessions` entry's `Exec=` is run through `canopy-greeter-xsession`,
 which bootstraps `Xorg` via `startx` before running it — `startx` handles
 `DISPLAY`/`Xauthority` setup for the client. This requires `xinit` (for
 `startx`) to be installed; without it, the session fails with a clear
@@ -142,7 +142,7 @@ default = "Hyprland (uwsm-managed)"
 Alternatively, a simple name or the `.desktop` filename can be passed through the greetd command:
 
 ```toml
-command = "/usr/bin/noctalia-greeter-session -- --session niri"
+command = "/usr/bin/canopy-greeter-session -- --session niri"
 ```
 
 Resolution order is command-line `--session`, `[session].default`, remembered `[session].last`, then the first discovered session. An unknown name is ignored.
@@ -184,6 +184,6 @@ Set either format to an empty string to hide only that line, or set `enabled = f
 
 ## Full example
 
-Use the maintained [full `greeter.toml` example](https://github.com/noctalia-dev/noctalia-greeter/blob/main/examples/greeter.toml) as the canonical reference. Copy it to `/var/lib/noctalia-greeter/greeter.toml`, then remove the values you do not want to override.
+Use the maintained [full `greeter.toml` example](https://github.com/noctalia-dev/canopy-greeter/blob/main/examples/greeter.toml) as the canonical reference. Copy it to `/var/lib/canopy-greeter/greeter.toml`, then remove the values you do not want to override.
 
 Restart greetd after changing startup, output, input, or idle settings. Appearance and picker state are otherwise read the next time the greeter starts.

@@ -2,41 +2,41 @@
 set -eu
 
 _session_dir="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)"
-GREETER_BIN="${NOCTALIA_GREETER_BIN:-${_session_dir}/noctalia-greeter}"
-COMPOSITOR_BIN="${NOCTALIA_GREETER_COMPOSITOR_BIN:-${_session_dir}/noctalia-greeter-compositor}"
+GREETER_BIN="${CANOPY_GREETER_BIN:-${_session_dir}/canopy-greeter}"
+COMPOSITOR_BIN="${CANOPY_GREETER_COMPOSITOR_BIN:-${_session_dir}/canopy-greeter-compositor}"
 
 # Default: park stdout/stderr so wlroots/libseat do not paint the VT. Greeter
 # and compositor logs go to syslog (journald / metalog / syslog-ng via greetd).
-# NOCTALIA_GREETER_LOG=stderr|stdout|none|- → console debug (no redirect).
-# NOCTALIA_GREETER_LOG=/path → file (+ syslog from the greeter and compositor).
+# CANOPY_GREETER_LOG=stderr|stdout|none|- → console debug (no redirect).
+# CANOPY_GREETER_LOG=/path → file (+ syslog from the greeter and compositor).
 _pass_log_env=0
-case "${NOCTALIA_GREETER_LOG:-}" in
+case "${CANOPY_GREETER_LOG:-}" in
 "" )
   exec >/dev/null 2>&1
-  unset NOCTALIA_GREETER_LOG
+  unset CANOPY_GREETER_LOG
   ;;
 - | none | NONE | stderr | STDERR | stdout | STDOUT)
-  export NOCTALIA_GREETER_LOG=stderr
+  export CANOPY_GREETER_LOG=stderr
   _pass_log_env=1
   ;;
 *)
-  _log_target="${NOCTALIA_GREETER_LOG}"
+  _log_target="${CANOPY_GREETER_LOG}"
   if touch "${_log_target}" 2>/dev/null; then
     exec >>"${_log_target}" 2>&1
-    export NOCTALIA_GREETER_LOG="${_log_target}"
+    export CANOPY_GREETER_LOG="${_log_target}"
     _pass_log_env=1
   else
     echo "warn: cannot write ${_log_target}; falling back to syslog-only" >&2
     exec >/dev/null 2>&1
-    unset NOCTALIA_GREETER_LOG
+    unset CANOPY_GREETER_LOG
   fi
   ;;
 esac
 
-echo "=== noctalia-greeter-session $(date -Iseconds) pid=$$ uid=$(id -u) euid=$(id -u -r 2>/dev/null || id -u) ==="
+echo "=== canopy-greeter-session $(date -Iseconds) pid=$$ uid=$(id -u) euid=$(id -u -r 2>/dev/null || id -u) ==="
 echo "GREETER_BIN=${GREETER_BIN}"
 echo "COMPOSITOR_BIN=${COMPOSITOR_BIN}"
-echo "NOCTALIA_GREETER_LOG=${NOCTALIA_GREETER_LOG:-syslog (fds parked)}"
+echo "CANOPY_GREETER_LOG=${CANOPY_GREETER_LOG:-syslog (fds parked)}"
 echo "GREETD_SOCK=${GREETD_SOCK:-unset}"
 
 _pam_runtime="${XDG_RUNTIME_DIR:-unset}"
@@ -61,7 +61,7 @@ if [ ! -x "${GREETER_BIN}" ]; then
 fi
 
 export GREETER_BIN
-# Raise log level with WLR_LOG=info when debugging (also set NOCTALIA_GREETER_LOG=stderr).
+# Raise log level with WLR_LOG=info when debugging (also set CANOPY_GREETER_LOG=stderr).
 export WLR_LOG="${WLR_LOG:-error}"
 
 echo "launch: ${COMPOSITOR_BIN} -- $*"
@@ -69,7 +69,7 @@ if command -v dbus-run-session >/dev/null 2>&1; then
   if [ "${_pass_log_env}" -eq 1 ]; then
     exec dbus-run-session -- env XDG_RUNTIME_DIR="${XDG_RUNTIME_DIR}" \
       GREETER_BIN="${GREETER_BIN}" \
-      NOCTALIA_GREETER_LOG="${NOCTALIA_GREETER_LOG}" \
+      CANOPY_GREETER_LOG="${CANOPY_GREETER_LOG}" \
       WLR_LOG="${WLR_LOG}" \
       "${COMPOSITOR_BIN}" -- "$@"
   fi
@@ -83,7 +83,7 @@ echo "warn: dbus-run-session not found; starting compositor without a session bu
 if [ "${_pass_log_env}" -eq 1 ]; then
   exec env XDG_RUNTIME_DIR="${XDG_RUNTIME_DIR}" \
     GREETER_BIN="${GREETER_BIN}" \
-    NOCTALIA_GREETER_LOG="${NOCTALIA_GREETER_LOG}" \
+    CANOPY_GREETER_LOG="${CANOPY_GREETER_LOG}" \
     WLR_LOG="${WLR_LOG}" \
     "${COMPOSITOR_BIN}" -- "$@"
 fi

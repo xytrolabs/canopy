@@ -1,9 +1,9 @@
 {
   pkgs,
-  noctalia-greeter,
+  canopy-greeter,
 }:
 pkgs.mkShell {
-  inputsFrom = [noctalia-greeter];
+  inputsFrom = [canopy-greeter];
 
   nativeBuildInputs = with pkgs; [
     # Workflow & Hooks

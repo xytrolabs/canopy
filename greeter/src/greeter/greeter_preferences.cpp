@@ -556,7 +556,7 @@ namespace greeter {
       if (!std::filesystem::exists(path, ec)) {
         kLog.warn(
             "cannot create {}; greetd user needs write access to {} (run: "
-            "noctalia-greeter-apply-appearance --setup-system)",
+            "canopy-greeter-apply-appearance --setup-system)",
             path.string(), path.parent_path().string()
         );
       }

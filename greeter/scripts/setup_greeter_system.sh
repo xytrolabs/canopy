@@ -11,7 +11,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "${SCRIPT_DIR}/greetd_setup_lib.sh"
 
 SESSION_BIN="$(find_session_bin)"
-SYNCED_DATA_DIR="/var/lib/noctalia-greeter"
+SYNCED_DATA_DIR="/var/lib/canopy-greeter"
 
 APPLY_APPEARANCE="$(find_apply_appearance || true)"
 GREETER_USER="$(resolve_greeter_user)"
@@ -25,18 +25,18 @@ ensure_greeter_paths "${GREETER_USER}"
 # Optional: also apply systemd/opentmpfiles drop-in when present (boot recreate).
 # Portable ensure_greeter_paths above remains the source of truth for packaging.
 if command -v systemd-tmpfiles >/dev/null 2>&1; then
-  systemd-tmpfiles --create noctalia-greeter.conf 2>/dev/null || true
+  systemd-tmpfiles --create canopy-greeter.conf 2>/dev/null || true
 elif command -v opentmpfiles >/dev/null 2>&1; then
-  opentmpfiles --create noctalia-greeter.conf 2>/dev/null || true
+  opentmpfiles --create canopy-greeter.conf 2>/dev/null || true
 elif command -v tmpfiles >/dev/null 2>&1; then
-  tmpfiles --create noctalia-greeter.conf 2>/dev/null || true
+  tmpfiles --create canopy-greeter.conf 2>/dev/null || true
 fi
 
 if [[ -n "${APPLY_APPEARANCE}" ]]; then
   echo "info: installing greeter.toml via ${APPLY_APPEARANCE} --setup-system"
   GREETER_USER="${GREETER_USER}" "${APPLY_APPEARANCE}" --setup-system
 else
-  echo "error: noctalia-greeter-apply-appearance not found; build/install first." >&2
+  echo "error: canopy-greeter-apply-appearance not found; build/install first." >&2
   exit 1
 fi
 

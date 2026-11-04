@@ -55,7 +55,7 @@ namespace {
   }
 
   [[nodiscard]] bool containsNoctaliaGreeter(std::string_view command) {
-    return command.find("noctalia-greeter") != std::string_view::npos;
+    return command.find("canopy-greeter") != std::string_view::npos;
   }
 
   struct GreetdSessionScan {

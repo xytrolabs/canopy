@@ -6,7 +6,7 @@
   ...
 }:
 let
-  cfg = config.services.displayManager.noctalia-greeter;
+  cfg = config.services.displayManager.canopy-greeter;
   tomlFormat = pkgs.formats.toml { };
 
   generateToml =
@@ -21,23 +21,23 @@ in
 {
   imports = [
     (lib.mkRenamedOptionModule
-      [ "programs" "noctalia-greeter" ]
-      [ "services" "displayManager" "noctalia-greeter" ]
+      [ "programs" "canopy-greeter" ]
+      [ "services" "displayManager" "canopy-greeter" ]
     )
   ];
-  disabledModules = ["services/display-managers/noctalia-greeter.nix"];
-  options.services.displayManager.noctalia-greeter = {
-    enable = lib.mkEnableOption "Whether to enable Noctalia Greeter, A minimal login greeter for greetd.";
+  disabledModules = ["services/display-managers/canopy-greeter.nix"];
+  options.services.displayManager.canopy-greeter = {
+    enable = lib.mkEnableOption "Whether to enable Canopy Greeter, A minimal login greeter for greetd.";
 
     package = lib.mkOption {
       type = lib.types.package;
-      description = "The noctalia-greeter package to use.";
+      description = "The canopy-greeter package to use.";
     };
 
     greeter-args = lib.mkOption {
       type = lib.types.str;
       default = "";
-      description = "Arguments to add onto noctalia-greeter-session command.";
+      description = "Arguments to add onto canopy-greeter-session command.";
     };
 
     passwordless-sync-users = lib.mkOption {
@@ -79,7 +79,7 @@ in
         palette, wallpaper, font, ...), output, idle, cursor, keyboard, auth.
         Sync/UI mutable data lives in sync.toml and is not managed by this option.
         Accepts a Nix attrset, raw TOML string, or path to a `.toml` file.
-        See examples/greeter.toml in the noctalia-greeter repository.
+        See examples/greeter.toml in the canopy-greeter repository.
       '';
       example = lib.literalExpression ''
         {
@@ -117,15 +117,15 @@ in
           cfg.package
         ];
 
-        systemd.tmpfiles.settings."10-noctalia-greeter" =
+        systemd.tmpfiles.settings."10-canopy-greeter" =
           {
-            "/var/lib/noctalia-greeter".d = {
+            "/var/lib/canopy-greeter".d = {
               inherit user group;
               mode = "0750";
             };
           }
           // lib.optionalAttrs (cfg.settings != { }) {
-            "/var/lib/noctalia-greeter/greeter.toml"."L+" = {
+            "/var/lib/canopy-greeter/greeter.toml"."L+" = {
               argument = "${generateToml "greeter.toml" cfg.settings}";
               inherit user group;
             };
@@ -136,7 +136,7 @@ in
           settings.default_session.command = lib.mkDefault (
             "${lib.getExe' pkgs.coreutils "env"} "
             + "XDG_DATA_DIRS=${config.services.displayManager.sessionData.desktops}/share "
-            + "${cfg.package}/bin/noctalia-greeter-session -- ${cfg.greeter-args}"
+            + "${cfg.package}/bin/canopy-greeter-session -- ${cfg.greeter-args}"
           );
         };
 
@@ -153,29 +153,29 @@ in
         assertions = [
           {
             assertion = (config.users.users.${user} or { }) != { };
-            message = "noctalia-greeter: user ${user} does not exist. Please create it before referencing it.";
+            message = "canopy-greeter: user ${user} does not exist. Please create it before referencing it.";
           }
           {
             assertion = lib.all (name: builtins.hasAttr name config.users.users) cfg.passwordless-sync-users;
-            message = "noctalia-greeter: every passwordless sync user must be a configured system user.";
+            message = "canopy-greeter: every passwordless sync user must be a configured system user.";
           }
         ];
       }
 
       (lib.mkIf (cfg.cursorTheme.package != null) {
         warnings = [
-          "services.displayManager.noctalia-greeter.cursorTheme.package is deprecated; set services.displayManager.noctalia-greeter.settings.cursor.path instead."
+          "services.displayManager.canopy-greeter.cursorTheme.package is deprecated; set services.displayManager.canopy-greeter.settings.cursor.path instead."
         ];
 
-        services.displayManager.noctalia-greeter.settings.cursor.path = lib.mkDefault cfg.cursorTheme.package;
+        services.displayManager.canopy-greeter.settings.cursor.path = lib.mkDefault cfg.cursorTheme.package;
       })
 
       (lib.mkIf (cfg.passwordless-sync-users != [ ]) {
         security.polkit.extraConfig = lib.mkAfter ''
           polkit.addRule(function(action, subject) {
             var allowedUsers = ${builtins.toJSON cfg.passwordless-sync-users};
-            if (action.id == "org.noctalia.greeter.sync-appearance" &&
-                action.lookup("program") == "${cfg.package}/bin/noctalia-greeter-apply-appearance" &&
+            if (action.id == "org.canopy.greeter.sync-appearance" &&
+                action.lookup("program") == "${cfg.package}/bin/canopy-greeter-apply-appearance" &&
                 action.lookup("user") == "root" &&
                 subject.local && subject.active &&
                 allowedUsers.indexOf(subject.user) >= 0) {

@@ -1,12 +1,12 @@
-# Contributing to Noctalia Greeter
+# Contributing to Canopy Greeter
 
-Thank you for contributing to Noctalia Greeter. It is a minimal login greeter for greetd, backed by a bundled wlroots
+Thank you for contributing to Canopy Greeter. It is a minimal login greeter for greetd, backed by a bundled wlroots
 compositor and a native Wayland client. Read this guide with [README.md](README.md), which covers user-facing setup,
 packaging, configuration, and troubleshooting.
 
 ## Scope and design
 
-Noctalia Greeter owns the login screen, user and session selection, password authentication, appearance settings, and
+Canopy Greeter owns the login screen, user and session selection, password authentication, appearance settings, and
 optional appearance synchronization with Noctalia Shell. It is not a desktop shell or a general-purpose compositor.
 
 Keep changes consistent with these principles:

@@ -29,7 +29,7 @@ namespace paths {
     }
 
     std::filesystem::path installedAssetsRoot() {
-      std::filesystem::path installed(NOCTALIA_GREETER_INSTALLED_ASSETS_DIR);
+      std::filesystem::path installed(CANOPY_GREETER_INSTALLED_ASSETS_DIR);
       if (installed.is_absolute()) {
         return installed;
       }
@@ -39,7 +39,7 @@ namespace paths {
       return installed;
     }
 
-    std::filesystem::path sourceAssetsRoot() { return std::filesystem::path(NOCTALIA_GREETER_ASSETS_DIR); }
+    std::filesystem::path sourceAssetsRoot() { return std::filesystem::path(CANOPY_GREETER_ASSETS_DIR); }
 
     bool isAssetRoot(const std::filesystem::path& root) {
       if (root.empty()) {
@@ -63,20 +63,20 @@ namespace paths {
     std::vector<std::filesystem::path> assetCandidates() {
       std::vector<std::filesystem::path> candidates;
 
-      if (const char* env = std::getenv("NOCTALIA_GREETER_ASSETS_DIR"); env != nullptr && env[0] != '\0') {
+      if (const char* env = std::getenv("CANOPY_GREETER_ASSETS_DIR"); env != nullptr && env[0] != '\0') {
         const std::filesystem::path overridePath(env);
         if (isAssetRoot(overridePath)) {
           candidates.push_back(overridePath);
           return candidates;
         }
-        kLog.warn("NOCTALIA_GREETER_ASSETS_DIR is not a valid asset bundle: {}", overridePath.string());
+        kLog.warn("CANOPY_GREETER_ASSETS_DIR is not a valid asset bundle: {}", overridePath.string());
       }
 
       if (auto exe = executablePath()) {
         const std::filesystem::path exeDir = exe->parent_path();
         appendUnique(candidates, exeDir / "assets");
         appendUnique(candidates, exeDir.parent_path() / "assets");
-        appendUnique(candidates, exeDir.parent_path() / "share" / "noctalia-greeter" / "assets");
+        appendUnique(candidates, exeDir.parent_path() / "share" / "canopy-greeter" / "assets");
       }
 
       appendUnique(candidates, installedAssetsRoot());

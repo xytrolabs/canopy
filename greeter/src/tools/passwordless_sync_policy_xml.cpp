@@ -10,7 +10,7 @@ namespace greeter::passwordless_sync::detail {
 
   namespace {
 
-    constexpr std::string_view kActionId = "org.noctalia.greeter.sync-appearance";
+    constexpr std::string_view kActionId = "org.canopy.greeter.sync-appearance";
     constexpr std::string_view kExecPathAnnotation = "org.freedesktop.policykit.exec.path";
     constexpr std::string_view kExecArgv1Annotation = "org.freedesktop.policykit.exec.argv1";
 
@@ -104,7 +104,7 @@ namespace greeter::passwordless_sync::detail {
     }
     constexpr int parseOptions = XML_PARSE_NONET | XML_PARSE_NOERROR | XML_PARSE_NOWARNING | XML_PARSE_COMPACT;
     xmlDoc* document = ::xmlReadMemory(
-        contents.data(), static_cast<int>(contents.size()), "noctalia-greeter-policy.xml", nullptr, parseOptions
+        contents.data(), static_cast<int>(contents.size()), "canopy-greeter-policy.xml", nullptr, parseOptions
     );
     if (document == nullptr) {
       return false;

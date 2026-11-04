@@ -33,12 +33,12 @@ namespace greeter::passwordless_sync {
   namespace {
 
     constexpr char kRulesDirectory[] = "/etc/polkit-1/rules.d";
-    constexpr char kManagedRuleName[] = "49-noctalia-greeter-passwordless-sync.rules";
-    constexpr char kLockPath[] = "/run/noctalia-greeter-passwordless-sync.lock";
-    constexpr char kApplyHelperName[] = "noctalia-greeter-apply-appearance";
-    constexpr char kActionId[] = "org.noctalia.greeter.sync-appearance";
+    constexpr char kManagedRuleName[] = "49-canopy-greeter-passwordless-sync.rules";
+    constexpr char kLockPath[] = "/run/canopy-greeter-passwordless-sync.lock";
+    constexpr char kApplyHelperName[] = "canopy-greeter-apply-appearance";
+    constexpr char kActionId[] = "org.canopy.greeter.sync-appearance";
     constexpr char kSecureSyncCapability[] = "secure-sync-v1";
-    constexpr std::string_view kManagedMarker = "// Managed by noctalia-greeter passwordless-sync. Do not edit.\n";
+    constexpr std::string_view kManagedMarker = "// Managed by canopy-greeter passwordless-sync. Do not edit.\n";
     constexpr std::string_view kMetadataPrefix = "// metadata: ";
     constexpr std::size_t kMaximumRuleSize = std::size_t{64} * 1024U;
     constexpr std::size_t kMaximumPolicySize = std::size_t{256} * 1024U;
@@ -102,9 +102,9 @@ namespace greeter::passwordless_sync {
 
     void printUsage(std::ostream& out) {
       out
-          << "Usage: noctalia-greeter passwordless-sync enable USER\n"
-          << "       noctalia-greeter passwordless-sync disable USER\n"
-          << "       noctalia-greeter passwordless-sync status [USER]\n\n"
+          << "Usage: canopy-greeter passwordless-sync enable USER\n"
+          << "       canopy-greeter passwordless-sync disable USER\n"
+          << "       canopy-greeter passwordless-sync status [USER]\n\n"
           << "Manage the dedicated Polkit rule for constrained, appearance-only sync.\n"
           << "enable and disable require administrator privileges. The authenticated\n"
           << "sync workflow remains available whether or not this rule is enabled.\n";
@@ -341,7 +341,7 @@ namespace greeter::passwordless_sync {
 
     [[nodiscard]] bool parseManagedRule(std::string_view contents, ManagedRule& ruleOut, std::string& errorOut) {
       if (!contents.starts_with(kManagedMarker)) {
-        errorOut = "the existing rule is not managed by noctalia-greeter";
+        errorOut = "the existing rule is not managed by canopy-greeter";
         return false;
       }
 
@@ -395,7 +395,7 @@ namespace greeter::passwordless_sync {
             return false;
           }
           if (renderRule(parsed) != contents) {
-            errorOut = "the managed rule was modified outside noctalia-greeter";
+            errorOut = "the managed rule was modified outside canopy-greeter";
             return false;
           }
           ruleOut = std::move(parsed);
@@ -521,7 +521,7 @@ namespace greeter::passwordless_sync {
       UniqueFd temporary;
       for (unsigned int attempt = 0; attempt < 100U; ++attempt) {
         temporaryName =
-            ".49-noctalia-greeter-passwordless-sync.tmp-" + std::to_string(::getpid()) + "-" + std::to_string(attempt);
+            ".49-canopy-greeter-passwordless-sync.tmp-" + std::to_string(::getpid()) + "-" + std::to_string(attempt);
         temporary = UniqueFd(
             ::openat(
                 directoryFd, temporaryName.c_str(), O_WRONLY | O_CREAT | O_EXCL | O_CLOEXEC | O_NOFOLLOW,
@@ -580,7 +580,7 @@ namespace greeter::passwordless_sync {
     }
 
     [[nodiscard]] bool validateInstalledPolicy(const std::filesystem::path& helper, std::string& errorOut) {
-      const std::filesystem::path configuredPath(NOCTALIA_GREETER_INSTALLED_POLICY_PATH);
+      const std::filesystem::path configuredPath(CANOPY_GREETER_INSTALLED_POLICY_PATH);
       struct stat linkState{};
       if (::lstat(configuredPath.c_str(), &linkState) != 0) {
         return setErrnoError(
@@ -791,12 +791,12 @@ namespace greeter::passwordless_sync {
       std::error_code ec;
       const std::filesystem::path self = std::filesystem::canonical("/proc/self/exe", ec);
       if (ec) {
-        errorOut = "failed to resolve the installed noctalia-greeter executable: " + ec.message();
+        errorOut = "failed to resolve the installed canopy-greeter executable: " + ec.message();
         return false;
       }
       std::filesystem::path helper;
       if (!trustedExecutable(self.parent_path() / kApplyHelperName, helper, errorOut)) {
-        errorOut += "; install noctalia-greeter into a trusted system prefix before enabling passwordless sync";
+        errorOut += "; install canopy-greeter into a trusted system prefix before enabling passwordless sync";
         return false;
       }
       if (!probeHelperCapability(helper, errorOut)
@@ -869,7 +869,7 @@ namespace greeter::passwordless_sync {
           << (alreadyEnabled ? "Refreshed" : "Enabled")
           << " passwordless appearance sync for '"
           << user
-          << "'.\nThe noctalia-greeter managed rule authorizes only the constrained appearance sync action, and only "
+          << "'.\nThe canopy-greeter managed rule authorizes only the constrained appearance sync action, and only "
              "from an active local session.\n";
       return 0;
     }
@@ -912,9 +912,9 @@ namespace greeter::passwordless_sync {
         return reportError(error);
       }
 
-      std::cout << "Removed '" << user << "' from the passwordless sync rule managed by noctalia-greeter.\n";
+      std::cout << "Removed '" << user << "' from the passwordless sync rule managed by canopy-greeter.\n";
       if (removedRule) {
-        std::cout << "Removed the now-empty rule managed by noctalia-greeter.\n";
+        std::cout << "Removed the now-empty rule managed by canopy-greeter.\n";
       }
       std::cout << "Administrator-authenticated appearance sync remains available. Other Polkit rules may still "
                    "authorize this user.\n";
@@ -950,16 +950,16 @@ namespace greeter::passwordless_sync {
             << *requestedUser
             << ": "
             << (enabled ? "enabled" : "not enabled")
-            << " by the noctalia-greeter managed rule\n"
+            << " by the canopy-greeter managed rule\n"
             << "Other administrator-authored Polkit rules are not included in this status.\n";
         return 0;
       }
       if (state == ManagedRuleState::Missing) {
-        std::cout << "No passwordless sync users are enabled by the noctalia-greeter managed rule.\n";
+        std::cout << "No passwordless sync users are enabled by the canopy-greeter managed rule.\n";
         return 0;
       }
 
-      std::cout << "Passwordless appearance sync users managed by noctalia-greeter:\n";
+      std::cout << "Passwordless appearance sync users managed by canopy-greeter:\n";
       for (const std::string& user : rule.users) {
         std::cout << "  " << user << '\n';
       }

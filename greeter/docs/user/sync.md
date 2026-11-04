@@ -5,10 +5,10 @@ sidebar:
   order: 3
 ---
 
-Noctalia Shell can copy its current appearance and monitor arrangement to the login screen. Install both **Noctalia** and **Noctalia Greeter**, including the packaged apply helper and Polkit action.
+Noctalia Shell can copy its current appearance and monitor arrangement to the login screen. Install both **Noctalia** and **Canopy Greeter**, including the packaged apply helper and Polkit action.
 
 :::caution[Passwordless version requirement]
-Passwordless sync requires **Noctalia Greeter 1.5.0 or newer** together with
+Passwordless sync requires **Canopy Greeter 1.5.0 or newer** together with
 **the next Noctalia release after 5.0.1**. Current `-git` packages or current
 manual builds from `main` also work when both components are up to date.
 
@@ -51,7 +51,7 @@ The synced font must be available to the greeter account through Fontconfig. Sys
 
 ## Run Sync
 
-Open **Settings → Security → Noctalia Greeter → Sync Now**. Log out or restart greetd to see the result on the login screen.
+Open **Settings → Security → Canopy Greeter → Sync Now**. Log out or restart greetd to see the result on the login screen.
 
 Enable **Auto-Sync Greeter** on the same settings page to sync whenever the wallpaper, palette, theme mode, or shell font changes. Rapid changes are debounced into one operation. A corner-radius-only change still needs **Sync Now**, unless it arrives with another auto-sync trigger.
 
@@ -65,7 +65,7 @@ legacy path.
 
 ## Synced state and precedence
 
-Sync installs wallpaper files under `/var/lib/noctalia-greeter/` and merges appearance and output values into `/var/lib/noctalia-greeter/sync.toml`. It never overwrites declarative `greeter.toml`.
+Sync installs wallpaper files under `/var/lib/canopy-greeter/` and merges appearance and output values into `/var/lib/canopy-greeter/sync.toml`. It never overwrites declarative `greeter.toml`.
 
 When the same value exists in both files, `greeter.toml` wins. Palette and
 wallpaper precedence are resolved independently: a complete
@@ -108,11 +108,11 @@ schemes. `fill_mode` accepts `center`, `crop`, `fit`, `stretch`, `repeat`, or
 
 ```toml
 [appearance.wallpaper]
-path = "/var/lib/noctalia-greeter/wallpaper.webp"
+path = "/var/lib/canopy-greeter/wallpaper.webp"
 fill_mode = "crop"
 
 [appearance.wallpapers.DP-2]
-path = "/var/lib/noctalia-greeter/wallpaper-DP-2.webp"
+path = "/var/lib/canopy-greeter/wallpaper-DP-2.webp"
 fill_mode = "crop"
 ```
 
@@ -130,10 +130,10 @@ Legacy live `appearance.json` is migrated into `sync.toml` once and is no longer
 
 ## Authorization
 
-The packaged `org.noctalia.greeter.sync-appearance` action matches only:
+The packaged `org.canopy.greeter.sync-appearance` action matches only:
 
 ```text
-noctalia-greeter-apply-appearance --sync <staging-directory>
+canopy-greeter-apply-appearance --sync <staging-directory>
 ```
 
 It requires administrator authentication by default. Setup and legacy helper modes use generic administrator authorization and are never covered by the passwordless sync rule.
@@ -153,7 +153,7 @@ for its selected users, so it does not need an agent for this action.
 Only add a passwordless rule when the helper supports `--sync` and its installed
 Polkit action contains `org.freedesktop.policykit.exec.argv1` set to `--sync`.
 Upstream releases through 1.3.1 use the old
-`org.noctalia.greeter.apply-appearance` action, scoped only by executable path.
+`org.canopy.greeter.apply-appearance` action, scoped only by executable path.
 Never adapt the rule below to that action; doing so would also authorize the
 legacy helper mode. If unsure, keep the administrator prompt.
 :::
@@ -165,15 +165,15 @@ manage its narrow Polkit allow rule for you. Pass each local login account that
 should be allowed to sync without a prompt:
 
 ```sh
-sudo noctalia-greeter passwordless-sync enable alice
+sudo canopy-greeter passwordless-sync enable alice
 ```
 
 Enabling another account adds it without removing accounts that are already
 allowed. Check the managed rule for one account, or list all allowed accounts:
 
 ```sh
-noctalia-greeter passwordless-sync status alice
-noctalia-greeter passwordless-sync status
+canopy-greeter passwordless-sync status alice
+canopy-greeter passwordless-sync status
 ```
 
 If your distribution restricts reads of the Polkit rules directory, rerun the
@@ -182,7 +182,7 @@ status command with `sudo`.
 To remove an account from the CLI-managed authorization:
 
 ```sh
-sudo noctalia-greeter passwordless-sync disable alice
+sudo canopy-greeter passwordless-sync disable alice
 ```
 
 The command manages only the dedicated constrained appearance-sync action. It
@@ -196,7 +196,7 @@ or update that separate rule before prompts resume.
 Use these commands with a packaged or system-installed Greeter 1.5.0 or newer.
 They intentionally reject an untrusted helper installation rather than writing
 a rule for a checkout, build directory, or user-writable prefix. Packages must
-also include the dedicated `org.noctalia.greeter.sync-appearance` Polkit action.
+also include the dedicated `org.canopy.greeter.sync-appearance` Polkit action.
 
 ### NixOS
 
@@ -204,7 +204,7 @@ NixOS users configure the same authorization declaratively. With the project
 module, list trusted login users directly:
 
 ```nix
-services.displayManager.noctalia-greeter.passwordless-sync-users = [ "alice" ];
+services.displayManager.canopy-greeter.passwordless-sync-users = [ "alice" ];
 ```
 
 The option defaults to an empty list, which keeps every sync authenticated. The
@@ -216,13 +216,13 @@ target account, and those users in active local sessions.
 The nixpkgs module works the same, only with a slightly different notation:
 
 ```nix
-services.displayManager.noctalia-greeter.passwordlessSyncUsers = [ "alice" ];
+services.displayManager.canopy-greeter.passwordlessSyncUsers = [ "alice" ];
 ```
 
-If you override `services.displayManager.noctalia-greeter.package`, use that
+If you override `services.displayManager.canopy-greeter.package`, use that
 same package in the helper path. Greeter 1.3.1 and older do not provide this
 action, so the rule has no effect with those packages. Do not change it to
-their path-only `org.noctalia.greeter.apply-appearance` action.
+their path-only `org.canopy.greeter.apply-appearance` action.
 
 ### Manual Polkit rule
 
@@ -236,16 +236,16 @@ authorization managed by that CLI, not arbitrary administrator-authored rules.
 First find the helper's canonical path:
 
 ```sh
-readlink -f "$(command -v noctalia-greeter-apply-appearance)"
+readlink -f "$(command -v canopy-greeter-apply-appearance)"
 ```
 
 The resulting helper must satisfy the trusted-install requirement above. Do not
 point a passwordless rule at an executable inside a user checkout, build
 directory, home directory, or other user-writable prefix.
 
-Then create `/etc/polkit-1/rules.d/49-noctalia-greeter-sync.rules` as root,
+Then create `/etc/polkit-1/rules.d/49-canopy-greeter-sync.rules` as root,
 mode `0644`. Replace `alice` and
-`/usr/bin/noctalia-greeter-apply-appearance` with the trusted user and the path
+`/usr/bin/canopy-greeter-apply-appearance` with the trusted user and the path
 printed above:
 
 ```js
@@ -253,8 +253,8 @@ polkit.addRule(function (action, subject) {
   var allowedUsers = ["alice"];
 
   if (
-    action.id == "org.noctalia.greeter.sync-appearance" &&
-    action.lookup("program") == "/usr/bin/noctalia-greeter-apply-appearance" &&
+    action.id == "org.canopy.greeter.sync-appearance" &&
+    action.lookup("program") == "/usr/bin/canopy-greeter-apply-appearance" &&
     action.lookup("user") == "root" &&
     subject.local &&
     subject.active &&
@@ -277,11 +277,11 @@ Passwordless authorization requires Polkit to recognize the caller as an active 
 The constrained helper also requires:
 
 - invocation through `pkexec`, which supplies the verified `PKEXEC_UID`; direct `sudo`, `doas`, and `run0` calls are unsupported
-- the exact caller-owned staging path `/run/user/<uid>/noctalia-greeter-sync`
+- the exact caller-owned staging path `/run/user/<uid>/canopy-greeter-sync`
 - a protected logind/elogind-style `/run/user/<uid>` runtime directory
-- the standard `/var/lib/noctalia-greeter` state directory, owned by the non-root greeter account
+- the standard `/var/lib/canopy-greeter` state directory, owned by the non-root greeter account
 
-`--sync` ignores `NOCTALIA_GREETER_STATE_DIR`. Installations using a custom
+`--sync` ignores `CANOPY_GREETER_STATE_DIR`. Installations using a custom
 state directory must use an absolute path and keep the legacy helper mode
 administrator-authenticated. Noctalia forwards the custom path explicitly when
 it launches that mode.
@@ -289,8 +289,8 @@ it launches that mode.
 On seatd without logind, **Sync Now** can still stage the files, but authorization needs a terminal or console. Run:
 
 ```sh
-greeter_sync_helper="$(readlink -f "$(command -v noctalia-greeter-apply-appearance)")"
-greeter_sync_staging="/run/user/$(id -u)/noctalia-greeter-sync"
+greeter_sync_helper="$(readlink -f "$(command -v canopy-greeter-apply-appearance)")"
+greeter_sync_staging="/run/user/$(id -u)/canopy-greeter-sync"
 pkexec "$greeter_sync_helper" --sync "$greeter_sync_staging"
 ```
 
@@ -308,14 +308,14 @@ directory, the staged directory instead follows `$XDG_RUNTIME_DIR` and the
 helper uses its positional syntax. For the default state directory, run:
 
 ```sh
-pkexec noctalia-greeter-apply-appearance "$XDG_RUNTIME_DIR/noctalia-greeter-sync"
+pkexec canopy-greeter-apply-appearance "$XDG_RUNTIME_DIR/canopy-greeter-sync"
 ```
 
 For a custom state directory, preserve it explicitly across `pkexec`:
 
 ```sh
-pkexec /usr/bin/env NOCTALIA_GREETER_STATE_DIR=/absolute/custom/path \
-  noctalia-greeter-apply-appearance "$XDG_RUNTIME_DIR/noctalia-greeter-sync"
+pkexec /usr/bin/env CANOPY_GREETER_STATE_DIR=/absolute/custom/path \
+  canopy-greeter-apply-appearance "$XDG_RUNTIME_DIR/canopy-greeter-sync"
 ```
 
 The legacy path may also use `run0` or a configured administrator privilege

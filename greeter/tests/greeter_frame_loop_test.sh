@@ -21,13 +21,13 @@ EOF
 # client's success marker. Keep the combined log available on any failure.
 if ! env \
   XDG_RUNTIME_DIR="$test_dir/runtime" \
-  NOCTALIA_GREETER_STATE_DIR="$test_dir/state" \
+  CANOPY_GREETER_STATE_DIR="$test_dir/state" \
   WLR_BACKENDS=headless \
   WLR_HEADLESS_OUTPUTS=1 \
   WLR_RENDERER=pixman \
   LIBGL_ALWAYS_SOFTWARE=1 \
   GREETER_BIN="$client" \
-  NOCTALIA_GREETER_LOG=stderr \
+  CANOPY_GREETER_LOG=stderr \
   "$compositor" >"$test_dir/log" 2>&1; then
   cat "$test_dir/log"
   exit 1

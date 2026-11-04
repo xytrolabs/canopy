@@ -41,7 +41,7 @@
   };
 in
   stdenv.mkDerivation {
-    pname = "noctalia-greeter";
+    pname = "canopy-greeter";
     inherit version;
 
     src = lib.cleanSourceWith {
@@ -97,10 +97,10 @@ in
     ninjaFlags = ["-v"];
 
     meta = with lib; {
-      description = "Noctalia Greeter - A minimal login greeter for greetd that matches the look and feel of Noctalia Shell";
-      homepage = "https://github.com/noctalia-dev/noctalia-greeter";
+      description = "Canopy Greeter - A minimal login greeter for greetd that matches the look and feel of Noctalia Shell";
+      homepage = "https://github.com/noctalia-dev/canopy-greeter";
       license = licenses.mit;
       platforms = platforms.linux;
-      mainProgram = "noctalia-greeter";
+      mainProgram = "canopy-greeter";
     };
   }

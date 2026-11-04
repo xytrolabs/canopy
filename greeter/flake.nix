@@ -1,5 +1,5 @@
 {
-  description = "Noctalia Greeter - A minimal login greeter for greetd that matches the look and feel of Noctalia Shell";
+  description = "Canopy Greeter - A minimal login greeter for greetd that matches the look and feel of Noctalia Shell";
 
   inputs = {
     nixpkgs.url = "https://channels.nixos.org/nixos-unstable/nixexprs.tar.zst";
@@ -25,7 +25,7 @@
       );
   in {
     overlays.default = final: prev: {
-      noctalia-greeter = final.callPackage ./nix/package.nix {};
+      canopy-greeter = final.callPackage ./nix/package.nix {};
     };
 
     packages = forEachSystem (
@@ -40,7 +40,7 @@
         system,
       }: {
         default = pkgs.callPackage ./nix/devshell.nix {
-          noctalia-greeter = self.packages.${system}.default;
+          canopy-greeter = self.packages.${system}.default;
         };
       }
     );
@@ -51,7 +51,7 @@
       ...
     }: {
       imports = [./nix/nixos-module.nix];
-      services.displayManager.noctalia-greeter.package = lib.mkDefault self.packages.${pkgs.stdenv.hostPlatform.system}.default;
+      services.displayManager.canopy-greeter.package = lib.mkDefault self.packages.${pkgs.stdenv.hostPlatform.system}.default;
     };
   };
 }

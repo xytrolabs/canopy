@@ -7,7 +7,7 @@ if [ "$#" -ne 1 ]; then
 fi
 
 helper=$1
-test_dir=$(mktemp -d "${TMPDIR:-/tmp}/noctalia-greeter-compat.XXXXXX")
+test_dir=$(mktemp -d "${TMPDIR:-/tmp}/canopy-greeter-compat.XXXXXX")
 cleanup() {
     rm -f "$test_dir/expected" "$test_dir/stdout" "$test_dir/stderr"
     rmdir "$test_dir"

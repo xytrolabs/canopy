@@ -5,7 +5,7 @@ sidebar:
   order: 5
 ---
 
-Noctalia Greeter supports keyboard-only navigation and lets administrators configure the keyboard layout, Num Lock state, and cursor theme used on the login screen.
+Canopy Greeter supports keyboard-only navigation and lets administrators configure the keyboard layout, Num Lock state, and cursor theme used on the login screen.
 
 - [Keyboard controls](#keyboard-controls)
 - [Keyboard layout](#keyboard-layout)
@@ -64,11 +64,11 @@ a console keymap should provide one of the XKB forms above or use
 `greeter.toml`.
 
 Terminal greeters such as `tuigreet` receive input through the virtual
-terminal's kernel keymap. Noctalia Greeter is a Wayland compositor and receives
+terminal's kernel keymap. Canopy Greeter is a Wayland compositor and receives
 raw input events instead, so it needs an XKB configuration from one of the
 sources above.
 
-Set the layout in `/var/lib/noctalia-greeter/greeter.toml`:
+Set the layout in `/var/lib/canopy-greeter/greeter.toml`:
 
 ```toml
 [keyboard]
@@ -92,7 +92,7 @@ greetd starts the greeter with a minimal environment. Put XKB overrides in the g
 
 ```toml
 [default_session]
-command = "env XKB_DEFAULT_LAYOUT=cz /usr/bin/noctalia-greeter-session"
+command = "env XKB_DEFAULT_LAYOUT=cz /usr/bin/canopy-greeter-session"
 ```
 
 Prefer `greeter.toml` for persistent configuration. Environment variables are mainly useful for testing or installations that cannot manage that file.
@@ -167,7 +167,7 @@ As with keyboard variables, put cursor overrides in the greetd session command:
 
 ```toml
 [default_session]
-command = "env XCURSOR_THEME=Adwaita XCURSOR_SIZE=24 /usr/bin/noctalia-greeter-session"
+command = "env XCURSOR_THEME=Adwaita XCURSOR_SIZE=24 /usr/bin/canopy-greeter-session"
 ```
 
 Add `XCURSOR_PATH` when the theme is not in the default search path.
@@ -176,14 +176,14 @@ Add `XCURSOR_PATH` when the theme is not in the default search path.
 
 ## NixOS
 
-NixOS has two different Noctalia Greeter modules. Configure the option path belonging to the module you enabled; do not enable both modules at once.
+NixOS has two different Canopy Greeter modules. Configure the option path belonging to the module you enabled; do not enable both modules at once.
 
 ### nixpkgs module
 
 The nixpkgs module provides a `cursorTheme` convenience option. It fills the cursor theme and search path, while other cursor and keyboard values go under `settings`:
 
 ```nix
-services.displayManager.noctalia-greeter = {
+services.displayManager.canopy-greeter = {
   enable = true;
 
   cursorTheme = {
@@ -207,7 +207,7 @@ services.displayManager.noctalia-greeter = {
 Configure the greeter through `settings`:
 
 ```nix
-services.displayManager.noctalia-greeter = {
+services.displayManager.canopy-greeter = {
   enable = true;
 
   settings = {
@@ -225,4 +225,4 @@ services.displayManager.noctalia-greeter = {
 };
 ```
 
-Both modules materialize these values in `/var/lib/noctalia-greeter/greeter.toml`; neither needs to inject `XKB_DEFAULT_*` or `XCURSOR_*` into the greetd command.
+Both modules materialize these values in `/var/lib/canopy-greeter/greeter.toml`; neither needs to inject `XKB_DEFAULT_*` or `XCURSOR_*` into the greetd command.

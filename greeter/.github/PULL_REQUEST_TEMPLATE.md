@@ -46,7 +46,7 @@
 - [ ] Tested with `just run` / `just run-local` (dev compositor)
 - [ ] Tested with multiple monitors
 - [ ] Tested appearance sync from Noctalia Shell (`Sync Now`)
-- [ ] Tested on NixOS (`programs.noctalia-greeter`)
+- [ ] Tested on NixOS (`programs.canopy-greeter`)
 - [ ] Tested with a pinned `[output].name`
 - [ ] Tested with custom `[output].layout` / `[output].transforms`
 

@@ -16,10 +16,10 @@ jobs:
       run:
         shell: bash
     env:
-      AUR_REPO: ssh://aur@aur.archlinux.org/noctalia-greeter.git
+      AUR_REPO: ssh://aur@aur.archlinux.org/canopy-greeter.git
       GIT_SSH_COMMAND: ssh -i /root/.ssh/id_aur -o StrictHostKeyChecking=yes -o IdentitiesOnly=yes -o ServerAliveInterval=15 -o ServerAliveCountMax=4
-      PKGNAME: noctalia-greeter
-      AUR_LINK: https://aur.archlinux.org/packages/noctalia-greeter
+      PKGNAME: canopy-greeter
+      AUR_LINK: https://aur.archlinux.org/packages/canopy-greeter
 
     steps:
       - name: Install dependencies
@@ -100,9 +100,9 @@ jobs:
 
       - name: Summarize update
         env:
-          PKGNAME: noctalia-greeter
+          PKGNAME: canopy-greeter
           PKGVER: ${{ steps.vars.outputs.pkgver }}
-          AUR_LINK: https://aur.archlinux.org/packages/noctalia-greeter
+          AUR_LINK: https://aur.archlinux.org/packages/canopy-greeter
         run: |
           set -euo pipefail
           {

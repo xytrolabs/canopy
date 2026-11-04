@@ -1,4 +1,4 @@
-# Noctalia Greeter
+# Canopy Greeter
 
 A minimal login greeter for [greetd](https://github.com/kennylevinsen/greetd) that matches the look and feel of [Noctalia Shell](https://github.com/noctalia-dev/noctalia-shell).
 
@@ -11,11 +11,11 @@ A minimal login greeter for [greetd](https://github.com/kennylevinsen/greetd) th
 <p><br/></p>
 
 <p align="center">
-  <a href="https://github.com/noctalia-dev/noctalia-greeter/commits">
-    <img src="https://img.shields.io/github/last-commit/noctalia-dev/noctalia-greeter?style=for-the-badge&labelColor=0C0D11&color=A8AEFF&logo=git&logoColor=FFFFFF&label=commit" alt="Last commit" />
+  <a href="https://github.com/noctalia-dev/canopy-greeter/commits">
+    <img src="https://img.shields.io/github/last-commit/noctalia-dev/canopy-greeter?style=for-the-badge&labelColor=0C0D11&color=A8AEFF&logo=git&logoColor=FFFFFF&label=commit" alt="Last commit" />
   </a>
-  <a href="https://github.com/noctalia-dev/noctalia-greeter/stargazers">
-    <img src="https://img.shields.io/github/stars/noctalia-dev/noctalia-greeter?style=for-the-badge&labelColor=0C0D11&color=A8AEFF&logo=github&logoColor=FFFFFF" alt="GitHub stars" />
+  <a href="https://github.com/noctalia-dev/canopy-greeter/stargazers">
+    <img src="https://img.shields.io/github/stars/noctalia-dev/canopy-greeter?style=for-the-badge&labelColor=0C0D11&color=A8AEFF&logo=github&logoColor=FFFFFF" alt="GitHub stars" />
   </a>
   <a href="https://docs.noctalia.dev">
     <img src="https://img.shields.io/badge/docs-A8AEFF?style=for-the-badge&logo=gitbook&logoColor=FFFFFF&labelColor=0C0D11" alt="Documentation" />
@@ -25,15 +25,15 @@ A minimal login greeter for [greetd](https://github.com/kennylevinsen/greetd) th
   </a>
 </p>
 
-## What is Noctalia Greeter?
+## What is Canopy Greeter?
 
-Noctalia Greeter is the screen you see before your desktop session starts. It lets you pick a user, enter your password, choose a Wayland session, and pick a color scheme - with the same visual language as Noctalia. A [configurable clock](docs/user/configuration.md#clock) uses Noctalia-compatible time/date formats, separate time and date font sizes, and the active greeter palette.
+Canopy Greeter is the screen you see before your desktop session starts. It lets you pick a user, enter your password, choose a Wayland session, and pick a color scheme - with the same visual language as Noctalia. A [configurable clock](docs/user/configuration.md#clock) uses Noctalia-compatible time/date formats, separate time and date font sizes, and the active greeter palette.
 
 Long session and color scheme menus fit within the screen and show a scrollbar.
 Use the mouse wheel, drag the scrollbar, or navigate with the arrow keys; see
 [keyboard and cursor controls](docs/user/input.md#keyboard-controls).
 
-It is built for **greetd**: greetd launches `noctalia-greeter-session`, which starts the bundled wlroots compositor and runs the greeter inside that session.
+It is built for **greetd**: greetd launches `canopy-greeter-session`, which starts the bundled wlroots compositor and runs the greeter inside that session.
 
 Pair it with **[Noctalia v5](https://github.com/noctalia-dev/noctalia)** if you want wallpaper and palette synced from the shell settings (optional).
 
@@ -53,7 +53,7 @@ After installation:
 
 ## Scope
 
-Noctalia Greeter is a **display/login greeter** for greetd. It handles user/session selection and authentication UI.
+Canopy Greeter is a **display/login greeter** for greetd. It handles user/session selection and authentication UI.
 
 It is **not** a desktop shell or compositor replacement.
 

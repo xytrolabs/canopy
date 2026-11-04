@@ -22,7 +22,7 @@
 
 namespace {
 
-  constexpr std::string_view kStagingName = "noctalia-greeter-sync";
+  constexpr std::string_view kStagingName = "canopy-greeter-sync";
   constexpr std::string_view kSyncedOutputLayout = "DP-1:0,0; DP-2:1280,0";
   constexpr std::string_view kSyncedOutputTransforms = "DP-1:90; DP-2:normal";
   constexpr std::string_view kSyncedOutputScales = "DP-1:2; DP-2:1.25";

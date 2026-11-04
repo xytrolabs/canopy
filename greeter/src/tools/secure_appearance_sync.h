@@ -15,7 +15,7 @@ namespace greeter::secure_sync {
   // session commands, while ensuring root only snapshots bounded caller files.
   [[nodiscard]] bool applyLegacyFromStaging(const std::filesystem::path& stagingDirectory, std::string& errorOut);
 
-#ifdef NOCTALIA_GREETER_TESTING
+#ifdef CANOPY_GREETER_TESTING
   namespace detail {
 
     // Exercises the same descriptor-based legacy staging validation as production,
