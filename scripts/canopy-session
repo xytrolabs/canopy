@@ -47,6 +47,23 @@ for arg in "$@"; do
     esac
 done
 
+# Running from a terminal inside an existing desktop? Then this is a nested
+# session, not a new one: Labwc must render into a window on the running
+# compositor instead of trying to become the display server (which fails on the
+# VT and collides with the existing XWayland socket).
+if [ -z "$NESTED" ] && { [ -n "${WAYLAND_DISPLAY:-}" ] || [ -n "${DISPLAY:-}" ]; }; then
+    NESTED=1
+fi
+
+if [ -n "$NESTED" ]; then
+    # wlroots must use the Wayland backend; auto-detection can pick DRM when
+    # DISPLAY is set, which hangs waiting for a seat it will never get.
+    export WLR_BACKENDS="${WLR_BACKENDS:-wayland}"
+    printf 'canopy-session: starting nested inside %s\n' "${WAYLAND_DISPLAY:-$DISPLAY}"
+    printf '  this is a window inside your current desktop, not a login session\n'
+    printf '  for the real session: log out and choose Canopy, or run this from a TTY\n'
+fi
+
 if ! command -v labwc >/dev/null 2>&1; then
     printf 'canopy-session: labwc is not installed\n' >&2
     printf '  install it with your package manager, or run: sh scripts/deps.sh plan\n' >&2
@@ -59,7 +76,6 @@ pkill -x canopy 2>/dev/null || true
 sleep 0.3
 
 if [ -n "$NESTED" ]; then
-    # Nested: useful for development inside a running session.
     exec labwc -S 'canopy' -t 'Canopy (nested)'
 fi
 

@@ -192,15 +192,26 @@ seed_toolkits() {
 
     for v in 3.0 4.0; do
         run mkdir -p "$XDG_CONFIG_HOME/gtk-$v"
-        if [ -f "$XDG_CONFIG_HOME/gtk-$v/settings.ini" ]; then
-            say "keeping existing gtk-$v/settings.ini"
+        if [ -f "$XDG_CONFIG_HOME/gtk-$v/settings.ini" ] && [ "$REFRESH_CONFIG" -eq 0 ]; then
+            say "keeping existing gtk-$v/settings.ini (use --refresh-config to update)"
         elif [ "$DRY_RUN" -eq 1 ]; then
             say "would write gtk-$v/settings.ini (icons: $ICON_THEME, cursor: $CURSOR_THEME)"
         else
-            sed -e "s/^gtk-icon-theme-name=.*/gtk-icon-theme-name=$ICON_THEME/" \
-                -e "s/^gtk-cursor-theme-name=.*/gtk-cursor-theme-name=$CURSOR_THEME/" \
-                "$PROJECT_DIR/config/gtk-$v/settings.ini" \
-                > "$XDG_CONFIG_HOME/gtk-$v/settings.ini"
+            # Keep anything the user set that we do not own; only the icon and
+            # cursor theme are Canopy's to choose.
+            _existing="$XDG_CONFIG_HOME/gtk-$v/settings.ini"
+            _base="$PROJECT_DIR/config/gtk-$v/settings.ini"
+            if [ -f "$_existing" ] && [ "$REFRESH_CONFIG" -eq 1 ]; then
+                sed -e "s/^gtk-icon-theme-name=.*/gtk-icon-theme-name=$ICON_THEME/" \
+                    -e "s/^gtk-cursor-theme-name=.*/gtk-cursor-theme-name=$CURSOR_THEME/" \
+                    "$_existing" > "$_existing.canopy-new"
+                mv "$_existing.canopy-new" "$_existing"
+            else
+                sed -e "s/^gtk-icon-theme-name=.*/gtk-icon-theme-name=$ICON_THEME/" \
+                    -e "s/^gtk-cursor-theme-name=.*/gtk-cursor-theme-name=$CURSOR_THEME/" \
+                    "$_base" > "$_existing"
+            fi
+            say "icon theme -> $ICON_THEME (gtk-$v)"
         fi
     done
 
@@ -317,6 +328,31 @@ install_greeter() {
     fi
 }
 
+seed_icon_theme() {
+    # The session advertises XDG_CURRENT_DESKTOP=Canopy, so libsfdo looks for an
+    # icon theme literally named "canopy". Without a theme by that name Labwc
+    # logs "Failed to initialize icon loader" and every window icon is blank.
+    # This alias inherits the best theme actually installed.
+    _parent="$(canopy_icon_theme)"
+    for _dir in "$XDG_DATA_HOME/icons" /usr/local/share/icons /usr/share/icons; do
+        [ -w "$_dir" ] || [ "$is_system" -eq 1 ] || continue
+        _target="$_dir/canopy"
+        run mkdir -p "$_target"
+        if [ "$DRY_RUN" -eq 0 ]; then
+            cat > "$_target/index.theme" <<EOF
+[Icon Theme]
+Name=Canopy
+Comment=Canopy desktop icon theme (inherits the installed theme)
+Inherits=$_parent
+Directories=
+EOF
+        fi
+        say "icon theme -> $_target (inherits $_parent)"
+        return 0
+    done
+    return 0
+}
+
 # ---------------------------------------------------------------- helpers ----
 install_helpers() {
     run mkdir -p "$HOME/.local/bin"
@@ -337,11 +373,11 @@ install_binary
 install_session
 install_helpers
 install_greeter
-install_greeter
 seed_config
 seed_labwc
 seed_toolkits
 seed_assets
+seed_icon_theme
 ensure_dependencies
 
 say ""
