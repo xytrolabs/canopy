@@ -375,7 +375,7 @@ namespace FileUtils {
   [[nodiscard]] inline std::string configDir() {
     const char* canopy = std::getenv("CANOPY_CONFIG_HOME");
     if (canopy != nullptr && canopy[0] != '\0') {
-      return std::string(canopy) + "/noctalia";
+      return std::string(canopy) + "/canopy";
     }
     const char* xdg = std::getenv("XDG_CONFIG_HOME");
     if (xdg != nullptr && xdg[0] != '\0') {

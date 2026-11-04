@@ -648,7 +648,7 @@ void GreeterSurface::initialize(RenderContext* context) {
   }
 
   if (!m_hideLogo) {
-    const auto logoPath = paths::assetPath("noctalia.svg");
+    const auto logoPath = paths::assetPath("canopy.svg");
     m_brandLogoTexture = m_renderContext->textureManager().loadFromFile(logoPath.string(), 1024, true);
     if (m_bottomBrandLogo != nullptr && m_brandLogoTexture.id != 0) {
       m_bottomBrandLogo->setTextureId(m_brandLogoTexture.id);

@@ -118,7 +118,7 @@ auto_hide           = false
 reserve_space       = true
 capsule             = false
 
-start  = ["launcher", "active_window"]
+start  = ["launcher", "wordmark", "active_window"]
 center = []
 end    = ["media", "group:status", "control-center", "clock", "session"]
 
@@ -144,7 +144,7 @@ accordion_delay_ms = 120
 position            = "left"
 thickness           = 56
 radius              = 26
-margin_ends         = 200
+margin_ends         = 24
 margin_edge         = 10
 padding             = 6
 widget_spacing      = 2
@@ -164,11 +164,14 @@ capsule_border_width = 1.0
 # processes (StatusNotifierItem) of the session. Notifications and audio are
 # deliberately not here — they have their own panels.
 #
-# The tray widget is placed bare, not inside a capsule group: a group with no
-# items still draws its padding, which showed up as an empty pill at the top.
+# Everything lives in the *center* lane on purpose. A vertical bar with items in
+# both `center` and `end` draws its capsule around both blocks: the centered
+# block floats in the middle while `end` is pinned to the bottom, leaving a dead
+# band at the top of the pill. One centered lane makes the pill size itself to
+# its content and stay visually balanced whatever the tray reports.
 start  = []
-center = ["launcher", "control-center", "tray"]
-end    = ["network", "bluetooth", "battery", "settings"]
+center = ["launcher", "control-center", "tray", "network", "bluetooth", "battery", "settings"]
+end    = []
 
 # ── Dock — bottom centre ──────────────────────────────────────────────────────
 # Pinned ǀ running ǀ minimized. Pinned ordering is stored in `pinned`, running
@@ -256,6 +259,11 @@ enable_ddcutil = false
 # The panel launcher shows the Canopy mark instead of a generic search glyph.
 # Installer copies the mark to ~/.local/share/icons; if it is missing the widget
 # falls back to the bundled glyph named below.
+
+[widget.wordmark]
+# The desktop names itself in the menu bar, right after its mark.
+type = "text"
+text = "Canopy"
 
 [widget.launcher]
 # The mark carries the accent, like a Start button that is actually branded.

@@ -135,6 +135,43 @@ install_session() {
         if [ -d "$PROJECT_DIR/config/labwc/themes/canopy" ] && [ ! -d /usr/share/themes/canopy ]; then
             run cp -a "$PROJECT_DIR/config/labwc/themes/canopy" /usr/share/themes/canopy
         fi
+
+        # The shell only reads config.toml from the user's config directory, so
+        # a system install must ship the Canopy defaults somewhere a *new*
+        # account can find them. canopy-session seeds the user copy from here
+        # on first login; /etc/xdg/canopy is the conventional place for it and
+        # is what image builders/greeters look at.
+        if [ -f "$PROJECT_DIR/config/canopy/config.toml" ]; then
+            run install -Dm644 "$PROJECT_DIR/config/canopy/config.toml" \
+                /usr/local/share/canopy/config.toml
+            if [ ! -f /etc/xdg/canopy/config.toml ]; then
+                run install -Dm644 "$PROJECT_DIR/config/canopy/config.toml" \
+                    /etc/xdg/canopy/config.toml
+            fi
+        fi
+
+        # Wallpapers and the mark, for accounts that never ran the user path.
+        if [ -d "$PROJECT_DIR/assets/wallpapers" ]; then
+            for w in "$PROJECT_DIR"/assets/wallpapers/*.png; do
+                [ -f "$w" ] || continue
+                run install -Dm644 "$w" "/usr/local/share/backgrounds/$(basename "$w")"
+            done
+        fi
+        [ -f "$PROJECT_DIR/assets/canopy-wallpaper.png" ] && \
+            run install -Dm644 "$PROJECT_DIR/assets/canopy-wallpaper.png" \
+                /usr/local/share/backgrounds/canopy-wallpaper.png
+        [ -f "$PROJECT_DIR/assets/canopy-mark.svg" ] && \
+            run install -Dm644 "$PROJECT_DIR/assets/canopy-mark.svg" \
+                /usr/local/share/icons/hicolor/scalable/apps/canopy-mark.svg
+        if [ "$DRY_RUN" -eq 0 ] && command -v gtk-update-icon-cache >/dev/null 2>&1; then
+            gtk-update-icon-cache -q -t /usr/local/share/icons/hicolor 2>/dev/null || true
+        fi
+        if [ "$DRY_RUN" -eq 0 ] && command -v update-desktop-database >/dev/null 2>&1; then
+            update-desktop-database /usr/local/share/applications 2>/dev/null || true
+        fi
+        if [ "$DRY_RUN" -eq 0 ] && command -v fc-cache >/dev/null 2>&1; then
+            fc-cache -f /usr/local/share/fonts/canopy >/dev/null 2>&1 || true
+        fi
     else
         run mkdir -p "$HOME/.local/bin" "$XDG_DATA_HOME/wayland-sessions"
         run install -m755 "$PROJECT_DIR/scripts/canopy-session" "$HOME/.local/bin/canopy-session"
@@ -382,6 +419,15 @@ install_helpers() {
         for u in canopy-update.service canopy-update.timer; do
             run cp -f "$PROJECT_DIR/config/systemd/user/$u" "$XDG_CONFIG_HOME/systemd/user/$u"
         done
+        # Copying a timer without enabling it is how update checks silently
+        # never run. As root there is no user session to load it into, so the
+        # command is only attempted for a user install.
+        if [ "$is_system" -eq 0 ] && command -v systemctl >/dev/null 2>&1; then
+            systemctl --user daemon-reload >/dev/null 2>&1 || true
+            systemctl --user enable --now canopy-update.timer >/dev/null 2>&1 \
+                && say "update timer enabled (canopy-update.timer)" \
+                || say "note: enable the update check with: systemctl --user enable --now canopy-update.timer"
+        fi
     fi
     if [ -f "$PROJECT_DIR/assets/canopy-update.desktop" ]; then
         run mkdir -p "$XDG_DATA_HOME/applications"
@@ -397,6 +443,54 @@ install_helpers() {
     done
 }
 
+# ----------------------------------------------------------------- verify ----
+# "Installed" should be checkable, not assumed. Every component the shell needs
+# at runtime is listed here, so a half-install (missing icon theme, missing
+# config seed, missing greeter assets) shows up here instead of as a blank
+# panel or a stock palette later.
+verify_install() {
+    [ "$DRY_RUN" -eq 1 ] && return 0
+    _fail=0
+    _check() {
+        if [ -e "$2" ]; then
+            say "  ok    $1"
+        else
+            say "  MISS  $1 ($2)"
+            _fail=$((_fail + 1))
+        fi
+    }
+
+    say ""
+    say "verifying the install:"
+    if [ "$is_system" -eq 1 ]; then
+        _check "shell binary" /usr/local/bin/canopy
+        _check "runtime assets" /usr/local/share/canopy/assets
+        _check "session entry" /usr/local/share/wayland-sessions/canopy.desktop
+        _check "session launcher" /usr/local/bin/canopy-session
+        _check "default config" /usr/local/share/canopy/config.toml
+        _check "desktop entry" /usr/local/share/applications/dev.canopy.Canopy.desktop
+        _check "portal config" /usr/local/share/xdg-desktop-portal/canopy-portals.conf
+        _check "window theme" /usr/share/themes/canopy
+        _check "icon font" /usr/local/share/canopy/assets/fonts/canopy-tabler.ttf
+        _check "wallpaper" /usr/local/share/backgrounds/canopy-wallpaper.png
+        [ "$WITH_GREETER" -eq 1 ] && _check "greeter" /usr/local/bin/canopy-greeter-session
+    else
+        _check "shell binary" "$HOME/.local/bin/canopy"
+        _check "runtime assets" "$XDG_DATA_HOME/canopy/assets"
+        _check "session launcher" "$HOME/.local/bin/canopy-session"
+        _check "user config" "$XDG_CONFIG_HOME/canopy/config.toml"
+        _check "labwc rc.xml" "$XDG_CONFIG_HOME/labwc/rc.xml"
+        _check "icon theme alias" "$XDG_DATA_HOME/icons/canopy/index.theme"
+        _check "theme" "$XDG_DATA_HOME/themes/canopy"
+        _check "fonts" "$XDG_DATA_HOME/fonts/canopy/SpaceGrotesk-Regular.ttf"
+    fi
+    if [ "$_fail" -gt 0 ]; then
+        say "  $_fail component(s) missing - re-run this installer"
+    else
+        say "  all components present"
+    fi
+}
+
 install_binary
 install_session
 install_helpers
@@ -407,6 +501,7 @@ seed_toolkits
 seed_assets
 seed_icon_theme
 ensure_dependencies
+verify_install
 
 say ""
 if [ "$is_system" -eq 1 ]; then

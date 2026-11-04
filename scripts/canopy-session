@@ -79,6 +79,29 @@ if [ -n "$NESTED" ]; then
     exec labwc -S 'canopy' -t 'Canopy (nested)'
 fi
 
+# ------------------------------------------------------------ first login ----
+# A system install (sudo) cannot write into the user's home, so the Canopy
+# defaults are installed to /usr/local/share/canopy/config.toml and
+# /etc/xdg/canopy/config.toml. Nobody's config.toml means the shell would fall
+# back to its built-in palette and layout - i.e. it would not look like Canopy
+# at all. Seed the user copy once, then never touch it again.
+CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}"
+if [ ! -f "$CONFIG_HOME/canopy/config.toml" ]; then
+    for candidate in \
+        /etc/xdg/canopy/config.toml \
+        /usr/local/share/canopy/config.toml \
+        /usr/share/canopy/config.toml
+    do
+        if [ -f "$candidate" ]; then
+            mkdir -p "$CONFIG_HOME/canopy"
+            cp "$candidate" "$CONFIG_HOME/canopy/config.toml"
+            printf 'canopy-session: seeded %s from %s\n' \
+                "$CONFIG_HOME/canopy/config.toml" "$candidate"
+            break
+        fi
+    done
+fi
+
 # Session: labwc runs ~/.config/labwc/autostart, which starts the shell. When
 # that file is missing or does not mention canopy, pass the shell as the startup
 # command instead - passing both would run two shells, which is exactly what
