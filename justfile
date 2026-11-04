@@ -22,7 +22,7 @@ configure m=mode install_prefix=prefix:
     ln -sfn "build-{{m}}/compile_commands.json" compile_commands.json
 
 build m=mode: (_ensure-configured m)
-    meson compile -C build-{{m}} noctalia
+    meson compile -C build-{{m}} canopy
 
 _ensure-configured m=mode:
     #!/usr/bin/env bash
@@ -42,7 +42,7 @@ _ensure-configured m=mode:
     fi
 
 run m=mode: (build m)
-    ./build-{{m}}/noctalia
+    ./build-{{m}}/canopy
 
 # Build and run the unit tests, enabling their targets when auto mode omits them.
 test m=mode *args: (_ensure-configured m)
@@ -60,8 +60,8 @@ test-workflows:
 install m:
     #!/usr/bin/env bash
     set -euo pipefail
-    if [[ ! -x "build-{{m}}/noctalia" ]]; then
-        echo "error: build-{{m}}/noctalia is missing; run 'just build {{m}}' before installing" >&2
+    if [[ ! -x "build-{{m}}/canopy" ]]; then
+        echo "error: build-{{m}}/canopy is missing; run 'just build {{m}}' before installing" >&2
         exit 1
     fi
     meson install --no-rebuild -C build-{{m}}

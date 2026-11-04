@@ -183,7 +183,7 @@ void LocationService::startGeolocate() {
   const auto path = transportCacheDir() / "geolocate.json";
   const std::uint64_t serial = ++m_requestSerial;
   m_requestKind = RequestKind::Geolocate;
-  m_httpClient.download("https://api.noctalia.dev/geolocate", path, [this, path, serial](bool success) {
+  m_httpClient.download("https://api.canopy.dev/geolocate", path, [this, path, serial](bool success) {
     handleResponse(path, true, success, serial);
   });
 }
@@ -192,7 +192,7 @@ void LocationService::startAddressGeocode() {
   std::error_code ec;
   std::filesystem::create_directories(transportCacheDir(), ec);
   const auto path = transportCacheDir() / "geocode.json";
-  const std::string url = "https://api.noctalia.dev/geocode?city=" + StringUtils::urlEncode(m_config.address);
+  const std::string url = "https://api.canopy.dev/geocode?city=" + StringUtils::urlEncode(m_config.address);
   const std::uint64_t serial = ++m_requestSerial;
   m_requestKind = RequestKind::GeocodeAddress;
   m_httpClient.download(url, path, [this, path, serial](bool success) {
@@ -285,17 +285,17 @@ bool LocationService::coordinatesValid(double latitude, double longitude) noexce
 }
 
 std::filesystem::path LocationService::transportCacheDir() {
-  return std::filesystem::path("/tmp") / "noctalia-location";
+  return std::filesystem::path("/tmp") / "canopy-location";
 }
 
 std::filesystem::path LocationService::stateCacheFilePath() {
   if (const char* xdg = std::getenv("XDG_CACHE_HOME"); xdg != nullptr && xdg[0] != '\0') {
-    return std::filesystem::path(xdg) / "noctalia" / "location.json";
+    return std::filesystem::path(xdg) / "canopy" / "location.json";
   }
   if (const char* home = std::getenv("HOME"); home != nullptr && home[0] != '\0') {
-    return std::filesystem::path(home) / ".cache" / "noctalia" / "location.json";
+    return std::filesystem::path(home) / ".cache" / "canopy" / "location.json";
   }
-  return std::filesystem::path("/tmp") / "noctalia-location-cache.json";
+  return std::filesystem::path("/tmp") / "canopy-location-cache.json";
 }
 
 std::string LocationService::compactLocationLabel(const std::string& name, const std::string& country) {

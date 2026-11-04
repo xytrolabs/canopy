@@ -78,39 +78,39 @@ expect_config() {
 }
 
 expect reporter \
-  'files = ["noctalia.toml"] # []' \
+  'files = ["canopy.toml"] # []' \
   '[include.optional]' \
-  'files = ["noctalia.toml"] # []'
+  'files = ["canopy.toml"] # []'
 
 expect control_nocomment \
-  'files = ["noctalia.toml"]' \
+  'files = ["canopy.toml"]' \
   '[include.optional]' \
-  'files = ["noctalia.toml"]'
+  'files = ["canopy.toml"]'
 
 expect control_comment \
-  'files = ["noctalia.toml"] # keep this' \
+  'files = ["canopy.toml"] # keep this' \
   '[include.optional]' \
-  'files = ["noctalia.toml"] # keep this'
+  'files = ["canopy.toml"] # keep this'
 
 expect user_comment \
-  'files = ["user.toml", "noctalia.toml"] # []' \
+  'files = ["user.toml", "canopy.toml"] # []' \
   '[include.optional]' \
   'files = ["user.toml"] # []'
 
 expect multiline \
-  $'files = [\n  "user.toml",\n  "noctalia.toml",\n]' \
+  $'files = [\n  "user.toml",\n  "canopy.toml",\n]' \
   '[include.optional]' \
   'files = [' \
   '  "user.toml",' \
   ']'
 
 expect quoted_hash \
-  'files = ["a#b.toml", "noctalia.toml"]' \
+  'files = ["a#b.toml", "canopy.toml"]' \
   '[include.optional]' \
   'files = ["a#b.toml"]'
 
 expect quoted_close \
-  'files = ["a]b.toml", "noctalia.toml"]' \
+  'files = ["a]b.toml", "canopy.toml"]' \
   '[include.optional]' \
   'files = ["a]b.toml"]'
 
@@ -120,14 +120,14 @@ expect_error scalar_bracket_comment \
   'files = "user.toml" # [a]'
 
 expect_config legacy_migration \
-  $'[include]\nfiles = ["user.toml"]\n\n[include.optional]\nfiles = ["noctalia.toml"]' \
+  $'[include]\nfiles = ["user.toml"]\n\n[include.optional]\nfiles = ["canopy.toml"]' \
   '[include]' \
-  'files = ["user.toml", "noctalia.toml"]'
+  'files = ["user.toml", "canopy.toml"]'
 
 expect_config legacy_with_optional \
-  $'[include]\nfiles = ["required.toml"]\n\n[include.optional]\nfiles = ["optional.toml", "noctalia.toml"]' \
+  $'[include]\nfiles = ["required.toml"]\n\n[include.optional]\nfiles = ["optional.toml", "canopy.toml"]' \
   '[include]' \
-  'files = ["required.toml", "noctalia.toml"]' \
+  'files = ["required.toml", "canopy.toml"]' \
   '' \
   '[include.optional]' \
   'files = ["optional.toml"]'

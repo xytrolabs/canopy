@@ -42,7 +42,7 @@ namespace {
   constexpr auto kPropertiesInterface = "org.freedesktop.DBus.Properties";
   constexpr auto kMprisRootInterface = "org.mpris.MediaPlayer2";
   constexpr auto kMprisPlayerInterface = "org.mpris.MediaPlayer2.Player";
-  constexpr auto kNoctaliaMprisInterface = "dev.noctalia.Mpris";
+  constexpr auto kNoctaliaMprisInterface = "dev.canopy.Mpris";
   constexpr auto kPropertiesDebounceWindow = std::chrono::milliseconds{120};
   constexpr float kMediaVolumeStepDefault = 0.05F;
   constexpr auto kVolumeHoldWindow = std::chrono::milliseconds{800};
@@ -58,7 +58,7 @@ namespace {
   const sdbus::ServiceName kDbusName{"org.freedesktop.DBus"};
   const sdbus::ObjectPath kDbusPath{"/org/freedesktop/DBus"};
   const sdbus::ObjectPath kMprisPath{"/org/mpris/MediaPlayer2"};
-  const sdbus::ServiceName kNoctaliaMprisBusName{"dev.noctalia.Mpris"};
+  const sdbus::ServiceName kNoctaliaMprisBusName{"dev.canopy.Mpris"};
   const sdbus::ObjectPath kNoctaliaMprisObjectPath{"/dev/noctalia/Mpris"};
 
   bool is_mpris_bus_name(std::string_view name) { return name.starts_with("org.mpris.MediaPlayer2."); }
@@ -2498,17 +2498,17 @@ void MprisService::dismissPlayer(const std::string& busName) {
 
 bool MprisService::onPlayPausePlayer(const std::string& busName) {
   if (busName.empty()) {
-    throw sdbus::Error(sdbus::Error::Name{"dev.noctalia.Mpris.Error.InvalidArgs"}, "player_bus_name must not be empty");
+    throw sdbus::Error(sdbus::Error::Name{"dev.canopy.Mpris.Error.InvalidArgs"}, "player_bus_name must not be empty");
   }
 
   if (!m_players.contains(busName)) {
-    throw sdbus::Error(sdbus::Error::Name{"dev.noctalia.Mpris.Error.NotFound"}, "player was not found");
+    throw sdbus::Error(sdbus::Error::Name{"dev.canopy.Mpris.Error.NotFound"}, "player was not found");
   }
 
   const bool ok = playPause(busName);
   if (!ok) {
     throw sdbus::Error(
-        sdbus::Error::Name{"dev.noctalia.Mpris.Error.NotSupported"}, "player does not support PlayPause"
+        sdbus::Error::Name{"dev.canopy.Mpris.Error.NotSupported"}, "player does not support PlayPause"
     );
   }
   return true;
@@ -2516,76 +2516,76 @@ bool MprisService::onPlayPausePlayer(const std::string& busName) {
 
 bool MprisService::onPlayPlayer(const std::string& busName) {
   if (busName.empty()) {
-    throw sdbus::Error(sdbus::Error::Name{"dev.noctalia.Mpris.Error.InvalidArgs"}, "player_bus_name must not be empty");
+    throw sdbus::Error(sdbus::Error::Name{"dev.canopy.Mpris.Error.InvalidArgs"}, "player_bus_name must not be empty");
   }
   if (!m_players.contains(busName)) {
-    throw sdbus::Error(sdbus::Error::Name{"dev.noctalia.Mpris.Error.NotFound"}, "player was not found");
+    throw sdbus::Error(sdbus::Error::Name{"dev.canopy.Mpris.Error.NotFound"}, "player was not found");
   }
   const bool ok = play(busName);
   if (!ok) {
-    throw sdbus::Error(sdbus::Error::Name{"dev.noctalia.Mpris.Error.NotSupported"}, "player does not support Play");
+    throw sdbus::Error(sdbus::Error::Name{"dev.canopy.Mpris.Error.NotSupported"}, "player does not support Play");
   }
   return true;
 }
 
 bool MprisService::onPausePlayer(const std::string& busName) {
   if (busName.empty()) {
-    throw sdbus::Error(sdbus::Error::Name{"dev.noctalia.Mpris.Error.InvalidArgs"}, "player_bus_name must not be empty");
+    throw sdbus::Error(sdbus::Error::Name{"dev.canopy.Mpris.Error.InvalidArgs"}, "player_bus_name must not be empty");
   }
   if (!m_players.contains(busName)) {
-    throw sdbus::Error(sdbus::Error::Name{"dev.noctalia.Mpris.Error.NotFound"}, "player was not found");
+    throw sdbus::Error(sdbus::Error::Name{"dev.canopy.Mpris.Error.NotFound"}, "player was not found");
   }
   const bool ok = pause(busName);
   if (!ok) {
-    throw sdbus::Error(sdbus::Error::Name{"dev.noctalia.Mpris.Error.NotSupported"}, "player does not support Pause");
+    throw sdbus::Error(sdbus::Error::Name{"dev.canopy.Mpris.Error.NotSupported"}, "player does not support Pause");
   }
   return true;
 }
 
 bool MprisService::onStopPlayer(const std::string& busName) {
   if (busName.empty()) {
-    throw sdbus::Error(sdbus::Error::Name{"dev.noctalia.Mpris.Error.InvalidArgs"}, "player_bus_name must not be empty");
+    throw sdbus::Error(sdbus::Error::Name{"dev.canopy.Mpris.Error.InvalidArgs"}, "player_bus_name must not be empty");
   }
 
   if (!m_players.contains(busName)) {
-    throw sdbus::Error(sdbus::Error::Name{"dev.noctalia.Mpris.Error.NotFound"}, "player was not found");
+    throw sdbus::Error(sdbus::Error::Name{"dev.canopy.Mpris.Error.NotFound"}, "player was not found");
   }
 
   const bool ok = stop(busName);
   if (!ok) {
-    throw sdbus::Error(sdbus::Error::Name{"dev.noctalia.Mpris.Error.NotSupported"}, "player does not support Stop");
+    throw sdbus::Error(sdbus::Error::Name{"dev.canopy.Mpris.Error.NotSupported"}, "player does not support Stop");
   }
   return true;
 }
 
 bool MprisService::onNextPlayer(const std::string& busName) {
   if (busName.empty()) {
-    throw sdbus::Error(sdbus::Error::Name{"dev.noctalia.Mpris.Error.InvalidArgs"}, "player_bus_name must not be empty");
+    throw sdbus::Error(sdbus::Error::Name{"dev.canopy.Mpris.Error.InvalidArgs"}, "player_bus_name must not be empty");
   }
 
   if (!m_players.contains(busName)) {
-    throw sdbus::Error(sdbus::Error::Name{"dev.noctalia.Mpris.Error.NotFound"}, "player was not found");
+    throw sdbus::Error(sdbus::Error::Name{"dev.canopy.Mpris.Error.NotFound"}, "player was not found");
   }
 
   const bool ok = next(busName);
   if (!ok) {
-    throw sdbus::Error(sdbus::Error::Name{"dev.noctalia.Mpris.Error.NotSupported"}, "player does not support Next");
+    throw sdbus::Error(sdbus::Error::Name{"dev.canopy.Mpris.Error.NotSupported"}, "player does not support Next");
   }
   return true;
 }
 
 bool MprisService::onPreviousPlayer(const std::string& busName) {
   if (busName.empty()) {
-    throw sdbus::Error(sdbus::Error::Name{"dev.noctalia.Mpris.Error.InvalidArgs"}, "player_bus_name must not be empty");
+    throw sdbus::Error(sdbus::Error::Name{"dev.canopy.Mpris.Error.InvalidArgs"}, "player_bus_name must not be empty");
   }
 
   if (!m_players.contains(busName)) {
-    throw sdbus::Error(sdbus::Error::Name{"dev.noctalia.Mpris.Error.NotFound"}, "player was not found");
+    throw sdbus::Error(sdbus::Error::Name{"dev.canopy.Mpris.Error.NotFound"}, "player was not found");
   }
 
   const bool ok = previous(busName);
   if (!ok) {
-    throw sdbus::Error(sdbus::Error::Name{"dev.noctalia.Mpris.Error.NotSupported"}, "player does not support Previous");
+    throw sdbus::Error(sdbus::Error::Name{"dev.canopy.Mpris.Error.NotSupported"}, "player does not support Previous");
   }
   return true;
 }
@@ -2593,7 +2593,7 @@ bool MprisService::onPreviousPlayer(const std::string& busName) {
 bool MprisService::onPlayPauseActive() {
   const auto active = chooseActivePlayer();
   if (!active.has_value()) {
-    throw sdbus::Error(sdbus::Error::Name{"dev.noctalia.Mpris.Error.NotFound"}, "no active player available");
+    throw sdbus::Error(sdbus::Error::Name{"dev.canopy.Mpris.Error.NotFound"}, "no active player available");
   }
   return onPlayPausePlayer(*active);
 }
@@ -2601,7 +2601,7 @@ bool MprisService::onPlayPauseActive() {
 bool MprisService::onPlayActive() {
   const auto active = chooseActivePlayer();
   if (!active.has_value()) {
-    throw sdbus::Error(sdbus::Error::Name{"dev.noctalia.Mpris.Error.NotFound"}, "no active player available");
+    throw sdbus::Error(sdbus::Error::Name{"dev.canopy.Mpris.Error.NotFound"}, "no active player available");
   }
   return onPlayPlayer(*active);
 }
@@ -2609,7 +2609,7 @@ bool MprisService::onPlayActive() {
 bool MprisService::onPauseActive() {
   const auto active = chooseActivePlayer();
   if (!active.has_value()) {
-    throw sdbus::Error(sdbus::Error::Name{"dev.noctalia.Mpris.Error.NotFound"}, "no active player available");
+    throw sdbus::Error(sdbus::Error::Name{"dev.canopy.Mpris.Error.NotFound"}, "no active player available");
   }
   return onPausePlayer(*active);
 }
@@ -2617,7 +2617,7 @@ bool MprisService::onPauseActive() {
 bool MprisService::onStopActive() {
   const auto active = chooseActivePlayer();
   if (!active.has_value()) {
-    throw sdbus::Error(sdbus::Error::Name{"dev.noctalia.Mpris.Error.NotFound"}, "no active player available");
+    throw sdbus::Error(sdbus::Error::Name{"dev.canopy.Mpris.Error.NotFound"}, "no active player available");
   }
   return onStopPlayer(*active);
 }
@@ -2625,7 +2625,7 @@ bool MprisService::onStopActive() {
 bool MprisService::onNextActive() {
   const auto active = chooseActivePlayer();
   if (!active.has_value()) {
-    throw sdbus::Error(sdbus::Error::Name{"dev.noctalia.Mpris.Error.NotFound"}, "no active player available");
+    throw sdbus::Error(sdbus::Error::Name{"dev.canopy.Mpris.Error.NotFound"}, "no active player available");
   }
   return onNextPlayer(*active);
 }
@@ -2633,22 +2633,22 @@ bool MprisService::onNextActive() {
 bool MprisService::onPreviousActive() {
   const auto active = chooseActivePlayer();
   if (!active.has_value()) {
-    throw sdbus::Error(sdbus::Error::Name{"dev.noctalia.Mpris.Error.NotFound"}, "no active player available");
+    throw sdbus::Error(sdbus::Error::Name{"dev.canopy.Mpris.Error.NotFound"}, "no active player available");
   }
   return onPreviousPlayer(*active);
 }
 
 bool MprisService::onSeekPlayer(const std::string& busName, int64_t offsetUs) {
   if (busName.empty()) {
-    throw sdbus::Error(sdbus::Error::Name{"dev.noctalia.Mpris.Error.InvalidArgs"}, "player_bus_name must not be empty");
+    throw sdbus::Error(sdbus::Error::Name{"dev.canopy.Mpris.Error.InvalidArgs"}, "player_bus_name must not be empty");
   }
 
   if (!m_players.contains(busName)) {
-    throw sdbus::Error(sdbus::Error::Name{"dev.noctalia.Mpris.Error.NotFound"}, "player was not found");
+    throw sdbus::Error(sdbus::Error::Name{"dev.canopy.Mpris.Error.NotFound"}, "player was not found");
   }
 
   if (!seek(busName, offsetUs)) {
-    throw sdbus::Error(sdbus::Error::Name{"dev.noctalia.Mpris.Error.NotSupported"}, "player does not support Seek");
+    throw sdbus::Error(sdbus::Error::Name{"dev.canopy.Mpris.Error.NotSupported"}, "player does not support Seek");
   }
   return true;
 }
@@ -2656,23 +2656,23 @@ bool MprisService::onSeekPlayer(const std::string& busName, int64_t offsetUs) {
 bool MprisService::onSeekActive(int64_t offsetUs) {
   const auto active = chooseActivePlayer();
   if (!active.has_value()) {
-    throw sdbus::Error(sdbus::Error::Name{"dev.noctalia.Mpris.Error.NotFound"}, "no active player available");
+    throw sdbus::Error(sdbus::Error::Name{"dev.canopy.Mpris.Error.NotFound"}, "no active player available");
   }
   return onSeekPlayer(*active, offsetUs);
 }
 
 bool MprisService::onSetPositionPlayer(const std::string& busName, int64_t positionUs) {
   if (busName.empty()) {
-    throw sdbus::Error(sdbus::Error::Name{"dev.noctalia.Mpris.Error.InvalidArgs"}, "player_bus_name must not be empty");
+    throw sdbus::Error(sdbus::Error::Name{"dev.canopy.Mpris.Error.InvalidArgs"}, "player_bus_name must not be empty");
   }
 
   if (!m_players.contains(busName)) {
-    throw sdbus::Error(sdbus::Error::Name{"dev.noctalia.Mpris.Error.NotFound"}, "player was not found");
+    throw sdbus::Error(sdbus::Error::Name{"dev.canopy.Mpris.Error.NotFound"}, "player was not found");
   }
 
   if (!setPosition(busName, positionUs)) {
     throw sdbus::Error(
-        sdbus::Error::Name{"dev.noctalia.Mpris.Error.NotSupported"}, "player does not support SetPosition"
+        sdbus::Error::Name{"dev.canopy.Mpris.Error.NotSupported"}, "player does not support SetPosition"
     );
   }
   return true;
@@ -2681,19 +2681,19 @@ bool MprisService::onSetPositionPlayer(const std::string& busName, int64_t posit
 bool MprisService::onSetPositionActive(int64_t positionUs) {
   const auto active = chooseActivePlayer();
   if (!active.has_value()) {
-    throw sdbus::Error(sdbus::Error::Name{"dev.noctalia.Mpris.Error.NotFound"}, "no active player available");
+    throw sdbus::Error(sdbus::Error::Name{"dev.canopy.Mpris.Error.NotFound"}, "no active player available");
   }
   return onSetPositionPlayer(*active, positionUs);
 }
 
 int64_t MprisService::onGetPositionPlayer(const std::string& busName) const {
   if (busName.empty()) {
-    throw sdbus::Error(sdbus::Error::Name{"dev.noctalia.Mpris.Error.InvalidArgs"}, "player_bus_name must not be empty");
+    throw sdbus::Error(sdbus::Error::Name{"dev.canopy.Mpris.Error.InvalidArgs"}, "player_bus_name must not be empty");
   }
 
   const auto pos = position(busName);
   if (!pos.has_value()) {
-    throw sdbus::Error(sdbus::Error::Name{"dev.noctalia.Mpris.Error.NotFound"}, "player was not found");
+    throw sdbus::Error(sdbus::Error::Name{"dev.canopy.Mpris.Error.NotFound"}, "player was not found");
   }
   return *pos;
 }
@@ -2701,19 +2701,19 @@ int64_t MprisService::onGetPositionPlayer(const std::string& busName) const {
 int64_t MprisService::onGetPositionActive() const {
   const auto pos = positionActive();
   if (!pos.has_value()) {
-    throw sdbus::Error(sdbus::Error::Name{"dev.noctalia.Mpris.Error.NotFound"}, "no active player available");
+    throw sdbus::Error(sdbus::Error::Name{"dev.canopy.Mpris.Error.NotFound"}, "no active player available");
   }
   return *pos;
 }
 
 double MprisService::onGetVolumePlayer(const std::string& busName) const {
   if (busName.empty()) {
-    throw sdbus::Error(sdbus::Error::Name{"dev.noctalia.Mpris.Error.InvalidArgs"}, "player_bus_name must not be empty");
+    throw sdbus::Error(sdbus::Error::Name{"dev.canopy.Mpris.Error.InvalidArgs"}, "player_bus_name must not be empty");
   }
 
   const auto currentVolume = volume(busName);
   if (!currentVolume.has_value()) {
-    throw sdbus::Error(sdbus::Error::Name{"dev.noctalia.Mpris.Error.NotFound"}, "player was not found");
+    throw sdbus::Error(sdbus::Error::Name{"dev.canopy.Mpris.Error.NotFound"}, "player was not found");
   }
   return *currentVolume;
 }
@@ -2721,29 +2721,29 @@ double MprisService::onGetVolumePlayer(const std::string& busName) const {
 double MprisService::onGetVolumeActive() const {
   const auto currentVolume = volumeActive();
   if (!currentVolume.has_value()) {
-    throw sdbus::Error(sdbus::Error::Name{"dev.noctalia.Mpris.Error.NotFound"}, "no active player available");
+    throw sdbus::Error(sdbus::Error::Name{"dev.canopy.Mpris.Error.NotFound"}, "no active player available");
   }
   return *currentVolume;
 }
 
 bool MprisService::onSetVolumePlayer(const std::string& busName, double volume) {
   if (busName.empty()) {
-    throw sdbus::Error(sdbus::Error::Name{"dev.noctalia.Mpris.Error.InvalidArgs"}, "player_bus_name must not be empty");
+    throw sdbus::Error(sdbus::Error::Name{"dev.canopy.Mpris.Error.InvalidArgs"}, "player_bus_name must not be empty");
   }
 
   if (!std::isfinite(volume) || volume < 0.0) {
     throw sdbus::Error(
-        sdbus::Error::Name{"dev.noctalia.Mpris.Error.InvalidArgs"}, "volume must be a finite non-negative number"
+        sdbus::Error::Name{"dev.canopy.Mpris.Error.InvalidArgs"}, "volume must be a finite non-negative number"
     );
   }
 
   if (!m_players.contains(busName)) {
-    throw sdbus::Error(sdbus::Error::Name{"dev.noctalia.Mpris.Error.NotFound"}, "player was not found");
+    throw sdbus::Error(sdbus::Error::Name{"dev.canopy.Mpris.Error.NotFound"}, "player was not found");
   }
 
   if (!setVolume(busName, volume)) {
     throw sdbus::Error(
-        sdbus::Error::Name{"dev.noctalia.Mpris.Error.NotSupported"}, "player does not support Volume updates"
+        sdbus::Error::Name{"dev.canopy.Mpris.Error.NotSupported"}, "player does not support Volume updates"
     );
   }
   return true;
@@ -2752,19 +2752,19 @@ bool MprisService::onSetVolumePlayer(const std::string& busName, double volume) 
 bool MprisService::onSetVolumeActive(double volume) {
   const auto active = chooseActivePlayer();
   if (!active.has_value()) {
-    throw sdbus::Error(sdbus::Error::Name{"dev.noctalia.Mpris.Error.NotFound"}, "no active player available");
+    throw sdbus::Error(sdbus::Error::Name{"dev.canopy.Mpris.Error.NotFound"}, "no active player available");
   }
   return onSetVolumePlayer(*active, volume);
 }
 
 bool MprisService::onGetShufflePlayer(const std::string& busName) const {
   if (busName.empty()) {
-    throw sdbus::Error(sdbus::Error::Name{"dev.noctalia.Mpris.Error.InvalidArgs"}, "player_bus_name must not be empty");
+    throw sdbus::Error(sdbus::Error::Name{"dev.canopy.Mpris.Error.InvalidArgs"}, "player_bus_name must not be empty");
   }
 
   const auto currentShuffle = shuffle(busName);
   if (!currentShuffle.has_value()) {
-    throw sdbus::Error(sdbus::Error::Name{"dev.noctalia.Mpris.Error.NotFound"}, "player was not found");
+    throw sdbus::Error(sdbus::Error::Name{"dev.canopy.Mpris.Error.NotFound"}, "player was not found");
   }
   return *currentShuffle;
 }
@@ -2772,23 +2772,23 @@ bool MprisService::onGetShufflePlayer(const std::string& busName) const {
 bool MprisService::onGetShuffleActive() const {
   const auto currentShuffle = shuffleActive();
   if (!currentShuffle.has_value()) {
-    throw sdbus::Error(sdbus::Error::Name{"dev.noctalia.Mpris.Error.NotFound"}, "no active player available");
+    throw sdbus::Error(sdbus::Error::Name{"dev.canopy.Mpris.Error.NotFound"}, "no active player available");
   }
   return *currentShuffle;
 }
 
 bool MprisService::onSetShufflePlayer(const std::string& busName, bool shuffle) {
   if (busName.empty()) {
-    throw sdbus::Error(sdbus::Error::Name{"dev.noctalia.Mpris.Error.InvalidArgs"}, "player_bus_name must not be empty");
+    throw sdbus::Error(sdbus::Error::Name{"dev.canopy.Mpris.Error.InvalidArgs"}, "player_bus_name must not be empty");
   }
 
   if (!m_players.contains(busName)) {
-    throw sdbus::Error(sdbus::Error::Name{"dev.noctalia.Mpris.Error.NotFound"}, "player was not found");
+    throw sdbus::Error(sdbus::Error::Name{"dev.canopy.Mpris.Error.NotFound"}, "player was not found");
   }
 
   if (!setShuffle(busName, shuffle)) {
     throw sdbus::Error(
-        sdbus::Error::Name{"dev.noctalia.Mpris.Error.NotSupported"}, "player does not support Shuffle updates"
+        sdbus::Error::Name{"dev.canopy.Mpris.Error.NotSupported"}, "player does not support Shuffle updates"
     );
   }
   return true;
@@ -2797,19 +2797,19 @@ bool MprisService::onSetShufflePlayer(const std::string& busName, bool shuffle) 
 bool MprisService::onSetShuffleActive(bool shuffle) {
   const auto active = chooseActivePlayer();
   if (!active.has_value()) {
-    throw sdbus::Error(sdbus::Error::Name{"dev.noctalia.Mpris.Error.NotFound"}, "no active player available");
+    throw sdbus::Error(sdbus::Error::Name{"dev.canopy.Mpris.Error.NotFound"}, "no active player available");
   }
   return onSetShufflePlayer(*active, shuffle);
 }
 
 std::string MprisService::onGetLoopStatusPlayer(const std::string& busName) const {
   if (busName.empty()) {
-    throw sdbus::Error(sdbus::Error::Name{"dev.noctalia.Mpris.Error.InvalidArgs"}, "player_bus_name must not be empty");
+    throw sdbus::Error(sdbus::Error::Name{"dev.canopy.Mpris.Error.InvalidArgs"}, "player_bus_name must not be empty");
   }
 
   const auto currentLoopStatus = loopStatus(busName);
   if (!currentLoopStatus.has_value()) {
-    throw sdbus::Error(sdbus::Error::Name{"dev.noctalia.Mpris.Error.NotFound"}, "player was not found");
+    throw sdbus::Error(sdbus::Error::Name{"dev.canopy.Mpris.Error.NotFound"}, "player was not found");
   }
   return *currentLoopStatus;
 }
@@ -2817,29 +2817,29 @@ std::string MprisService::onGetLoopStatusPlayer(const std::string& busName) cons
 std::string MprisService::onGetLoopStatusActive() const {
   const auto currentLoopStatus = loopStatusActive();
   if (!currentLoopStatus.has_value()) {
-    throw sdbus::Error(sdbus::Error::Name{"dev.noctalia.Mpris.Error.NotFound"}, "no active player available");
+    throw sdbus::Error(sdbus::Error::Name{"dev.canopy.Mpris.Error.NotFound"}, "no active player available");
   }
   return *currentLoopStatus;
 }
 
 bool MprisService::onSetLoopStatusPlayer(const std::string& busName, const std::string& loopStatus) {
   if (busName.empty()) {
-    throw sdbus::Error(sdbus::Error::Name{"dev.noctalia.Mpris.Error.InvalidArgs"}, "player_bus_name must not be empty");
+    throw sdbus::Error(sdbus::Error::Name{"dev.canopy.Mpris.Error.InvalidArgs"}, "player_bus_name must not be empty");
   }
 
   if (!is_valid_loop_status(loopStatus)) {
     throw sdbus::Error(
-        sdbus::Error::Name{"dev.noctalia.Mpris.Error.InvalidArgs"}, "loop_status must be one of: None, Track, Playlist"
+        sdbus::Error::Name{"dev.canopy.Mpris.Error.InvalidArgs"}, "loop_status must be one of: None, Track, Playlist"
     );
   }
 
   if (!m_players.contains(busName)) {
-    throw sdbus::Error(sdbus::Error::Name{"dev.noctalia.Mpris.Error.NotFound"}, "player was not found");
+    throw sdbus::Error(sdbus::Error::Name{"dev.canopy.Mpris.Error.NotFound"}, "player was not found");
   }
 
   if (!setLoopStatus(busName, loopStatus)) {
     throw sdbus::Error(
-        sdbus::Error::Name{"dev.noctalia.Mpris.Error.NotSupported"}, "player does not support LoopStatus updates"
+        sdbus::Error::Name{"dev.canopy.Mpris.Error.NotSupported"}, "player does not support LoopStatus updates"
     );
   }
   return true;
@@ -2848,18 +2848,18 @@ bool MprisService::onSetLoopStatusPlayer(const std::string& busName, const std::
 bool MprisService::onSetLoopStatusActive(const std::string& loopStatus) {
   const auto active = chooseActivePlayer();
   if (!active.has_value()) {
-    throw sdbus::Error(sdbus::Error::Name{"dev.noctalia.Mpris.Error.NotFound"}, "no active player available");
+    throw sdbus::Error(sdbus::Error::Name{"dev.canopy.Mpris.Error.NotFound"}, "no active player available");
   }
   return onSetLoopStatusPlayer(*active, loopStatus);
 }
 
 bool MprisService::onSetActivePlayerPreference(const std::string& busName) {
   if (busName.empty()) {
-    throw sdbus::Error(sdbus::Error::Name{"dev.noctalia.Mpris.Error.InvalidArgs"}, "player_bus_name must not be empty");
+    throw sdbus::Error(sdbus::Error::Name{"dev.canopy.Mpris.Error.InvalidArgs"}, "player_bus_name must not be empty");
   }
 
   if (!setPinnedPlayerPreference(busName)) {
-    throw sdbus::Error(sdbus::Error::Name{"dev.noctalia.Mpris.Error.NotFound"}, "player was not found");
+    throw sdbus::Error(sdbus::Error::Name{"dev.canopy.Mpris.Error.NotFound"}, "player was not found");
   }
   return true;
 }

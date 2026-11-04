@@ -52,11 +52,11 @@ namespace {
 
 int main() {
   const auto root =
-      std::filesystem::temp_directory_path() / ("noctalia-reminder-monitor-test-" + std::to_string(::getpid()));
+      std::filesystem::temp_directory_path() / ("canopy-reminder-monitor-test-" + std::to_string(::getpid()));
   const auto configHome = root / "config";
   const auto stateHome = root / "state";
   const auto cacheHome = root / "cache";
-  const auto configDir = configHome / "noctalia";
+  const auto configDir = configHome / "canopy";
 
   std::filesystem::remove_all(root);
   std::filesystem::create_directories(configDir);

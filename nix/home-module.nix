@@ -25,23 +25,23 @@ in
   # Disable the home-manager module to avoid conflicts
   # The module got turned into a folder on 2026-09-30. Disable both old and new.
   disabledModules = [
-    "programs/noctalia.nix"
-    "programs/noctalia"
+    "programs/canopy.nix"
+    "programs/canopy"
   ];
 
   imports = [
     (lib.mkRenamedOptionModule
-      [ "programs" "noctalia" "validateConfig" ]
-      [ "programs" "noctalia" "checkConfig" ]
+      [ "programs" "canopy" "validateConfig" ]
+      [ "programs" "canopy" "checkConfig" ]
     )
   ];
 
-  options.programs.noctalia = {
+  options.programs.canopy = {
     enable = lib.mkEnableOption "noctalia, a lightweight Wayland shell and bar";
 
-    systemd.enable = lib.mkEnableOption "a systemd user service for noctalia";
+    systemd.enable = lib.mkEnableOption "a systemd user service for canopy";
 
-    package = lib.mkPackageOption pkgs "noctalia" { nullable = true; };
+    package = lib.mkPackageOption pkgs "canopy" { nullable = true; };
 
     checkConfig = lib.mkOption {
       type = lib.types.bool;
@@ -59,12 +59,12 @@ in
         ];
       default = { };
       description = ''
-        Default settings for noctalia, Can be written as:
+        Default settings for canopy, Can be written as:
           - A Nix attrset (converted to TOML via nixpkgs' tomlFormat)
           - A raw TOML string
           - A path to a `.toml` file
 
-        See <https://docs.noctalia.dev/noctalia/configuration/> for more information and examples.
+        See <https://docs.canopy.dev/canopy/configuration/> for more information and examples.
 
         Note: these settings can still be overwritten at runtime via the settings menu.
       '';
@@ -94,22 +94,22 @@ in
       description = ''
         Custom color pallete options.
 
-        See <https://docs.noctalia.dev/noctalia/theming/palette/#custom-palette-files>.
+        See <https://docs.canopy.dev/canopy/theming/palette/#custom-palette-files>.
       '';
     };
   };
 
   config = lib.mkIf cfg.enable {
-    systemd.user.services.noctalia = lib.mkIf cfg.systemd.enable {
+    systemd.user.services.canopy = lib.mkIf cfg.systemd.enable {
       Unit = {
         Description = "Noctalia - A lightweight Wayland shell and bar";
-        Documentation = "https://docs.noctalia.dev/noctalia/";
+        Documentation = "https://docs.canopy.dev/canopy/";
         PartOf = [ config.wayland.systemd.target ];
         After = [ config.wayland.systemd.target ];
         X-Restart-Triggers =
-          lib.optional (cfg.settings != { }) "${config.xdg.configFile."noctalia/config.toml".source}"
+          lib.optional (cfg.settings != { }) "${config.xdg.configFile."canopy/config.toml".source}"
           ++ lib.mapAttrsToList (
-            name: _: "${config.xdg.configFile."noctalia/palettes/${name}.json".source}"
+            name: _: "${config.xdg.configFile."canopy/palettes/${name}.json".source}"
           ) cfg.customPalettes;
       };
 
@@ -126,12 +126,12 @@ in
     xdg = {
       configFile = lib.mkMerge [
         (lib.mkIf (cfg.settings != { }) {
-          "noctalia/config.toml".source =
+          "canopy/config.toml".source =
             let
               rawConfig = generateToml "config.toml" cfg.settings;
             in
             if cfg.checkConfig && cfg.package != null then
-              pkgs.runCommand "noctalia-config.toml" { } ''
+              pkgs.runCommand "canopy-config.toml" { } ''
                 ${lib.getExe cfg.package} config validate ${rawConfig}
                 cp ${rawConfig} $out
               ''
@@ -140,7 +140,7 @@ in
         })
         (lib.mapAttrs' (
           name: palette:
-          lib.nameValuePair "noctalia/palettes/${name}.json" {
+          lib.nameValuePair "canopy/palettes/${name}.json" {
             source = generateJson "${name}-palette.json" palette;
           }
         ) cfg.customPalettes)
@@ -150,7 +150,7 @@ in
     assertions = [
       {
         assertion = !cfg.systemd.enable || cfg.package != null;
-        message = "programs.noctalia.package cannot be null when programs.noctalia.systemd.enable is true";
+        message = "programs.canopy.package cannot be null when programs.canopy.systemd.enable is true";
       }
     ];
   };

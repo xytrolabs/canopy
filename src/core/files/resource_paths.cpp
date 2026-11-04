@@ -20,9 +20,9 @@ namespace paths {
     std::filesystem::path installedAssetsRoot() {
       const std::filesystem::path datadir(NOCTALIA_INSTALL_DATADIR);
       if (datadir.is_absolute()) {
-        return datadir / "noctalia" / "assets";
+        return datadir / "canopy" / "assets";
       }
-      return std::filesystem::path(NOCTALIA_INSTALL_PREFIX) / datadir / "noctalia" / "assets";
+      return std::filesystem::path(NOCTALIA_INSTALL_PREFIX) / datadir / "canopy" / "assets";
     }
 
     bool isAssetRoot(const std::filesystem::path& root) {
@@ -32,7 +32,7 @@ namespace paths {
 
       std::error_code ec;
       return std::filesystem::exists(root / "emoji.json", ec)
-          && std::filesystem::exists(root / "fonts" / "noctalia-tabler.ttf", ec)
+          && std::filesystem::exists(root / "fonts" / "canopy-tabler.ttf", ec)
           && std::filesystem::exists(root / "templates" / "builtin.toml", ec)
           && std::filesystem::exists(root / "translations" / "en.json", ec);
     }
@@ -76,9 +76,9 @@ namespace paths {
 
         const std::filesystem::path datadir(NOCTALIA_INSTALL_DATADIR);
         if (!datadir.empty() && !datadir.is_absolute()) {
-          appendUnique(candidates, exeDir.parent_path() / datadir / "noctalia" / "assets");
+          appendUnique(candidates, exeDir.parent_path() / datadir / "canopy" / "assets");
         }
-        appendUnique(candidates, exeDir.parent_path() / "share" / "noctalia" / "assets");
+        appendUnique(candidates, exeDir.parent_path() / "share" / "canopy" / "assets");
       }
 
       appendUnique(candidates, installedAssetsRoot());

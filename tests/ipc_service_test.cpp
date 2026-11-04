@@ -16,7 +16,7 @@
 namespace {
 
   std::filesystem::path makeTempDir() {
-    std::string pattern = (std::filesystem::temp_directory_path() / "noctalia-ipc-service-XXXXXX").string();
+    std::string pattern = (std::filesystem::temp_directory_path() / "canopy-ipc-service-XXXXXX").string();
     std::vector<char> buffer(pattern.begin(), pattern.end());
     buffer.push_back('\0');
     char* result = ::mkdtemp(buffer.data());
@@ -70,7 +70,7 @@ namespace {
 int main() {
   const auto runtimeDir = makeTempDir();
   TEST_CHECK(!runtimeDir.empty());
-  constexpr const char* kWaylandDisplay = "noctalia-ipc-service-test";
+  constexpr const char* kWaylandDisplay = "canopy-ipc-service-test";
   TEST_CHECK(::setenv("XDG_RUNTIME_DIR", runtimeDir.c_str(), 1) == 0);
   TEST_CHECK(::setenv("WAYLAND_DISPLAY", kWaylandDisplay, 1) == 0);
 
@@ -184,7 +184,7 @@ int main() {
   TEST_CHECK(updatedHelp.contains("Toggle a panel by id"));
 
   TEST_CHECK(ipc.start());
-  const auto socketPath = runtimeDir / ("noctalia-" + std::string(kWaylandDisplay) + ".sock");
+  const auto socketPath = runtimeDir / ("canopy-" + std::string(kWaylandDisplay) + ".sock");
   TEST_CHECK(sendRaw(ipc, socketPath, "status line1\nline2\nline3") == "status:line1\nline2\nline3\n");
   return 0;
 }

@@ -3,7 +3,7 @@ set -euo pipefail
 
 kitty_config_dir="${XDG_CONFIG_HOME:-$HOME/.config}/kitty"
 config_file="$kitty_config_dir/kitty.conf"
-theme_file="$kitty_config_dir/themes/noctalia.conf"
+theme_file="$kitty_config_dir/themes/canopy.conf"
 include_line='include themes/noctalia.conf'
 
 # kitty loads only the first kitty.conf it finds, so a new user file would hide one in XDG_CONFIG_DIRS.

@@ -49,7 +49,7 @@ noctalia msg plugins source remove my-repo
 
 The built-in `official` and `community` sources can be updated and enabled or disabled in Settings, but are protected from removal in Settings and IPC. Custom git/path sources are removable. **Auto-update plugins** is a dropdown that controls the global `[plugins].auto_update` mode: **All sources** (default), **Official only**, or **None**.
 
-Enabling a plugin makes its entries available. Its **bar widget** then shows up in the Add-widget picker - add a widget instance just like any built-in widget (or configure one by hand with `type = "<author>/<plugin>:<entry>"`). A **control-center shortcut** is added from the control-center shortcuts settings, like any other shortcut. A **panel** opens with `noctalia msg panel-toggle <author>/<plugin>:<entry>` (or from a bar widget that runs the same command). Panel **placement** (attached/floating, screen position, open-near-click) is configured per panel entry under **Settings → Plugins**, same as built-in shell panels.
+Enabling a plugin makes its entries available. Its **bar widget** then shows up in the Add-widget picker - add a widget instance just like any built-in widget (or configure one by hand with `type = "<author>/<plugin>:<entry>"`). A **control-center shortcut** is added from the control-center shortcuts settings, like any other shortcut. A **panel** opens with `canopy msg panel-toggle <author>/<plugin>:<entry>` (or from a bar widget that runs the same command). Panel **placement** (attached/floating, screen position, open-near-click) is configured per panel entry under **Settings → Plugins**, same as built-in shell panels.
 
 ## Configuration
 
@@ -58,14 +58,14 @@ Plugin state lives under `[plugins]`. The `enabled` list and the sources are use
 ```toml
 [plugins]
 # Fully-qualified ids ("<author>/<plugin>") that are active.
-enabled = ["noctalia/screen_recorder"]
+enabled = ["canopy/screen_recorder"]
 auto_update = "all" # "all" | "official" | "none"; background git updates on startup and every 6 hours
 
 # A git source: cached and updated by Noctalia.
 [[plugins.source]]
 name     = "official"
 kind     = "git"
-location = "https://github.com/noctalia-dev/official-plugins"
+location = "https://github.com/canopy-dev/official-plugins"
 enabled  = true
 
 # A path source: an immutable local directory Noctalia treats read-only
@@ -85,9 +85,9 @@ enabled  = true
 
 The boolean form (`auto_update = true` / `false`) from earlier builds is no longer accepted - use `"all"` or `"none"`. `enabled = false` on a source prevents it from being scanned or updated while retaining its app-managed clone.
 
-Plugins placed by hand under `~/.local/share/noctalia/plugins/<plugin>/` are discovered as a built-in **local** source - handy for development. Like every plugin, they must be enabled before they activate. See [File locations](/noctalia/configuration/#file-locations) for where plugin code and everything else lives.
+Plugins placed by hand under `~/.local/share/canopy/plugins/<plugin>/` are discovered as a built-in **local** source - handy for development. Like every plugin, they must be enabled before they activate. See [File locations](/canopy/configuration/#file-locations) for where plugin code and everything else lives.
 
-Git source operations are non-interactive. Private repos must be reachable through an already-working credential helper, SSH agent, or SSH config; otherwise clone/update fails and Noctalia continues without prompting for a password. Git source runtime files are exported caches, not editable plugin state. Use a `path` source or `~/.local/share/noctalia/plugins/` for local plugin development.
+Git source operations are non-interactive. Private repos must be reachable through an already-working credential helper, SSH agent, or SSH config; otherwise clone/update fails and Noctalia continues without prompting for a password. Git source runtime files are exported caches, not editable plugin state. Use a `path` source or `~/.local/share/canopy/plugins/` for local plugin development.
 
 A source `name` is its identity, so duplicate names in `[[plugins.source]]` are rejected with a config error. Replacing a git source with the same name but a different `location` deletes Noctalia's app-managed repo cache and exported runtime files for that source, then re-fetches from the new location when needed.
 
@@ -101,13 +101,13 @@ Use **Most recommended** to browse by total count or **Trending** to find plugin
 
 ### Privacy
 
-No account is needed. Clicking the thumb sends your choice and a private identifier specific to that plugin to Noctalia's service. This is separate from startup telemetry and does not send an inventory of installed plugins. Recommendations stay until you withdraw them; the service keeps a removal record for 30 days. Deleting Noctalia's saved state means you can no longer withdraw earlier recommendations. See the [privacy policy](https://noctalia.dev/privacy).
+No account is needed. Clicking the thumb sends your choice and a private identifier specific to that plugin to Noctalia's service. This is separate from startup telemetry and does not send an inventory of installed plugins. Recommendations stay until you withdraw them; the service keeps a removal record for 30 days. Deleting Noctalia's saved state means you can no longer withdraw earlier recommendations. See the [privacy policy](https://canopy.dev/privacy).
 
 **Offline Mode** disables recommendation changes and count updates. It does not save changes to send later.
 
 ## Updating
 
-`noctalia msg plugins update <source>` updates the source and hot-reloads its enabled plugins. The global `[plugins].auto_update` mode decides what the background tick (startup + every 6 hours) updates: `"all"` (default) pulls every enabled git source, `"official"` pulls only the built-in `official` source, and `"none"` disables background updates. Updates are safe per enabled plugin: if one enabled plugin's new version targets an unsupported plugin API level, Noctalia keeps that plugin's previous exported copy, still updates compatible enabled plugins from the same source, and advances the source catalog. After Noctalia gains support for that API level, the held plugin can catch up from the already-updated source revision.
+`canopy msg plugins update <source>` updates the source and hot-reloads its enabled plugins. The global `[plugins].auto_update` mode decides what the background tick (startup + every 6 hours) updates: `"all"` (default) pulls every enabled git source, `"official"` pulls only the built-in `official` source, and `"none"` disables background updates. Updates are safe per enabled plugin: if one enabled plugin's new version targets an unsupported plugin API level, Noctalia keeps that plugin's previous exported copy, still updates compatible enabled plugins from the same source, and advances the source catalog. After Noctalia gains support for that API level, the held plugin can catch up from the already-updated source revision.
 
 ## Compatibility
 

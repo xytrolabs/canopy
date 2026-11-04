@@ -969,12 +969,12 @@
       "greeter-sync-pending-console": "Sincronizando aparência para o greeter. Se autorização é necessária, aprove a caixa de diálogo do polkit no Noctalia, em um TTY ou em um console.",
       "greeter-sync-pending-legacy": "Sincronizando através do utilitário legado. Aprovação do administrador é necessária.",
       "greeter-sync-pending-manual": "Os arquivos estão preparados para a sincronização legada autenticada. Execute o auxiliar de aplicação posicional em um terminal, mantendo o NOCTALIA_GREETER_STATE_DIR caso utilize um caminho personalizado, ou configure o shell.greeter_sync.privilege_command e sincronize novamente.",
-      "greeter-sync-pending-manual-pkexec": "Sincronizando aparência para o greeter. Se autorização de administrador for necessária e não for apresentada uma caixa de diálogo, execute em um terminal: pkexec noctalia-greeter-apply-appearance --sync \"/run/user/$(id -u)/noctalia-greeter-sync\".",
+      "greeter-sync-pending-manual-pkexec": "Sincronizando aparência para o greeter. Se autorização de administrador for necessária e não for apresentada uma caixa de diálogo, execute em um terminal: pkexec canopy-greeter-apply-appearance --sync \"/run/user/$(id -u)/noctalia-greeter-sync\".",
       "greeter-sync-success": "Aparência sincronizada. As alterações serão aplicadas na próxima tela de login.",
       "greeter-sync-timeout": "A sincronização do Greeter ainda está aguardando autorização. Verifique se há uma caixa de diálogo do polkit em um TTY ou console, habilite o agente polkit nas configurações de Segurança ou execute o pkexec manualmente.",
       "greeter-sync-timeout-manual": "A sincronização legada do Greeter ainda precisa da autorização. Execute o auxiliar de aplicação posicional em um terminal e preserve NOCTALIA_GREETER_STATE_DIR se você utiliza um caminho personalizado.",
-      "greeter-sync-timeout-manual-pkexec": "Sincronização com o greeter continua necessitando autorização. Execute em um terminal: pkexec noctalia-greeter-apply-appearance --sync \"/run/user/$(id -u)/noctalia-greeter-sync\"",
-      "keybind-app": "Noctalia",
+      "greeter-sync-timeout-manual-pkexec": "Sincronização com o greeter continua necessitando autorização. Execute em um terminal: pkexec canopy-greeter-apply-appearance --sync \"/run/user/$(id -u)/noctalia-greeter-sync\"",
+      "keybind-app": "Canopy",
       "keybind-invalid-modifier": "Este atalho aceita uma única tecla sem modificadores.",
       "keybind-invalid-printable": "Teclas imprimíveis (letras, números, símbolos) requerem uma tecla modificadora como Ctrl ou Alt.",
       "keybind-invalid-super": "A tecla Super/Windows não pode ser usada em atalhos de teclado do shell.",
@@ -1361,7 +1361,7 @@
       "sync-greeter": "Não foi possível sincronizar a aparência com o Noctalia Greeter.",
       "sync-greeter-timeout": "A sincronização do Greeter ainda está aguardando a autorização. Verifique se há uma caixa de diálogo do polkit em um TTY ou console, habilite o agente polkit nas configurações de Segurança ou execute o pkexec manualmente.",
       "sync-greeter-timeout-manual": "A sincronização legada do Greeter ainda precisa da autorização do administrador. Execute o auxiliar de aplicação posicional em um terminal e preserve NOCTALIA_GREETER_STATE_DIR se você utiliza um caminho personalizado.",
-      "sync-greeter-timeout-manual-pkexec": "Sincronização com o greeter continua necessitando autorização. Execute em um terminal: pkexec noctalia-greeter-apply-appearance --sync \"/run/user/$(id -u)/noctalia-greeter-sync\"",
+      "sync-greeter-timeout-manual-pkexec": "Sincronização com o greeter continua necessitando autorização. Execute em um terminal: pkexec canopy-greeter-apply-appearance --sync \"/run/user/$(id -u)/noctalia-greeter-sync\"",
       "widget": {
         "rename": "Não foi possível renomar o widget nomeado."
       },
@@ -1844,8 +1844,8 @@
         },
         "kind-label": "Tipo",
         "location-label": "Localização",
-        "location-placeholder-git": "https://github.com/me/noctalia-plugins",
-        "location-placeholder-path": "~/dev/noctalia-plugins",
+        "location-placeholder-git": "https://github.com/me/canopy-plugins",
+        "location-placeholder-path": "~/dev/canopy-plugins",
         "name-label": "ID da Fonte",
         "name-placeholder": "meus-plugins",
         "precedence-hint": "As fontes de nível inferior têm prioridade sobre as de nível superior quando oferecem o mesmo plug-in.",
@@ -1868,7 +1868,7 @@
         "loading": "Carregando catálogo...",
         "no-readme": "Nenhuma descrição disponível.",
         "not-listed": "Não listado",
-        "open-page": "Abrir página de plugin em noctalia.dev",
+        "open-page": "Abrir página de plugin em canopy.dev",
         "open-source": "Abrir repositório fonte de plugin",
         "recommend": "Recomendar",
         "recommendation-error": "A mudança não foi confirmada. Sua recomendação anterior não foi modificada. Tente novamente a mesma mudança para que seja reconciliada.",
@@ -1940,7 +1940,7 @@
           "label": "Arredondamento dos Cantos"
         },
         "custom-palette": {
-          "description": "Escolha uma paleta em ~/.config/noctalia/palettes/",
+          "description": "Escolha uma paleta em ~/.config/canopy/palettes/",
           "label": "Paleta Personalizada",
           "search-placeholder": "Busque paletas personalizadas..."
         },
@@ -3369,7 +3369,7 @@
           "label": "Formato da Data"
         },
         "external-ip": {
-          "description": "Determinar o IP público da WAN da conexão (por meio de api.noctalia.dev) e exibi-lo na guia “Rede” da Central de Controle",
+          "description": "Determinar o IP público da WAN da conexão (por meio de api.canopy.dev) e exibi-lo na guia “Rede” da Central de Controle",
           "label": "Mostrar IP da WAN"
         },
         "greeter-sync-auto": {
@@ -4240,7 +4240,7 @@
             "label": "Abrir configurações"
           },
           "settings-open-plugin": {
-            "description": "Abrir a janela de configurações na configuração de um plugin (ex.: noctalia/notes)",
+            "description": "Abrir a janela de configurações na configuração de um plugin (ex.: canopy/notes)",
             "label": "Abrir configurações de plugin"
           },
           "settings-open-widget": {

@@ -857,11 +857,11 @@
       "greeter-sync": "Noctalia Greeter",
       "greeter-sync-pending": "En attente de l'approbation de l'administrateur pour écrire dans le greeter.",
       "greeter-sync-pending-console": "En attente de l'autorisation de l'administrateur. Accepte la demande polkit dans Noctalia, sur un TTY ou une console, ou exécute pkexec manuellement.",
-      "greeter-sync-pending-manual": "Les fichiers sont prêts. Exécute cette commande dans un terminal : pkexec noctalia-greeter-apply-appearance \"$XDG_RUNTIME_DIR/noctalia-greeter-sync\". Tu peux aussi définir shell.greeter_sync.privilege_command (par exemple ghostty -e pkexec), puis relancer la synchronisation.",
+      "greeter-sync-pending-manual": "Les fichiers sont prêts. Exécute cette commande dans un terminal : pkexec canopy-greeter-apply-appearance \"$XDG_RUNTIME_DIR/noctalia-greeter-sync\". Tu peux aussi définir shell.greeter_sync.privilege_command (par exemple ghostty -e pkexec), puis relancer la synchronisation.",
       "greeter-sync-success": "Apparence synchronisée. Les modifications s’appliqueront au prochain écran de connexion.",
       "greeter-sync-timeout": "La synchronisation du greeter est toujours en attente de l'autorisation de l'administrateur. Vérifie si une demande polkit est affichée sur un TTY ou une console, active le polkit agent dans les paramètres de sécurité, ou exécute pkexec manuellement.",
-      "greeter-sync-timeout-manual": "La synchronisation du greeter nécessite toujours l'autorisation de l'administrateur. Exécute cette commande dans un terminal : pkexec noctalia-greeter-apply-appearance \"$XDG_RUNTIME_DIR/noctalia-greeter-sync\"",
-      "keybind-app": "Noctalia",
+      "greeter-sync-timeout-manual": "La synchronisation du greeter nécessite toujours l'autorisation de l'administrateur. Exécute cette commande dans un terminal : pkexec canopy-greeter-apply-appearance \"$XDG_RUNTIME_DIR/noctalia-greeter-sync\"",
+      "keybind-app": "Canopy",
       "keybind-invalid-modifier": "Ce raccourci accepte une seule touche sans modificateur.",
       "keybind-invalid-printable": "Les touches imprimables (lettres, chiffres, symboles) nécessitent un modificateur tel que Ctrl ou Alt.",
       "keybind-invalid-super": "La touche Super/Windows ne peut pas être utilisée dans les raccourcis du shell.",
@@ -1207,7 +1207,7 @@
       "support-report": "Échec de l’enregistrement du rapport de support.",
       "sync-greeter": "Impossible de synchroniser l’apparence avec Noctalia Greeter.",
       "sync-greeter-timeout": "La synchronisation du greeter est toujours en attente de l'autorisation de l'administrateur. Vérifie si une demande polkit est affichée sur un TTY ou une console, active le polkit agent dans les paramètres de sécurité, ou exécute pkexec manuellement.",
-      "sync-greeter-timeout-manual": "La synchronisation du greeter nécessite toujours l'autorisation de l'administrateur. Exécute cette commande dans un terminal : pkexec noctalia-greeter-apply-appearance \"$XDG_RUNTIME_DIR/noctalia-greeter-sync\"",
+      "sync-greeter-timeout-manual": "La synchronisation du greeter nécessite toujours l'autorisation de l'administrateur. Exécute cette commande dans un terminal : pkexec canopy-greeter-apply-appearance \"$XDG_RUNTIME_DIR/noctalia-greeter-sync\"",
       "widget": {
         "rename": "Impossible de renommer le widget nommé."
       },
@@ -1605,8 +1605,8 @@
         },
         "kind-label": "Type",
         "location-label": "Localisation",
-        "location-placeholder-git": "https://github.com/me/noctalia-plugins",
-        "location-placeholder-path": "~/dev/noctalia-plugins",
+        "location-placeholder-git": "https://github.com/me/canopy-plugins",
+        "location-placeholder-path": "~/dev/canopy-plugins",
         "name-label": "Identifiant de la source",
         "name-placeholder": "my-plugins",
         "precedence-hint": "Les sources de priorité inférieure remplacent les sources de priorité supérieure lorsqu'elles proposent le même plugin.",
@@ -1623,7 +1623,7 @@
         "incompatible": "Incompatible",
         "loading": "Chargement du catalogue...",
         "no-readme": "Pas de description disponible...",
-        "open-page": "Ouvrir la page du plugin sur noctalia.dev",
+        "open-page": "Ouvrir la page du plugin sur canopy.dev",
         "open-source": "Ouvrir le dépôt source du plugin",
         "results-count": "{count} plugins",
         "search-placeholder": "Recherche plugins...",
@@ -1683,7 +1683,7 @@
           "label": "Arrondi des coins"
         },
         "custom-palette": {
-          "description": "Choisir une palette depuis ~/.config/noctalia/palettes/",
+          "description": "Choisir une palette depuis ~/.config/canopy/palettes/",
           "label": "Palette personnalisée",
           "search-placeholder": "Chercher des palettes personnalisées..."
         },
@@ -2575,7 +2575,7 @@
           "placeholder": "Ville, Pays"
         },
         "location-auto-locate": {
-          "description": "Détecte vote position automatiquement à partir de votre adresse IP via noctalia.dev",
+          "description": "Détecte vote position automatiquement à partir de votre adresse IP via canopy.dev",
           "label": "Localisation automatique (IP)"
         },
         "longitude": {

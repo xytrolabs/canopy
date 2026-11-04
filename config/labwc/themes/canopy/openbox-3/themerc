@@ -1,0 +1,51 @@
+# Canopy window decoration - macOS traffic lights
+border.width: 1
+
+window.active.border.color: #2C2C38
+window.inactive.border.color: #232330
+
+window.active.title.bg: flat solid
+window.active.title.bg.color: #1E1E26
+window.inactive.title.bg: flat solid
+window.inactive.title.bg.color: #191920
+
+window.active.label.bg: parentrelative
+window.inactive.label.bg: parentrelative
+window.label.text.justify: center
+window.active.label.text.color: #F2F2F5
+window.inactive.label.text.color: #8E8E9A
+
+# traffic-light dots
+window.button.width: 18
+window.button.height: 18
+window.button.spacing: 6
+
+window.active.button.unpressed.bg: parentrelative
+window.inactive.button.unpressed.bg: parentrelative
+
+window.active.button.close.unpressed.image.color: #FF5F57
+window.active.button.close.hover.image.color: #FF8A84
+window.active.button.close.pressed.image.color: #E0443E
+window.active.button.iconify.unpressed.image.color: #FEBC2E
+window.active.button.iconify.hover.image.color: #FFD470
+window.active.button.iconify.pressed.image.color: #DEA123
+window.active.button.max.unpressed.image.color: #28C840
+window.active.button.max.hover.image.color: #5AE070
+window.active.button.max.pressed.image.color: #20A934
+
+window.inactive.button.close.unpressed.image.color: #4A4A55
+window.inactive.button.iconify.unpressed.image.color: #4A4A55
+window.inactive.button.max.unpressed.image.color: #4A4A55
+
+window.button.hover.bg.color: #00000000
+window.button.hover.bg.corner-radius: 0
+
+menu.border.width: 1
+menu.border.color: #2C2C38
+menu.items.bg.color: #1E1E26
+menu.items.text.color: #F2F2F5
+menu.items.active.bg.color: #7C5CFC
+menu.items.active.text.color: #FFFFFF
+menu.separator.color: #2C2C38
+menu.title.bg.color: #1E1E26
+menu.title.text.color: #F2F2F5

@@ -152,7 +152,7 @@ namespace scripting {
     // the script is called back with the same text declared here.
     std::vector<std::string> panelCaptureKeys;
 
-    // Surface defaults of a [[layer]] entry (plugin_api >= 36); noctalia.layer.configure() changes
+    // Surface defaults of a [[layer]] entry (plugin_api >= 36); canopy.layer.configure() changes
     // them at runtime. `layerVisible` shows the layer as soon as its plugin loads.
     PluginLayerConfig layerConfig;
     bool layerVisible = false;

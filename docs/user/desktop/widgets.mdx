@@ -40,9 +40,9 @@ When enabled, Noctalia renders each desktop widget as its own tightly-sized laye
 ### IPC
 
 ```sh
-noctalia msg desktop-widgets-edit
-noctalia msg desktop-widgets-exit
-noctalia msg desktop-widgets-toggle-edit
+canopy msg desktop-widgets-edit
+canopy msg desktop-widgets-exit
+canopy msg desktop-widgets-toggle-edit
 ```
 
 You can also turn edit mode on from **Settings → Desktop → Toggle Editor**. Noctalia shows a short internal notification and you should switch to an **empty workspace** (no windows covering the desktop) so the editor overlay is visible.
@@ -193,7 +193,7 @@ show_seconds = true
 | Setting        | Type   | Default      | Description                                                                                                                                                                                               |
 | -------------- | ------ | ------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `clock_style`  | string | `"digital"`  | `"digital"` renders a formatted text clock; `"analog"` renders a circular clock with hands.                                                                                                               |
-| `format`       | string | `"{:%H:%M}"` | Digital clock format string. Ignored when `clock_style = "analog"`. Supports the same syntax and tokens as the bar clock `format`; see [Date format tokens](/noctalia/configuration/date-format-tokens/). |
+| `format`       | string | `"{:%H:%M}"` | Digital clock format string. Ignored when `clock_style = "analog"`. Supports the same syntax and tokens as the bar clock `format`; see [Date format tokens](/canopy/configuration/date-format-tokens/). |
 | `center_text`  | bool   | `false`      | Digital only. Center-aligns the formatted time inside the clock box. When `false`, the clock keeps the leading edge stable as digits change width.                                                        |
 | `circle`       | bool   | `true`       | Analog only. Shows the outer ring and minute tick marks around the dial. When disabled, only the hands are drawn.                                                                                         |
 | `show_seconds` | bool   | `true`       | Analog only. Shows the second hand. Disable it for a clock that updates once per minute.                                                                                                                  |
@@ -203,7 +203,7 @@ show_seconds = true
 
 ### calendar
 
-The calendar widget uses the configured [calendar service](/noctalia/services/calendar/) accounts. It shows event indicators in the month grid and can show the selected day's events beside the grid.
+The calendar widget uses the configured [calendar service](/canopy/services/calendar/) accounts. It shows event indicators in the month grid and can show the selected day's events beside the grid.
 
 ```toml
 [desktop_widgets.widget.calendar_main]
@@ -226,7 +226,7 @@ font_family          = ""
 | `show_events_location` | bool   | `false` | Show each event's location below its time in the event list      |
 | `font_family`          | string | `""`    | Typeface for calendar text; empty inherits the global shell font |
 
-The event list uses the shared `event_date_format` and `event_time_format` from [`[calendar]`](/noctalia/services/calendar/), so the desktop widget and control center use the same event formatting. It also follows [`hide_past_events` and `past_events_threshold_minutes`](/noctalia/control-center/#calendar) from `[control_center.calendar]` when deciding which of today's finished events to list.
+The event list uses the shared `event_date_format` and `event_time_format` from [`[calendar]`](/canopy/services/calendar/), so the desktop widget and control center use the same event formatting. It also follows [`hide_past_events` and `past_events_threshold_minutes`](/canopy/control-center/#calendar) from `[control_center.calendar]` when deciding which of today's finished events to list.
 
 Use the arrow buttons or vertical scrolling to change months. Select a day to update the event list; selecting a day from the preceding or following month also navigates to that month. Select the date or month heading to return to today.
 
@@ -314,7 +314,7 @@ secondary_color    = "secondary"
 
 ### weather
 
-Draws the current weather glyph alongside the temperature and short condition, driven by the shared `WeatherService`. Requires `[weather] enabled = true` in `config.toml` (see [Services - Weather](/noctalia/services/weather/)) - the widget will render a placeholder otherwise.
+Draws the current weather glyph alongside the temperature and short condition, driven by the shared `WeatherService`. Requires `[weather] enabled = true` in `config.toml` (see [Services - Weather](/canopy/services/weather/)) - the widget will render a placeholder otherwise.
 
 ```toml
 [desktop_widgets.widget.weather_main]
@@ -507,7 +507,7 @@ background   = true
 
 ### sysmon
 
-System monitor widget with graph or pill-gauge display modes. Uses the shared `SystemMonitorService`. Poll intervals are configured globally under [`[system.monitor]`](/noctalia/services/system-monitor/), not in the widget settings below.
+System monitor widget with graph or pill-gauge display modes. Uses the shared `SystemMonitorService`. Poll intervals are configured globally under [`[system.monitor]`](/canopy/services/system-monitor/), not in the widget settings below.
 
 ```toml
 [desktop_widgets.widget.sysmon_main]
@@ -540,7 +540,7 @@ background     = true
 | Setting                        | Type   | Default        | Description                                                                                                                                        |
 | ------------------------------ | ------ | -------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `display`                      | string | `"graph"`      | `"graph"` shows a scrolling history chart; `"gauge"` shows a compact pill gauge like the bar sysmon widget                                         |
-| `stat`                         | string | `"cpu_usage"`  | Primary stat. See [Available stats](/noctalia/services/system-monitor/#available-stats)                                                            |
+| `stat`                         | string | `"cpu_usage"`  | Primary stat. See [Available stats](/canopy/services/system-monitor/#available-stats)                                                            |
 | `stat2`                        | string | -              | Graph mode only. Optional secondary stat (same values as `stat`). Omit for single curve.                                                           |
 | `gauge_layout`                 | string | `"horizontal"` | Gauge mode only. `"horizontal"` lays out icon, vertical pill gauge, and value in a row; `"vertical"` stacks icon, horizontal pill gauge, and value |
 | `interface`                    | string | `""`           | Network interface to monitor for `net_rx`/`net_tx`; empty uses the total across all non-loopback interfaces                                        |

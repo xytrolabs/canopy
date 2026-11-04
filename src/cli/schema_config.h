@@ -71,8 +71,8 @@ namespace noctalia::cli {
   inline constexpr Command kConfigReplayReportCmd{
       "replay-report",
       "Reconstruct config and state from a support report",
-      "Reconstruct config-home/noctalia and state-home/noctalia from a support report.\n\n"
-      "With --flattened, reconstruct a single config-home/noctalia/config.toml from the report's merged config.",
+      "Reconstruct config-home/canopy and state-home/canopy from a support report.\n\n"
+      "With --flattened, reconstruct a single config-home/canopy/config.toml from the report's merged config.",
       {},
       kConfigReplayFlags,
       kConfigReplayPositionals,

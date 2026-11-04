@@ -9,25 +9,25 @@ in
 {
   # The module from this flake predates the module in nixpkgs.
   # To avoid conflicts, we disable the nixpkgs module.
-  disabledModules = [ "programs/wayland/noctalia.nix" ];
+  disabledModules = [ "programs/wayland/canopy.nix" ];
 
   options.programs.noctalia = {
-    enable = lib.mkEnableOption "Whether to enable noctalia, a lightweight Wayland shell and bar.";
+    enable = lib.mkEnableOption "Whether to enable canopy, a lightweight Wayland shell and bar.";
 
     package = lib.mkOption {
       type = lib.types.nullOr lib.types.package;
       default = null;
-      description = "The noctalia package to install.";
+      description = "The canopy package to install.";
     };
 
     systemd = {
-      enable = lib.mkEnableOption "Enables a systemd user service for noctalia.";
+      enable = lib.mkEnableOption "Enables a systemd user service for canopy.";
 
       target = lib.mkOption {
         type = lib.types.str;
         default = "graphical-session.target";
         example = "hyprland-session.target";
-        description = "The systemd user target for the noctalia service.";
+        description = "The systemd user target for the canopy service.";
       };
     };
 
@@ -46,7 +46,7 @@ in
 
         systemd.user.services.noctalia = lib.mkIf cfg.systemd.enable {
           description = "Noctalia - A lightweight Wayland shell and bar";
-          documentation = [ "https://docs.noctalia.dev/noctalia/" ];
+          documentation = [ "https://docs.canopy.dev/canopy/" ];
           partOf = [ cfg.systemd.target ];
           after = [ cfg.systemd.target ];
           wantedBy = [ cfg.systemd.target ];
@@ -63,7 +63,7 @@ in
         assertions = [
           {
             assertion = !cfg.systemd.enable || cfg.package != null;
-            message = "programs.noctalia.package cannot be null when programs.noctalia.systemd.enable is true";
+            message = "programs.canopy.package cannot be null when programs.canopy.systemd.enable is true";
           }
         ];
       }

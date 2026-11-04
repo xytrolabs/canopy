@@ -27,8 +27,8 @@ DND enable/disable IPC commands show a short OSD for the new state.
 `notification-show` accepts a summary, and CLI usage can pass body as a second argument:
 
 ```sh
-noctalia msg notification-show "Build finished"
-noctalia msg notification-show "Build finished" "All tests passed"
+canopy msg notification-show "Build finished"
+canopy msg notification-show "Build finished" "All tests passed"
 ```
 
 When a body argument is passed, the CLI forwards it as structured payload (`summary` + `body`) to the IPC handler.
@@ -36,7 +36,7 @@ When a body argument is passed, the CLI forwards it as structured payload (`summ
 For full control, pass a JSON payload object:
 
 ```sh
-noctalia msg notification-show '{"app_name":"Noctalia","summary":"Build finished","body":"All tests passed","urgency":"low","timeout_ms":4000,"icon":"circle-check"}'
+canopy msg notification-show '{"app_name":"Canopy","summary":"Build finished","body":"All tests passed","urgency":"low","timeout_ms":4000,"icon":"circle-check"}'
 ```
 
 Supported JSON fields:
@@ -95,7 +95,7 @@ Player volume is clamped to 0–100%. A player already above 100% can be lowered
 
 Wallpaper paths accept an image path (`~` expanded) or `color:#RRGGBB` / `color:#RRGGBBAA`. Non-color paths must exist at call time.
 
-The CLI forwards everything after the command as one string (`noctalia msg wallpaper-set ...`), so `noctalia msg wallpaper-set DP-1 /home/you/My Pictures/wall.jpg` still yields a correct path when the shell passes separate arguments after the command.
+The CLI forwards everything after the command as one string (`canopy msg wallpaper-set ...`), so `canopy msg wallpaper-set DP-1 /home/you/My Pictures/wall.jpg` still yields a correct path when the shell passes separate arguments after the command.
 
 ## Theme
 
@@ -113,11 +113,11 @@ The CLI forwards everything after the command as one string (`noctalia msg wallp
 - **builtin** - built-in palette name, such as `Noctalia`
 - **wallpaper** - generator scheme, such as `m3-tonal-spot`, `m3-content`, `m3-fruit-salad`, `m3-rainbow`, `m3-monochrome`, `vibrant`, `faithful`, `soft`, `dysfunctional`, or `muted`
 - **community** - community palette id
-- **custom** - palette file name without `.json` under `~/.config/noctalia/palettes/`
+- **custom** - palette file name without `.json` under `~/.config/canopy/palettes/`
 
 ## Screenshots
 
-Region and fullscreen capture require compositor support for `wlr-screencopy-unstable-v1`. Window capture uses `ext-image-copy-capture-v1` and `ext-foreign-toplevel-image-capture-source-manager-v1`. All screenshot commands use the global `[shell.screenshot]` output policy (directory, filename pattern, file format, freeze, save to file, clipboard, pipe command) unless [per-call options](#per-call-options) override it; window capture ignores `freeze`. See [Shell settings](/noctalia/configuration/shell/#shell-settings).
+Region and fullscreen capture require compositor support for `wlr-screencopy-unstable-v1`. Window capture uses `ext-image-copy-capture-v1` and `ext-foreign-toplevel-image-capture-source-manager-v1`. All screenshot commands use the global `[shell.screenshot]` output policy (directory, filename pattern, file format, freeze, save to file, clipboard, pipe command) unless [per-call options](#per-call-options) override it; window capture ignores `freeze`. See [Shell settings](/canopy/configuration/shell/#shell-settings).
 
 | Action                       | Command                                               | Description                                                                                                                                                                      |
 | ---------------------------- | ----------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -135,7 +135,7 @@ In picker mode, choose a connector from the top bar on any screen, or click the 
 
 ### Per-call options
 
-`screenshot-region`, `screenshot-fullscreen`, `screenshot-window`, `screenshot-annotate`, and `annotate` accept options that override single `[shell.screenshot]` keys for one invocation, so two keybinds for the same command can behave differently. Each call starts from the config and only the named keys change; a call without options behaves exactly as the config says. Options work from `noctalia msg`, compositor binds, and bar widget actions, and `noctalia msg <command> --help` lists them.
+`screenshot-region`, `screenshot-fullscreen`, `screenshot-window`, `screenshot-annotate`, and `annotate` accept options that override single `[shell.screenshot]` keys for one invocation, so two keybinds for the same command can behave differently. Each call starts from the config and only the named keys change; a call without options behaves exactly as the config says. Options work from `canopy msg`, compositor binds, and bar widget actions, and `canopy msg <command> --help` lists them.
 
 | Option                                                             | `[shell.screenshot]` key                   |
 | ------------------------------------------------------------------ | ------------------------------------------ |
@@ -168,13 +168,13 @@ In picker mode, choose a connector from the top bar on any screen, or click the 
 
 ```sh
 # Annotate this region even though annotate = false in the config
-noctalia msg screenshot-region --annotate
+canopy msg screenshot-region --annotate
 # Copy straight to the clipboard without the editor and without saving a file
-noctalia msg screenshot-region --no-annotate --copy-to-clipboard --no-save-to-file
+canopy msg screenshot-region --no-annotate --copy-to-clipboard --no-save-to-file
 # Send a combined capture of every monitor to satty
-noctalia msg screenshot-fullscreen --pipe-to-command --pipe-command 'satty -f -' all
+canopy msg screenshot-fullscreen --pipe-to-command --pipe-command 'satty -f -' all
 # Save this region as a lossless WebP file
-noctalia msg screenshot-region --format webp --quality 100
+canopy msg screenshot-region --format webp --quality 100
 ```
 
 A Niri bind and a screenshot widget action using the same options:
@@ -192,7 +192,7 @@ left = "screenshot-region --annotate"
 
 `annotate <path>` edits a file instead of the screen. The image is decoded with the shell's own loader (PNG, JPEG, GIF, WebP, JPEG XL, ICO, SVG, and the other formats used for wallpapers and icons) and opens centered at its native pixel size on the focused output, scaled down when it does not fit. EXIF orientation is applied, so camera and phone photos open upright. Relative paths resolve against the directory the command ran in, and `~` expands. The pointer button stays disabled because no cursor was captured, and **Freeze** is not offered. **Copy** and **Save** deliver the annotated PNG, and **Done** applies the `[shell.screenshot]` output policy. Saving never overwrites the source: it writes a new PNG into the screenshot folder using the configured filename pattern.
 
-Noctalia also installs a hidden desktop entry, `dev.noctalia.Noctalia.Annotator.desktop`, that runs `noctalia msg annotate` on the chosen file. It does not appear in launchers, but file managers list **Noctalia Image Annotator** under **Open With** for the supported image types. Noctalia must already be running.
+Noctalia also installs a hidden desktop entry, `dev.canopy.Noctalia.Annotator.desktop`, that runs `noctalia msg annotate` on the chosen file. It does not appear in launchers, but file managers list **Noctalia Image Annotator** under **Open With** for the supported image types. Noctalia must already be running.
 
 Annotation tool keys (no modifier): **`m`** move, **`b`** brush, **`h`** highlighter, **`l`** line, **`a`** arrow, **`s`** rectangle, **`o`** circle, **`t`** text, **`n`** numbering, **`u`** blur, **`e`** eraser, **`c`** crop, **`z`** freeze (live overlay), **`p`** toggle the captured pointer, **`f`** cycle the shape fill through off, semi-transparent, and opaque, **`1`** to **`8`** pick the current tool's color from the eight swatches, **`[`** and **`]`** change the current tool's size. **`Ctrl+Z`** undoes, **`Ctrl+Shift+Z`** and **`Ctrl+Y`** redo, **`[keybinds].copy`** copies, **`[keybinds].save`** saves.
 

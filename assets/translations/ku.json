@@ -531,7 +531,7 @@
       "battery-low-title": "Betarî kêm e",
       "calendar": "Salname",
       "greeter-sync": "Silavkarê Noctalia",
-      "keybind-app": "Noctalia"
+      "keybind-app": "Canopy"
     }
   },
   "osd": {
@@ -934,8 +934,8 @@
           "path": "Rêgeh"
         },
         "kind-label": "Kind",
-        "location-placeholder-git": "https://github.com/me/noctalia-plugins",
-        "location-placeholder-path": "~/dev/noctalia-plugins",
+        "location-placeholder-git": "https://github.com/me/canopy-plugins",
+        "location-placeholder-path": "~/dev/canopy-plugins",
         "name-label": "Çavkaniya NB",
         "remove": "Çavkaniyê rake",
         "save": "Tomar bike",

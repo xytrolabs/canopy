@@ -163,7 +163,7 @@ Draft pull requests may leave checkboxes incomplete. Before marking a pull reque
 
 ## Translations
 
-Noctalia translations are managed through [Noctalia Translate](https://i18n.noctalia.dev/projects/noctalia). The JSON files in `assets/translations/` are exported from that workflow, with `assets/translations/en.json` acting as the source catalog for new strings.
+Noctalia translations are managed through [Noctalia Translate](https://i18n.canopy.dev/projects/canopy). The JSON files in `assets/translations/` are exported from that workflow, with `assets/translations/en.json` acting as the source catalog for new strings.
 
 When a code, UI, settings, or documentation change needs a new user-facing string, add or update the English string in `assets/translations/en.json` only. Do not machine translate strings, copy English into other locales, or include broad updates to non-English translation files in a normal feature or bug-fix PR. The translation team handles those locale updates through the translation app.
 
@@ -275,20 +275,20 @@ third_party/
 
 ## Debugging
 
-All debug commands use the `dev.noctalia.Debug` D-Bus service, available at runtime.
+All debug commands use the `dev.canopy.Debug` D-Bus service, available at runtime.
 
 ```sh
 # Enable verbose debug logs
-gdbus call --session --dest dev.noctalia.Debug --object-path /dev/noctalia/Debug --method dev.noctalia.Debug.SetVerboseLogs true
+gdbus call --session --dest dev.canopy.Debug --object-path /dev/canopy/Debug --method dev.canopy.Debug.SetVerboseLogs true
 
 # Disable verbose debug logs
-gdbus call --session --dest dev.noctalia.Debug --object-path /dev/noctalia/Debug --method dev.noctalia.Debug.SetVerboseLogs false
+gdbus call --session --dest dev.canopy.Debug --object-path /dev/canopy/Debug --method dev.canopy.Debug.SetVerboseLogs false
 
 # Check current verbose log state
-gdbus call --session --dest dev.noctalia.Debug --object-path /dev/noctalia/Debug --method dev.noctalia.Debug.GetVerboseLogs
+gdbus call --session --dest dev.canopy.Debug --object-path /dev/canopy/Debug --method dev.canopy.Debug.GetVerboseLogs
 
 # Emit an internal notification (app_name, summary, body, timeout_ms, urgency 0-2)
-gdbus call --session --dest dev.noctalia.Debug --object-path /dev/noctalia/Debug --method dev.noctalia.Debug.EmitInternalNotification "Noctalia" "Test" "Hello from debug" 5000 1
+gdbus call --session --dest dev.canopy.Debug --object-path /dev/canopy/Debug --method dev.canopy.Debug.EmitInternalNotification "Canopy" "Test" "Hello from debug" 5000 1
 ```
 
 ### Crash output

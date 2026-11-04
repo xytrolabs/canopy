@@ -43,10 +43,10 @@ To run an action only when the battery is discharging and has just crossed below
 
 ```toml
 [hooks]
-battery_percentage_changed = "NOCTALIA_BATTERY_THRESHOLD=20 ~/.config/noctalia/hooks/battery-threshold.sh"
+battery_percentage_changed = "NOCTALIA_BATTERY_THRESHOLD=20 ~/.config/canopy/hooks/battery-threshold.sh"
 ```
 
-```bash title="~/.config/noctalia/hooks/battery-threshold.sh"
+```bash title="~/.config/canopy/hooks/battery-threshold.sh"
 #!/usr/bin/env bash
 set -euo pipefail
 
@@ -54,7 +54,7 @@ set -euo pipefail
 threshold="${NOCTALIA_BATTERY_THRESHOLD:-20}"
 
 # Keep a tiny state file so the script can compare this event with the last one.
-state_dir="${XDG_STATE_HOME:-$HOME/.local/state}/noctalia"
+state_dir="${XDG_STATE_HOME:-$HOME/.local/state}/canopy"
 state_file="$state_dir/battery-percent"
 
 # Noctalia provides these values whenever battery_percentage_changed fires.
@@ -100,40 +100,40 @@ wallpaper_changed = "logger -t noctalia-hooks \"Wallpaper on $NOCTALIA_WALLPAPER
 started = "systemctl --user start noctalia-ready.target"
 
 # Log wallpaper changes with the connector-specific payload.
-wallpaper_changed = "logger -t noctalia-hooks \"wallpaper: $NOCTALIA_WALLPAPER_CONNECTOR $NOCTALIA_WALLPAPER_PATH\""
+wallpaper_changed = "logger -t canopy-hooks \"wallpaper: $NOCTALIA_WALLPAPER_CONNECTOR $NOCTALIA_WALLPAPER_PATH\""
 colors_changed = [
   "systemctl --user reload foot-server.service",
-  "logger -t noctalia-hooks 'palette colors changed'",
+  "logger -t canopy-hooks 'palette colors changed'",
 ]
-theme_mode_changed = "logger -t noctalia-hooks \"mode: $NOCTALIA_THEME_MODE\""
+theme_mode_changed = "logger -t canopy-hooks \"mode: $NOCTALIA_THEME_MODE\""
 
 # Combine normal shell commands with Noctalia IPC commands.
 session_locked = [
   "playerctl pause",
-  "noctalia msg bar-hide",
+  "canopy msg bar-hide",
 ]
 session_unlocked = [
-  "noctalia msg bar-show",
-  "noctalia msg dpms-on && notify-send 'Session resumed'",
+  "canopy msg bar-show",
+  "canopy msg dpms-on && notify-send 'Session resumed'",
 ]
 
-logging_out   = "logger -t noctalia-hooks 'logout requested'"
+logging_out   = "logger -t canopy-hooks 'logout requested'"
 rebooting     = "systemctl --user stop backup-sync.service"
 shutting_down = "systemctl --user stop backup-sync.service"
 
 # External or IPC-initiated Wi-Fi, Bluetooth, and power profile changes use OSD.
 # Use hooks only for extra side effects.
-wifi_enabled  = "logger -t noctalia-hooks 'Wi-Fi radio enabled'"
-wifi_disabled = "logger -t noctalia-hooks 'Wi-Fi radio disabled'"
+wifi_enabled  = "logger -t canopy-hooks 'Wi-Fi radio enabled'"
+wifi_disabled = "logger -t canopy-hooks 'Wi-Fi radio disabled'"
 
-bluetooth_enabled  = "logger -t noctalia-hooks 'Bluetooth powered on'"
-bluetooth_disabled = "logger -t noctalia-hooks 'Bluetooth powered off'"
+bluetooth_enabled  = "logger -t canopy-hooks 'Bluetooth powered on'"
+bluetooth_disabled = "logger -t canopy-hooks 'Bluetooth powered off'"
 
-battery_charging           = "logger -t noctalia-hooks 'Battery charging'"
-battery_discharging        = "logger -t noctalia-hooks 'Battery discharging'"
-battery_plugged            = "logger -t noctalia-hooks 'Battery plugged'"
-battery_percentage_changed = "logger -t noctalia-hooks \"Battery: $NOCTALIA_BATTERY_STATE $NOCTALIA_BATTERY_PERCENT%\""
-power_profile_changed   = "logger -t noctalia-hooks \"Power profile: $NOCTALIA_POWER_PROFILE_PREVIOUS -> $NOCTALIA_POWER_PROFILE ($NOCTALIA_POWER_PROFILE_ORIGIN)\""
+battery_charging           = "logger -t canopy-hooks 'Battery charging'"
+battery_discharging        = "logger -t canopy-hooks 'Battery discharging'"
+battery_plugged            = "logger -t canopy-hooks 'Battery plugged'"
+battery_percentage_changed = "logger -t canopy-hooks \"Battery: $NOCTALIA_BATTERY_STATE $NOCTALIA_BATTERY_PERCENT%\""
+power_profile_changed   = "logger -t canopy-hooks \"Power profile: $NOCTALIA_POWER_PROFILE_PREVIOUS -> $NOCTALIA_POWER_PROFILE ($NOCTALIA_POWER_PROFILE_ORIGIN)\""
 
 # Quick test while developing a hook; not needed for Noctalia's own notifications.
 # started = "notify-send 'Noctalia hook' 'started fired'"

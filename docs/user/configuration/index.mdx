@@ -31,7 +31,7 @@ position = "top"
 You can also split things up if you like tidy dotfiles:
 
 ```text
-~/.config/noctalia/
+~/.config/canopy/
 ├── bar.toml
 ├── theme.toml
 └── widgets.toml
@@ -39,20 +39,20 @@ You can also split things up if you like tidy dotfiles:
 
 GUI-managed overrides live in:
 
-- `$NOCTALIA_STATE_HOME/noctalia/settings.toml`
-- `$XDG_STATE_HOME/noctalia/settings.toml`
-- or `~/.local/state/noctalia/settings.toml`
+- `$NOCTALIA_STATE_HOME/canopy/settings.toml`
+- `$XDG_STATE_HOME/canopy/settings.toml`
+- or `~/.local/state/canopy/settings.toml`
 
 Noctalia writes this file when you change settings through the UI, setup flows, IPC-backed controls, and other runtime actions that need to persist. If the file is a symbolic link, Noctalia writes through to the link target and keeps the link in place.
 
-`NOCTALIA_CONFIG_HOME` and `NOCTALIA_STATE_HOME` have the same "home root" shape as the XDG variables. For example, `NOCTALIA_CONFIG_HOME=/tmp/profile` reads `/tmp/profile/noctalia/`. Use these Noctalia-specific variables when you want a separate shell profile without changing the environment inherited by apps launched from Noctalia.
+`NOCTALIA_CONFIG_HOME` and `NOCTALIA_STATE_HOME` have the same "home root" shape as the XDG variables. For example, `NOCTALIA_CONFIG_HOME=/tmp/profile` reads `/tmp/profile/canopy/`. Use these Noctalia-specific variables when you want a separate shell profile without changing the environment inherited by apps launched from Noctalia.
 
 ## Including extra files
 
 Automatic loading only sees `*.toml` files sitting directly in the config folder. To pull in files from subdirectories, load a specific file, or control load order without renaming files, add an `[include]` table:
 
 ```toml
-# ~/.config/noctalia/config.toml
+# ~/.config/canopy/config.toml
 [include]
 files = [
   "widgets/",                  # a directory: every *.toml inside it (sorted, non-recursive)
@@ -84,7 +84,7 @@ Includes can nest (an included file can include more files), and each file is lo
 By default, every `*.toml` in the config folder still loads automatically alongside your includes. If you keep alternative setups in the root that should not all load at once - say `profile_a.toml` and `profile_b.toml` - set `autoload = false` in your entry file. Then **only** the file(s) that set it (plus whatever they include) load, and the other root files are ignored:
 
 ```toml
-# ~/.config/noctalia/config.toml
+# ~/.config/canopy/config.toml
 [include]
 autoload = false
 files = ["profiles/work.toml"]
@@ -108,9 +108,9 @@ If you are confused about why a hand-written value is not taking effect, inspect
 
 ## Where should I edit?
 
-Use `~/.config/noctalia/` for curated config: the things you want to keep in dotfiles, copy to another machine, or manage declaratively.
+Use `~/.config/canopy/` for curated config: the things you want to keep in dotfiles, copy to another machine, or manage declaratively.
 
-Treat `~/.local/state/noctalia/settings.toml` as an app-managed override file. It is useful to inspect when debugging GUI changes, and safe to delete when you want to clear those overrides. Keeping it outside `~/.config` also lets the GUI save changes when your config directory is read-only, for example on NixOS. Support reports include config sources and `settings.toml`, but omit `state.toml` contents because they can contain private runtime data.
+Treat `~/.local/state/canopy/settings.toml` as an app-managed override file. It is useful to inspect when debugging GUI changes, and safe to delete when you want to clear those overrides. Keeping it outside `~/.config` also lets the GUI save changes when your config directory is read-only, for example on NixOS. Support reports include config sources and `settings.toml`, but omit `state.toml` contents because they can contain private runtime data.
 
 Both layers are watched for changes and hot-reloaded. A save is applied about 150 ms after the file is written, so editors that save in several steps reload once; removing a config file also reloads. If neither layer exists, Noctalia uses its built-in defaults.
 
@@ -118,12 +118,12 @@ Both layers are watched for changes and hot-reloaded. A save is applied about 15
 
 When a release changes the shape of a setting, Noctalia migrates old values before parsing them so the running shell keeps the intended behavior. The app-owned `settings.toml` is upgraded once and stamped with an internal `config_version`; Noctalia manages that marker and excludes it from exported user config.
 
-Files under `~/.config/noctalia/` are never rewritten. Values that need migration are normalized temporarily on every load, and Settings keeps a warning visible until you update the source TOML. The warning and notification identify the source file, line, column, and exact legacy key to edit. Noctalia sends the notification when it first finds an affected key, when a new affected key appears, and every three days while affected values remain.
+Files under `~/.config/canopy/` are never rewritten. Values that need migration are normalized temporarily on every load, and Settings keeps a warning visible until you update the source TOML. The warning and notification identify the source file, line, column, and exact legacy key to edit. Noctalia sends the notification when it first finds an affected key, when a new affected key appears, and every three days while affected values remain.
 
 Run the validator to list every affected key, its source location, and its canonical replacement:
 
 ```sh
-noctalia config validate
+canopy config validate
 ```
 
 Noctalia can keep using normalized values while you update a file, but migration warnings are intentionally not permanent compatibility promises. Treat them as required config maintenance.
@@ -134,22 +134,22 @@ Where Noctalia keeps everything, by purpose:
 
 | What                           | Where                                                      | Purpose                                                        |
 | ------------------------------ | ---------------------------------------------------------- | -------------------------------------------------------------- |
-| Your config                    | `~/.config/noctalia/config.toml`                           | hand-written / declarative - the base layer                    |
-| GUI overrides                  | `~/.local/state/noctalia/settings.toml`                    | written by Settings; wins over your config                     |
-| Internal UI state              | `~/.local/state/noctalia/state.toml`                       | app-managed non-secret state and last-used values              |
+| Your config                    | `~/.config/canopy/config.toml`                           | hand-written / declarative - the base layer                    |
+| GUI overrides                  | `~/.local/state/canopy/settings.toml`                    | written by Settings; wins over your config                     |
+| Internal UI state              | `~/.local/state/canopy/state.toml`                       | app-managed non-secret state and last-used values              |
 | Calendar credentials           | Desktop Secret Service or an explicit CalDAV password file | CalDAV passwords and Google refresh tokens                     |
 | Encrypted storage key          | Desktop Secret Service or an explicit key file             | master key for encrypted clipboard history and calendar events |
-| Calendar event cache           | `$XDG_CACHE_HOME/noctalia/calendar/events.enc`             | encrypted last-known-good events                               |
-| Custom palettes                | `~/.config/noctalia/palettes/`                             | your own color palette files                                   |
-| Local plugins                  | `~/.local/share/noctalia/plugins/`                         | plugins you install or place by hand                           |
-| Plugin source repos            | `~/.local/state/noctalia/plugins/sources/`                 | git-source repo caches, re-fetchable                           |
-| Exported plugin files          | `~/.local/state/noctalia/plugins/materialized/`            | runtime files exported from git sources                        |
-| Community palettes / templates | `~/.local/state/noctalia/community-*/`                     | downloaded catalogs, re-fetchable                              |
+| Calendar event cache           | `$XDG_CACHE_HOME/canopy/calendar/events.enc`             | encrypted last-known-good events                               |
+| Custom palettes                | `~/.config/canopy/palettes/`                             | your own color palette files                                   |
+| Local plugins                  | `~/.local/share/canopy/plugins/`                         | plugins you install or place by hand                           |
+| Plugin source repos            | `~/.local/state/canopy/plugins/sources/`                 | git-source repo caches, re-fetchable                           |
+| Exported plugin files          | `~/.local/state/canopy/plugins/materialized/`            | runtime files exported from git sources                        |
+| Community palettes / templates | `~/.local/state/canopy/community-*/`                     | downloaded catalogs, re-fetchable                              |
 
 It comes down to **three storage owners**:
 
-- **Yours** - `~/.config/noctalia/` (settings you write) and `~/.local/share/noctalia/` (plugins you install).
-- **Noctalia's** - `~/.local/state/noctalia/` (GUI overrides, UI state, plugin repo caches, exported plugin files, and downloaded catalogs).
+- **Yours** - `~/.config/canopy/` (settings you write) and `~/.local/share/canopy/` (plugins you install).
+- **Noctalia's** - `~/.local/state/canopy/` (GUI overrides, UI state, plugin repo caches, exported plugin files, and downloaded catalogs).
 - **Credential provider's** - durable calendar credentials and the encrypted storage master key managed by Secret Service, or explicit credential/key files managed by an external provisioner such as agenix. Deleting Noctalia's state directory does not remove them.
 
 Every path honors the relevant standard `XDG_CONFIG_HOME` / `XDG_STATE_HOME` / `XDG_DATA_HOME` / `XDG_CACHE_HOME` variable (and the `NOCTALIA_CONFIG_HOME` / `NOCTALIA_STATE_HOME` / `NOCTALIA_DATA_HOME` overrides where applicable).
@@ -159,13 +159,13 @@ Every path honors the relevant standard `XDG_CONFIG_HOME` / `XDG_STATE_HOME` / `
 Export the merged user config from the command line:
 
 ```sh
-noctalia config export > noctalia-config.toml
+canopy config export > canopy-config.toml
 ```
 
 Export the full effective config, including built-in defaults:
 
 ```sh
-noctalia config export full > noctalia-full-config.toml
+canopy config export full > canopy-full-config.toml
 ```
 
 Export stops with an error (and writes nothing) if a config file fails to parse or an `[include]` points at a file that does not exist, so a broken config never produces a misleading partial export. (The running shell is more forgiving: it loads what it can and surfaces the problem as a notification.)
@@ -173,15 +173,15 @@ Export stops with an error (and writes nothing) if a config file fails to parse 
 Because export writes TOML to stdout, you can pipe it into TOML-aware query tools. For example, with [`yq`](https://github.com/mikefarah/yq):
 
 ```sh
-noctalia config export full | yq -p toml -r '.theme.mode'
-noctalia config export full | yq -p toml -r '.shell.offline_mode'
-noctalia config export full | yq -p toml '.bar.default'
+canopy config export full | yq -p toml -r '.theme.mode'
+canopy config export full | yq -p toml -r '.shell.offline_mode'
+canopy config export full | yq -p toml '.bar.default'
 ```
 
 If you prefer normal `jq` filters, convert the TOML stream to JSON first:
 
 ```sh
-noctalia config export full | yq -p toml -o json '.' | jq -r '.theme.mode'
+canopy config export full | yq -p toml -o json '.' | jq -r '.theme.mode'
 ```
 
 The Settings actions menu includes **Export Config...**. It opens a chooser with two export modes:
@@ -196,26 +196,26 @@ The chooser warns that **both export modes may contain sensitive data**, such as
 Run the validator to catch problems before they silently take effect:
 
 ```sh
-noctalia config validate
+canopy config validate
 ```
 
-With no argument it checks the merged configuration exactly as the shell loads it: every `*.toml` in `~/.config/noctalia/` (or `$NOCTALIA_CONFIG_HOME`), then the `settings.toml` overrides in `~/.local/state/noctalia/`. Pass a directory to validate just that directory's `*.toml` files instead:
+With no argument it checks the merged configuration exactly as the shell loads it: every `*.toml` in `~/.config/canopy/` (or `$NOCTALIA_CONFIG_HOME`), then the `settings.toml` overrides in `~/.local/state/canopy/`. Pass a directory to validate just that directory's `*.toml` files instead:
 
 ```sh
-noctalia config validate ./my-config-dir
+canopy config validate ./my-config-dir
 ```
 
 Pass a file to validate only that TOML file, without scanning default locations or merging `settings.toml`. This is useful for generated configs, including NixOS-managed config files:
 
 ```sh
-noctalia config validate ./config.toml
+canopy config validate ./config.toml
 ```
 
 Every diagnostic is prefixed with the file, line, and column it came from, followed by the dotted config path:
 
 ```
-WARN  /home/you/.config/noctalia/bar.toml:14:10: bar.main.foo: unknown setting
-ERROR /home/you/.config/noctalia/widgets.toml:22:12: widget.clock.timezone: unknown timezone "Europe/Berln"
+WARN  /home/you/.config/canopy/bar.toml:14:10: bar.main.foo: unknown setting
+ERROR /home/you/.config/canopy/widgets.toml:22:12: widget.clock.timezone: unknown timezone "Europe/Berln"
 ```
 
 With several config files in play (or `settings.toml` overriding one of them), the reported file is the one whose definition actually won the merge.

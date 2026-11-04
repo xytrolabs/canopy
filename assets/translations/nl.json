@@ -693,7 +693,7 @@
       "desktop-widgets-editor-enabled": "Widget-editor voor bureaublad staat aan. Schakel over naar een lege werkruimte om de editor-overlay te zien.",
       "greeter-sync": "Noctalia Greeter",
       "greeter-sync-success": "Uiterlijk gesynchroniseerd. Wijzigingen worden toegepast bij het volgende aanmeldingsscherm.",
-      "keybind-app": "Noctalia",
+      "keybind-app": "Canopy",
       "keybind-invalid-modifier": "Deze sneltoets accepteert een enkele toets zonder modificatietoetsen.",
       "keybind-invalid-printable": "Drukbare toetsen (letters, cijfers, symbolen) vereisen een modificatietoets zoals Ctrl of Alt.",
       "keybind-invalid-super": "De Super-/Windows-toets kan niet worden gebruikt in shell-sneltoetsen.",
@@ -1265,8 +1265,8 @@
         },
         "kind-label": "Soort",
         "location-label": "Locatie",
-        "location-placeholder-git": "https://github.com/me/noctalia-plugins",
-        "location-placeholder-path": "~/dev/noctalia-plugins",
+        "location-placeholder-git": "https://github.com/me/canopy-plugins",
+        "location-placeholder-path": "~/dev/canopy-plugins",
         "name-label": "Naam",
         "name-placeholder": "mijn-plugins",
         "remove": "Verwijder bron",
@@ -1307,7 +1307,7 @@
           "label": "Hoekronding"
         },
         "custom-palette": {
-          "description": "Kies een palet uit ~/.config/noctalia/palettes/",
+          "description": "Kies een palet uit ~/.config/canopy/palettes/",
           "label": "Aangepast palet",
           "search-placeholder": "Aangepaste paletten zoeken..."
         },

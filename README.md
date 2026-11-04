@@ -1,17 +1,17 @@
-# Noctalia
+# Canopy
 
-Noctalia is a native Wayland desktop shell for people who want a polished, configurable Linux desktop without stitching together a separate bar, launcher, notification daemon, lock screen, wallpaper tool, and settings UI.
+Canopy is a native Wayland desktop shell for people who want a polished, configurable Linux desktop. It is built on the Canopy/Noctalia v5 foundation, customized for Xytro Labs with its own identity, defaults, and release process.
 
 It provides the shell layer around your compositor: bars, widgets, dock, launcher, control center, notifications, wallpaper, lock screen, session actions, clipboard history, OSDs, tray integration, and desktop widgets. The project is built directly on Wayland and OpenGL ES with no Qt or GTK dependency, so the UI, rendering, configuration, and IPC model are designed as one cohesive shell instead of a collection of unrelated panels and scripts.
 
 <p><br/></p>
 
 <p align="center">
-  <img src="https://assets.noctalia.dev/noctalia-logo.svg?v=2" alt="Noctalia Logo" style="width: 192px" />
+  <img src="https://assets.canopy.dev/canopy-logo.svg?v=2" alt="Noctalia Logo" style="width: 192px" />
 </p>
 
 <p align="center">
-  <a href="https://docs.noctalia.dev/noctalia/getting-started/installation/">
+  <a href="https://docs.canopy.dev/canopy/getting-started/installation/">
     <img
       src="https://img.shields.io/badge/Install_Noctalia-FFF59B?style=for-the-badge&labelColor=FFF59B"
       alt="Install Noctalia"
@@ -23,16 +23,16 @@ It provides the shell layer around your compositor: bars, widgets, dock, launche
 <p><br/></p>
 
 <p align="center">
-  <a href="https://github.com/noctalia-dev/noctalia/commits">
-    <img src="https://img.shields.io/github/last-commit/noctalia-dev/noctalia?style=for-the-badge&labelColor=FFF59B&color=FFF59B&logo=git&logoColor=070722&label=commit" alt="Last commit" />
+  <a href="https://github.com/canopy-dev/canopy/commits">
+    <img src="https://img.shields.io/github/last-commit/canopy-dev/canopy?style=for-the-badge&labelColor=FFF59B&color=FFF59B&logo=git&logoColor=070722&label=commit" alt="Last commit" />
   </a>
-  <a href="https://github.com/noctalia-dev/noctalia/stargazers">
-    <img src="https://img.shields.io/github/stars/noctalia-dev/noctalia?style=for-the-badge&labelColor=FFF59B&color=FFF59B&logo=github&logoColor=070722" alt="GitHub stars" />
+  <a href="https://github.com/canopy-dev/canopy/stargazers">
+    <img src="https://img.shields.io/github/stars/canopy-dev/canopy?style=for-the-badge&labelColor=FFF59B&color=FFF59B&logo=github&logoColor=070722" alt="GitHub stars" />
   </a>
-  <a href="https://docs.noctalia.dev">
+  <a href="https://docs.canopy.dev">
     <img src="https://img.shields.io/badge/docs-FFF59B?style=for-the-badge&logo=gitbook&logoColor=070722&labelColor=FFF59B" alt="Documentation" />
   </a>
-  <a href="https://discord.noctalia.dev">
+  <a href="https://discord.canopy.dev">
     <img src="https://img.shields.io/badge/discord-FFF59B?style=for-the-badge&labelColor=FFF59B&logo=discord&logoColor=070722" alt="Discord" />
   </a>
 </p>
@@ -43,7 +43,7 @@ Most Wayland setups leave the desktop shell to a stack of small tools: one bar, 
 
 Noctalia solves that by providing one configurable shell layer that owns the common desktop surfaces and services while still fitting into compositor-driven Wayland workflows. It is meant for users who want the control of a custom desktop environment with fewer moving parts and a consistent UI.
 
-To understand the values and philosophy guiding the project, read our [ethos](https://noctalia.dev/ethos).
+To understand the values and philosophy guiding the project, read our [ethos](https://canopy.dev/ethos).
 
 ## What It Includes
 
@@ -68,17 +68,17 @@ Source dependencies, distro-specific package commands, build modes, and install 
 
 ## Configuration
 
-A ready-to-use starting config with all defaults is at [example.toml](example.toml). The full configuration reference lives in the [documentation site](https://docs.noctalia.dev/noctalia/). The source MDX files are in [`docs/user/`](docs/user/); sync them to a local docs checkout with `tools/sync-docs.sh`.
+A ready-to-use starting config with all defaults is at [example.toml](example.toml). The full configuration reference lives in the [documentation site](https://docs.canopy.dev/canopy/). The source MDX files are in [`docs/user/`](docs/user/); sync them to a local docs checkout with `tools/sync-docs.sh`.
 
 ## Contributing
 
 Developer notes, code style, contribution rules, testing, project layout, and debugging commands live in [CONTRIBUTING.md](CONTRIBUTING.md). The architecture and its invariants are described in [ARCHITECTURE.md](ARCHITECTURE.md).
 
-Bug reports, fixes, documentation updates, themes, and configuration examples are welcome. For general help and design discussion, join the community on [Discord](https://discord.noctalia.dev).
+Bug reports, fixes, documentation updates, themes, and configuration examples are welcome. For general help and design discussion, join the community on [Discord](https://discord.canopy.dev).
 
 ## Credits
 
-Thank you to the [contributors](https://github.com/noctalia-dev/noctalia/graphs/contributors) and community members who test Noctalia, report issues, share configurations, and help shape the project.
+Thank you to the [contributors](https://github.com/canopy-dev/canopy/graphs/contributors) and community members who test Noctalia, report issues, share configurations, and help shape the project.
 
 ## Donations
 
@@ -88,7 +88,7 @@ Donations are appreciated but completely optional.
   <a href="https://www.buymeacoffee.com/noctalia">
     <img src="https://img.shields.io/badge/Buy_Me_a_Coffee-FFF59B?style=for-the-badge&logo=buymeacoffee&logoColor=070722&labelColor=FFF59B" alt="Buy Me a Coffee">
   </a>
-  <a href="https://ko-fi.com/noctaliadev">
+  <a href="https://ko-fi.com/canopydev">
     <img src="https://img.shields.io/badge/Ko--fi-FFF59B?style=for-the-badge&logo=kofi&logoColor=070722&labelColor=FFF59B" alt="Ko-fi">
   </a>
 </p>
@@ -104,7 +104,7 @@ Distro packaging notes (description, deps, install layout, Meson options) live i
 ## Star History
 
 <p align="center">
-  <a href="https://github.com/noctalia-dev/noctalia/stargazers">
-    <img src="https://api.noctalia.dev/stars-animated/noctalia" alt="Star History" />
+  <a href="https://github.com/canopy-dev/canopy/stargazers">
+    <img src="https://api.canopy.dev/stars-animated/canopy" alt="Star History" />
   </a>
 </p>

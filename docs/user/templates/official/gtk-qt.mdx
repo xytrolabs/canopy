@@ -48,13 +48,13 @@ GTK applications include most GNOME apps and many Linux applications. Noctalia c
 - Open **Settings → Templates**
 - Toggle on **GTK 3** and/or **GTK 4**
 
-Enabling those built-in templates writes `noctalia.css` and runs the shipped [`apply.sh`](https://github.com/noctalia-dev/noctalia/blob/main/assets/templates/gtk/apply.sh) `post_hook` (`bash '…/gtk/apply.sh' dark|light`). That script imports `noctalia.css` into `gtk.css` and selects `adw-gtk3` / `adw-gtk3-dark`. A theme mode change re-applies the templates, so the same full hook runs again; you do not need a separate hook for that path.
+Enabling those built-in templates writes `canopy.css` and runs the shipped [`apply.sh`](https://github.com/canopy-dev/canopy/blob/main/assets/templates/gtk/apply.sh) `post_hook` (`bash '…/gtk/apply.sh' dark|light`). That script imports `canopy.css` into `gtk.css` and selects `adw-gtk3` / `adw-gtk3-dark`. A theme mode change re-applies the templates, so the same full hook runs again; you do not need a separate hook for that path.
 
-The GNOME `org.gnome.desktop.interface.color-scheme` preference, which browsers and other apps read through the desktop portal, is not part of the GTK templates. Noctalia syncs it on its own, with or without these templates; see [`sync_color_scheme`](/noctalia/theming/#sync_color_scheme) to turn that off.
+The GNOME `org.gnome.desktop.interface.color-scheme` preference, which browsers and other apps read through the desktop portal, is not part of the GTK templates. Noctalia syncs it on its own, with or without these templates; see [`sync_color_scheme`](/canopy/theming/#sync_color_scheme) to turn that off.
 
 ### App extensions
 
-Some community templates (for example Thunar) are **GTK extensions**: app-scoped CSS layered on top of the GTK theme. They load through the built-in GTK template, so they only take effect while **GTK 3** (or **GTK 4**, depending on the extension) is enabled here. Noctalia keeps them in `noctalia-extensions/` next to `gtk.css` and never adds anything else to `gtk.css`. Restart the app after enabling or disabling one.
+Some community templates (for example Thunar) are **GTK extensions**: app-scoped CSS layered on top of the GTK theme. They load through the built-in GTK template, so they only take effect while **GTK 3** (or **GTK 4**, depending on the extension) is enabled here. Noctalia keeps them in `canopy-extensions/` next to `gtk.css` and never adds anything else to `gtk.css`. Restart the app after enabling or disabling one.
 
 ### Troubleshooting
 
@@ -135,7 +135,7 @@ export QT_QPA_PLATFORMTHEME=qt6ct
 
 - Run `qt6ct` from terminal
 - In the **Appearance** tab, there will be a dropdown for **"Color scheme:"**
-- In the dropdown select `noctalia (KColorScheme)` if using a KColorScheme for KDE app compatibility, or `noctalia` for a normal QT theme without the need for KDE app compatibility.
+- In the dropdown select `canopy (KColorScheme)` if using a KColorScheme for KDE app compatibility, or `canopy` for a normal QT theme without the need for KDE app compatibility.
 - Click **Apply** and **OK**
 
 :::tip[KDE File Picker]

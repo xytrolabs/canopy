@@ -44,7 +44,7 @@ namespace {
   };
 
   void checkGroupHelp() {
-    const std::string expected = "Usage: noctalia tools <command> [options]\n"
+    const std::string expected = "Usage: canopy tools <command> [options]\n"
                                  "\n"
                                  "Manage offline tools.\n"
                                  "\n"
@@ -59,7 +59,7 @@ namespace {
   }
 
   void checkLeafHelp() {
-    const std::string expected = "Usage: noctalia convert <input> [kind] [options]\n"
+    const std::string expected = "Usage: canopy convert <input> [kind] [options]\n"
                                  "\n"
                                  "Convert a source file.\n"
                                  "\n"

@@ -20,7 +20,7 @@
 namespace scripting {
   namespace {
     constexpr Logger kLog("plugin-recommendations");
-    constexpr std::string_view kApi = "https://api.noctalia.dev";
+    constexpr std::string_view kApi = "https://api.canopy.dev";
     constexpr std::string_view kOwner = "plugin_store";
     using Clock = std::chrono::steady_clock;
 
@@ -115,7 +115,7 @@ namespace scripting {
         || encodeToken(bytes.bytes()) != secret) {
       return std::nullopt;
     }
-    constexpr char prefix[] = "noctalia-recommend-v1\0";
+    constexpr char prefix[] = "canopy-recommend-v1\0";
     std::string message(prefix, sizeof(prefix) - 1);
     message += key;
     std::array<std::uint8_t, crypto_auth_hmacsha256_BYTES> digest{};

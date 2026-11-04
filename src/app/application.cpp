@@ -146,7 +146,7 @@ Application::~Application() {
   SearchPickerDialog::setPopup(nullptr);
   m_settingsWindow.shutdownDialogPresenter();
   // m_systemMonitor is declared after the plugin hosts, so it is destroyed first; drop the script
-  // API's pointer to it here, while both are still alive, or a plugin that used noctalia.cpuCores
+  // API's pointer to it here, while both are still alive, or a plugin that used canopy.cpuCores
   // releases its reference through a dangling pointer as its host is torn down.
   m_scriptApi.setSystemMonitor(nullptr);
   TooltipManager::instance().shutdown();
@@ -180,7 +180,7 @@ void Application::run(const std::function<void()>& startupReadyCallback) {
   runStartupPhase("initUi", [this] { initUi(); });
   runStartupPhase("initPluginServices", [this] {
     // Outputs are enumerated by now (wallpaper created its surfaces in initUi); refresh
-    // the script-visible output snapshot before any service/panel reads noctalia.outputs().
+    // the script-visible output snapshot before any service/panel reads canopy.outputs().
     if (m_syncScriptApiOutputs) {
       m_syncScriptApiOutputs();
     }

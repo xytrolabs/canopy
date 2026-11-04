@@ -64,14 +64,14 @@ namespace {
     bool m_releaseOnDestruction = true;
   };
 
-  constexpr std::string_view kApplyHelperName = "noctalia-greeter-apply-appearance";
+  constexpr std::string_view kApplyHelperName = "canopy-greeter-apply-appearance";
   constexpr std::string_view kPkexecName = "pkexec";
   constexpr std::string_view kSyncArgument = "--sync";
   constexpr std::string_view kCapabilityArgument = "--supports";
   constexpr std::string_view kSecureSyncCapability = "secure-sync-v1";
-  constexpr std::string_view kGreeterName = "noctalia-greeter";
+  constexpr std::string_view kGreeterName = "canopy-greeter";
   constexpr std::string_view kGreeterTomlFileName = "greeter.toml";
-  constexpr std::string_view kDefaultGreeterStateDir = "/var/lib/noctalia-greeter";
+  constexpr std::string_view kDefaultGreeterStateDir = "/var/lib/canopy-greeter";
   constexpr std::string_view kGreeterStateDirEnv = "NOCTALIA_GREETER_STATE_DIR";
   constexpr std::string_view kStagedOutputLayoutFileName = "output_layout";
   constexpr std::string_view kStagedOutputTransformsFileName = "output_transforms";
@@ -311,7 +311,7 @@ namespace {
   [[nodiscard]] std::string findApplyHelper() {
     std::string helper = resolveProgramPath(
         kApplyHelperName,
-        {"/usr/bin/noctalia-greeter-apply-appearance", "/usr/local/bin/noctalia-greeter-apply-appearance"}
+        {"/usr/bin/canopy-greeter-apply-appearance", "/usr/local/bin/canopy-greeter-apply-appearance"}
     );
     if (!helper.empty() && !isTrustedPrivilegeExecutable(helper)) {
       kLog.warn("refusing untrusted greeter sync helper '{}'", helper);
@@ -363,7 +363,7 @@ namespace {
       return {};
     }
 
-    auto staging = runtimeDirectory / "noctalia-greeter-sync";
+    auto staging = runtimeDirectory / "canopy-greeter-sync";
     std::filesystem::remove_all(staging, ec);
     if (ec) {
       kLog.warn("failed to clear greeter sync staging directory '{}': {}", staging.string(), ec.message());
@@ -525,7 +525,7 @@ namespace {
     if (!secureStagedFile(syncPath)) {
       return false;
     }
-    out << "# noctalia-greeter staged sync.toml (merged into live sync.toml by apply-appearance)\n\n";
+    out << "# canopy-greeter staged sync.toml (merged into live sync.toml by apply-appearance)\n\n";
     out << formatToml(root);
     if (!out.good()) {
       kLog.warn("failed to write staged sync.toml '{}'", syncPath.string());
@@ -959,7 +959,7 @@ namespace greeter::detail {
 namespace greeter {
 
   bool appearanceSyncAvailable(const ShellGreeterSyncConfig& greeterSync) noexcept {
-    return programExists(kGreeterName, {"/usr/bin/noctalia-greeter", "/usr/local/bin/noctalia-greeter"})
+    return programExists(kGreeterName, {"/usr/bin/canopy-greeter", "/usr/local/bin/canopy-greeter"})
         && !findApplyHelper().empty()
         && (process::resolvePrivilegeEscalator().has_value() || hasPrivilegeCommandOverride(greeterSync));
   }
@@ -1152,7 +1152,7 @@ namespace greeter {
             return "error: usage: greeter-sync\n";
           }
           if (!appearanceSyncAvailable(config.config().shell.greeterSync)) {
-            return "error: noctalia greeter is not installed\n";
+            return "error: canopy greeter is not installed\n";
           }
           const bool logind = logindOnSystemBus != nullptr && logindOnSystemBus();
           const GreeterSyncLaunch launch =

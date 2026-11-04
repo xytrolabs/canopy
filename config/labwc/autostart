@@ -1,0 +1,7 @@
+# Canopy session autostart (Labwc)
+# Kill any stale shell first, then start exactly one instance. Running two
+# shells is what produces a duplicate panel / duplicate tray.
+
+pkill -x canopy 2>/dev/null
+sleep 1
+canopy >"$HOME/.cache/canopy-shell.log" 2>&1 &

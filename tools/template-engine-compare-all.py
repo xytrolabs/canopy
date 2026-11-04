@@ -21,14 +21,14 @@ from pathlib import Path
 
 SCRIPT_DIR = Path(__file__).parent.resolve()
 REPO_DIR = SCRIPT_DIR.parent
-NOCTALIA_BIN = REPO_DIR / "build-debug" / "noctalia"
+NOCTALIA_BIN = REPO_DIR / "build-debug" / "canopy"
 PYTHON_PROCESSOR = (
-    Path.home() / "Development/misc/noctalia/noctalia-shell/Scripts/python/src/theming/template-processor.py"
+    Path.home() / "Development/misc/canopy/canopy-shell/Scripts/python/src/theming/template-processor.py"
 )
-PYTHON_THEMING_DIR = Path.home() / "Development/misc/noctalia/noctalia-shell/Scripts/python/src/theming"
-TEMPLATE_ROOT = Path.home() / "Development/misc/noctalia/noctalia-shell/Assets/Templates"
+PYTHON_THEMING_DIR = Path.home() / "Development/misc/canopy/canopy-shell/Scripts/python/src/theming"
+TEMPLATE_ROOT = Path.home() / "Development/misc/canopy/canopy-shell/Assets/Templates"
 PREDEFINED_SCHEME_JSON = (
-    Path.home() / "Development/misc/noctalia/noctalia-shell/Assets/ColorScheme/Noctalia-default/Noctalia-default.json"
+    Path.home() / "Development/misc/canopy/canopy-shell/Assets/ColorScheme/Noctalia-default/Noctalia-default.json"
 )
 
 sys.path.insert(0, str(PYTHON_THEMING_DIR))

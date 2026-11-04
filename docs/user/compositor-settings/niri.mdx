@@ -15,7 +15,7 @@ Add the following settings to your Niri configuration file (usually located at `
 ## Autostart Noctalia
 
 ```kdl
-spawn-at-startup "noctalia"
+spawn-at-startup "canopy"
 ```
 
 ## Compositor Settings
@@ -33,7 +33,7 @@ window-rule {
 
 // Floating Noctalia settings window.
 window-rule {
-  match app-id="dev.noctalia.Noctalia"
+  match app-id="dev.canopy.Noctalia"
   open-floating true
   default-column-width { fixed 1080; }
   default-window-height { fixed 920; }
@@ -55,17 +55,17 @@ Add these binds to your `~/.config/niri/config.kdl`:
 binds {
     // Core Noctalia binds
     Mod+Space { spawn-sh "noctalia msg panel-toggle launcher"; }
-    Mod+S { spawn-sh "noctalia msg panel-toggle control-center"; }
-    Mod+Shift+Comma { spawn-sh "noctalia msg settings-toggle"; }
-    Alt+Tab { spawn-sh "noctalia msg window-switcher hold"; }
+    Mod+S { spawn-sh "canopy msg panel-toggle control-center"; }
+    Mod+Shift+Comma { spawn-sh "canopy msg settings-toggle"; }
+    Alt+Tab { spawn-sh "canopy msg window-switcher hold"; }
     // Niri has a built-in window switcher you might want to try it to see which one you prefer.
 
     // Audio & Brightness
-    XF86AudioRaiseVolume { spawn-sh "noctalia msg volume-up"; }
-    XF86AudioLowerVolume { spawn-sh "noctalia msg volume-down"; }
-    XF86AudioMute { spawn-sh "noctalia msg volume-mute"; }
-    XF86MonBrightnessUp { spawn-sh "noctalia msg brightness-up"; }
-    XF86MonBrightnessDown { spawn-sh "noctalia msg brightness-down"; }
+    XF86AudioRaiseVolume { spawn-sh "canopy msg volume-up"; }
+    XF86AudioLowerVolume { spawn-sh "canopy msg volume-down"; }
+    XF86AudioMute { spawn-sh "canopy msg volume-mute"; }
+    XF86MonBrightnessUp { spawn-sh "canopy msg brightness-up"; }
+    XF86MonBrightnessDown { spawn-sh "canopy msg brightness-down"; }
 }
 ```
 
@@ -109,7 +109,7 @@ This configuration places Noctalia's dedicated backdrop layer (a blurred and tin
 
 ```kdl
 layer-rule {
-  match namespace="^noctalia-backdrop"
+  match namespace="^canopy-backdrop"
   place-within-backdrop true
 }
 ```
@@ -127,7 +127,7 @@ If you prefer a stationary wallpaper that is visible at all times and does not s
 ```kdl
 // Place the regular wallpaper on the backdrop.
 layer-rule {
-  match namespace="^noctalia-wallpaper"
+  match namespace="^canopy-wallpaper"
   place-within-backdrop true
 }
 
@@ -195,7 +195,7 @@ layer-rule {
   }
 }
 
-/* Enable blur on noctalia's window switcher and disable xray. */
+/* Enable blur on canopy's window switcher and disable xray. */
 layer-rule {
     match namespace="noctalia-window-switcher"
     background-effect {
@@ -238,7 +238,7 @@ Omitting the Noctalia `layer-rule` is not enough to disable its client-requested
 Each desktop widget lives on its own layer-shell surface with a unique namespace, so you can target an individual widget with a `layer-rule`. The namespace is:
 
 ```
-noctalia-desktop-widget-<type>-<id>
+canopy-desktop-widget-<type>-<id>
 ```
 
 where `<type>` is the widget kind (`clock`, `weather`, `sysmon`, …) and `<id>` is the widget's stable id. Run `niri msg layers` to list all layer surfaces and see the exact namespaces on your setup:
@@ -248,14 +248,14 @@ Bottom layer:
   Surface:
     Namespace: "noctalia-desktop-widget-clock-000000000000000a"
   Surface:
-    Namespace: "noctalia-desktop-widget-weather-000000000000000b"
+    Namespace: "canopy-desktop-widget-weather-000000000000000b"
 ```
 
 Match on `^noctalia-desktop-widget-` to target every desktop widget at once, or narrow the pattern by type or full id for a single widget. For example, to match just the weather widget:
 
 ```kdl
 layer-rule {
-  match namespace="^noctalia-desktop-widget-weather-"
+  match namespace="^canopy-desktop-widget-weather-"
 }
 ```
 
@@ -267,7 +267,7 @@ To lock and suspend yourself from Niri (for example when logind lid handling is 
 
 ```kdl
 switch-events {
-    lid-close { spawn "noctalia" "msg" "session" "lock-and-suspend"; }
+    lid-close { spawn "canopy" "msg" "session" "lock-and-suspend"; }
 }
 ```
 

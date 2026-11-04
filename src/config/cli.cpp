@@ -208,8 +208,8 @@ namespace noctalia::config {
 
       const std::filesystem::path configHome = target / "config-home";
       const std::filesystem::path stateHome = target / "state-home";
-      const std::filesystem::path configDir = configHome / "noctalia";
-      const std::filesystem::path stateDir = stateHome / "noctalia";
+      const std::filesystem::path configDir = configHome / "canopy";
+      const std::filesystem::path stateDir = stateHome / "canopy";
 
       if (options.force) {
         std::error_code ec;
@@ -327,7 +327,7 @@ namespace noctalia::config {
 
     int runValidate(int argc, char* argv[]) {
       auto parsed = cli::parseOrReport(
-          cli::kConfigValidateCmd, "noctalia config validate",
+          cli::kConfigValidateCmd, "canopy config validate",
           std::span<char* const>{argv + 3, static_cast<std::size_t>(argc - 3)}
       );
       if (!parsed)
@@ -403,7 +403,7 @@ namespace noctalia::config {
 
     int runExport(int argc, char* argv[]) {
       auto parsed = cli::parseOrReport(
-          cli::kConfigExportCmd, "noctalia config export",
+          cli::kConfigExportCmd, "canopy config export",
           std::span<char* const>{argv + 3, static_cast<std::size_t>(argc - 3)}
       );
       if (!parsed)
@@ -443,7 +443,7 @@ namespace noctalia::config {
 
   int runCli(int argc, char* argv[]) {
     if (argc < 3 || std::strcmp(argv[2], "--help") == 0 || std::strcmp(argv[2], "-h") == 0) {
-      std::print("{}", cli::renderHelp(cli::kConfigCmd, "noctalia config"));
+      std::print("{}", cli::renderHelp(cli::kConfigCmd, "canopy config"));
       return argc < 3 ? 1 : 0;
     }
 
@@ -455,7 +455,7 @@ namespace noctalia::config {
       return runSettingsCount(argc, argv);
     if (std::strcmp(argv[2], "replay-report") == 0) {
       auto parsed = cli::parseOrReport(
-          cli::kConfigReplayReportCmd, "noctalia config replay-report",
+          cli::kConfigReplayReportCmd, "canopy config replay-report",
           std::span<char* const>{argv + 3, static_cast<std::size_t>(argc - 3)}
       );
       if (!parsed)
@@ -472,7 +472,7 @@ namespace noctalia::config {
     }
 
     std::println(stderr, "error: unknown command: {}", argv[2]);
-    std::println(stderr, "Run 'noctalia config --help' for usage.");
+    std::println(stderr, "Run 'canopy config --help' for usage.");
     return 1;
   }
 

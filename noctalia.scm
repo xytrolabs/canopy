@@ -6,13 +6,13 @@
 ;;; --8<---------------cut here---------------start------------->8---
 ;;; (channel
 ;;;   (name 'noctalia)
-;;;   (url "https://github.com/noctalia-dev/noctalia")
+;;;   (url "https://github.com/canopy-dev/canopy")
 ;;;   (branch "main"))
 ;;; --8<---------------cut here---------------end--------------->8---
 ;;;
-;;; It provides this (noctalia) module with the noctalia-git package.
+;;; It provides this (canopy) module with the canopy-git package.
 
-(define-module (noctalia)
+(define-module (canopy)
   ;; Utilities
   #:use-module (guix gexp)
   #:use-module ((guix licenses) #:prefix license:)
@@ -62,7 +62,7 @@
                 "0zqnn7bwqzifchjhclrrcqnp39cpd3nnf6nbd9bav2hwhcx92mwy"))))))
 
 (define source-checkout
-  (local-file "." "noctalia-checkout"
+  (local-file "." "canopy-checkout"
               #:recursive? #t
               #:select?
               (or (git-predicate (current-source-directory))
@@ -70,7 +70,7 @@
 
 (define-public noctalia-git
   (package
-    (name "noctalia-git")
+    (name "canopy-git")
     (version "latest")
     (source source-checkout)
     (build-system meson-build-system)
@@ -123,7 +123,7 @@
            wayland
            wayland-protocols-1.48
            wireplumber))
-    (home-page "https://noctalia.dev/")
+    (home-page "https://canopy.dev/")
     (synopsis "Wayland shell and bar")
     (description
      "Noctalia is a lightweight Wayland shell and bar built directly on

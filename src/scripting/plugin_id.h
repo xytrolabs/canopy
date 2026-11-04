@@ -51,7 +51,7 @@ namespace scripting {
     return std::string(id.substr(id.find('/') + 1));
   }
 
-  // Public plugin page on noctalia.dev for official/community catalog entries.
+  // Public plugin page on canopy.dev for official/community catalog entries.
   [[nodiscard]] inline std::optional<std::string> pluginWebsitePageUrl(std::string_view source, std::string_view id) {
     if (source != "official" && source != "community") {
       return std::nullopt;
@@ -60,7 +60,7 @@ namespace scripting {
     if (!subdir.has_value()) {
       return std::nullopt;
     }
-    return "https://noctalia.dev/plugins/" + std::string(source) + "/" + *subdir;
+    return "https://canopy.dev/plugins/" + std::string(source) + "/" + *subdir;
   }
 
 } // namespace scripting

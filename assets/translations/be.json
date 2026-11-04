@@ -959,7 +959,7 @@
       "calendar-reminder-open": "Адкрыць",
       "calendar-reminder-untitled": "Падзея без назвы",
       "calendar-reminder-with-location": "{when}\n{location}",
-      "config-migration-body": "Абнавіце {path} у зыходным файле. Noctalia толькі тэрмінова прымяняе гэтую замену. Выканайце noctalia config validate, каб убачыць усе патрэбныя змены.",
+      "config-migration-body": "Абнавіце {path} у зыходным файле. Noctalia толькі тэрмінова прымяняе гэтую замену. Выканайце canopy config validate, каб убачыць усе патрэбныя змены.",
       "config-migration-title": "Патрабуецца абнаўленне канфігурацыі",
       "dbus-disabled": "Апавяшчэнні DBus выключаныя",
       "desktop-widgets-editor": "Рэдактар віджэтаў",
@@ -968,13 +968,13 @@
       "greeter-sync-pending": "Чаканне ухвалення адміністратара на запіс у Greeter.",
       "greeter-sync-pending-console": "Чаканне ухвалення адміністратара. Ухваліце запыт polkit у Noctalia, на TTY ці кансолі, або ўласнаручна выканайце pkexec.",
       "greeter-sync-pending-legacy": "Сінхранізацыя праз састарэлы аўтэнтыфікаваны памочнік. Патрабуецца ўхваленне адміністратара.",
-      "greeter-sync-pending-manual": "Файлы ў чаканні. Выканайце ў тэрмінале каманду: pkexec noctalia-greeter-apply-appearance \"$XDG_RUNTIME_DIR/noctalia-greeter-sync\". Або задайце shell.greeter_sync.privilege_command (напрыклад, ghostty -e pkexec) і сінхранізуйцеся паўторна.",
-      "greeter-sync-pending-manual-pkexec": "Сінхранізацыя выгляду ў Greeter. Калі патрабуецца аўтарызацыя адміністратара, а запыт не паказваецца, выканайце ў тэрмінале: pkexec noctalia-greeter-apply-appearance --sync \"/run/user/$(id -u)/noctalia-greeter-sync\".",
+      "greeter-sync-pending-manual": "Файлы ў чаканні. Выканайце ў тэрмінале каманду: pkexec canopy-greeter-apply-appearance \"$XDG_RUNTIME_DIR/noctalia-greeter-sync\". Або задайце shell.greeter_sync.privilege_command (напрыклад, ghostty -e pkexec) і сінхранізуйцеся паўторна.",
+      "greeter-sync-pending-manual-pkexec": "Сінхранізацыя выгляду ў Greeter. Калі патрабуецца аўтарызацыя адміністратара, а запыт не паказваецца, выканайце ў тэрмінале: pkexec canopy-greeter-apply-appearance --sync \"/run/user/$(id -u)/noctalia-greeter-sync\".",
       "greeter-sync-success": "Выгляд сінхранізаваны. Змены прыменяцца на наступным экране блакіроўкі.",
       "greeter-sync-timeout": "Сінхранізацыя Greeter усё яшчэ чакае ухвалення адміністратара. Праверце TTY або кансоль на прадмет запыту polkit, уключыце агент polkit у наладах бяспекі, або ўласнаручна выканайце pkexec.",
-      "greeter-sync-timeout-manual": "Сінхранізацыя Greeter усё яшчэ патрабуе ухвалення адміністратарам. Выканайце ў тэрмінале каманду: pkexec noctalia-greeter-apply-appearance \"$XDG_RUNTIME_DIR/noctalia-greeter-sync\"",
-      "greeter-sync-timeout-manual-pkexec": "Сінхранізацыя Greeter усё яшчэ патрабуе аўтарызацыі. Выканайце ў тэрмінале: pkexec noctalia-greeter-apply-appearance --sync \"/run/user/$(id -u)/noctalia-greeter-sync\"",
-      "keybind-app": "Noctalia",
+      "greeter-sync-timeout-manual": "Сінхранізацыя Greeter усё яшчэ патрабуе ухвалення адміністратарам. Выканайце ў тэрмінале каманду: pkexec canopy-greeter-apply-appearance \"$XDG_RUNTIME_DIR/noctalia-greeter-sync\"",
+      "greeter-sync-timeout-manual-pkexec": "Сінхранізацыя Greeter усё яшчэ патрабуе аўтарызацыі. Выканайце ў тэрмінале: pkexec canopy-greeter-apply-appearance --sync \"/run/user/$(id -u)/noctalia-greeter-sync\"",
+      "keybind-app": "Canopy",
       "keybind-invalid-modifier": "Гэта спалучэнне можа быць адной клавішай без мадыфікатараў.",
       "keybind-invalid-printable": "Клавішам-сімвалам (літарам, лічбам, пунктуацыі і інш.) патрабуюцца мадыфікатары, такія як Ctrl або Alt.",
       "keybind-invalid-super": "Клавіша Super/Windows не можа быць выкарыстана ў спалучэннях клавішаў абалонкі.",
@@ -1360,8 +1360,8 @@
       "support-report": "Не ўдалося захаваць справаздачу.",
       "sync-greeter": "Не ўдалося сінхранізаваць выгляд з Noctalia Greeter.",
       "sync-greeter-timeout": "Сінхранізацыя Greeter усё яшчэ чакае ухвалення адміністратара. Праверце TTY або кансоль на прадмет запыту polkit, уключыце агент polkit у наладах бяспекі, або ўласнаручна выканайце pkexec.",
-      "sync-greeter-timeout-manual": "Сінхранізацыя Greeter усё яшчэ патрабуе ухвалення адміністратарам. Выканайце ў тэрмінале каманду: pkexec noctalia-greeter-apply-appearance \"$XDG_RUNTIME_DIR/noctalia-greeter-sync\"",
-      "sync-greeter-timeout-manual-pkexec": "Сінхранізацыя Greeter усё яшчэ патрабуе аўтарызацыі. Выканайце ў тэрмінале: pkexec noctalia-greeter-apply-appearance --sync \"/run/user/$(id -u)/noctalia-greeter-sync\"",
+      "sync-greeter-timeout-manual": "Сінхранізацыя Greeter усё яшчэ патрабуе ухвалення адміністратарам. Выканайце ў тэрмінале каманду: pkexec canopy-greeter-apply-appearance \"$XDG_RUNTIME_DIR/noctalia-greeter-sync\"",
+      "sync-greeter-timeout-manual-pkexec": "Сінхранізацыя Greeter усё яшчэ патрабуе аўтарызацыі. Выканайце ў тэрмінале: pkexec canopy-greeter-apply-appearance --sync \"/run/user/$(id -u)/noctalia-greeter-sync\"",
       "widget": {
         "rename": "Не ўдалося перайменаваць названы віджэт."
       },
@@ -1844,8 +1844,8 @@
         },
         "kind-label": "Тып",
         "location-label": "Месцазнаходжанне",
-        "location-placeholder-git": "https://github.com/ja/ubudovy-noctalia",
-        "location-placeholder-path": "~/dev/ubudovy-noctalia",
+        "location-placeholder-git": "https://github.com/ja/ubudovy-canopy",
+        "location-placeholder-path": "~/dev/ubudovy-canopy",
         "name-label": "ID крыніцы",
         "name-placeholder": "maje-ubudovy",
         "precedence-hint": "Крыніцы ніжэй перавызначаюць крыніцы вышэй, калі ёсць аднолькавыя ўбудовы.",
@@ -1868,7 +1868,7 @@
         "loading": "Загрузка каталога…",
         "no-readme": "Апісання няма",
         "not-listed": "Не ў каталогу",
-        "open-page": "Адкрыць старонку ўбудовы на noctalia.dev",
+        "open-page": "Адкрыць старонку ўбудовы на canopy.dev",
         "open-source": "Адкрыць рэпазіторый убудовы",
         "recommend": "Рэкамендаваць",
         "recommendation-error": "Змена не пацвердзілася. Папярэдняя рэкамендацыя не змянілася. Паўтарыце тую ж змену, каб узгадніць стан.",
@@ -1940,7 +1940,7 @@
           "label": "Скругленасць кутоў"
         },
         "custom-palette": {
-          "description": "Выберыце палітру з ~/.config/noctalia/palettes/",
+          "description": "Выберыце палітру з ~/.config/canopy/palettes/",
           "label": "Уласная палітра",
           "search-placeholder": "Шукаць карыстальніцкія палітры…"
         },
@@ -3361,7 +3361,7 @@
             "label": "Адкрыць налады"
           },
           "settings-open-plugin": {
-            "description": "Адкрыць акно налад на наладах убудовы (напр. noctalia/notes)",
+            "description": "Адкрыць акно налад на наладах убудовы (напр. canopy/notes)",
             "label": "Адкрыць налады ўбудовы"
           },
           "settings-open-widget": {
@@ -4240,7 +4240,7 @@
       "export-config": "Экспарт канфігурацыі…",
       "export-config-saved": "Экспарт канфігурацыі захаваны.",
       "filter-overridden": "Перавызначаныя",
-      "legacy-config-warning": "Састарэлая налада: {issue}. Адрэдагуйце гэты зыходны запіс; Noctalia ужывае замену толькі часова. Выканайце noctalia config validate, каб атрымаць спіс усіх неабходных змен.",
+      "legacy-config-warning": "Састарэлая налада: {issue}. Адрэдагуйце гэты зыходны запіс; Noctalia ужывае замену толькі часова. Выканайце canopy config validate, каб атрымаць спіс усіх неабходных змен.",
       "native-title": "Налады Noctalia",
       "no-results": "Налад не знойдзена",
       "no-results-hint": "Паспрабуйце іншую назву налады або ключ канфігурацыі.",

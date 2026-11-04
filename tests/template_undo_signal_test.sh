@@ -65,11 +65,11 @@ run_undo() {
 
 # script:theme file relative to XDG_CONFIG_HOME
 cases="
-ghostty/undo.sh:ghostty/themes/noctalia
-kitty/undo.sh:kitty/themes/noctalia.conf
-btop/undo.sh:btop/themes/noctalia.theme
-cava/undo.sh:cava/themes/noctalia
-mango/undo.sh:mango/noctalia.conf
+ghostty/undo.sh:ghostty/themes/canopy
+kitty/undo.sh:kitty/themes/canopy.conf
+btop/undo.sh:btop/themes/canopy.theme
+cava/undo.sh:cava/themes/canopy
+mango/undo.sh:mango/canopy.conf
 "
 
 for entry in $cases; do
@@ -85,7 +85,7 @@ for entry in $cases; do
 
   config_home="$work_dir/$(dirname "$script")-themed"
   mkdir -p "$config_home/$(dirname "$theme_file")"
-  printf 'noctalia\n' >"$config_home/$theme_file"
+  printf 'canopy\n' >"$config_home/$theme_file"
   run_undo "$script" "$config_home"
   if [ ! -s "$calls_file" ]; then
     fail "$script removed its theme without reloading its client"
@@ -112,7 +112,7 @@ fi
 config_home="$work_dir/wezterm-themed"
 mkdir -p "$config_home/wezterm/colors"
 config_file="$config_home/wezterm/wezterm.lua"
-printf 'local config = {}\nconfig.color_scheme = "Noctalia"\nreturn config\n' >"$config_file"
+printf 'local config = {}\nconfig.color_scheme = "Canopy"\nreturn config\n' >"$config_file"
 printf 'colors\n' >"$config_home/wezterm/colors/Noctalia.toml"
 touch -t 202001010000 "$config_file"
 run_undo "wezterm/undo.sh" "$config_home"

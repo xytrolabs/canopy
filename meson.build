@@ -1,4 +1,4 @@
-project('noctalia', ['c', 'cpp'],
+project('canopy', ['c', 'cpp'],
   version: files('VERSION'),
   meson_version: '>=1.1',
   default_options: [
@@ -450,7 +450,7 @@ _protocol_sources += _wlr_ls_c
 _protocol_headers += _wlr_ls_h
 
 # ── Main sources ──────────────────────────────────────────────────────────────
-_noctalia_sources = files(
+_canopy_sources = files(
   'src/app/application.cpp',
   'src/app/application_events.cpp',
   'src/app/application_ipc.cpp',
@@ -1065,14 +1065,14 @@ _noctalia_sources = files(
 )
 
 if sanitize
-  _noctalia_sources += files('src/core/lsan_suppressions.cpp')
+  _canopy_sources += files('src/core/lsan_suppressions.cpp')
 endif
 
 git_program = find_program('git', required: false)
 if git_program.found()
   _git_revision_h = vcs_tag(
     input: 'src/core/git_revision.h.in',
-    output: 'noctalia_git_revision.h',
+    output: 'canopy_git_revision.h',
     command: [git_program, 'describe', '--tags', '--always', '--dirty=-dirty', '--abbrev=12'],
     fallback: 'unknown',
   )
@@ -1081,7 +1081,7 @@ else
   _git_revision_config.set('VCS_TAG', 'unknown')
   _git_revision_h = configure_file(
     input: 'src/core/git_revision.h.in',
-    output: 'noctalia_git_revision.h',
+    output: 'canopy_git_revision.h',
     configuration: _git_revision_config,
   )
 endif
@@ -1094,7 +1094,7 @@ endif
 alias_target('generated-headers', _generated_headers)
 
 # ── Include directories ────────────────────────────────────────────────────────
-_noctalia_inc = [
+_canopy_inc = [
   include_directories('src'),
   # '.' adds both the source root and the corresponding build-dir root, so
   # generated protocol headers (written to the build root) are found by #include.
@@ -1102,7 +1102,7 @@ _noctalia_inc = [
 ] + _wuffs_inc
 
 # ── Application library and executable ────────────────────────────────────────
-_noctalia_system_dependencies = [
+_canopy_system_dependencies = [
   sdbus_cpp_dep,
   wayland_client_dep,
   egl_dep,
@@ -1142,68 +1142,68 @@ _noctalia_system_dependencies = [
   sndfile_dep,
 ] + jemalloc_deps + (dl_dep.found() ? [dl_dep] : [])
 
-_noctalia_dependencies = _noctalia_system_dependencies + [
+_canopy_dependencies = _canopy_system_dependencies + [
   fzy_dep,
   mcu_dep,
   luau_dep,
 ]
 
-_noctalia_test_dependencies = _noctalia_system_dependencies + [
+_canopy_test_dependencies = _canopy_system_dependencies + [
   _fzy_selective_dep,
   _mcu_selective_dep,
   _luau_selective_dep,
 ]
 
-_noctalia_compile_definitions = [
+_canopy_compile_definitions = [
   '-DNOCTALIA_INSTALL_PREFIX="' + get_option('prefix') + '"',
   '-DNOCTALIA_INSTALL_DATADIR="' + get_option('datadir') + '"',
   '-DNOCTALIA_VERSION="' + meson.project_version() + '"',
 ] + jemalloc_cpp_args
 
-_noctalia_cpp_args = [
+_canopy_cpp_args = [
   '-Wall', '-Wextra', '-Wno-missing-field-initializers', '-Wpedantic', '-Wconversion', '-Wshadow',
-] + _noctalia_compile_definitions
+] + _canopy_compile_definitions
 
 # Production sources and generated protocols compile once. The shell links the
 # archive whole; tests link it normally so only the objects they exercise enter
 # each test executable.
-noctalia_core_lib = static_library('noctalia_core',
-  sources: _noctalia_sources + _protocol_sources + _protocol_headers + [_git_revision_h],
-  dependencies: _noctalia_dependencies,
-  include_directories: _noctalia_inc,
-  cpp_args: _noctalia_cpp_args,
+canopy_core_lib = static_library('canopy_core',
+  sources: _canopy_sources + _protocol_sources + _protocol_headers + [_git_revision_h],
+  dependencies: _canopy_dependencies,
+  include_directories: _canopy_inc,
+  cpp_args: _canopy_cpp_args,
 )
 
-noctalia_core_dep = declare_dependency(
-  link_with: noctalia_core_lib,
-  dependencies: _noctalia_test_dependencies,
-  include_directories: _noctalia_inc,
-  compile_args: _noctalia_compile_definitions,
+canopy_core_dep = declare_dependency(
+  link_with: canopy_core_lib,
+  dependencies: _canopy_test_dependencies,
+  include_directories: _canopy_inc,
+  compile_args: _canopy_compile_definitions,
   sources: _protocol_headers,
 )
 
-noctalia_exe = executable('noctalia',
+canopy_exe = executable('canopy',
   sources: files('src/main.cpp') + _protocol_headers,
-  dependencies: _noctalia_dependencies,
-  include_directories: _noctalia_inc,
-  cpp_args: _noctalia_cpp_args,
-  objects: noctalia_core_lib.extract_all_objects(recursive: false),
+  dependencies: _canopy_dependencies,
+  include_directories: _canopy_inc,
+  cpp_args: _canopy_cpp_args,
+  objects: canopy_core_lib.extract_all_objects(recursive: false),
   install: true,
 )
 
 install_subdir('assets',
-  install_dir: get_option('datadir') / 'noctalia',
-  exclude_files: ['dev.noctalia.Noctalia.desktop', 'dev.noctalia.Noctalia.Annotator.desktop'],
+  install_dir: get_option('datadir') / 'canopy',
+  exclude_files: ['dev.canopy.Noctalia.desktop', 'dev.canopy.Noctalia.Annotator.desktop'],
 )
 
 install_data(
-  'assets/dev.noctalia.Noctalia.desktop',
-  'assets/dev.noctalia.Noctalia.Annotator.desktop',
+  'assets/dev.canopy.Canopy.desktop',
+  'assets/dev.canopy.Canopy.Annotator.desktop',
   install_dir: get_option('datadir') / 'applications',
 )
 
 install_data(
-  'assets/noctalia.svg',
+  'assets/canopy.svg',
   install_dir: get_option('datadir') / 'icons' / 'hicolor' / 'scalable' / 'apps',
 )
 
@@ -1388,7 +1388,7 @@ if build_tests
     endif
     test_exe = executable(test_name + '_test',
       sources: files('tests' / (test_name + '_test.cpp')),
-      dependencies: noctalia_core_dep,
+      dependencies: canopy_core_dep,
       override_options: ['b_ndebug=false'],
     )
     test_args = []
@@ -1413,43 +1413,43 @@ if build_tests
 
   screencopy_connection_isolation_exe = executable('screencopy_connection_isolation_test',
     sources: files('tests/screencopy_connection_isolation_test.cpp') + [_wlr_screencopy_test_server_h],
-    dependencies: [noctalia_core_dep, wayland_server_dep],
+    dependencies: [canopy_core_dep, wayland_server_dep],
     override_options: ['b_ndebug=false'],
   )
   test('screencopy_connection_isolation', screencopy_connection_isolation_exe)
 
   idle_manager_exe = executable('idle_manager_test',
     sources: files('tests/idle_manager_test.cpp') + [_idle_test_server_h],
-    dependencies: [noctalia_core_dep, wayland_server_dep],
+    dependencies: [canopy_core_dep, wayland_server_dep],
     override_options: ['b_ndebug=false'],
   )
   test('idle_manager', idle_manager_exe)
 
   brightness_service_exe = executable('brightness_service_test',
     sources: files('tests/brightness_service_test.cpp'),
-    dependencies: [noctalia_core_dep, wayland_server_dep],
+    dependencies: [canopy_core_dep, wayland_server_dep],
     override_options: ['b_ndebug=false'],
   )
   test('brightness_service', brightness_service_exe, timeout: 60)
 
   upower_integration_exe = executable('upower_charge_limit_integration_test',
     sources: files('tests/upower_charge_limit_integration_test.cpp'),
-    dependencies: noctalia_core_dep,
+    dependencies: canopy_core_dep,
     override_options: ['b_ndebug=false'],
   )
   secret_collection_probe_integration_exe = executable('secret_collection_probe_integration_test',
     sources: files('tests/secret_collection_probe_integration_test.cpp'),
-    dependencies: noctalia_core_dep,
+    dependencies: canopy_core_dep,
     override_options: ['b_ndebug=false'],
   )
   tray_registration_integration_exe = executable('tray_registration_integration_test',
     sources: files('tests/tray_registration_integration_test.cpp'),
-    dependencies: noctalia_core_dep,
+    dependencies: canopy_core_dep,
     override_options: ['b_ndebug=false'],
   )
   fingerprint_integration_exe = executable('fingerprint_authenticator_integration_test',
     sources: files('tests/fingerprint_authenticator_integration_test.cpp'),
-    dependencies: noctalia_core_dep,
+    dependencies: canopy_core_dep,
     override_options: ['b_ndebug=false'],
   )
   dbus_run_session = find_program('dbus-run-session', required: false)
@@ -1490,7 +1490,7 @@ if build_tests
 
   bluetooth_property_integration_exe = executable('bluetooth_property_integration_test',
     sources: files('tests/bluetooth_property_integration_test.cpp'),
-    dependencies: noctalia_core_dep,
+    dependencies: canopy_core_dep,
     override_options: ['b_ndebug=false'],
   )
   if dbus_run_session.found()
@@ -1507,7 +1507,7 @@ if build_tests
 
   bluetooth_connect_pass_integration_exe = executable('bluetooth_connect_pass_integration_test',
     sources: files('tests/bluetooth_connect_pass_integration_test.cpp'),
-    dependencies: noctalia_core_dep,
+    dependencies: canopy_core_dep,
     override_options: ['b_ndebug=false'],
   )
   if dbus_run_session.found()

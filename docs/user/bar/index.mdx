@@ -98,7 +98,7 @@ back = "media previous"
 forward = "media next"
 ```
 
-All nine gestures are available, and an action is an IPC command, `exec <command line>`, or `none` - see [Widget Actions](/noctalia/bar/actions/) for the full vocabulary. Panel actions anchor at the pointer, since there is no widget to anchor to.
+All nine gestures are available, and an action is an IPC command, `exec <command line>`, or `none` - see [Widget Actions](/canopy/bar/actions/) for the full vocabulary. Panel actions anchor at the pointer, since there is no widget to anchor to.
 
 Right-click opens Control Center unless you bind `right` to something else. While an attached panel is open, right-click anywhere on the bar still toggles Control Center unless the click lands in the dead zone and `right` is bound.
 
@@ -201,8 +201,8 @@ The IPC `bar-layer-set <top|overlay> [bar-name] [monitor-selector]` switches the
 
 ```kdl
 binds {
-    Mod+B { spawn-sh "noctalia msg bar-layer-set overlay"; }
-    Mod+Shift+B { spawn-sh "noctalia msg bar-layer-set top"; }
+    Mod+B { spawn-sh "canopy msg bar-layer-set overlay"; }
+    Mod+Shift+B { spawn-sh "canopy msg bar-layer-set top"; }
 }
 ```
 

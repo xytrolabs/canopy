@@ -959,7 +959,7 @@
       "calendar-reminder-open": "開く",
       "calendar-reminder-untitled": "無題の予定",
       "calendar-reminder-with-location": "{when}\n{location}",
-      "config-migration-body": "ソースファイル内の{path}を更新してください。Noctaliaはこの置換を一時的にのみ適用しています。必要な変更をすべて確認するには、noctalia config validateを実行してください。",
+      "config-migration-body": "ソースファイル内の{path}を更新してください。Noctaliaはこの置換を一時的にのみ適用しています。必要な変更をすべて確認するには、canopy config validateを実行してください。",
       "config-migration-title": "設定の更新が必要です",
       "dbus-disabled": "DBus通知は無効です",
       "desktop-widgets-editor": "ウィジェット編集",
@@ -969,12 +969,12 @@
       "greeter-sync-pending-console": "外観設定をグリーターに同期しています。認証が必要な場合は、Noctalia、TTY、またはコンソールに表示されるpolkitの認証要求を承認してください。",
       "greeter-sync-pending-legacy": "認証済みの従来方式ヘルパーを使用して同期しています。管理者の承認が必要です。",
       "greeter-sync-pending-manual": "認証済みの従来方式の同期用ファイルを準備しました。ターミナルで位置引数形式の適用ヘルパーを実行してください。独自の保存先を使用している場合はNOCTALIA_GREETER_STATE_DIRを引き継ぐか、shell.greeter_sync.privilege_commandを設定してから、もう一度同期してください。",
-      "greeter-sync-pending-manual-pkexec": "外観設定をグリーターに同期しています。管理者の認証が必要なのに認証要求が表示されない場合は、ターミナルで次のコマンドを実行してください：pkexec noctalia-greeter-apply-appearance --sync \"/run/user/$(id -u)/noctalia-greeter-sync\"",
+      "greeter-sync-pending-manual-pkexec": "外観設定をグリーターに同期しています。管理者の認証が必要なのに認証要求が表示されない場合は、ターミナルで次のコマンドを実行してください：pkexec canopy-greeter-apply-appearance --sync \"/run/user/$(id -u)/noctalia-greeter-sync\"",
       "greeter-sync-success": "外観設定を同期しました。変更は次回のログイン画面から反映されます。",
       "greeter-sync-timeout": "グリーターの同期は、まだ認証待ちです。TTYまたはコンソールでpolkitの認証要求を確認するか、セキュリティ設定でpolkitエージェントを有効にするか、pkexecを手動で実行してください。",
       "greeter-sync-timeout-manual": "認証済みの従来方式の同期には、引き続き管理者の承認が必要です。ターミナルで位置引数形式の適用ヘルパーを実行し、独自の保存先を使用している場合はNOCTALIA_GREETER_STATE_DIRを引き継いでください",
-      "greeter-sync-timeout-manual-pkexec": "グリーターの同期には、まだ認証が必要です。ターミナルで次のコマンドを実行してください：pkexec noctalia-greeter-apply-appearance --sync \"/run/user/$(id -u)/noctalia-greeter-sync\"",
-      "keybind-app": "Noctalia",
+      "greeter-sync-timeout-manual-pkexec": "グリーターの同期には、まだ認証が必要です。ターミナルで次のコマンドを実行してください：pkexec canopy-greeter-apply-appearance --sync \"/run/user/$(id -u)/noctalia-greeter-sync\"",
+      "keybind-app": "Canopy",
       "keybind-invalid-modifier": "このショートカットには、修飾キーを使わない単一のキーを指定できます。",
       "keybind-invalid-printable": "文字入力キー（英字、数字、記号）を使用するには、CtrlやAltなどの修飾キーが必要です。",
       "keybind-invalid-super": "シェルのキーバインドではSuper/Windowsキーを使用できません。",
@@ -1361,7 +1361,7 @@
       "sync-greeter": "外観設定をNoctalia Greeterに同期できませんでした。",
       "sync-greeter-timeout": "グリーターの同期は、まだ認証待ちです。TTYまたはコンソールでpolkitの認証要求を確認するか、セキュリティ設定でpolkitエージェントを有効にするか、pkexecを手動で実行してください。",
       "sync-greeter-timeout-manual": "認証済みの従来方式の同期には、引き続き管理者の承認が必要です。ターミナルで位置引数形式の適用ヘルパーを実行し、独自の保存先を使用している場合はNOCTALIA_GREETER_STATE_DIRを引き継いでください",
-      "sync-greeter-timeout-manual-pkexec": "グリーターの同期には、まだ認証が必要です。ターミナルで次のコマンドを実行してください：pkexec noctalia-greeter-apply-appearance --sync \"/run/user/$(id -u)/noctalia-greeter-sync\"",
+      "sync-greeter-timeout-manual-pkexec": "グリーターの同期には、まだ認証が必要です。ターミナルで次のコマンドを実行してください：pkexec canopy-greeter-apply-appearance --sync \"/run/user/$(id -u)/noctalia-greeter-sync\"",
       "widget": {
         "rename": "名前付きウィジェットの名前を変更できませんでした。"
       },
@@ -1847,8 +1847,8 @@
         },
         "kind-label": "種類",
         "location-label": "配布元のURLまたはパス",
-        "location-placeholder-git": "https://github.com/me/noctalia-plugins",
-        "location-placeholder-path": "~/dev/noctalia-plugins",
+        "location-placeholder-git": "https://github.com/me/canopy-plugins",
+        "location-placeholder-path": "~/dev/canopy-plugins",
         "name-label": "配布元ID",
         "name-placeholder": "my-plugins",
         "precedence-hint": "同じプラグインがある場合、下にある配布元が上の配布元より優先されます。",
@@ -1871,7 +1871,7 @@
         "loading": "カタログを読み込み中…",
         "no-readme": "説明がありません。",
         "not-listed": "未掲載",
-        "open-page": "noctalia.devでプラグインページを開く",
+        "open-page": "canopy.devでプラグインページを開く",
         "open-source": "プラグインのソースリポジトリを開く",
         "recommend": "おすすめする",
         "recommendation-error": "変更を確認できませんでした。以前のおすすめ設定は変更されていません。同じ操作をもう一度お試しください。",
@@ -1943,7 +1943,7 @@
           "label": "角の丸み"
         },
         "custom-palette": {
-          "description": "~/.config/noctalia/palettes/から配色を選択",
+          "description": "~/.config/canopy/palettes/から配色を選択",
           "label": "カスタム配色",
           "search-placeholder": "カスタム配色を検索…"
         },
@@ -3134,7 +3134,7 @@
           "placeholder": "都市名、国名"
         },
         "location-auto-locate": {
-          "description": "noctalia.devを利用してIPアドレスから現在地を自動検出",
+          "description": "canopy.devを利用してIPアドレスから現在地を自動検出",
           "label": "現在地を自動検出（IP）"
         },
         "longitude": {
@@ -3378,7 +3378,7 @@
           "label": "日付の書式"
         },
         "external-ip": {
-          "description": "接続のパブリックWAN IPアドレスを（api.noctalia.dev経由で）取得し、コントロールセンターのネットワークタブに表示します",
+          "description": "接続のパブリックWAN IPアドレスを（api.canopy.dev経由で）取得し、コントロールセンターのネットワークタブに表示します",
           "label": "WAN IPを表示"
         },
         "greeter-sync-auto": {
@@ -4249,7 +4249,7 @@
             "label": "設定を開く"
           },
           "settings-open-plugin": {
-            "description": "指定したプラグインの設定画面を開く（例：noctalia/notes）",
+            "description": "指定したプラグインの設定画面を開く（例：canopy/notes）",
             "label": "プラグインの設定を開く"
           },
           "settings-open-widget": {
@@ -5148,7 +5148,7 @@
       "export-config": "設定をエクスポート…",
       "export-config-saved": "設定をエクスポートしました。",
       "filter-overridden": "上書き済み",
-      "legacy-config-warning": "旧形式の設定：{issue}。設定ファイルの該当項目を修正してください。Noctaliaは現在、一時的に新しい設定を適用しています。必要な変更をすべて確認するには、noctalia config validateを実行してください",
+      "legacy-config-warning": "旧形式の設定：{issue}。設定ファイルの該当項目を修正してください。Noctaliaは現在、一時的に新しい設定を適用しています。必要な変更をすべて確認するには、canopy config validateを実行してください",
       "native-title": "Noctaliaの設定",
       "no-results": "設定が見つかりません",
       "no-results-hint": "別の設定名または設定キーで検索してください。",

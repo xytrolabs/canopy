@@ -237,7 +237,7 @@ struct ScreenshotIpcRequest {
   std::string target; // screenshot-fullscreen target / annotate path; empty when omitted
 };
 
-// Applies `noctalia msg <command>` flags on top of `base` (the [shell.screenshot] snapshot).
+// Applies `canopy msg <command>` flags on top of `base` (the [shell.screenshot] snapshot).
 // The error string is the complete IPC response: an "error: ...\n" line, or the help text.
 [[nodiscard]] std::expected<ScreenshotIpcRequest, std::string> parseScreenshotIpcRequest(
     const noctalia::cli::Command& command, std::string_view args, ScreenshotService::OutputOptions base,

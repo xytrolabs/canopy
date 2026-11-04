@@ -20,7 +20,7 @@ These commands control shell state, logging, settings windows, the window switch
 | Get config           | <IpcCommand command="config-get <path>" />                   | Print the effective value at a config path, including built-in defaults (e.g. `config-get shell.font_family`). Unknown paths return an error.          |
 | Set config           | <IpcCommand command="config-set <path> <value>" />           | Validate a TOML value and save it at a config path in `settings.toml`, then reload. Quote strings (e.g. `config-set shell.font_family "'Noto Sans'"`). |
 | Open settings        | <IpcCommand command="settings-open [context]" />             | Open or focus the graphical settings window, optionally at a specific section (e.g. `bar`).                                                            |
-| Open plugin settings | <IpcCommand command="settings-open-plugin noctalia/notes" /> | Open the settings window at an installed plugin's settings. The plugin must be enabled and expose settings.                                            |
+| Open plugin settings | <IpcCommand command="settings-open-plugin canopy/notes" /> | Open the settings window at an installed plugin's settings. The plugin must be enabled and expose settings.                                            |
 | Close settings       | <IpcCommand command="settings-close" />                      | Close the graphical settings window.                                                                                                                   |
 | Toggle settings      | <IpcCommand command="settings-toggle [context]" />           | Open or close the graphical settings window, optionally at a specific section.                                                                         |
 
@@ -40,7 +40,7 @@ Alt+Tab-style overlay with two presentations selected by `[shell.window_switcher
 Example Hyprland bind (use `hold` so a quick tap switches to the previous window):
 
 ```ini
-hl.bind("ALT + TAB", hl.dsp.exec_cmd("noctalia msg window-switcher hold"))
+hl.bind("ALT + TAB", hl.dsp.exec_cmd("canopy msg window-switcher hold"))
 ```
 
 While the overlay is open it takes exclusive keyboard focus on its layer surface:

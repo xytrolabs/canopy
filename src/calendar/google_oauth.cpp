@@ -9,7 +9,7 @@ namespace calendar {
 
   namespace {
     constexpr Logger kLog("calendar-oauth");
-    constexpr const char* kBrokerBase = "https://api.noctalia.dev/v1/calendar/oauth/google";
+    constexpr const char* kBrokerBase = "https://api.canopy.dev/v1/calendar/oauth/google";
 
     std::chrono::system_clock::time_point expiryFromUnix(std::int64_t seconds) {
       return std::chrono::system_clock::time_point{std::chrono::seconds{seconds}};
@@ -23,7 +23,7 @@ namespace calendar {
     req.method = "POST";
     req.url = std::string(kBrokerBase) + "/start";
     req.headers = {"Content-Type: application/json"};
-    req.body = R"({"client":"noctalia-shell"})";
+    req.body = R"({"client":"canopy-shell"})";
     m_http.request(std::move(req), [cb = std::move(cb)](HttpResponse resp) {
       if (!resp.transportOk || resp.status != 200) {
         kLog.warn("oauth start failed http={}", resp.status);

@@ -18,10 +18,10 @@ namespace {
 
   constexpr Logger kLog("kwin_active_window");
 
-  const sdbus::ServiceName kBusName{"dev.noctalia.KWinActiveWindow"};
-  const sdbus::ObjectPath kObjectPath{"/dev/noctalia/KWinActiveWindow"};
-  constexpr auto kInterface = "dev.noctalia.KWinActiveWindow";
-  constexpr auto kScriptLabel = "noctalia-active-window";
+  const sdbus::ServiceName kBusName{"dev.canopy.KWinActiveWindow"};
+  const sdbus::ObjectPath kObjectPath{"/dev/canopy/KWinActiveWindow"};
+  constexpr auto kInterface = "dev.canopy.KWinActiveWindow";
+  constexpr auto kScriptLabel = "canopy-active-window";
 
   const sdbus::ServiceName kKwinBusName{"org.kde.KWin"};
   const sdbus::ObjectPath kKwinPath{"/KWin"};
@@ -33,9 +33,9 @@ namespace {
   constexpr char kFieldSeparator = '\x1e';
 
   constexpr std::string_view kScriptSource = R"js(
-const BUS = "dev.noctalia.KWinActiveWindow";
-const PATH = "/dev/noctalia/KWinActiveWindow";
-const IFACE = "dev.noctalia.KWinActiveWindow";
+const BUS = "dev.canopy.KWinActiveWindow";
+const PATH = "/dev/canopy/KWinActiveWindow";
+const IFACE = "dev.canopy.KWinActiveWindow";
 const RECORD_SEP = "\x1F";
 const FIELD_SEP = "\x1e";
 
@@ -59,17 +59,17 @@ function notify(window) {
     const resourceClass = window.resourceClass || "";
     callDBus(BUS, PATH, IFACE, "notifyActiveWindow", caption, resourceClass, windowUuid(window));
   } catch (error) {
-    print("noctalia-active-window notify failed: " + error);
+    print("canopy-active-window notify failed: " + error);
   }
 }
 
 function isNoctaliaShellSurface(window) {
   const resourceClass = (window.resourceClass || "").toLowerCase();
-  if (resourceClass === "noctalia") {
+  if (resourceClass === "canopy") {
     return true;
   }
   const caption = (window.caption || "").toLowerCase();
-  return caption === "noctalia" && resourceClass === "";
+  return caption === "canopy" && resourceClass === "";
 }
 
 function shouldTrack(window) {
@@ -179,7 +179,7 @@ function syncWindows() {
     }
     callDBus(BUS, PATH, IFACE, "notifyWindowList", rows.join(RECORD_SEP));
   } catch (error) {
-    print("noctalia-active-window sync failed: " + error);
+    print("canopy-active-window sync failed: " + error);
   }
 }
 
@@ -264,10 +264,10 @@ syncWindows();
 
   [[nodiscard]] bool isNoctaliaShellSurface(const std::string& appId, const std::string& title) {
     const std::string appLower = StringUtils::toLower(appId);
-    if (appLower == "noctalia") {
+    if (appLower == "canopy") {
       return true;
     }
-    if (appLower.empty() && StringUtils::toLower(title) == "noctalia") {
+    if (appLower.empty() && StringUtils::toLower(title) == "canopy") {
       return true;
     }
     return false;
@@ -513,7 +513,7 @@ for (const window of workspace.windowList()) {{
         jsStringLiteral(uuid), jsStringLiteral(appId), jsStringLiteral(title), warpPointer ? "true" : "false"
     );
 
-    const std::string label = std::format("noctalia-activate-{}", ++m_transientScriptSerial);
+    const std::string label = std::format("canopy-activate-{}", ++m_transientScriptSerial);
     if (!runTransientScript(script, label)) {
       kLog.warn(R"(failed to activate kde window class="{}" title="{}")", appId, title);
     }
@@ -550,7 +550,7 @@ for (const window of workspace.windowList()) {{
         jsStringLiteral(uuid), jsStringLiteral(appId), jsStringLiteral(title)
     );
 
-    const std::string label = std::format("noctalia-close-{}", ++m_transientScriptSerial);
+    const std::string label = std::format("canopy-close-{}", ++m_transientScriptSerial);
     if (!runTransientScript(script, label)) {
       kLog.warn(R"(failed to close kde window class="{}" title="{}")", appId, title);
     }
@@ -583,7 +583,7 @@ for (const window of workspace.windowList()) {{
 )js",
         jsStringLiteral(uuid)
     );
-    const std::string label = std::format("noctalia-minimize-{}", ++m_transientScriptSerial);
+    const std::string label = std::format("canopy-minimize-{}", ++m_transientScriptSerial);
     return runTransientScript(script, label);
   }
 

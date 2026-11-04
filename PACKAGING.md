@@ -35,7 +35,7 @@ v5 is already packaged for:
 | License         | MIT ([LICENSE](LICENSE)); also see vendored licenses under `third_party/` for SPDX completeness                |
 | Version         | [`VERSION`](VERSION), read by Meson `project(... version: files('VERSION'))`                                   |
 | Binary          | `noctalia`                                                                                                     |
-| Desktop entries | `dev.noctalia.Noctalia.desktop`; `dev.noctalia.Noctalia.Annotator.desktop` (hidden, image "Open With" handler) |
+| Desktop entries | `dev.canopy.Noctalia.desktop`; `dev.canopy.Noctalia.Annotator.desktop` (hidden, image "Open With" handler) |
 | Icon            | `noctalia` (`share/icons/hicolor/scalable/apps/noctalia.svg`)                                                  |
 
 ## Maintenance Policy
@@ -83,8 +83,8 @@ Prefix/datadir are baked into the binary via `NOCTALIA_INSTALL_PREFIX` / `NOCTAL
 ```text
 <prefix>/bin/noctalia
 <prefix>/share/noctalia/assets/...
-<prefix>/share/applications/dev.noctalia.Noctalia.desktop
-<prefix>/share/applications/dev.noctalia.Noctalia.Annotator.desktop
+<prefix>/share/applications/dev.canopy.Noctalia.desktop
+<prefix>/share/applications/dev.canopy.Noctalia.Annotator.desktop
 <prefix>/share/icons/hicolor/scalable/apps/noctalia.svg
 ```
 

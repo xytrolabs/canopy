@@ -76,7 +76,7 @@ namespace noctalia::theme {
       const auto* palette = findBuiltinPalette(cfg.builtinPalette);
       if (palette == nullptr) {
         kLog.warn("unknown builtin palette '{}', falling back to Noctalia", cfg.builtinPalette);
-        palette = findBuiltinPalette("Noctalia");
+        palette = findBuiltinPalette("Canopy");
       }
       const GeneratedPalette generated = expandBuiltinPalette(*palette);
       return {

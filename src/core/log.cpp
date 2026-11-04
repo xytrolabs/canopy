@@ -278,9 +278,9 @@ void initLogFile() {
 
   std::string dir;
   if (cacheHome != nullptr && cacheHome[0] != '\0') {
-    dir = std::string(cacheHome) + "/noctalia";
+    dir = std::string(cacheHome) + "/canopy";
   } else if (home != nullptr && home[0] != '\0') {
-    dir = std::string(home) + "/.cache/noctalia";
+    dir = std::string(home) + "/.cache/canopy";
   } else {
     return; // no writable location available
   }
@@ -291,8 +291,8 @@ void initLogFile() {
     return;
   }
 
-  const std::string logPath = dir + "/noctalia.log";
-  const std::string backupPath = dir + "/noctalia.log.1";
+  const std::string logPath = dir + "/canopy.log";
+  const std::string backupPath = dir + "/canopy.log.1";
 
   std::scoped_lock lock(gLogMutex);
   closeLogFileUnlocked();

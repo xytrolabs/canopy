@@ -14,7 +14,7 @@ Find answers to common setup and troubleshooting questions for Noctalia.
 <FaqItem question="What distributions are supported?">
   Noctalia is packaged for Arch Linux, NixOS, Fedora, openSUSE. You can also install it manually on other Linux distributions if the required build and runtime dependencies are available.
 
-  See the [Installation guide](/noctalia/getting-started/installation/) for distro-specific commands and manual install steps.
+  See the [Installation guide](/canopy/getting-started/installation/) for distro-specific commands and manual install steps.
 </FaqItem>
 
 <FaqItem question="Does Noctalia support touchscreen scrolling?">
@@ -33,7 +33,7 @@ Find answers to common setup and troubleshooting questions for Noctalia.
   See the [Installation guide](/noctalia/getting-started/installation/) and [Running Noctalia](/noctalia/getting-started/running-the-shell/) for setup steps.
 </FaqItem>
 
-<FaqItem question="Should I use v4 or noctalia-qs instructions with v5?">
+<FaqItem question="Should I use v4 or canopy-qs instructions with v5?">
   No. Noctalia v5 is a native C++ and OpenGL ES shell launched with `noctalia`. The v4 line is Quickshell-based and uses `qs` / `noctalia-qs`, so v4 commands and configuration examples should not be copied into a v5 setup.
 
   If you are using the Quickshell-based version, use the [v4 documentation](/noctalia-shell-legacy/) instead.
@@ -49,7 +49,7 @@ Find answers to common setup and troubleshooting questions for Noctalia.
 
   ```toml
   [general]
-  autostart = ["noctalia"]
+  autostart = ["canopy"]
   ```
   :::
 
@@ -57,7 +57,7 @@ Find answers to common setup and troubleshooting questions for Noctalia.
   Add to `~/.config/niri/config.kdl`:
 
   ```ini
-  spawn-at-startup "noctalia"
+  spawn-at-startup "canopy"
   ```
   :::
 
@@ -66,7 +66,7 @@ Find answers to common setup and troubleshooting questions for Noctalia.
 
   ```lua
   hl.on("hyprland.start", function()
-    hl.exec_cmd("noctalia")
+    hl.exec_cmd("canopy")
   end)
   ```
   :::
@@ -75,7 +75,7 @@ Find answers to common setup and troubleshooting questions for Noctalia.
   Add to `~/.config/sway/config` (or equivalent):
 
   ```bash
-  exec noctalia
+  exec canopy
   ```
   :::
 
@@ -83,7 +83,7 @@ Find answers to common setup and troubleshooting questions for Noctalia.
   Add to `~/.config/labwc/autostart`:
 
   ```
-  noctalia
+  canopy
   ```
   :::
 
@@ -91,27 +91,27 @@ Find answers to common setup and troubleshooting questions for Noctalia.
   Add to `~/.config/mango/config.conf`:
 
   ```bash
-  exec_once=noctalia
+  exec_once=canopy
   ```
   :::
 
   :::note[KDE Plasma]
-  Add `noctalia` under System Settings → Autostart, or see [KDE Plasma](/noctalia/compositor-settings/kde/) for Plasma-specific limits (clipboard, blur, screenshots, and more).
+  Add `canopy` under System Settings → Autostart, or see [KDE Plasma](/canopy/compositor-settings/kde/) for Plasma-specific limits (clipboard, blur, screenshots, and more).
   :::
 
-  If your compositor expects startup commands to return after the shell has initialized, use `noctalia --daemon`. See the [Running Noctalia](/noctalia/getting-started/running-the-shell/) page for details.
+  If your compositor expects startup commands to return after the shell has initialized, use `canopy --daemon`. See the [Running Noctalia](/canopy/getting-started/running-the-shell/) page for details.
 </FaqItem>
 
 ## Configuration
 
 <FaqItem question="Where should I put my config, and why is my setting ignored?">
-  If you only use Settings, you normally do not need to edit config files. Settings writes your changes to `~/.local/state/noctalia/settings.toml`.
+  If you only use Settings, you normally do not need to edit config files. Settings writes your changes to `~/.local/state/canopy/settings.toml`.
 
-  If you write config by hand, put it in `~/.config/noctalia/`. Noctalia reads every `*.toml` file in that directory, sorted alphabetically, and merges them.
+  If you write config by hand, put it in `~/.config/canopy/`. Noctalia reads every `*.toml` file in that directory, sorted alphabetically, and merges them.
 
-  Settings changes load after hand-written config, so they win when both layers define the same setting. If a value in your file looks ignored, check Settings first, or inspect `~/.local/state/noctalia/settings.toml`.
+  Settings changes load after hand-written config, so they win when both layers define the same setting. If a value in your file looks ignored, check Settings first, or inspect `~/.local/state/canopy/settings.toml`.
 
-  See [How configuration works](/noctalia/configuration/) for the full load order and export options.
+  See [How configuration works](/canopy/configuration/) for the full load order and export options.
 </FaqItem>
 
 <FaqItem question="How does Noctalia resolve application icons?">
@@ -140,7 +140,7 @@ Find answers to common setup and troubleshooting questions for Noctalia.
   # settings for the second sysmon
   ```
 
-  See [Widget definitions](/noctalia/bar/widgets/#widget-definitions) for more examples.
+  See [Widget definitions](/canopy/bar/widgets/#widget-definitions) for more examples.
 </FaqItem>
 
 <FaqItem question="How do I choose Monday or Sunday as the first day of the week?">
@@ -162,13 +162,13 @@ Find answers to common setup and troubleshooting questions for Noctalia.
 
   In text config, the main keys are `shell.ui_scale`, `[bar.<name>].scale`, and `[widget.<name>].scale`.
 
-  See [Shell settings](/noctalia/configuration/shell/#shell-settings) and [Bars](/noctalia/bar/).
+  See [Shell settings](/canopy/configuration/shell/#shell-settings) and [Bars](/canopy/bar/).
 </FaqItem>
 
 <FaqItem question="How do I turn off blur behind a transparent bar?">
   On Niri, making a bar transparent only changes Noctalia surface opacity. When Niri `ext-background-effects` support is active, Noctalia still publishes blur regions for its layer surfaces, so the compositor can keep blurring behind the bar.
 
-  The default xray blur samples the wallpaper, which can also appear as faint wallpaper-colored pixels around rounded corners. Use `xray false` to blur the actual content behind Noctalia, or `blur false` to disable the effect. See [Niri compositor settings: Blur](/noctalia/compositor-settings/niri/?section=blur) for the full rules and explanation.
+  The default xray blur samples the wallpaper, which can also appear as faint wallpaper-colored pixels around rounded corners. Use `xray false` to blur the actual content behind Noctalia, or `blur false` to disable the effect. See [Niri compositor settings: Blur](/canopy/compositor-settings/niri/?section=blur) for the full rules and explanation.
 </FaqItem>
 
 <FaqItem question="How do I tweak the seam between the bar and attached panels?">
@@ -186,7 +186,7 @@ Find answers to common setup and troubleshooting questions for Noctalia.
   contact_shadow = true   # dark gradient at the seam for a lifted look
   ```
 
-  See [Bars](/noctalia/bar/) for the full per-bar and per-monitor field list.
+  See [Bars](/canopy/bar/) for the full per-bar and per-monitor field list.
 </FaqItem>
 
 <FaqItem question="How can I get Noctalia to display in my language?">
@@ -228,7 +228,7 @@ Find answers to common setup and troubleshooting questions for Noctalia.
   After your wallpaper app sets a new image, tell Noctalia which file to use for color extraction:
 
   ```sh
-  noctalia msg wallpaper-set ~/Pictures/Wallpapers/new-wallpaper.png
+  canopy msg wallpaper-set ~/Pictures/Wallpapers/new-wallpaper.png
   ```
 
   Noctalia extracts colors from that image, generates a palette with the configured scheme, and cross-fades the shell to the new colors even though it is not displaying the wallpaper itself. The path is persisted across restarts.
@@ -240,13 +240,13 @@ Find answers to common setup and troubleshooting questions for Noctalia.
   Check these points first:
 
   1. Make sure Noctalia is running.
-  2. Use v5 IPC commands in the form `noctalia msg ...`.
+  2. Use v5 IPC commands in the form `canopy msg ...`.
   3. Verify that your compositor bind syntax is correct.
   4. Test the command in a terminal before putting it in a compositor config.
 
   Noctalia Settings does not create compositor keybinds. Keybinds belong in your compositor's configuration; Noctalia only receives the IPC command.
 
-  See the [IPC overview](/noctalia/ipc/) and [Shell commands](/noctalia/ipc/shell/).
+  See the [IPC overview](/canopy/ipc/) and [Shell commands](/canopy/ipc/shell/).
 </FaqItem>
 
 <FaqItem question="Why don't I hear notification or volume sounds?">
@@ -268,7 +268,7 @@ Find answers to common setup and troubleshooting questions for Noctalia.
 
      Raise "System Sounds" in pavucontrol, or delete that line and run `systemctl --user restart wireplumber`.
 
-  3. Watch where the stream goes: keep `pw-top` open and run `noctalia msg volume-up 5`. A `noctalia-sound` node should appear on your output device.
+  3. Watch where the stream goes: keep `pw-top` open and run `canopy msg volume-up 5`. A `canopy-sound` node should appear on your output device.
 
   4. Run Noctalia with `NOCTALIA_LOG_LEVEL=debug` to log each sound stream's state changes and node id (use `wpctl inspect <id>`). A warning that a stream "was never linked to an output" means WirePlumber found no sink for it.
 
@@ -286,7 +286,7 @@ Find answers to common setup and troubleshooting questions for Noctalia.
 
   The battery widget defaults to the system battery. If you want to show a peripheral or second battery, middle-click the battery widget and choose its **Device** setting. In text config, set the widget's `device` key.
 
-  See the [`battery` widget docs](/noctalia/bar/widgets/battery/).
+  See the [`battery` widget docs](/canopy/bar/widgets/battery/).
 </FaqItem>
 
 <FaqItem question="Why won't an app appear in the launcher or dock?">
@@ -297,7 +297,7 @@ Find answers to common setup and troubleshooting questions for Noctalia.
   - `$HOME/.nix-profile/share/applications/`
   - `/etc/profiles/per-user/$USER/share/applications/`
 
-  For dock pins, match the desktop entry ID, `StartupWMClass`, display name, or full desktop entry path. See the [Dock](/noctalia/dock/) page for matching rules.
+  For dock pins, match the desktop entry ID, `StartupWMClass`, display name, or full desktop entry path. See the [Dock](/canopy/dock/) page for matching rules.
 </FaqItem>
 
 <FaqItem question="Why are weather or Night Light not working?">
@@ -311,7 +311,7 @@ Find answers to common setup and troubleshooting questions for Noctalia.
 
   Weather, Theme `auto`, and Night Light all share the same location source.
 
-  See [Location](/noctalia/services/location/), [Theme](/noctalia/theming/#mode), and [Night Light](/noctalia/services/night-light/).
+  See [Location](/canopy/services/location/), [Theme](/canopy/theming/#mode), and [Night Light](/canopy/services/night-light/).
 </FaqItem>
 
 <FaqItem question="Why can't I unlock my lock screen?">

@@ -865,7 +865,7 @@
       "calendar-reminder-open": "Abrir",
       "calendar-reminder-untitled": "Evento sin título",
       "calendar-reminder-with-location": "{when}\n{location}",
-      "config-migration-body": "Actualiza {path} en el archivo de origen. Noctalia está aplicando este reemplazo solo temporalmente. Ejecuta noctalia config validate para listar todos los cambios necesarios.",
+      "config-migration-body": "Actualiza {path} en el archivo de origen. Noctalia está aplicando este reemplazo solo temporalmente. Ejecuta canopy config validate para listar todos los cambios necesarios.",
       "config-migration-title": "Se necesita actualizar configuración",
       "dbus-disabled": "Notificaciones DBus deshabilitada",
       "desktop-widgets-editor": "Editor de Widget",
@@ -875,12 +875,12 @@
       "greeter-sync-pending-console": "Sincronizando la apariencia con el greeter. Si se requiere autorización, aprueba la solicitud de polkit en Noctalia, en una TTY o en una consola.",
       "greeter-sync-pending-legacy": "Sincronizando a través del asistente autenticado auxiliar antiguo. Se requiere la aprobación del administrador.",
       "greeter-sync-pending-manual": "Los archivos están preparados para la sincronización heredada autenticada. Ejecuta el asistente de aplicación posicional en una terminal, conservando NOCTALIA_GREETER_STATE_DIR si usas una ruta personalizada, o configura shell.greeter_sync.privilege_command y sincroniza de nuevo.",
-      "greeter-sync-pending-manual-pkexec": "Sincronizando la apariencia con el greeter. Si se requiere autorización de administrador y no aparece ninguna solicitud, ejecute lo siguiente en una terminal: pkexec noctalia-greeter-apply-appearance --sync \"/run/user/$(id -u)/noctalia-greeter-sync\".",
+      "greeter-sync-pending-manual-pkexec": "Sincronizando la apariencia con el greeter. Si se requiere autorización de administrador y no aparece ninguna solicitud, ejecute lo siguiente en una terminal: pkexec canopy-greeter-apply-appearance --sync \"/run/user/$(id -u)/noctalia-greeter-sync\".",
       "greeter-sync-success": "Apariencia sincronizada. Los cambios se aplicarán en la siguiente pantalla de inicio de sesión.",
       "greeter-sync-timeout": "La sincronización con el greeter sigue a la espera de autorización. Busca una solicitud de polkit en una TTY o consola, activa el agente de polkit en los ajustes de Seguridad, o ejecuta pkexec manualmente.",
       "greeter-sync-timeout-manual": "La sincronización heredada autenticada todavía necesita la aprobación del administrador. Ejecuta el asistente de aplicación posicional en una terminal y conserva NOCTALIA_GREETER_STATE_DIR si usas una ruta personalizada.",
-      "greeter-sync-timeout-manual-pkexec": "La sincronización del greeter aún requiere autorización. Ejecute lo siguiente en una terminal: pkexec noctalia-greeter-apply-appearance --sync \"/run/user/$(id -u)/noctalia-greeter-sync\"",
-      "keybind-app": "Noctalia",
+      "greeter-sync-timeout-manual-pkexec": "La sincronización del greeter aún requiere autorización. Ejecute lo siguiente en una terminal: pkexec canopy-greeter-apply-appearance --sync \"/run/user/$(id -u)/noctalia-greeter-sync\"",
+      "keybind-app": "Canopy",
       "keybind-invalid-modifier": "Este atajo acepta una sola tecla sin modificadores.",
       "keybind-invalid-printable": "Las teclas imprimibles (letras, números, símbolos) requieren un modificador como Ctrl o Alt.",
       "keybind-invalid-super": "La tecla Super/Windows no se puede usar en los atajos de teclado del shell.",
@@ -1251,7 +1251,7 @@
       "sync-greeter": "No se pudo sincronizar la apariencia con Noctalia Greeter.",
       "sync-greeter-timeout": "La sincronización con el greeter sigue a la espera de autorización. Busca una solicitud de polkit en una TTY o consola, activa el agente de polkit en los ajustes de Seguridad, o ejecuta pkexec manualmente.",
       "sync-greeter-timeout-manual": "La sincronización heredada autenticada todavía necesita la aprobación del administrador. Ejecuta el asistente de aplicación posicional en una terminal y conserva NOCTALIA_GREETER_STATE_DIR si usas una ruta personalizada.",
-      "sync-greeter-timeout-manual-pkexec": "La sincronización del greeter aún requiere autorización. Ejecuta lo siguiente en una terminal: pkexec noctalia-greeter-apply-appearance --sync \"/run/user/$(id -u)/noctalia-greeter-sync\"",
+      "sync-greeter-timeout-manual-pkexec": "La sincronización del greeter aún requiere autorización. Ejecuta lo siguiente en una terminal: pkexec canopy-greeter-apply-appearance --sync \"/run/user/$(id -u)/noctalia-greeter-sync\"",
       "widget": {
         "rename": "No se pudo renombrar el widget con nombre."
       },
@@ -1677,8 +1677,8 @@
         },
         "kind-label": "Tipo",
         "location-label": "Ubicación",
-        "location-placeholder-git": "https://github.com/me/noctalia-plugins",
-        "location-placeholder-path": "~/dev/noctalia-plugins",
+        "location-placeholder-git": "https://github.com/me/canopy-plugins",
+        "location-placeholder-path": "~/dev/canopy-plugins",
         "name-label": "ID de fuente",
         "name-placeholder": "my-plugins",
         "precedence-hint": "Las fuentes inferiores anulan a las superiores cuando ofrecen el mismo complemento.",
@@ -1700,7 +1700,7 @@
         "installed": "Instalado",
         "loading": "Cargando catálogo…",
         "no-readme": "No hay descripción disponible.",
-        "open-page": "Abrir la página de complementos en noctalia.dev",
+        "open-page": "Abrir la página de complementos en canopy.dev",
         "open-source": "Abrir repositorio del complemento",
         "results-count": "{count} plugins",
         "search-placeholder": "Buscar complementos…",
@@ -1760,7 +1760,7 @@
           "label": "Radio de las esquinas"
         },
         "custom-palette": {
-          "description": "Elige una paleta de ~/.config/noctalia/palettes/",
+          "description": "Elige una paleta de ~/.config/canopy/palettes/",
           "label": "Paleta personalizada",
           "search-placeholder": "Buscar paletas personalizadas..."
         },
@@ -2840,7 +2840,7 @@
           "placeholder": "Ciudad, País"
         },
         "location-auto-locate": {
-          "description": "Detectar tu ubicación automáticamente a partir de tu dirección IP mediante noctalia.dev",
+          "description": "Detectar tu ubicación automáticamente a partir de tu dirección IP mediante canopy.dev",
           "label": "Localizar automáticamente (IP)"
         },
         "longitude": {
@@ -3084,7 +3084,7 @@
           "label": "Formato de fecha"
         },
         "external-ip": {
-          "description": "Resuelve IP publica WAN (via api.noctalia.dev) y se muestra en el panel de Red del Panel de Control",
+          "description": "Resuelve IP publica WAN (via api.canopy.dev) y se muestra en el panel de Red del Panel de Control",
           "label": "Mostrar IP WAN"
         },
         "greeter-sync-auto": {
@@ -3888,7 +3888,7 @@
             "label": "Abrir configuración"
           },
           "settings-open-plugin": {
-            "description": "Abrir la ventana de configuración en la configuración de un complemento (por ejemplo, noctalia/notes)",
+            "description": "Abrir la ventana de configuración en la configuración de un complemento (por ejemplo, canopy/notes)",
             "label": "Abrir la configuración del complemento"
           },
           "settings-open-widget": {
@@ -4755,7 +4755,7 @@
       "export-config": "Exportar configuración...",
       "export-config-saved": "Exportación de configuración guardada.",
       "filter-overridden": "Sobreescrito",
-      "legacy-config-warning": "Configuración heredada: {issue}. Edite esta entrada de origen; Noctalia aplicará el reemplazo solo temporalmente. Ejecute noctalia config validate para ver todos los cambios necesarios.",
+      "legacy-config-warning": "Configuración heredada: {issue}. Edite esta entrada de origen; Noctalia aplicará el reemplazo solo temporalmente. Ejecute canopy config validate para ver todos los cambios necesarios.",
       "native-title": "Ajustes de Noctalia",
       "no-results": "Ajustes no encontrados",
       "no-results-hint": "Prueba con otro nombre o clave de configuración.",

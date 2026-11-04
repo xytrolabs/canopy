@@ -194,11 +194,11 @@ class TemplateValidationTests(unittest.TestCase):
 
 
 class TemplateEnforcementTests(unittest.TestCase):
-    ISSUE_URL = "https://api.github.test/repos/noctalia-dev/noctalia/issues/123"
-    PULL_REQUEST_URL = "https://api.github.test/repos/noctalia-dev/noctalia/pulls/123"
+    ISSUE_URL = "https://api.github.test/repos/canopy-dev/canopy/issues/123"
+    PULL_REQUEST_URL = "https://api.github.test/repos/canopy-dev/canopy/pulls/123"
     GRAPHQL_URL = "https://api.github.test/graphql"
-    COMMENT_URL = "https://api.github.test/repos/noctalia-dev/noctalia/issues/comments/7"
-    OLDER_COMMENT_URL = "https://api.github.test/repos/noctalia-dev/noctalia/issues/comments/5"
+    COMMENT_URL = "https://api.github.test/repos/canopy-dev/canopy/issues/comments/7"
+    OLDER_COMMENT_URL = "https://api.github.test/repos/canopy-dev/canopy/issues/comments/5"
     NODE_ID = "PR_node123"
     OWN_USER = {"login": "github-actions[bot]"}
     FORMER_USER = {"login": "Noctalia-CI"}

@@ -107,9 +107,9 @@ namespace noctalia::theme {
     // reach all Firefox profiles, not only the process that owns the Unix socket.
     [[nodiscard]] std::filesystem::path commandNotifyDir() {
       if (const char* runtime = std::getenv("XDG_RUNTIME_DIR"); runtime != nullptr && runtime[0] != '\0') {
-        return std::filesystem::path(runtime) / "noctalia" / "firefox-theme";
+        return std::filesystem::path(runtime) / "canopy" / "firefox-theme";
       }
-      return std::filesystem::temp_directory_path() / ("noctalia-firefox-theme-" + std::to_string(::getuid()));
+      return std::filesystem::temp_directory_path() / ("canopy-firefox-theme-" + std::to_string(::getuid()));
     }
 
     [[nodiscard]] std::filesystem::path commandNotifyPath() { return commandNotifyDir() / "command"; }
@@ -196,7 +196,7 @@ namespace noctalia::theme {
         return self;
       }
 #ifdef NOCTALIA_INSTALL_PREFIX
-      auto installed = std::filesystem::path(NOCTALIA_INSTALL_PREFIX) / "bin" / "noctalia";
+      auto installed = std::filesystem::path(NOCTALIA_INSTALL_PREFIX) / "bin" / "canopy";
       std::error_code ec;
       if (std::filesystem::is_regular_file(installed, ec)) {
         return installed;
@@ -237,7 +237,7 @@ namespace noctalia::theme {
       return true;
     }
 
-    // Install only when absent or already owned by noctalia — never clobber a foreign host.
+    // Install only when absent or already owned by canopy — never clobber a foreign host.
     bool ensureManifestOwnedByNoctalia(std::string* error, std::string* warning) {
       const auto host = resolveNoctaliaExecutable();
       if (host.empty()) {
@@ -705,7 +705,7 @@ namespace noctalia::theme {
 
   int runFirefoxThemeCli(int argc, char* argv[]) {
     auto parsed = cli::parseOrReport(
-        cli::kFirefoxThemeCmd, "noctalia firefox-theme",
+        cli::kFirefoxThemeCmd, "canopy firefox-theme",
         std::span<char* const>{argv + 2, static_cast<std::size_t>(argc - 2)}
     );
     if (!parsed)
@@ -714,7 +714,7 @@ namespace noctalia::theme {
       return 0;
     const std::string_view action = parsed->positionals.front();
     if (action == "help") {
-      std::print("{}", cli::renderHelp(cli::kFirefoxThemeCmd, "noctalia firefox-theme"));
+      std::print("{}", cli::renderHelp(cli::kFirefoxThemeCmd, "canopy firefox-theme"));
       return 0;
     }
     if (action == "host" || action == "start") {

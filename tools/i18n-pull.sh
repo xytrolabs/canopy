@@ -7,8 +7,8 @@
 set -e
 
 # Configuration
-API_BASE="${I18N_API_BASE:-https://i18n.noctalia.dev}"
-PROJECT_SLUG="${1:-noctalia}"
+API_BASE="${I18N_API_BASE:-https://i18n.canopy.dev}"
+PROJECT_SLUG="${1:-canopy}"
 OUTPUT_DIR="${2:-./assets/translations}"
 
 # Colors for output

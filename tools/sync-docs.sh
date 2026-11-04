@@ -8,9 +8,9 @@
 set -euo pipefail
 
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-site_root="${1:-"$repo_root/../noctalia-docs"}"
+site_root="${1:-"$repo_root/../canopy-docs"}"
 source_dir="$repo_root/docs/user"
-dest_dir="$site_root/src/content/docs/noctalia"
+dest_dir="$site_root/src/content/docs/canopy"
 asset_source="$repo_root/docs/assets"
 asset_dest="$site_root/src/assets"
 plugin_api_source="$repo_root/docs/plugin-api.json"

@@ -913,7 +913,7 @@
       "calendar-reminder-open": "Deschide",
       "calendar-reminder-untitled": "Eveniment fără titlu",
       "calendar-reminder-with-location": "{when}\n{location}",
-      "config-migration-body": "Actualizează {path} în fișierul sursă. Noctalia aplică această înlocuire doar temporar. Rulează noctalia config validate pentru a lista toate modificările necesare.",
+      "config-migration-body": "Actualizează {path} în fișierul sursă. Noctalia aplică această înlocuire doar temporar. Rulează canopy config validate pentru a lista toate modificările necesare.",
       "config-migration-title": "Este necesară actualizarea configurației",
       "dbus-disabled": "Notificările DBus sunt dezactivate",
       "desktop-widgets-editor": "Editor de widgeturi",
@@ -923,12 +923,12 @@
       "greeter-sync-pending-console": "Se sincronizează aspectul cu ecranul de autentificare. Dacă este necesară autorizarea, aprobă solicitarea polkit în Noctalia, pe un TTY sau pe o consolă.",
       "greeter-sync-pending-legacy": "Se sincronizează prin instrumentul auxiliar autentificat vechi. Este necesară aprobarea administratorului.",
       "greeter-sync-pending-manual": "Fișierele sunt pregătite pentru sincronizarea autentificată veche. Rulează instrumentul auxiliar de aplicare pozițional într-un terminal, păstrând NOCTALIA_GREETER_STATE_DIR dacă folosești o cale personalizată, sau configurează shell.greeter_sync.privilege_command și sincronizează din nou.",
-      "greeter-sync-pending-manual-pkexec": "Se sincronizează aspectul cu ecranul de autentificare. Dacă este necesară autorizarea administratorului și nu apare nicio solicitare, rulează într-un terminal: pkexec noctalia-greeter-apply-appearance --sync \"/run/user/$(id -u)/noctalia-greeter-sync\".",
+      "greeter-sync-pending-manual-pkexec": "Se sincronizează aspectul cu ecranul de autentificare. Dacă este necesară autorizarea administratorului și nu apare nicio solicitare, rulează într-un terminal: pkexec canopy-greeter-apply-appearance --sync \"/run/user/$(id -u)/noctalia-greeter-sync\".",
       "greeter-sync-success": "Aspectul a fost sincronizat. Modificările se aplică la următorul ecran de autentificare.",
       "greeter-sync-timeout": "Sincronizarea cu ecranul de autentificare așteaptă încă autorizarea. Verifică un TTY sau o consolă pentru o solicitare polkit, activează agentul polkit din setările de securitate sau rulează pkexec manual.",
       "greeter-sync-timeout-manual": "Sincronizarea autentificată veche necesită încă aprobarea administratorului. Rulează instrumentul auxiliar de aplicare pozițional într-un terminal și păstrează NOCTALIA_GREETER_STATE_DIR dacă folosești o cale personalizată.",
-      "greeter-sync-timeout-manual-pkexec": "Sincronizarea cu ecranul de autentificare necesită încă autorizare. Rulează într-un terminal: pkexec noctalia-greeter-apply-appearance --sync \"/run/user/$(id -u)/noctalia-greeter-sync\"",
-      "keybind-app": "Noctalia",
+      "greeter-sync-timeout-manual-pkexec": "Sincronizarea cu ecranul de autentificare necesită încă autorizare. Rulează într-un terminal: pkexec canopy-greeter-apply-appearance --sync \"/run/user/$(id -u)/noctalia-greeter-sync\"",
+      "keybind-app": "Canopy",
       "keybind-invalid-modifier": "Această comandă rapidă acceptă o singură tastă fără modificatori.",
       "keybind-invalid-printable": "Tastele imprimabile (litere, cifre, simboluri) necesită un modificator precum Ctrl sau Alt.",
       "keybind-invalid-super": "Tasta Super/Windows nu poate fi folosită în comenzile rapide ale shell-ului.",
@@ -1315,7 +1315,7 @@
       "sync-greeter": "Nu s-a putut sincroniza aspectul cu Noctalia Greeter.",
       "sync-greeter-timeout": "Sincronizarea cu ecranul de autentificare așteaptă încă autorizarea. Verifică un TTY sau o consolă pentru o solicitare polkit, activează agentul polkit din setările de securitate sau rulează pkexec manual.",
       "sync-greeter-timeout-manual": "Sincronizarea autentificată veche necesită încă aprobarea administratorului. Rulează instrumentul auxiliar de aplicare pozițional într-un terminal și păstrează NOCTALIA_GREETER_STATE_DIR dacă folosești o cale personalizată.",
-      "sync-greeter-timeout-manual-pkexec": "Sincronizarea cu ecranul de autentificare necesită încă autorizare. Rulează într-un terminal: pkexec noctalia-greeter-apply-appearance --sync \"/run/user/$(id -u)/noctalia-greeter-sync\"",
+      "sync-greeter-timeout-manual-pkexec": "Sincronizarea cu ecranul de autentificare necesită încă autorizare. Rulează într-un terminal: pkexec canopy-greeter-apply-appearance --sync \"/run/user/$(id -u)/noctalia-greeter-sync\"",
       "widget": {
         "rename": "Nu s-a putut redenumi widgetul numit."
       },
@@ -1798,8 +1798,8 @@
         },
         "kind-label": "Tip",
         "location-label": "Locație",
-        "location-placeholder-git": "https://github.com/me/noctalia-plugins",
-        "location-placeholder-path": "~/dev/noctalia-plugins",
+        "location-placeholder-git": "https://github.com/me/canopy-plugins",
+        "location-placeholder-path": "~/dev/canopy-plugins",
         "name-label": "ID sursă",
         "name-placeholder": "pluginurile-mele",
         "precedence-hint": "Sursele aflate mai jos le suprascriu pe cele aflate mai sus atunci când oferă același plugin.",
@@ -1822,7 +1822,7 @@
         "loading": "Se încarcă catalogul…",
         "no-readme": "Nicio descriere disponibilă.",
         "not-listed": "Nelistat",
-        "open-page": "Deschide pagina pluginului pe noctalia.dev",
+        "open-page": "Deschide pagina pluginului pe canopy.dev",
         "open-source": "Deschide depozitul sursă al pluginului",
         "recommend": "Recomandă",
         "recommendation-error": "Modificarea nu a fost confirmată. Recomandarea anterioară rămâne neschimbată. Reîncearcă aceeași modificare pentru a o reconcilia.",
@@ -1894,7 +1894,7 @@
           "label": "Rotunjimea colțurilor"
         },
         "custom-palette": {
-          "description": "Alege o paletă din ~/.config/noctalia/palettes/",
+          "description": "Alege o paletă din ~/.config/canopy/palettes/",
           "label": "Paletă personalizată",
           "search-placeholder": "Caută palete personalizate…"
         },
@@ -3071,7 +3071,7 @@
           "placeholder": "Oraș, țară"
         },
         "location-auto-locate": {
-          "description": "Detectează automat locația din adresa IP prin noctalia.dev",
+          "description": "Detectează automat locația din adresa IP prin canopy.dev",
           "label": "Localizare automată (IP)"
         },
         "longitude": {
@@ -3315,7 +3315,7 @@
           "label": "Formatul datei"
         },
         "external-ip": {
-          "description": "Rezolvă IP-ul WAN public al conexiunii (prin api.noctalia.dev) și îl arată în fila de rețea a centrului de control",
+          "description": "Rezolvă IP-ul WAN public al conexiunii (prin api.canopy.dev) și îl arată în fila de rețea a centrului de control",
           "label": "Arată IP-ul WAN"
         },
         "greeter-sync-auto": {
@@ -4178,7 +4178,7 @@
             "label": "Deschide setările"
           },
           "settings-open-plugin": {
-            "description": "Deschide fereastra de setări la setările unui plugin (de ex. noctalia/notes)",
+            "description": "Deschide fereastra de setări la setările unui plugin (de ex. canopy/notes)",
             "label": "Deschide setările pluginului"
           },
           "settings-open-widget": {
@@ -5073,7 +5073,7 @@
       "export-config": "Exportă configurația…",
       "export-config-saved": "Exportul configurației a fost salvat.",
       "filter-overridden": "Suprascris",
-      "legacy-config-warning": "Setare veche: {issue}. Editează această intrare sursă; Noctalia aplică înlocuirea doar temporar. Rulează noctalia config validate pentru a lista toate modificările necesare.",
+      "legacy-config-warning": "Setare veche: {issue}. Editează această intrare sursă; Noctalia aplică înlocuirea doar temporar. Rulează canopy config validate pentru a lista toate modificările necesare.",
       "native-title": "Setările Noctalia",
       "no-results": "Nicio setare găsită",
       "no-results-hint": "Încearcă un alt nume de setare sau o altă cheie de configurare.",

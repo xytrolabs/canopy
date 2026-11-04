@@ -50,19 +50,19 @@ The examples below use the default config directory and an example home director
 | Compositor          | Primary user config, relative to the config directory | Generated theme, relative to the config directory | Manual integration                                            |
 | ------------------- | ----------------------------------------------------- | ------------------------------------------------- | ------------------------------------------------------------- |
 | Umbriel             | `umbriel/config.toml`                                 | `umbriel/noctalia.toml`                           | Add the path to `[include.optional].files`, as shown below.   |
-| Niri                | `niri/config.kdl`                                     | `niri/noctalia.kdl`                               | `include "/home/you/.config/niri/noctalia.kdl"`               |
-| Sway                | `sway/config`                                         | `sway/noctalia`                                   | `include "/home/you/.config/sway/noctalia"`                   |
-| Scroll              | `scroll/config`                                       | `scroll/noctalia`                                 | `include "/home/you/.config/scroll/noctalia"`                 |
+| Niri                | `niri/config.kdl`                                     | `niri/noctalia.kdl`                               | `include "/home/you/.config/niri/canopy.kdl"`               |
+| Sway                | `sway/config`                                         | `sway/noctalia`                                   | `include "/home/you/.config/sway/canopy"`                   |
+| Scroll              | `scroll/config`                                       | `scroll/noctalia`                                 | `include "/home/you/.config/scroll/canopy"`                 |
 | Mango               | `mango/config.conf`                                   | `mango/noctalia.conf`                             | `source=/home/you/.config/mango/noctalia.conf`                |
 | Hyprland (Hyprlang) | `hypr/hyprland.conf`                                  | `hypr/noctalia.conf`                              | `source = /home/you/.config/hypr/noctalia.conf`               |
-| Hyprland (Lua)      | `hypr/hyprland.lua`                                   | `hypr/noctalia.lua`                               | `dofile("/home/you/.config/hypr/noctalia.lua").apply_theme()` |
+| Hyprland (Lua)      | `hypr/hyprland.lua`                                   | `hypr/noctalia.lua`                               | `dofile("/home/you/.config/hypr/canopy.lua").apply_theme()` |
 | Labwc               | `labwc/rc.xml`                                        | `labwc/noctalia.conf`                             | Select the `noctalia` theme as shown below.                   |
 
 For Umbriel, append the generated path to the existing `files` array, or add this section if it is absent:
 
 ```toml
 [include.optional]
-files = ["/home/you/.config/umbriel/noctalia.toml"]
+files = ["/home/you/.config/umbriel/canopy.toml"]
 ```
 
 For Labwc, the template also installs the theme in `${XDG_DATA_HOME:-$HOME/.local/share}/themes/noctalia/openbox-3/themerc`. Set the name inside the existing `<theme>` element, or add this element inside `<labwc_config>`:
@@ -120,7 +120,7 @@ User templates are declared directly in Noctalia config:
 
 ```toml
 [theme.templates.user.my_app]
-input_path  = "$XDG_CONFIG_HOME/noctalia/templates/my-app.css"
+input_path  = "$XDG_CONFIG_HOME/canopy/templates/my-app.css"
 output_path = "$XDG_CONFIG_HOME/my-app/theme.css"
 post_hook   = "my-app --reload-theme"
 ```
@@ -129,7 +129,7 @@ Defining `[theme.templates.user.<id>]` enables that user template. Set `enabled 
 
 Relative paths resolve from the Noctalia config directory. A leading `$XDG_CONFIG_HOME`, `$XDG_DATA_HOME`, `$XDG_STATE_HOME`, or `$XDG_CACHE_HOME` token is expanded using the XDG base directory defaults when the matching environment variable is not set.
 
-User template entries support the same fields documented in [Template Entries](/noctalia/theming/templates/#template-entries), including `input_path_modes`, `output_path_dynamic`, `colors_to_compare`, `compare_to`, `pre_hook`, `post_hook`, `post_action`, and `index`.
+User template entries support the same fields documented in [Template Entries](/canopy/theming/templates/#template-entries), including `input_path_modes`, `output_path_dynamic`, `colors_to_compare`, `compare_to`, `pre_hook`, `post_hook`, `post_action`, and `index`.
 
 ### Example: Terminal Escape Sequences
 
@@ -147,7 +147,7 @@ post_hook   = "tee /dev/pts/[0-9]* < ~/.cache/terminal-sequences"
 Then create its input file:
 
 ```sh
-mkdir -p ~/.config/noctalia/templates
+mkdir -p ~/.config/canopy/templates
 {
     printf '\033]10;{{colors.terminal_foreground.default.hex}}\007'
     printf '\033]11;{{colors.terminal_background.default.hex}}\007'
@@ -173,7 +173,7 @@ mkdir -p ~/.config/noctalia/templates
     printf '\033]19;{{colors.terminal_selection_fg.default.hex}}\007'
     printf '\033]17;{{colors.terminal_selection_bg.default.hex}}\007'
     printf '\033]12;{{colors.terminal_cursor.default.hex}}\007'
-} > ~/.config/noctalia/templates/terminal-sequences
+} > ~/.config/canopy/templates/terminal-sequences
 ```
 
 The hook only recolors terminals that are already open. To color new terminals too, without the built-in foot template, add this to `~/.bashrc`:
@@ -184,10 +184,10 @@ The hook only recolors terminals that are already open. To color new terminals t
 
 ## Config Location
 
-Put dotfile-managed templates in `~/.config/noctalia/*.toml`:
+Put dotfile-managed templates in `~/.config/canopy/*.toml`:
 
 ```toml
-# ~/.config/noctalia/templates.toml
+# ~/.config/canopy/templates.toml
 [theme.templates]
 enable_builtin_templates   = true
 enable_community_templates = true

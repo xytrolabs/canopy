@@ -58,7 +58,7 @@ server_url = "https://cloud.example.com/remote.php/dav/"
 username   = "me"
 calendars  = ["personal"]   # optional discovered collection ids; empty = all
 credential_source = "file"
-password_file = "/run/agenix/noctalia-caldav"
+password_file = "/run/agenix/canopy-caldav"
 
 # Google Calendar (authorized via Settings → Calendar → Accounts → Connect)
 [calendar.account.work_google]
@@ -129,20 +129,20 @@ File-backed credentials work with agenix, sops-nix, and systemd credentials. Con
 
 The two CalDAV modes are strict. `password_file` is rejected unless `credential_source = "file"`, and file mode is rejected without an absolute `password_file`. Noctalia does not try one source and then fall back to the other.
 
-CalDAV passwords and Google refresh tokens are written to the Secret Service `default` collection. That collection must be unlocked at login, which is the usual cause of credentials being locked after every reboot when multiple GNOME Keyring keyrings exist. See [Secret Service & keyrings](/noctalia/configuration/secret-service/) for how the `default` alias works, the multiple-keyrings fix, and automatic recovery.
+CalDAV passwords and Google refresh tokens are written to the Secret Service `default` collection. That collection must be unlocked at login, which is the usual cause of credentials being locked after every reboot when multiple GNOME Keyring keyrings exist. See [Secret Service & keyrings](/canopy/configuration/secret-service/) for how the `default` alias works, the multiple-keyrings fix, and automatic recovery.
 
 If Secret Service contains a matching credential but it remains locked after an unlock attempt, Noctalia sends one notification and marks the affected Google account as locked. Unlock the keyring and use **Retry**; do not reconnect the Google account unless Settings specifically reports that authorization is missing. If a configured Google account has no refresh token, its account row shows **Reconnect**. The encrypted event-cache master key is separate from account credentials, so a cache-key warning does not by itself mean the Google authorization was lost.
 
 ## Event cache encryption
 
-Calendar titles, locations, names, and times are written only to the encrypted `$XDG_CACHE_HOME/noctalia/calendar/events.enc` cache. Noctalia derives a calendar-specific key from the shared storage master key, separate from the derived clipboard-history key.
+Calendar titles, locations, names, and times are written only to the encrypted `$XDG_CACHE_HOME/canopy/calendar/events.enc` cache. Noctalia derives a calendar-specific key from the shared storage master key, separate from the derived clipboard-history key.
 
 The default `[storage].key_source = "secret-service"` stores the master key in Secret Service. To use agenix, sops-nix, or another provisioner without a keyring, configure one authoritative file:
 
 ```toml
 [storage]
 key_source = "file"
-key_file = "/run/agenix/noctalia-storage-key"
+key_file = "/run/agenix/canopy-storage-key"
 ```
 
 The file format and generation instructions are documented under [Encrypted storage master key](/noctalia/configuration/shell/#encrypted-storage-master-key). When no storage key is available, live calendar sync continues but events are not read from or written to disk. Missing or incorrect keys preserve the encrypted cache and surface a retry action in Settings. If the original key cannot be restored, or the cache is damaged, **Recover Private Storage** provides a confirmed reset. Because clipboard and calendar storage share one master key, this reset also removes saved clipboard history. A configured storage key file is never modified.
@@ -176,7 +176,7 @@ provider   = "custom"
 server_url = "https://dav.example.com/"
 username   = "me"
 credential_source = "file"
-password_file    = "/run/agenix/noctalia-caldav"
+password_file    = "/run/agenix/canopy-caldav"
 client_cert_file = "~/pki/client.pem"
 client_key_file  = "~/pki/client.key"
 ```
@@ -225,7 +225,7 @@ Common iCloud failures:
 
 ## Google setup
 
-In Settings, choose **Google**, then press **Save and Connect**. For manual TOML, add a named account table with `type = "google"`, enable the calendar service, then open **Settings → Calendar → Accounts**, edit the account, and press **Save and Connect**. A browser tab opens for Google's consent screen; approve it and the tab confirms completion. Tokens are obtained through the noctalia OAuth broker (`api.noctalia.dev`) - no Google Cloud project or client secret is required on your side. Access is `calendar.readonly`.
+In Settings, choose **Google**, then press **Save and Connect**. For manual TOML, add a named account table with `type = "google"`, enable the calendar service, then open **Settings → Calendar → Accounts**, edit the account, and press **Save and Connect**. A browser tab opens for Google's consent screen; approve it and the tab confirms completion. Tokens are obtained through the canopy OAuth broker (`api.canopy.dev`) - no Google Cloud project or client secret is required on your side. Access is `calendar.readonly`.
 
 :::note
 The account id is the last segment of the named table. For `[calendar.account.work_google]`, the id is `work_google`. It must **not** be your Google email address. The signed-in Google account is chosen during browser authorization, not from the table name.
@@ -233,7 +233,7 @@ The account id is the last segment of the named table. For `[calendar.account.wo
 
 If a Google account later shows as disconnected (revoked or expired), edit the account and press **Save and Connect** again to reauthorize.
 
-If Settings reports that Secret Service is unavailable, confirm that a compatible provider is running in the same login session, then use the retry action. Noctalia also reopens calendar credentials and encrypted storage on its own once the provider appears or its keyring unlocks; see [Secret Service & keyrings](/noctalia/configuration/secret-service/) for how automatic recovery works and the multiple-keyrings caveat. If access is locked or denied, unlock the provider and retry. A cancelled prompt is not treated as a missing credential; start the operation again when you are ready.
+If Settings reports that Secret Service is unavailable, confirm that a compatible provider is running in the same login session, then use the retry action. Noctalia also reopens calendar credentials and encrypted storage on its own once the provider appears or its keyring unlocks; see [Secret Service & keyrings](/canopy/configuration/secret-service/) for how automatic recovery works and the multiple-keyrings caveat. If access is locked or denied, unlock the provider and retry. A cancelled prompt is not treated as a missing credential; start the operation again when you are ready.
 
 `[shell].offline_mode = true` disables all calendar network traffic; the last successfully synced events remain available from the encrypted on-disk cache when the storage key is available.
 

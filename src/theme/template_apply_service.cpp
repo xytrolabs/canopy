@@ -50,7 +50,7 @@ namespace noctalia::theme {
     std::filesystem::path userTemplateConfigPath() {
       const std::string configDir = FileUtils::configDir();
       if (configDir.empty()) {
-        return "noctalia.toml";
+        return "canopy.toml";
       }
       return std::filesystem::path(configDir) / "config.toml";
     }
@@ -374,7 +374,7 @@ namespace noctalia::theme {
     }
     const std::filesystem::path gtk3Dir = gtkConfigDir(GtkToolkit::Gtk3);
     const std::filesystem::path gtk4Dir = gtkConfigDir(GtkToolkit::Gtk4);
-    // noctalia.css imports the extension index; it has to exist before that import is written.
+    // canopy.css imports the extension index; it has to exist before that import is written.
     if (gtkToolkits.gtk3)
       (void)ensureGtkExtensionIndex(gtk3Dir);
     if (gtkToolkits.gtk4)

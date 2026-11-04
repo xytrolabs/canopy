@@ -23,7 +23,7 @@ pre_action_fade_seconds = 2.0
 
 While a fade is in progress, the overlay is click-through so pointer/keyboard activity still reaches the compositor; if the session becomes active again during that window, the pending command is cancelled. The dim is a layer-shell **overlay** that covers the full monitor (including the bar).
 
-Each behavior picks an **`action`**. The built-in actions are native - they need no `command`. Use `action = "command"` only when you want to run something Noctalia doesn't have a native action for. Command fields are normal shell commands; use `noctalia msg ...` when a shell command needs to call Noctalia IPC.
+Each behavior picks an **`action`**. The built-in actions are native - they need no `command`. Use `action = "command"` only when you want to run something Noctalia doesn't have a native action for. Command fields are normal shell commands; use `canopy msg ...` when a shell command needs to call Noctalia IPC.
 
 ```toml
 [idle.behavior.lock]
@@ -67,8 +67,8 @@ For a fully custom power action, use the canonical IPC CLI as part of a shell co
 [idle.behavior.custom-power]
 timeout = 660
 action = "command"
-command = "noctalia msg dpms-off"
-resume_command = "noctalia msg dpms-on && some_shell_command"
+command = "canopy msg dpms-off"
+resume_command = "canopy msg dpms-on && some_shell_command"
 ```
 
 Idle behavior uses the Wayland `ext_idle_notifier_v1` protocol and respects active idle inhibitors.

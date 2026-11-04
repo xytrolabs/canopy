@@ -18,7 +18,7 @@ class SystemMonitorService;
 
 namespace scripting {
 
-  // A connected output as exposed to plugin scripts via noctalia.outputs().
+  // A connected output as exposed to plugin scripts via canopy.outputs().
   struct ScriptOutputInfo {
     std::string name; // DRM connector name, e.g. "DP-1"
     std::string description;
@@ -30,7 +30,7 @@ namespace scripting {
     bool focused = false;
   };
 
-  // A calendar event as exposed to plugin scripts via noctalia.calendarEvents().
+  // A calendar event as exposed to plugin scripts via canopy.calendarEvents().
   // Mirrors CalendarEvent, but with wall-clock milliseconds instead of a chrono time_point so the
   // scripting layer stays off the calendar layer's headers.
   struct ScriptCalendarEvent {
@@ -139,7 +139,7 @@ namespace scripting {
       return m_calendarEvents;
     }
 
-    // Shell [shell].time_format / date_format — mirrored for noctalia.timeFormat() / dateFormat().
+    // Shell [shell].time_format / date_format — mirrored for canopy.timeFormat() / dateFormat().
     void setTimeFormat(std::string format) {
       std::scoped_lock lock(m_mutex);
       m_timeFormat = std::move(format);

@@ -23,9 +23,9 @@ These commands are useful for media keys, compositor binds, scripts, and custom 
 `osd-show` takes a glyph name and optional text, or a JSON payload for the progress bar and muted look:
 
 ```sh
-noctalia msg osd-show wifi VPN connected
-noctalia msg osd-show '{"icon":"brightness-low","value":"40%","progress":0.4}'
-noctalia msg osd-show '{"icon":"wifi-off","value":"VPN disconnected","inactive":true}'
+canopy msg osd-show wifi VPN connected
+canopy msg osd-show '{"icon":"brightness-low","value":"40%","progress":0.4}'
+canopy msg osd-show '{"icon":"wifi-off","value":"VPN disconnected","inactive":true}'
 ```
 
 JSON fields: `icon` (required string), `value` (string), `progress` (number from `0` to `1`, clamped; omit it for a text-only popup), and `inactive` (boolean). Custom popups follow `[osd.kinds].custom` and share the slot with the built-in OSDs, the same as popups from plugins.

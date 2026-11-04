@@ -12,7 +12,7 @@ Controls the active palette source and the dark/light modes used by Noctalia and
 mode              = "dark"        # dark | light | auto
 shell_mode        = "follow"      # follow | dark | light | auto
 source            = "builtin"     # builtin | wallpaper | community | custom
-builtin           = "Noctalia"    # bundled palette name
+builtin           = "Canopy"    # bundled palette name
 community_palette = "Oxocarbon"   # community palette name when source = "community"
 custom_palette    = "MyPalette"   # file name (without .json) when source = "custom"
 wallpaper_scheme  = "m3-content"  # generator used when source = "wallpaper"
@@ -20,15 +20,15 @@ pure_black_dark   = false         # replace dark-mode backgrounds with pure blac
 sync_color_scheme = true          # sync the GNOME color-scheme preference with mode
 ```
 
-Palette changes apply live when the resolved config changes, whether through Settings or edits to `~/.config/noctalia/*.toml`. Wallpaper-derived themes re-resolve automatically when the default wallpaper changes. See [Palette](/noctalia/theming/palette/) for color roles, custom palette files, and terminal colors.
+Palette changes apply live when the resolved config changes, whether through Settings or edits to `~/.config/canopy/*.toml`. Wallpaper-derived themes re-resolve automatically when the default wallpaper changes. See [Palette](/canopy/theming/palette/) for color roles, custom palette files, and terminal colors.
 
 ---
 
 ## `mode`
 
-`dark` or `light` selects the palette variant directly. `auto` switches between them using the shared sunrise/sunset schedule in [`[location]`](/noctalia/services/location/) (same rules as [Night Light](/noctalia/services/night-light/)): sunrise and sunset computed from your coordinates, or your own `sunset` / `sunrise` times when [`custom_schedule = true`](/noctalia/services/location/#custom-schedule). Night light does not need to be enabled for theme auto to follow the schedule. When the schedule cannot be resolved, `auto` uses the light (day) palette until a valid schedule is available.
+`dark` or `light` selects the palette variant directly. `auto` switches between them using the shared sunrise/sunset schedule in [`[location]`](/canopy/services/location/) (same rules as [Night Light](/canopy/services/night-light/)): sunrise and sunset computed from your coordinates, or your own `sunset` / `sunrise` times when [`custom_schedule = true`](/canopy/services/location/#custom-schedule). Night light does not need to be enabled for theme auto to follow the schedule. When the schedule cannot be resolved, `auto` uses the light (day) palette until a valid schedule is available.
 
-This is the mode your apps run in: it selects the palette variant written by [templates](/noctalia/theming/templates/), the GNOME `color-scheme` preference (when [`sync_color_scheme`](#sync_color_scheme) is on), and the mode reported to [`theme_mode_changed`](/noctalia/automation/hooks/) hooks. `theme-mode-toggle`, `theme-mode-set`, the control center shortcut, and the theme mode bar widget all act on this key.
+This is the mode your apps run in: it selects the palette variant written by [templates](/canopy/theming/templates/), the GNOME `color-scheme` preference (when [`sync_color_scheme`](#sync_color_scheme) is on), and the mode reported to [`theme_mode_changed`](/canopy/automation/hooks/) hooks. `theme-mode-toggle`, `theme-mode-set`, the control center shortcut, and the theme mode bar widget all act on this key.
 
 ## `shell_mode`
 
@@ -52,7 +52,7 @@ When `true` (default), Noctalia writes `org.gnome.desktop.interface color-scheme
 
 ### Related IPC
 
-For theme mode and palette commands, see [Media & UI → Theme](/noctalia/ipc/media-and-ui/#theme).
+For theme mode and palette commands, see [Media & UI → Theme](/canopy/ipc/media-and-ui/#theme).
 
 ---
 
@@ -62,7 +62,7 @@ For theme mode and palette commands, see [Media & UI → Theme](/noctalia/ipc/me
 | ----------- | --------------------------------------------------------------------------------- |
 | `builtin`   | Use one of the palettes compiled into the binary.                                 |
 | `wallpaper` | Generate a palette from the current default wallpaper each time it changes.       |
-| `community` | Fetch a palette by name from `https://api.noctalia.dev/palette/<name>`.           |
+| `community` | Fetch a palette by name from `https://api.canopy.dev/palette/<name>`.           |
 | `custom`    | Load a palette JSON file from the Noctalia config directory's `palettes/` folder. |
 
 ---
@@ -77,9 +77,9 @@ Available palettes: `Ayu`, `Catppuccin`, `Dracula`, `Eldritch`, `Gruvbox`, `Kana
 
 ## `community_palette`
 
-Names a palette served by `https://api.noctalia.dev/palette/<name>`. The shell downloads the palette on first use and stores it in `~/.local/state/noctalia/community-palettes/` (honoring `NOCTALIA_STATE_HOME`, then `XDG_STATE_HOME`).
+Names a palette served by `https://api.canopy.dev/palette/<name>`. The shell downloads the palette on first use and stores it in `~/.local/state/canopy/community-palettes/` (honoring `NOCTALIA_STATE_HOME`, then `XDG_STATE_HOME`).
 
-The Settings GUI lists palette names from the cached `https://api.noctalia.dev/palettes` catalog when that catalog is available.
+The Settings GUI lists palette names from the cached `https://api.canopy.dev/palettes` catalog when that catalog is available.
 
 The catalog is refreshed on every launch and config reload. Each catalog entry carries an `md5` of its palette JSON; when the cached palette's checksum no longer matches the catalog, the shell re-downloads it and cross-fades to the updated colors. This means edits you publish to the online catalog reach clients automatically - no manual cache clearing. A cached palette whose catalog entry omits an `md5` is treated as up to date and kept. If the catalog cannot be fetched, the cached palette is used as-is, so community palettes still work offline.
 
@@ -89,11 +89,11 @@ While the initial download is in flight - or if it fails - the shell falls back 
 
 ## `custom_palette`
 
-Names a palette file in the Noctalia config directory's `palettes/` folder (honoring `NOCTALIA_CONFIG_HOME`, then `XDG_CONFIG_HOME`). The value is the file name without the `.json` extension - for example, `custom_palette = "MyPalette"` loads `~/.config/noctalia/palettes/MyPalette.json` with the default config location.
+Names a palette file in the Noctalia config directory's `palettes/` folder (honoring `NOCTALIA_CONFIG_HOME`, then `XDG_CONFIG_HOME`). The value is the file name without the `.json` extension - for example, `custom_palette = "MyPalette"` loads `~/.config/canopy/palettes/MyPalette.json` with the default config location.
 
 The Settings GUI lists palette files found in the directory when `source = "custom"` is selected. If the file is missing or invalid, the shell falls back to the `Noctalia` built-in palette.
 
-See [Palette](/noctalia/theming/palette/) for the custom palette JSON format.
+See [Palette](/canopy/theming/palette/) for the custom palette JSON format.
 
 ---
 

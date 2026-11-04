@@ -57,10 +57,10 @@
 
 namespace {
   Logger kLog{"luau"};
-  constexpr const char* kHostKey = "__noctalia_host";
+  constexpr const char* kHostKey = "__canopy_host";
   // Field on a module environment's metatable holding the module's own directory.
   // Not reachable through the environment table itself, and the metatable is frozen.
-  constexpr const char* kModuleDirKey = "__noctalia_moduledir";
+  constexpr const char* kModuleDirKey = "__canopy_moduledir";
   constexpr auto kDefaultCommandTimeout = std::chrono::milliseconds(5000);
   constexpr auto kMinCommandTimeout = std::chrono::milliseconds(50);
   constexpr auto kMaxCommandTimeout = std::chrono::milliseconds(60000);
@@ -586,7 +586,7 @@ namespace {
     return 1;
   }
 
-  // nowMs() -> wall-clock milliseconds since the Unix epoch. os.time() and noctalia.formatTime()
+  // nowMs() -> wall-clock milliseconds since the Unix epoch. os.time() and canopy.formatTime()
   // are both whole-second, so this is the only way a plugin can see sub-second time, e.g. to phase
   // its own updates onto a second boundary.
   int luau_nowMs(lua_State* L) {
@@ -807,7 +807,7 @@ namespace {
     if (auto* host = hostForState(L)) {
       host->scriptNotifyInfo(title, body);
     } else {
-      notify::info("Noctalia", title, body);
+      notify::info("Canopy", title, body);
     }
     return 0;
   }
@@ -818,7 +818,7 @@ namespace {
     if (auto* host = hostForState(L)) {
       host->scriptNotifyError(title, body);
     } else {
-      notify::error("Noctalia", title, body);
+      notify::error("Canopy", title, body);
     }
     return 0;
   }
@@ -1062,7 +1062,7 @@ namespace {
     return 0;
   }
 
-  // noctalia.osd.show(icon: string, value: string?, opts: { progress: number?, inactive: boolean? }?)
+  // canopy.osd.show(icon: string, value: string?, opts: { progress: number?, inactive: boolean? }?)
   int luau_osd_show(lua_State* L) {
     size_t iconLen = 0;
     const char* icon = luaL_checklstring(L, 1, &iconLen);
@@ -1776,7 +1776,7 @@ namespace {
       {nullptr, nullptr},
   };
 
-  // noctalia.idle.watch(seconds, callback, { ignoreInhibitors = bool }?) -> id
+  // canopy.idle.watch(seconds, callback, { ignoreInhibitors = bool }?) -> id
   int luau_idle_watch(lua_State* L) {
     const double seconds = luaL_checknumber(L, 1);
     luaL_checktype(L, 2, LUA_TFUNCTION);
@@ -1802,7 +1802,7 @@ namespace {
     const auto timeoutMs = static_cast<std::uint32_t>(std::ceil(seconds * 1000.0));
     if (!host->scriptIdleWatch(timeoutMs, ignoreInhibitors, callbackRef)) {
       lua_unref(L, callbackRef);
-      luaL_error(L, "noctalia.idle.watch: at most %d watches per entry", static_cast<int>(kMaxIdleWatchesPerHost));
+      luaL_error(L, "canopy.idle.watch: at most %d watches per entry", static_cast<int>(kMaxIdleWatchesPerHost));
     }
     lua_pushinteger(L, callbackRef);
     return 1;
@@ -1822,7 +1822,7 @@ namespace {
       {nullptr, nullptr},
   };
 
-  // noctalia.layer.*: show, hide, and configure this plugin's [[layer]] entries.
+  // canopy.layer.*: show, hide, and configure this plugin's [[layer]] entries.
 
   constexpr std::int64_t kMaxLayerExtent = 1 << 16;
 
@@ -1838,7 +1838,7 @@ namespace {
 
   std::int32_t checkLayerInteger(lua_State* L, int index, std::int64_t min, const char* what) {
     if (lua_type(L, index) != LUA_TNUMBER) {
-      luaL_error(L, "noctalia.layer.configure: %s must be an integer", what);
+      luaL_error(L, "canopy.layer.configure: %s must be an integer", what);
     }
     const double value = lua_tonumber(L, index);
     if (!std::isfinite(value)
@@ -1846,7 +1846,7 @@ namespace {
         || value < static_cast<double>(min)
         || value > static_cast<double>(kMaxLayerExtent)) {
       luaL_error(
-          L, "noctalia.layer.configure: %s must be an integer between %d and %d", what, static_cast<int>(min),
+          L, "canopy.layer.configure: %s must be an integer between %d and %d", what, static_cast<int>(min),
           static_cast<int>(kMaxLayerExtent)
       );
     }
@@ -1855,7 +1855,7 @@ namespace {
 
   std::string_view checkLayerString(lua_State* L, int index, const char* what) {
     if (lua_type(L, index) != LUA_TSTRING) {
-      luaL_error(L, "noctalia.layer.configure: %s must be a string", what);
+      luaL_error(L, "canopy.layer.configure: %s must be a string", what);
     }
     size_t len = 0;
     const char* value = lua_tolstring(L, index, &len);
@@ -1868,13 +1868,13 @@ namespace {
     while (lua_next(L, table) != 0) {
       const int value = lua_gettop(L);
       if (lua_type(L, -2) != LUA_TSTRING) {
-        luaL_error(L, "noctalia.layer.configure: property names must be strings");
+        luaL_error(L, "canopy.layer.configure: property names must be strings");
       }
       const std::string_view key = lua_tostring(L, -2);
       if (key == "layer") {
         const auto level = scripting::parsePluginLayerLevel(checkLayerString(L, value, "layer"));
         if (!level.has_value()) {
-          luaL_error(L, R"(noctalia.layer.configure: layer must be "background", "bottom", "top", or "overlay")");
+          luaL_error(L, R"(canopy.layer.configure: layer must be "background", "bottom", "top", or "overlay")");
         }
         patch.layer = level;
       } else if (key == "anchors") {
@@ -1888,7 +1888,7 @@ namespace {
           if (!anchor.has_value() || (anchors & *anchor) != 0) {
             luaL_error(
                 L,
-                R"(noctalia.layer.configure: anchors must list distinct values from "top", "bottom", "left", "right")"
+                R"(canopy.layer.configure: anchors must list distinct values from "top", "bottom", "left", "right")"
             );
           }
           anchors |= *anchor;
@@ -1922,7 +1922,7 @@ namespace {
       } else if (key == "keyboard") {
         const auto keyboard = scripting::parsePluginLayerKeyboard(checkLayerString(L, value, "keyboard"));
         if (!keyboard.has_value()) {
-          luaL_error(L, R"(noctalia.layer.configure: keyboard must be "none", "on_demand", or "exclusive")");
+          luaL_error(L, R"(canopy.layer.configure: keyboard must be "none", "on_demand", or "exclusive")");
         }
         patch.keyboard = keyboard;
       } else if (key == "clickThrough") {
@@ -1931,11 +1931,11 @@ namespace {
       } else if (key == "output") {
         const std::string_view output = checkLayerString(L, value, "output");
         if (output.empty()) {
-          luaL_error(L, "noctalia.layer.configure: output must not be empty");
+          luaL_error(L, "canopy.layer.configure: output must not be empty");
         }
         patch.output = std::string(output);
       } else {
-        luaL_error(L, "noctalia.layer.configure: unknown property '%s'", std::string(key).c_str());
+        luaL_error(L, "canopy.layer.configure: unknown property '%s'", std::string(key).c_str());
       }
       lua_pop(L, 1);
     }
@@ -2130,32 +2130,32 @@ namespace {
   };
 
   void registerNoctaliaLib(lua_State* L) {
-    luaL_register(L, "noctalia", kNoctaliaBaseLib);
-    // noctalia.state = { set, get, watch }
+    luaL_register(L, "canopy", kNoctaliaBaseLib);
+    // canopy.state = { set, get, watch }
     lua_createtable(L, 0, 0);
     luaL_register(L, nullptr, kNoctaliaStateLib);
     lua_setfield(L, -2, "state");
-    // noctalia.json = { decode, encode }
+    // canopy.json = { decode, encode }
     lua_createtable(L, 0, 0);
     luaL_register(L, nullptr, kNoctaliaJsonLib);
     lua_setfield(L, -2, "json");
-    // noctalia.sound = { load, play }
+    // canopy.sound = { load, play }
     lua_createtable(L, 0, 0);
     luaL_register(L, nullptr, kNoctaliaSoundLib);
     lua_setfield(L, -2, "sound");
-    // noctalia.osd = { show }
+    // canopy.osd = { show }
     lua_createtable(L, 0, 0);
     luaL_register(L, nullptr, kNoctaliaOsdLib);
     lua_setfield(L, -2, "osd");
-    // noctalia.string = { trim, urlEncode, urlDecode }
+    // canopy.string = { trim, urlEncode, urlDecode }
     lua_createtable(L, 0, 0);
     luaL_register(L, nullptr, kNoctaliaStringLib);
     lua_setfield(L, -2, "string");
-    // noctalia.idle = { watch, unwatch }
+    // canopy.idle = { watch, unwatch }
     lua_createtable(L, 0, 0);
     luaL_register(L, nullptr, kNoctaliaIdleLib);
     lua_setfield(L, -2, "idle");
-    // noctalia.layer = { show, hide, configure }
+    // canopy.layer = { show, hide, configure }
     lua_createtable(L, 0, 0);
     luaL_register(L, nullptr, kNoctaliaLayerLib);
     lua_setfield(L, -2, "layer");
@@ -3070,7 +3070,7 @@ void LuauHost::scriptNotifyInfo(std::string title, std::string body) {
     );
     return;
   }
-  notify::info("Noctalia", title, body);
+  notify::info("Canopy", title, body);
 }
 
 void LuauHost::scriptNotifyError(std::string title, std::string body) {
@@ -3080,7 +3080,7 @@ void LuauHost::scriptNotifyError(std::string title, std::string body) {
     );
     return;
   }
-  notify::error("Noctalia", title, body);
+  notify::error("Canopy", title, body);
 }
 
 bool LuauHost::scriptLoadSound(std::string name, std::string path, int callbackRef) {

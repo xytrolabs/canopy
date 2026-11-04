@@ -13,7 +13,7 @@ Add `noctalia` to the `autostart` array under `[general]`. Preserve any commands
 
 ```toml
 [general]
-autostart = ["noctalia"]
+autostart = ["canopy"]
 ```
 
 Umbriel runs these commands once after startup and does not run them again when its configuration is reloaded.
@@ -53,7 +53,7 @@ blur_optimized = true
 
 # Float Noctalia's settings window
 [[window_rule]]
-match.app_id = "^dev.noctalia.Noctalia$"
+match.app_id = "^dev.canopy.Noctalia$"
 default_floating = true
 default_size = [1020, 900]
 ```
@@ -88,18 +88,18 @@ Umbriel can launch Noctalia IPC commands directly from its `[keybinds]` table. A
 
 ```toml
 [keybinds]
-"Mod+Space" = "spawn:noctalia msg panel-toggle launcher"
-"Mod+S" = "spawn:noctalia msg panel-toggle control-center"
-"Mod+Comma" = "spawn:noctalia msg settings-toggle"
-"Alt+Tab" = "spawn:noctalia msg window-switcher hold"
-"Mod+Shift+A" = "spawn:noctalia msg screenshot-annotate"
-"Mod+Ctrl+A" = "spawn:noctalia msg annotate"
+"Mod+Space" = "spawn:canopy msg panel-toggle launcher"
+"Mod+S" = "spawn:canopy msg panel-toggle control-center"
+"Mod+Comma" = "spawn:canopy msg settings-toggle"
+"Alt+Tab" = "spawn:canopy msg window-switcher hold"
+"Mod+Shift+A" = "spawn:canopy msg screenshot-annotate"
+"Mod+Ctrl+A" = "spawn:canopy msg annotate"
 
-"XF86AudioRaiseVolume" = "spawn:noctalia msg volume-up"
-"XF86AudioLowerVolume" = "spawn:noctalia msg volume-down"
-"XF86AudioMute" = "spawn:noctalia msg volume-mute"
-"XF86MonBrightnessUp" = "spawn:noctalia msg brightness-up"
-"XF86MonBrightnessDown" = "spawn:noctalia msg brightness-down"
+"XF86AudioRaiseVolume" = "spawn:canopy msg volume-up"
+"XF86AudioLowerVolume" = "spawn:canopy msg volume-down"
+"XF86AudioMute" = "spawn:canopy msg volume-mute"
+"XF86MonBrightnessUp" = "spawn:canopy msg brightness-up"
+"XF86MonBrightnessDown" = "spawn:canopy msg brightness-down"
 ```
 
 `Mod` uses Umbriel's configured modifier from `general.mod_key` and defaults to Super in a native session. See [Keybinds](/umbriel/keybinds/) for more Noctalia IPC examples and the complete action reference.

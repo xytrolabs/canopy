@@ -33,8 +33,8 @@ while [[ $# -gt 0 ]]; do
 done
 
 # Configuration
-API_URL="${TRANSLATION_API_URL:-https://i18n.noctalia.dev}"
-PROJECT_SLUG="${TRANSLATION_PROJECT:-noctalia}"
+API_URL="${TRANSLATION_API_URL:-https://i18n.canopy.dev}"
+PROJECT_SLUG="${TRANSLATION_PROJECT:-canopy}"
 
 # Check for secret
 if [ -z "$NOCTALIA_TRANSLATION_PUSH_SECRET" ]; then

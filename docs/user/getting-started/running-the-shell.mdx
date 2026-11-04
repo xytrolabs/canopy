@@ -17,20 +17,20 @@ For the *Umbriel* compositor, add `noctalia` to the existing `autostart` array u
 
 ```toml
 [general]
-autostart = ["noctalia"]
+autostart = ["canopy"]
 ```
 
 For the *Niri* compositor, add the following line to the end of your configuration file, typically located at `~/.config/niri/config.kdl`
 
 ```ini
-spawn-at-startup "noctalia"
+spawn-at-startup "canopy"
 ```
 
 For the *Hyprland* compositor, append this to your existing `hyprland.start` event hook in your Lua configuration file, typically located at `~/.config/hypr/hyprland.lua`
 
 ```lua
 hl.on("hyprland.start", function()
-  hl.exec_cmd("noctalia")
+  hl.exec_cmd("canopy")
 end)
 ```
 

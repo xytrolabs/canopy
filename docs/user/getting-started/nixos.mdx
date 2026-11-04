@@ -33,7 +33,7 @@ If you'd prefer the latest git version or would like to use one of the modules, 
     # flake.nix
     {
       inputs = {
-        noctalia = {
+        canopy = {
           url = "github:noctalia-dev/noctalia";
           inputs.nixpkgs.follows = "nixpkgs"; # this line is optional, prevents downloading two versions of nixpkgs but disables cache
         };
@@ -50,7 +50,7 @@ If you'd prefer the latest git version or would like to use one of the modules, 
     Add Noctalia to your tack inputs:
 
     ```
-    tack add noctalia github:noctalia-dev/noctalia
+    tack add canopy github:canopy-dev/canopy
     ```
 
     If you want to use the cache, make sure to disable any sort of following for Noctalia's nixpkgs input.
@@ -64,14 +64,14 @@ If you'd prefer the latest git version or would like to use one of the modules, 
     Add Noctalia to your npins sources:
 
     ```
-    npins add github noctalia-dev noctalia --branch main
+    npins add github canopy-dev canopy --branch main
     ```
 
     ```nix
     # configuration.nix
     { pkgs, ... }:
     let
-      noctalia = import (import ./npins).noctalia {
+      canopy = import (import ./npins).canopy {
         inherit pkgs; # this line is optional, prevents downloading two versions of nixpkgs but disables cache
       };
     in
@@ -86,15 +86,15 @@ If you'd prefer the latest git version or would like to use one of the modules, 
     # configuration.nix
     { pkgs, ... }:
     let
-      noctalia-src = let
+      canopy-src = let
         commit = ""; # replace this with an actual commit id or tag
       in
         fetchTarball {
-          url = "https://github.com/noctalia-dev/noctalia/archive/${commit}.tar.gz";
+          url = "https://github.com/canopy-dev/canopy/archive/${commit}.tar.gz";
           sha256 = ""; # replace this with hash from nix build output, or by using `nix-prefetch-url --unpack`
         };
       
-      noctalia = import noctalia-src {
+      canopy = import canopy-src {
         inherit pkgs; # this line is optional, prevents downloading two versions of nixpkgs but disables cache
       };
     in
@@ -107,9 +107,9 @@ If you'd prefer the latest git version or would like to use one of the modules, 
     # configuration.nix
     { pkgs, ... }:
     let
-      noctalia-src = fetchTarball "https://github.com/noctalia-dev/noctalia/archive/main.tar.gz";
+      canopy-src = fetchTarball "https://github.com/noctalia-dev/noctalia/archive/main.tar.gz";
 
-      noctalia = import noctalia-src {
+      canopy = import canopy-src {
         inherit pkgs; # this line is optional, prevents downloading two versions of nixpkgs but disables cache
       };
     in
@@ -131,7 +131,7 @@ Note that both the Home Manager and Hjem modules install the package for you, so
     { inputs, pkgs, ... }:
     {
       environment.systemPackages = [
-        inputs.noctalia.packages.${pkgs.stdenv.hostPlatform.system}.default
+        inputs.canopy.packages.${pkgs.stdenv.hostPlatform.system}.default
       ];
     }
     ```
@@ -144,7 +144,7 @@ Note that both the Home Manager and Hjem modules install the package for you, so
       # see adding the input above
     in {
       environment.systemPackages = [
-        noctalia.package
+        canopy.package
       ];
     }
     ```
@@ -153,7 +153,7 @@ Note that both the Home Manager and Hjem modules install the package for you, so
 
 ### Home Manager Module {#home-manager}
 
-The Home Manager module allows you to configure Noctalia's settings [(that you would otherwise put in `~/.config/noctalia/`)](/noctalia/configuration/) using nix instead of toml, or allows you to link an existing toml file. It is optional.
+The Home Manager module allows you to configure Noctalia's settings [(that you would otherwise put in `~/.config/canopy/`)](/canopy/configuration/) using nix instead of toml, or allows you to link an existing toml file. It is optional.
 
 <Tabs>
   <TabItem label="flakes/tack">
@@ -162,10 +162,10 @@ The Home Manager module allows you to configure Noctalia's settings [(that you w
     {
       home-manager.users.drfoobar = {
         imports = [
-          inputs.noctalia.homeModules.default
+          inputs.canopy.homeModules.default
         ];
 
-        programs.noctalia = {
+        programs.canopy = {
           enable = true;
 
           settings = { # This may also be a string or path to a .toml file.
@@ -193,10 +193,10 @@ The Home Manager module allows you to configure Noctalia's settings [(that you w
     in {
       home-manager.users.drfoobar = {
         imports = [
-          noctalia.homeModule
+          canopy.homeModule
         ];
 
-        programs.noctalia = {
+        programs.canopy = {
           enable = true;
 
           settings = { # This may also be a string or path to a .toml file.
@@ -229,11 +229,11 @@ For those using Hjem instead of Home Manager, a Hjem module is also available.
     {
       hjem = {
         extraModules = [
-          inputs.noctalia.hjemModules.default
+          inputs.canopy.hjemModules.default
         ];
 
         users.drfoobar = {
-          programs.noctalia = {
+          programs.canopy = {
             enable = true;
             
             settings = { ... };
@@ -251,11 +251,11 @@ For those using Hjem instead of Home Manager, a Hjem module is also available.
     in {
       hjem = {
         extraModules = [
-          noctalia.hjemModule
+          canopy.hjemModule
         ];
 
         users.drfoobar = {
-          programs.noctalia = {
+          programs.canopy = {
             enable = true;
             
             settings = { ... };
@@ -277,10 +277,10 @@ The NixOS module installs the package system-wide and can enable some recommende
     { inputs, ... }:
     {
       imports = [
-        inputs.noctalia.nixosModules.default
+        inputs.canopy.nixosModules.default
       ];
 
-      programs.noctalia = {
+      programs.canopy = {
         enable = true;
 
         # Enables NetworkManager, Bluetooth, UPower, and a power profile service.
@@ -296,10 +296,10 @@ The NixOS module installs the package system-wide and can enable some recommende
       # see adding the input above
     in {
       imports = [
-        noctalia.nixosModule
+        canopy.nixosModule
       ];
       
-      programs.noctalia = {
+      programs.canopy = {
         enable = true;
       
         # Enables NetworkManager, Bluetooth, UPower, and a power profile service.
@@ -312,7 +312,7 @@ The NixOS module installs the package system-wide and can enable some recommende
 
 ### Systemd Service {#systemd}
 
-Each of the above modules includes a systemd user service for Noctalia, which can be enabled by setting `programs.noctalia.systemd.enable = true`.
+Each of the above modules includes a systemd user service for Noctalia, which can be enabled by setting `programs.canopy.systemd.enable = true`.
 
 :::note
 When using the service, it is recommended to enable `launch_apps_as_systemd_services`, otherwise any apps launched by Noctalia will be terminated when the service restarts.
@@ -320,7 +320,7 @@ When using the service, it is recommended to enable `launch_apps_as_systemd_serv
 
 ### Binary Cache {#binary-cache}
 
-Pre-built binaries are available on [Cachix](https://app.cachix.org/cache/noctalia), so you can skip compiling locally.
+Pre-built binaries are available on [Cachix](https://app.cachix.org/cache/canopy), so you can skip compiling locally.
 
 You can configure the substituter either in your NixOS config, flake, or `/etc/nix/nix.conf`:
 
@@ -334,8 +334,8 @@ You can add the cache either to your flake, nixos configuration, or `/etc/nix/ni
   <TabItem label="configuration.nix">
     ```nix
     nix.settings = {
-      extra-substituters = [ "https://noctalia.cachix.org" ];
-      extra-trusted-public-keys = [ "noctalia.cachix.org-1:pCOR47nnMEo5thcxNDtzWpOxNFQsBRglJzxWPp3dkU4=" ];
+      extra-substituters = [ "https://canopy.cachix.org" ];
+      extra-trusted-public-keys = [ "canopy.cachix.org-1:pCOR47nnMEo5thcxNDtzWpOxNFQsBRglJzxWPp3dkU4=" ];
     };
     ```
   </TabItem>
@@ -343,16 +343,16 @@ You can add the cache either to your flake, nixos configuration, or `/etc/nix/ni
   <TabItem label="flake.nix">
     ```nix
     nixConfig = {
-      extra-substituters = [ "https://noctalia.cachix.org" ];
-      extra-trusted-public-keys = [ "noctalia.cachix.org-1:pCOR47nnMEo5thcxNDtzWpOxNFQsBRglJzxWPp3dkU4=" ];
+      extra-substituters = [ "https://canopy.cachix.org" ];
+      extra-trusted-public-keys = [ "canopy.cachix.org-1:pCOR47nnMEo5thcxNDtzWpOxNFQsBRglJzxWPp3dkU4=" ];
     };
     ```
   </TabItem>
 
   <TabItem label="nix.conf">
     ```properties
-    extra-substituters = https://noctalia.cachix.org
-    extra-trusted-public-keys = noctalia.cachix.org-1:pCOR47nnMEo5thcxNDtzWpOxNFQsBRglJzxWPp3dkU4=
+    extra-substituters = https://canopy.cachix.org
+    extra-trusted-public-keys = canopy.cachix.org-1:pCOR47nnMEo5thcxNDtzWpOxNFQsBRglJzxWPp3dkU4=
     ```
   </TabItem>
 </Tabs>
@@ -361,24 +361,24 @@ Overriding any of Noctalia's inputs (e.g. via `inputs.nixpkgs.follows` with flak
 
 Additionally, tracking `main` directly may pull in a commit that hasn't been cached yet by CI.
 
-To avoid this, the [`cachix`](https://github.com/noctalia-dev/noctalia/tree/cachix) branch always points to the latest cached commit. Pinning to this branch guarantees you always track the latest commit that has already been cached:
+To avoid this, the [`cachix`](https://github.com/canopy-dev/canopy/tree/cachix) branch always points to the latest cached commit. Pinning to this branch guarantees you always track the latest commit that has already been cached:
 
 <Tabs>
   <TabItem label="flakes">
     ```nix
-    noctalia.url = "github:noctalia-dev/noctalia/cachix";
+    canopy.url = "github:noctalia-dev/noctalia/cachix";
     ```
   </TabItem>
 
   <TabItem label="tack">
     ```
-    tack add noctalia github:noctalia-dev/noctalia/cachix
+    tack add canopy github:canopy-dev/canopy/cachix
     ```
   </TabItem>
 
   <TabItem label="npins">
     ```
-    npins add github noctalia-dev noctalia --branch cachix
+    npins add github canopy-dev canopy --branch cachix
     ```
   </TabItem>
 

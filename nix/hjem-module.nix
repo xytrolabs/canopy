@@ -19,7 +19,7 @@ let
       rawConfig = toml.generate "config.toml" cfg.settings;
     in
     if cfg.package != null && cfg.validateConfig then
-      pkgs.runCommand "noctalia-config" { } ''
+      pkgs.runCommand "canopy-config" { } ''
         ${lib.getExe cfg.package} config validate ${rawConfig}
         cp ${rawConfig} $out
       ''
@@ -31,23 +31,23 @@ let
   ) cfg.customPalettes;
 in
 {
-  options.programs.noctalia = {
+  options.programs.canopy = {
     enable = mkEnableOption "Whether to enable noctalia, a lightweight Wayland shell and bar.";
 
     systemd = {
-      enable = mkEnableOption "Enables a systemd user service for noctalia.";
+      enable = mkEnableOption "Enables a systemd user service for canopy.";
 
       target = mkOption {
         type = lib.types.str;
         default = "graphical-session.target";
         example = "hyprland-session.target";
-        description = "The systemd target for the noctalia service.";
+        description = "The systemd target for the canopy service.";
       };
     };
 
     package = mkOption {
       type = lib.types.nullOr lib.types.package;
-      description = "The noctalia package to use.";
+      description = "The canopy package to use.";
     };
 
     validateConfig = mkOption {
@@ -60,8 +60,8 @@ in
       type = toml.type;
       default = { };
       description = ''
-        Configuration written to {file}`$XDG_CONFIG_HOME/noctalia/config.toml`.
-        See <https://docs.noctalia.dev/noctalia/configuration/> for more information and examples.
+        Configuration written to {file}`$XDG_CONFIG_HOME/canopy/config.toml`.
+        See <https://docs.canopy.dev/canopy/configuration/> for more information and examples.
       '';
       example = lib.literalExpression ''
         shell = {
@@ -81,8 +81,8 @@ in
       type = json.type;
       default = { };
       description = ''
-        Custom color palettes written to {file}`$XDG_CONFIG_HOME/noctalia/palettes/<name>.json`.
-        See <https://docs.noctalia.dev/noctalia/theming/palette/#custom-palette-files> for more information.
+        Custom color palettes written to {file}`$XDG_CONFIG_HOME/canopy/palettes/<name>.json`.
+        See <https://docs.canopy.dev/canopy/theming/palette/#custom-palette-files> for more information.
       '';
       example = lib.literalExpression ''
         cherry-blossom = {
@@ -100,9 +100,9 @@ in
   config = mkIf cfg.enable {
     packages = optional (cfg.package != null) cfg.package;
 
-    systemd.services.noctalia = mkIf (cfg.systemd.enable) {
+    systemd.services.canopy = mkIf (cfg.systemd.enable) {
       description = "Noctalia - A lightweight Wayland shell and bar";
-      documentation = [ "https://docs.noctalia.dev/noctalia/" ];
+      documentation = [ "https://docs.canopy.dev/canopy/" ];
       partOf = [ cfg.systemd.target ];
       after = [ cfg.systemd.target ];
       wantedBy = [ cfg.systemd.target ];
@@ -123,17 +123,17 @@ in
 
     xdg.config.files = lib.mkMerge [
       (mkIf (cfg.settings != { }) {
-        "noctalia/config.toml".source = configToml;
+        "canopy/config.toml".source = configToml;
       })
       (mapAttrs' (
-        name: source: lib.nameValuePair "noctalia/palettes/${name}.json" { inherit source; }
+        name: source: lib.nameValuePair "canopy/palettes/${name}.json" { inherit source; }
       ) paletteFiles)
     ];
 
     assertions = [
       {
         assertion = !cfg.systemd.enable || cfg.package != null;
-        message = "programs.noctalia.package cannot be null when programs.noctalia.systemd.enable is true";
+        message = "programs.canopy.package cannot be null when programs.canopy.systemd.enable is true";
       }
     ];
   };

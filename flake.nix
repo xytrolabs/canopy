@@ -29,7 +29,7 @@
     in
     {
       overlays.default = final: prev: {
-        noctalia = final.callPackage ./nix/package.nix { inherit rev; };
+        canopy = final.callPackage ./nix/package.nix { inherit rev; };
       };
 
       packages = forEachSystem (
@@ -45,7 +45,7 @@
         { pkgs, system }:
         {
           default = pkgs.callPackage ./nix/devshell.nix {
-            noctalia = self.packages.${system}.default;
+            canopy = self.packages.${system}.default;
           };
         }
       );

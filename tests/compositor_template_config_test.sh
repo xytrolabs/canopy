@@ -42,32 +42,32 @@ configure_case() {
   case "$name" in
     umbriel)
       primary_relative=umbriel/config.toml
-      theme_relative=umbriel/noctalia.toml
+      theme_relative=umbriel/canopy.toml
       integration='files = ["noctalia.toml"]'
       manual_directive="files = [\"$XDG_CONFIG_HOME/$theme_relative\"]"
       ;;
     niri)
       primary_relative=niri/config.kdl
-      theme_relative=niri/noctalia.kdl
+      theme_relative=niri/canopy.kdl
       integration='include "noctalia.kdl"'
       manual_directive="include \"$XDG_CONFIG_HOME/$theme_relative\""
       ;;
     sway|scroll)
       primary_relative="$name/config"
-      theme_relative="$name/noctalia"
+      theme_relative="$name/canopy"
       integration="include $XDG_CONFIG_HOME/$theme_relative"
       manual_directive="include \"$XDG_CONFIG_HOME/$theme_relative\""
       ;;
     mango)
       primary_relative=mango/config.conf
-      theme_relative=mango/noctalia.conf
+      theme_relative=mango/canopy.conf
       integration="source=$XDG_CONFIG_HOME/$theme_relative"
       manual_directive=$integration
       ;;
     hyprland-conf)
       compositor=hyprland
       primary_relative=hypr/hyprland.conf
-      theme_relative=hypr/noctalia.conf
+      theme_relative=hypr/canopy.conf
       integration="source = $XDG_CONFIG_HOME/$theme_relative"
       manual_directive=$integration
       ;;
@@ -75,14 +75,14 @@ configure_case() {
       compositor=hyprland
       export TEST_HYPRLAND_MODE=lua
       primary_relative=hypr/hyprland.lua
-      theme_relative=hypr/noctalia.lua
-      integration='require("noctalia").apply_theme()'
+      theme_relative=hypr/canopy.lua
+      integration='require("canopy").apply_theme()'
       manual_directive="dofile(\"$XDG_CONFIG_HOME/$theme_relative\").apply_theme()"
       ;;
     labwc)
       primary_relative=labwc/rc.xml
-      theme_relative=labwc/noctalia.conf
-      integration='<name>noctalia</name>'
+      theme_relative=labwc/canopy.conf
+      integration='<name>canopy</name>'
       manual_directive=$integration
       ;;
   esac
@@ -125,7 +125,7 @@ for name in umbriel niri sway scroll mango hyprland-conf hyprland-lua labwc; do
   [ ! -L "$primary" ] || fail "$name: created primary config symlink"
   [ -f "$theme" ] || fail "$name: removed generated theme on missing config"
   if [ "$name" = labwc ]; then
-    cmp -s "$theme" "$XDG_DATA_HOME/themes/noctalia/openbox-3/themerc" \
+    cmp -s "$theme" "$XDG_DATA_HOME/themes/canopy/openbox-3/themerc" \
       || fail "$name: did not install generated theme before warning"
   fi
   run_hook undo || fail "$name: undo failed with missing config"

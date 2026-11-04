@@ -9,7 +9,7 @@
 #include <string>
 
 Palette palette = noctalia::theme::mapGeneratedPaletteMode(
-    noctalia::theme::expandBuiltinPalette(*noctalia::theme::findBuiltinPalette("Noctalia")).dark
+    noctalia::theme::expandBuiltinPalette(*noctalia::theme::findBuiltinPalette("Canopy")).dark
 );
 bool g_resolvedThemeLight = false;
 

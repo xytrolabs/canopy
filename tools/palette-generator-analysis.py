@@ -7,8 +7,8 @@ Usage:
     ./tools/palette-generator-analysis.py <wallpaper> --fail-threshold 20
 
 Three backends:
-  - Noctalia  : ../build-debug/noctalia theme <img> --scheme <s> --dark
-  - Python    : the upstream reference in noctalia-shell/Scripts/python
+  - Noctalia  : ../build-debug/canopy theme <img> --scheme <s> --dark
+  - Python    : the upstream reference in canopy-shell/Scripts/python
   - Matugen   : Rust reference (M3 schemes only)
 
 Exit code: 0 if all diffs are under --fail-threshold (default: unlimited),
@@ -23,10 +23,10 @@ from pathlib import Path
 
 SCRIPT_DIR = Path(__file__).parent.resolve()
 REPO_DIR = SCRIPT_DIR.parent
-NOCTALIA_BIN = REPO_DIR / "build-debug" / "noctalia"
+NOCTALIA_BIN = REPO_DIR / "build-debug" / "canopy"
 
 # Absolute path into the upstream Python reference.
-PYTHON_THEMING_DIR = Path.home() / "Development/misc/noctalia/noctalia-shell/Scripts/python/src/theming"
+PYTHON_THEMING_DIR = Path.home() / "Development/misc/canopy/canopy-shell/Scripts/python/src/theming"
 PYTHON_PROCESSOR = PYTHON_THEMING_DIR / "template-processor.py"
 
 # Pull in Python's Hct for hue/chroma classification.
@@ -114,7 +114,7 @@ def run_matugen(image: Path, scheme: str) -> dict | None:
         return None
 
 
-def run_noctalia(image: Path, scheme: str) -> dict | None:
+def run_canopy(image: Path, scheme: str) -> dict | None:
     try:
         out = subprocess.run(
             [str(NOCTALIA_BIN), "theme", str(image),
@@ -123,7 +123,7 @@ def run_noctalia(image: Path, scheme: str) -> dict | None:
         )
         return json.loads(out.stdout)
     except Exception as e:
-        print(f"  noctalia {scheme}: {e}", file=sys.stderr)
+        print(f"  canopy {scheme}: {e}", file=sys.stderr)
         return None
 
 
@@ -150,7 +150,7 @@ def compare_m3(image: Path, scheme: str, has_matugen: bool) -> list[int]:
     """Return list of LSB diffs vs the best available reference."""
     print(f"\n─── {scheme} ───")
     py = run_python(image, scheme)
-    noct = run_noctalia(image, scheme)
+    noct = run_canopy(image, scheme)
     mat = run_matugen(image, scheme) if has_matugen else None
 
     if not py or not noct:
@@ -188,7 +188,7 @@ def compare_m3(image: Path, scheme: str, has_matugen: bool) -> list[int]:
 def compare_custom(image: Path, scheme: str) -> list[int]:
     print(f"\n─── {scheme} ───")
     py = run_python(image, scheme)
-    noct = run_noctalia(image, scheme)
+    noct = run_canopy(image, scheme)
     if not py or not noct:
         print("  ! missing reference output, skipping")
         return []

@@ -207,7 +207,7 @@ namespace {
 
     // Read-only cache is separate from remembered state and survives a bodyless 304.
     HttpRequest request;
-    request.url = "https://api.noctalia.dev/v1/plugin-metrics";
+    request.url = "https://api.canopy.dev/v1/plugin-metrics";
     bool readDone = false;
     std::string etag;
     http.request(request, [&](HttpResponse response) {

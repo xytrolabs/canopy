@@ -145,7 +145,7 @@ location = "https://example.invalid/bad"
   }
 
   void checkPluginIdValidation() {
-    const std::string valid[] = {"noctalia/screen_recorder", "me/hello", "Team/repo_2", "a/b.c-d"};
+    const std::string valid[] = {"canopy/screen_recorder", "me/hello", "Team/repo_2", "a/b.c-d"};
     for (const auto& id : valid) {
       if (!scripting::isValidPluginId(id)) {
         fail("plugins: rejected valid plugin id " + id);
@@ -170,7 +170,7 @@ location = "https://example.invalid/bad"
     // shapes that must not slip through are the near-misses: no colon, extra colons,
     // and an empty or malformed entry segment.
     const std::string validEntries[] = {
-        "noctalia/screen_recorder:widget", "me/hello:a", "Team/repo_2:entry-1", "a/b.c-d:e.f"
+        "canopy/screen_recorder:widget", "me/hello:a", "Team/repo_2:entry-1", "a/b.c-d:e.f"
     };
     for (const auto& id : validEntries) {
       if (!scripting::isValidPluginEntryId(id)) {
@@ -483,7 +483,7 @@ location = "https://example.invalid/bad"
          "user",
          {"personal"},
          CalendarCredentialSource::File,
-         "/run/agenix/noctalia-caldav"},
+         "/run/agenix/canopy-caldav"},
     };
     // Explicit chords so write→read round-trips (empty would emit defaults instead).
     c.keybinds.validate = {*parseKeyChordSpec("Return")};
@@ -528,7 +528,7 @@ location = "https://example.invalid/bad"
     c.shell.clipboardHistoryMaxEntries = 80;
     c.shell.clipboardAutoPaste = ClipboardAutoPasteMode::CtrlV;
     c.storage.keySource = StorageKeySource::File;
-    c.storage.keyFile = "/run/agenix/noctalia-storage-key";
+    c.storage.keyFile = "/run/agenix/canopy-storage-key";
     c.shell.avatarPath = "/home/u/face.png";
     c.shell.settingsWindowTranslucent = true;
     c.shell.animation.speed = 1.5F;
@@ -636,9 +636,9 @@ location = "https://example.invalid/bad"
     c.plugins.sources = {
         {.kind = PluginSourceKind::Git,
          .name = "official",
-         .location = "https://github.com/noctalia-dev/official-plugins"},
+         .location = "https://github.com/canopy-dev/official-plugins"},
     };
-    c.plugins.enabled = {"noctalia/notes"};
+    c.plugins.enabled = {"canopy/notes"};
     c.plugins.autoUpdate = PluginAutoUpdateMode::None; // non-default (default is All) so the round-trip exercises it
 
     c.bars = {makeProbeBar()};
@@ -852,7 +852,7 @@ location = "https://example.invalid/bad"
         defaultPluginSources()[0], // the official source
         {.kind = PluginSourceKind::Git,
          .name = "community",
-         .location = "https://github.com/noctalia-dev/community-plugins"},
+         .location = "https://github.com/canopy-dev/community-plugins"},
         {.kind = PluginSourceKind::Git,
          .name = "disabled",
          .location = "https://example.invalid/disabled",
@@ -878,12 +878,12 @@ location = "https://example.invalid/bad"
     };
     expectLocations("defaults", sources, PluginAutoUpdateMode::None, {});
     expectLocations(
-        "defaults", sources, PluginAutoUpdateMode::Official, {"https://github.com/noctalia-dev/official-plugins"}
+        "defaults", sources, PluginAutoUpdateMode::Official, {"https://github.com/canopy-dev/official-plugins"}
     );
     // Every enabled git source; disabled and path sources stay out.
     expectLocations(
         "defaults", sources, PluginAutoUpdateMode::All,
-        {"https://github.com/noctalia-dev/official-plugins", "https://github.com/noctalia-dev/community-plugins"}
+        {"https://github.com/canopy-dev/official-plugins", "https://github.com/canopy-dev/community-plugins"}
     );
     // A single source reusing the "official" name with an untrusted location is
     // legal config (names must be unique, locations need not), but the location
@@ -892,12 +892,12 @@ location = "https://example.invalid/bad"
         {.kind = PluginSourceKind::Git, .name = "official", .location = "https://example.invalid/untrusted"},
         {.kind = PluginSourceKind::Git,
          .name = "community",
-         .location = "https://github.com/noctalia-dev/community-plugins"},
+         .location = "https://github.com/canopy-dev/community-plugins"},
     };
     expectLocations("untrustedOfficial", untrustedOfficial, PluginAutoUpdateMode::Official, {});
     expectLocations(
         "untrustedOfficial", untrustedOfficial, PluginAutoUpdateMode::All,
-        {"https://example.invalid/untrusted", "https://github.com/noctalia-dev/community-plugins"}
+        {"https://example.invalid/untrusted", "https://github.com/canopy-dev/community-plugins"}
     );
   }
 
@@ -912,7 +912,7 @@ location = "https://example.invalid/bad"
 [[source]]
 name = "official"
 kind = "git"
-location = "https://github.com/noctalia-dev/official-plugins"
+location = "https://github.com/canopy-dev/official-plugins"
 
 [[source]]
 name = "official"
@@ -921,7 +921,7 @@ location = "https://example.invalid/untrusted"
 )");
     if (!erroredOnSource(legitDiag)
         || legitPlugins.sources.size() != 1
-        || legitPlugins.sources[0].location != "https://github.com/noctalia-dev/official-plugins") {
+        || legitPlugins.sources[0].location != "https://github.com/canopy-dev/official-plugins") {
       fail("plugins.source: duplicate names must error and keep the first entry");
     }
   }
@@ -942,7 +942,7 @@ provider = "custom"
 server_url = "https://dav.example.com/"
 username = "user"
 credential_source = "file"
-password_file = "/run/agenix/noctalia-caldav"
+password_file = "/run/agenix/canopy-caldav"
 )");
     if (valid.hasErrors()) {
       fail("calendar: valid file credential source was rejected");
@@ -965,7 +965,7 @@ type = "caldav"
 provider = "icloud"
 username = "user"
 credential_source = "secret-service"
-password_file = "/run/agenix/noctalia-caldav"
+password_file = "/run/agenix/canopy-caldav"
 )");
     if (!conflictingFile.hasErrors()) {
       fail("calendar: secret-service credential source accepted password_file");
@@ -1024,7 +1024,7 @@ credential_source = "automatic"
 
     const Diagnostics valid = parse(R"(
 key_source = "file"
-key_file = "/run/agenix/noctalia-storage-key"
+key_file = "/run/agenix/canopy-storage-key"
 )");
     if (valid.hasErrors()) {
       fail("storage: valid file key source was rejected");
@@ -1039,7 +1039,7 @@ key_source = "file"
 
     const Diagnostics conflictingFile = parse(R"(
 key_source = "secret-service"
-key_file = "/run/agenix/noctalia-storage-key"
+key_file = "/run/agenix/canopy-storage-key"
 )");
     if (!conflictingFile.hasErrors()) {
       fail("storage: secret-service key source accepted key_file");
@@ -1047,7 +1047,7 @@ key_file = "/run/agenix/noctalia-storage-key"
 
     const Diagnostics relativeFile = parse(R"(
 key_source = "file"
-key_file = "noctalia-storage-key"
+key_file = "canopy-storage-key"
 )");
     if (!relativeFile.hasErrors()) {
       fail("storage: file key source accepted a relative key_file");

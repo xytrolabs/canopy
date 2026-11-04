@@ -20,17 +20,17 @@ rewrite_config() {
 
 rewrite_config "$config_dir/hyprland.conf" '
     /#[[:space:]]*For Noctalia Color templates/ { pending = $0; next }
-    /^[[:space:]]*source[[:space:]]*=.*noctalia\.conf/ { pending = ""; next }
+    /^[[:space:]]*source[[:space:]]*=.*canopy\.conf/ { pending = ""; next }
     pending != "" { print pending; pending = "" }
     { print }
     END { if (pending != "") print pending }
 '
 rewrite_config "$config_dir/hyprland.lua" '
     /--[[:space:]]*For Noctalia Color templates/ { pending = $0; next }
-    /require\("noctalia"\)\.apply_theme\(\)/ { pending = ""; next }
+    /require\("canopy"\)\.apply_theme\(\)/ { pending = ""; next }
     pending != "" { print pending; pending = "" }
     { print }
     END { if (pending != "") print pending }
 '
 
-rm -f -- "$config_dir/noctalia.conf" "$config_dir/noctalia.lua"
+rm -f -- "$config_dir/canopy.conf" "$config_dir/canopy.lua"

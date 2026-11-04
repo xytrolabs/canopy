@@ -909,7 +909,7 @@
       "calendar-reminder-open": "打开",
       "calendar-reminder-untitled": "无标题日程",
       "calendar-reminder-with-location": "{when}\n{location}",
-      "config-migration-body": "请在源配置文件中更新 {path}。Noctalia 仅在内存中临时兼容。执行 noctalia config validate 命令查看所有必需的更改。",
+      "config-migration-body": "请在源配置文件中更新 {path}。Noctalia 仅在内存中临时兼容。执行 canopy config validate 命令查看所有必需的更改。",
       "config-migration-title": "需要更新配置",
       "dbus-disabled": "DBus 通知已禁用",
       "desktop-widgets-editor": "桌面小组件编辑器",
@@ -919,12 +919,12 @@
       "greeter-sync-pending-console": "正在将外观同步到 Greeter。如果需要授权，请在 Noctalia、TTY 或控制台中确认 polkit 提示。",
       "greeter-sync-pending-legacy": "正在通过需要身份验证的旧版辅助程序同步。需要管理员授权。",
       "greeter-sync-pending-manual": "同步文件已暂存，等待通过身份验证的旧版同步。请在终端运行接受位置参数的同步辅助程序；如果使用自定义路径，请保留 NOCTALIA_GREETER_STATE_DIR，或配置 shell.greeter_sync.privilege_command 后重新同步。",
-      "greeter-sync-pending-manual-pkexec": "正在将外观同步到 Greeter。如果需要管理员授权但未出现提示，请在终端运行：pkexec noctalia-greeter-apply-appearance --sync \"/run/user/$(id -u)/noctalia-greeter-sync\"。",
+      "greeter-sync-pending-manual-pkexec": "正在将外观同步到 Greeter。如果需要管理员授权但未出现提示，请在终端运行：pkexec canopy-greeter-apply-appearance --sync \"/run/user/$(id -u)/noctalia-greeter-sync\"。",
       "greeter-sync-success": "外观已同步。更改将在下次显示登录界面时生效。",
       "greeter-sync-timeout": "Greeter 同步仍在等待授权。请检查 TTY 或控制台中的 polkit 提示，在“安全”设置中启用 polkit 代理，或手动运行 pkexec。",
       "greeter-sync-timeout-manual": "通过身份验证的旧版同步仍需要管理员授权。请在终端运行接受位置参数的同步辅助程序；如果使用自定义路径，请保留 NOCTALIA_GREETER_STATE_DIR。",
-      "greeter-sync-timeout-manual-pkexec": "Greeter 同步仍需要授权。请在终端运行：pkexec noctalia-greeter-apply-appearance --sync \"/run/user/$(id -u)/noctalia-greeter-sync\"",
-      "keybind-app": "Noctalia",
+      "greeter-sync-timeout-manual-pkexec": "Greeter 同步仍需要授权。请在终端运行：pkexec canopy-greeter-apply-appearance --sync \"/run/user/$(id -u)/noctalia-greeter-sync\"",
+      "keybind-app": "Canopy",
       "keybind-invalid-modifier": "该快捷键仅接受不带修饰键的单键。",
       "keybind-invalid-printable": "字母、数字和符号键需要配合 Ctrl 或 Alt 等修饰键使用。",
       "keybind-invalid-super": "Super/Windows 键无法用于 Shell 快捷键。",
@@ -1311,7 +1311,7 @@
       "sync-greeter": "无法将外观同步至 Noctalia Greeter。",
       "sync-greeter-timeout": "Greeter 同步仍在等待授权。请检查 TTY 或控制台中的 polkit 提示，在“安全”设置中启用 polkit 代理，或手动运行 pkexec。",
       "sync-greeter-timeout-manual": "通过身份验证的旧版同步仍需要管理员授权。请在终端运行接受位置参数的同步辅助程序；如果使用自定义路径，请保留 NOCTALIA_GREETER_STATE_DIR。",
-      "sync-greeter-timeout-manual-pkexec": "Greeter 同步仍需要授权。请在终端运行：pkexec noctalia-greeter-apply-appearance --sync \"/run/user/$(id -u)/noctalia-greeter-sync\"",
+      "sync-greeter-timeout-manual-pkexec": "Greeter 同步仍需要授权。请在终端运行：pkexec canopy-greeter-apply-appearance --sync \"/run/user/$(id -u)/noctalia-greeter-sync\"",
       "widget": {
         "rename": "无法重命名此具名小组件。"
       },
@@ -1794,8 +1794,8 @@
         },
         "kind-label": "类型",
         "location-label": "位置",
-        "location-placeholder-git": "https://github.com/me/noctalia-plugins",
-        "location-placeholder-path": "~/dev/noctalia-plugins",
+        "location-placeholder-git": "https://github.com/me/canopy-plugins",
+        "location-placeholder-path": "~/dev/canopy-plugins",
         "name-label": "源 ID",
         "name-placeholder": "my-plugins",
         "precedence-hint": "若多个源提供同一插件，列表中靠下的源将覆盖靠上的源。",
@@ -1818,7 +1818,7 @@
         "loading": "正在加载目录…",
         "no-readme": "没有可用的描述。",
         "not-listed": "已下架",
-        "open-page": "在 noctalia.dev 上打开插件页面",
+        "open-page": "在 canopy.dev 上打开插件页面",
         "open-source": "打开插件源码仓库",
         "recommend": "推荐",
         "recommendation-error": "未能确认更改。原有推荐状态不变，请重试相同操作以同步状态。",
@@ -1890,7 +1890,7 @@
           "label": "圆角缩放"
         },
         "custom-palette": {
-          "description": "从 ~/.config/noctalia/palettes/ 中选择配色方案",
+          "description": "从 ~/.config/canopy/palettes/ 中选择配色方案",
           "label": "自定义配色方案",
           "search-placeholder": "搜索自定义配色方案…"
         },
@@ -3055,7 +3055,7 @@
           "placeholder": "城市, 国家"
         },
         "location-auto-locate": {
-          "description": "通过 noctalia.dev 根据 IP 地址自动定位",
+          "description": "通过 canopy.dev 根据 IP 地址自动定位",
           "label": "自动定位（IP）"
         },
         "longitude": {
@@ -3299,7 +3299,7 @@
           "label": "日期格式"
         },
         "external-ip": {
-          "description": "通过 api.noctalia.dev 解析当前连接的公网 WAN IP，并显示在控制中心的网络选项卡中",
+          "description": "通过 api.canopy.dev 解析当前连接的公网 WAN IP，并显示在控制中心的网络选项卡中",
           "label": "显示 WAN IP"
         },
         "greeter-sync-auto": {
@@ -4158,7 +4158,7 @@
             "label": "打开设置"
           },
           "settings-open-plugin": {
-            "description": "打开设置窗口并显示插件设置（如 noctalia/notes）",
+            "description": "打开设置窗口并显示插件设置（如 canopy/notes）",
             "label": "打开插件设置"
           },
           "settings-open-widget": {
@@ -5041,7 +5041,7 @@
       "export-config": "导出配置…",
       "export-config-saved": "配置导出已保存。",
       "filter-overridden": "已覆盖",
-      "legacy-config-warning": "旧版配置：{issue}。请修改源配置项。Noctalia 仅在内存中临时兼容。执行 noctalia config validate 命令查看所有必需的更改。",
+      "legacy-config-warning": "旧版配置：{issue}。请修改源配置项。Noctalia 仅在内存中临时兼容。执行 canopy config validate 命令查看所有必需的更改。",
       "native-title": "Noctalia 设置",
       "no-results": "未找到相关设置",
       "no-results-hint": "请尝试使用其他设置名称或配置键。",

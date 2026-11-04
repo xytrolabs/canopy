@@ -667,7 +667,7 @@ namespace noctalia::theme {
                         },
                 },
                 {
-                    .name = "Noctalia",
+                    .name = "Canopy",
                     .dark =
                         FixedPaletteMode{
                             .palette =

@@ -34,7 +34,7 @@ namespace {
 
 int main() {
   ::umask(022);
-  char templ[] = "/tmp/noctalia_plugin_file_privacy_XXXXXX";
+  char templ[] = "/tmp/canopy_plugin_file_privacy_XXXXXX";
   const char* made = ::mkdtemp(templ);
   if (!expect(made != nullptr, "mkdtemp")) {
     return 1;
@@ -43,7 +43,7 @@ int main() {
   ::setenv("NOCTALIA_STATE_HOME", root.c_str(), 1);
 
   // A data dir left world-readable by an older release must be tightened.
-  const fs::path dataDir = root / "noctalia" / "plugins" / "data" / "test" / "plugin";
+  const fs::path dataDir = root / "canopy" / "plugins" / "data" / "test" / "plugin";
   fs::create_directories(dataDir);
   fs::permissions(dataDir, fs::perms(0755), fs::perm_options::replace);
   const fs::path shared = root / "shared.txt";
@@ -58,9 +58,9 @@ int main() {
   LuauHost host(api, "test/plugin:service");
 
   const std::string source = R"(
-local dir = assert(noctalia.pluginDataDir())
-assert(noctalia.writeFile(dir .. "/history.json", "private"))
-assert(noctalia.writeFile(")"
+local dir = assert(canopy.pluginDataDir())
+assert(canopy.writeFile(dir .. "/history.json", "private"))
+assert(canopy.writeFile(")"
       + shared.string()
       + R"(", "shared"))
 )";

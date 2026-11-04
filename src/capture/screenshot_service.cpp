@@ -2263,11 +2263,11 @@ ScreenshotService::makeScreenshotPath(const OutputOptions& options, const std::s
 }
 
 void ScreenshotService::notifySaved(const std::filesystem::path& path) {
-  m_notifications.addInternal("Noctalia", "Screenshot saved", path.string());
+  m_notifications.addInternal("Canopy", "Screenshot saved", path.string());
 }
 
 void ScreenshotService::notifyError(const std::string& message) {
-  m_notifications.addInternal("Noctalia", "Screenshot failed", message, Urgency::Critical);
+  m_notifications.addInternal("Canopy", "Screenshot failed", message, Urgency::Critical);
 }
 
 void ScreenshotService::setSoundPlayer(SoundPlayer* soundPlayer) { m_soundPlayer = soundPlayer; }

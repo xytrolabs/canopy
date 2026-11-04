@@ -763,7 +763,7 @@
       "calendar-google-connect-start-failed": "לא ניתן היה להתחיל את אימות Google. נא לבדוק את חיבור הרשת ולנסות שוב.",
       "calendar-google-connect-start-http": "לא ניתן להתחיל את אימות Google. מתווך ה-OAuth החזיר HTTP {status}.",
       "calendar-google-connect-timeout": "פג תוקף האישור של Google. התחל את החיבור מחדש כשתהיה מוכן להתחבר.",
-      "config-migration-body": "יש לעדכן את {path} בקובץ המקור. Noctalia מיישמת החלפה זו באופן זמני בלבד. יש להריץ את noctalia config validate כדי להציג רשימה של כל השינויים הנדרשים.",
+      "config-migration-body": "יש לעדכן את {path} בקובץ המקור. Noctalia מיישמת החלפה זו באופן זמני בלבד. יש להריץ את canopy config validate כדי להציג רשימה של כל השינויים הנדרשים.",
       "config-migration-title": "נדרש עדכון תצורה",
       "dbus-disabled": "התראות DBus מושבתות",
       "desktop-widgets-editor": "עורך וידג'טים",
@@ -771,11 +771,11 @@
       "greeter-sync": "מקבל הפנים של Noctalia",
       "greeter-sync-pending": "ממתין לאישור מנהל כדי לכתוב ל-greeter.",
       "greeter-sync-pending-console": "ממתין לאישור מנהל. יש לאשר את בקשת ה־polkit ב־Noctalia, ב־TTY או במסוף, או להריץ את pkexec באופן ידני.",
-      "greeter-sync-pending-manual": "הקבצים מוכנים. הריצו במסוף: pkexec noctalia-greeter-apply-appearance \"$XDG_RUNTIME_DIR/noctalia-greeter-sync\". או הגדירו את shell.greeter_sync.privilege_command (לדוגמה ghostty -e pkexec) וסנכרנו שוב.",
+      "greeter-sync-pending-manual": "הקבצים מוכנים. הריצו במסוף: pkexec canopy-greeter-apply-appearance \"$XDG_RUNTIME_DIR/noctalia-greeter-sync\". או הגדירו את shell.greeter_sync.privilege_command (לדוגמה ghostty -e pkexec) וסנכרנו שוב.",
       "greeter-sync-success": "המראה סונכרן. השינויים יחולו במסך הכניסה הבא.",
       "greeter-sync-timeout": "סנכרון ה-Greeter עדיין ממתין לאישור מנהל. בדוק ב-TTY או בקונסולה להנחיית polkit, הפעל את סוכן ה-polkit ב'הגדרות אבטחה', או הרץ את pkexec באופן ידני.",
-      "greeter-sync-timeout-manual": "סנכרון ה-Greeter עדיין דורש אישור מנהל. הרץ בטרמינל: pkexec noctalia-greeter-apply-appearance \"$XDG_RUNTIME_DIR/noctalia-greeter-sync\"",
-      "keybind-app": "Noctalia",
+      "greeter-sync-timeout-manual": "סנכרון ה-Greeter עדיין דורש אישור מנהל. הרץ בטרמינל: pkexec canopy-greeter-apply-appearance \"$XDG_RUNTIME_DIR/noctalia-greeter-sync\"",
+      "keybind-app": "Canopy",
       "keybind-invalid-modifier": "קיצור דרך זה מקבל מקש בודד ללא מקשי צירוף.",
       "keybind-invalid-printable": "מקשים הניתנים להדפסה (אותיות, מספרים, סמלים) דורשים מקש שינוי כגון Ctrl או Alt.",
       "keybind-invalid-super": "לא ניתן להשתמש במקש Super/Windows בקיצורי המקשים של המעטפת.",
@@ -1138,7 +1138,7 @@
       "support-report": "שמירת דוח התמיכה נכשלה.",
       "sync-greeter": "לא ניתן היה לסנכרן את המראה עם Noctalia Greeter.",
       "sync-greeter-timeout": "סנכרון Greeter עדיין ממתין לאישור מנהל. יש לבדוק ב־TTY או בקונסולה אם מופיעה בקשת polkit, להפעיל את סוכן ה־polkit בהגדרות האבטחה, או להריץ את pkexec באופן ידני.",
-      "sync-greeter-timeout-manual": "סנכרון ה-Greeter עדיין דורש אישור מנהל. יש להריץ בטרמינל: pkexec noctalia-greeter-apply-appearance \"$XDG_RUNTIME_DIR/noctalia-greeter-sync\"",
+      "sync-greeter-timeout-manual": "סנכרון ה-Greeter עדיין דורש אישור מנהל. יש להריץ בטרמינל: pkexec canopy-greeter-apply-appearance \"$XDG_RUNTIME_DIR/noctalia-greeter-sync\"",
       "widget": {
         "rename": "לא ניתן היה לשנות את שם הווידג'ט."
       },
@@ -1532,8 +1532,8 @@
         },
         "kind-label": "סוג",
         "location-label": "מיקום",
-        "location-placeholder-git": "https://github.com/me/noctalia-plugins",
-        "location-placeholder-path": "~/dev/noctalia-plugins",
+        "location-placeholder-git": "https://github.com/me/canopy-plugins",
+        "location-placeholder-path": "~/dev/canopy-plugins",
         "name-label": "מזהה מקור",
         "name-placeholder": "הפלאגינים שלי",
         "precedence-hint": "מקורות נמוכים יותר דורסים את הגבוהים יותר כאשר הם מציעים את אותו התוסף.",
@@ -1554,7 +1554,7 @@
         "incompatible-hint": "נדרש API תוספים {required}; ‏Noctalia תומך ב־{oldest}–{current}.",
         "loading": "טוען קטלוג…",
         "no-readme": "אין תיאור זמין.",
-        "open-page": "פתח את דף התוסף ב-noctalia.dev",
+        "open-page": "פתח את דף התוסף ב-canopy.dev",
         "open-source": "פתח את מאגר המקור של התוסף",
         "results-count": "{count} תוספים",
         "search-placeholder": "חיפוש תוספים…",
@@ -1614,7 +1614,7 @@
           "label": "עיגול פינות"
         },
         "custom-palette": {
-          "description": "בחר פלטה מ-~/.config/noctalia/palettes/",
+          "description": "בחר פלטה מ-~/.config/canopy/palettes/",
           "label": "פלטת צבעים מותאמת אישית",
           "search-placeholder": "חיפוש פלטות מותאמות אישית…"
         },
@@ -2606,7 +2606,7 @@
           "placeholder": "עיר, מדינה"
         },
         "location-auto-locate": {
-          "description": "זיהוי המיקום שלך באופן אוטומטי מכתובת ה-IP שלך דרך noctalia.dev",
+          "description": "זיהוי המיקום שלך באופן אוטומטי מכתובת ה-IP שלך דרך canopy.dev",
           "label": "איתור אוטומטי (IP)"
         },
         "longitude": {
@@ -2829,7 +2829,7 @@
           "label": "פורמט תאריך"
         },
         "external-ip": {
-          "description": "בצע רזולוציה לכתובת ה-WAN הציבורית של החיבור (דרך api.noctalia.dev) והצג אותה בלשונית הרשת של ה-Control Center",
+          "description": "בצע רזולוציה לכתובת ה-WAN הציבורית של החיבור (דרך api.canopy.dev) והצג אותה בלשונית הרשת של ה-Control Center",
           "label": "הצג כתובת WAN IP"
         },
         "greeter-sync-auto": {
@@ -3935,7 +3935,7 @@
       "export-config": "ייצוא הגדרה…",
       "export-config-saved": "ייצוא ה-Config נשמר.",
       "filter-overridden": "עוקף",
-      "legacy-config-warning": "הגדרה מיושנת: {issue}. ערוך את רשומת המקור הזו; Noctalia מחילה את ההחלפה באופן זמני בלבד. הרץ noctalia config validate כדי להציג את כל השינויים הנדרשים.",
+      "legacy-config-warning": "הגדרה מיושנת: {issue}. ערוך את רשומת המקור הזו; Noctalia מחילה את ההחלפה באופן זמני בלבד. הרץ canopy config validate כדי להציג את כל השינויים הנדרשים.",
       "native-title": "הגדרות Noctalia",
       "no-results": "לא נמצאו הגדרות",
       "no-results-hint": "נסה שם הגדרה או מפתח תצורה אחר.",

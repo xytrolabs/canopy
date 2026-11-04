@@ -18,7 +18,7 @@
 
 ;;; Code:
 
-(deftheme noctalia "Theme using Template variables with quality of life improvements.")
+(deftheme canopy "Theme using Template variables with quality of life improvements.")
 
 ;; Define all the color variables (replaced by template processor)
 (let* ((bg "{{colors.background.default.hex}}")
@@ -99,7 +99,7 @@
       (term15 "{{colors.terminal_bright_white.default.hex}}"))
 
   (custom-theme-set-faces
-   'noctalia
+   'canopy
    ;; Basic faces
    `(default ((t (:background ,bg :foreground ,on-background))))
    `(cursor ((t (:background ,primary))))

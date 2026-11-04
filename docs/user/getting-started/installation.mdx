@@ -96,11 +96,11 @@ sudo zypper install noctalia
   </TabItem>
 </Tabs>
 
-**Step 2**: Refresh and install noctalia-git
+**Step 2**: Refresh and install canopy-git
 
 ```bash
 sudo zypper refresh
-sudo zypper install noctalia-git
+sudo zypper install canopy-git
 ```
 
 :::note
@@ -115,44 +115,44 @@ Noctalia is available in the [GURU](https://wiki.gentoo.org/wiki/Project\:GURU) 
 
 **Step 1**: Enable and sync the overlay as read in [Project:GURU/Information_for_End_Users](https://wiki.gentoo.org/wiki/Project\:GURU/Information_for_End_Users).
 
-**Step 2**: [Unmask](https://wiki.gentoo.org/wiki/Live_ebuilds#Unmasking_live_ebuilds) the `gui-apps/noctalia` package:
+**Step 2**: [Unmask](https://wiki.gentoo.org/wiki/Live_ebuilds#Unmasking_live_ebuilds) the `gui-apps/canopy` package:
 
 ```
-gui-apps/noctalia ~amd64
+gui-apps/canopy ~amd64
 ```
 
 **Step 3**: Emerge the package:
 
 ```bash
-emerge --ask gui-apps/noctalia
+emerge --ask gui-apps/canopy
 ```
 
 ---
 
 ## GNU Guix {#guix}
 
-Noctalia is available in the main Guix repository as the package `noctalia-shell`. Simply add `(gnu packages window-management)` to your list of imported modules, then add `noctalia-shell` to your list of packages.
+Noctalia is available in the main Guix repository as the package `canopy-shell`. Simply add `(gnu packages window-management)` to your list of imported modules, then add `canopy-shell` to your list of packages.
 
 Due to the fast pace of development on Noctalia, the main Guix channel is likely to lag behind in version. If you don't wish to wait for it to update then you have two alternative channels. Do note that with both options you will be compiling the package yourself, because only the main Guix channel provides substitutes for it.
 
 <Tabs>
   <TabItem label="Noctalia channel">
-    The Git repository of Noctalia is also available as a [Guix channel](https://guix.gnu.org/manual/devel/en/html_node/Channels.html).  It provides a `(noctalia)` module with the `noctalia-git` package.
+    The Git repository of Noctalia is also available as a [Guix channel](https://guix.gnu.org/manual/devel/en/html_node/Channels.html).  It provides a `(canopy)` module with the `canopy-git` package.
 
     Do note that since this is a git package, there might be times (though rare) where it fails to compile when either dependencies or something about the build process changes. If that happens you might want to [pin the channel](https://guix.gnu.org/manual/devel/en/html_node/Replicating-Guix.html) to an older working commit by adding `(commit "[full commit hash]")` to the channel definition.
 
     ```scheme
     (channel
-      (name 'noctalia)
+      (name 'canopy)
       (url "https://github.com/noctalia-dev/noctalia")
       (branch "main"))
     ```
 
-    Whenver you run `guix pull` you will get the latest commit of noctalia, which will start compiling and be available for use when you reconfigure your system or home environment, whichever you added the `noctalia-shell` package to. You can use `guix pull --select=noctalia` if you wish to update only noctalia without needing to pull your other channels.
+    Whenver you run `guix pull` you will get the latest commit of canopy, which will start compiling and be available for use when you reconfigure your system or home environment, whichever you added the `canopy-shell` package to. You can use `guix pull --select=canopy` if you wish to update only canopy without needing to pull your other channels.
   </TabItem>
 
   <TabItem label="Midnight channel">
-    The third-party [`midnight`](https://codeberg.org/stampede/midnight) guix channel provides the `noctalia` package under the module `(midnight packages noctalia)`. It provides up-to-date stable releases of noctalia for those who prefer that over a git package.
+    The third-party [`midnight`](https://codeberg.org/stampede/midnight) guix channel provides the `canopy` package under the module `(midnight packages canopy)`. It provides up-to-date stable releases of canopy for those who prefer that over a git package.
 
     ```scheme
     (channel
@@ -177,7 +177,7 @@ Noctalia provides an APT repository for Debian-based distributions.
 **Step 1**: Install the repository signing key
 
 ```bash
-wget https://pkg.noctalia.dev/deb/nickh-archive-keyring.deb && sudo dpkg -i nickh-archive-keyring.deb
+wget https://pkg.canopy.dev/deb/nickh-archive-keyring.deb && sudo dpkg -i nickh-archive-keyring.deb
 ```
 
 **Step 2**: Add the repository
@@ -185,37 +185,37 @@ wget https://pkg.noctalia.dev/deb/nickh-archive-keyring.deb && sudo dpkg -i nick
 <Tabs>
   <TabItem label="Debian Trixie">
     ```bash
-    sudo wget -O /etc/apt/sources.list.d/noctalia-trixie.sources https://pkg.noctalia.dev/deb/noctalia-trixie.sources
+    sudo wget -O /etc/apt/sources.list.d/canopy-trixie.sources https://pkg.canopy.dev/deb/canopy-trixie.sources
     ```
   </TabItem>
 
   <TabItem label="Debian Sid">
     ```bash
-    sudo wget -O /etc/apt/sources.list.d/noctalia-unstable.sources https://pkg.noctalia.dev/deb/noctalia-unstable.sources
+    sudo wget -O /etc/apt/sources.list.d/canopy-unstable.sources https://pkg.canopy.dev/deb/canopy-unstable.sources
     ```
   </TabItem>
 
   <TabItem label="Ubuntu 26.04">
     ```bash
-    sudo wget -O /etc/apt/sources.list.d/noctalia-resolute.sources https://pkg.noctalia.dev/deb/noctalia-resolute.sources
+    sudo wget -O /etc/apt/sources.list.d/canopy-resolute.sources https://pkg.canopy.dev/deb/canopy-resolute.sources
     ```
   </TabItem>
 </Tabs>
 
-**Step 3**: Install noctalia
+**Step 3**: Install canopy
 
 ```bash
 sudo apt update
-sudo apt install noctalia
+sudo apt install canopy
 ```
 
-You can also install the `noctalia-greeter`, `umbriel`, and `xdg-desktop-portal-umbriel` packages.
+You can also install the `canopy-greeter`, `umbriel`, and `xdg-desktop-portal-umbriel` packages.
 
 :::note
 The APT repository provides `amd64` and `arm64` packages only.
 :::
 
-***Configuring `noctalia-greeter`***
+***Configuring `canopy-greeter`***
 
 <ol>
   <li>
@@ -261,7 +261,7 @@ doas apk add chimera-repo-user
 
 ```sh
 doas apk update
-doas apk add noctalia
+doas apk add canopy
 ```
 
 ---
@@ -282,10 +282,10 @@ echo 'repository=https://universalrepo.pages.dev/void' | sudo tee /etc/xbps.d/10
 sudo xbps-install -S
 ```
 
-**Step 3**: Install noctalia
+**Step 3**: Install canopy
 
 ```bash
-sudo xbps-install -S noctalia
+sudo xbps-install -S canopy
 ```
 ---
 
@@ -294,7 +294,7 @@ sudo xbps-install -S noctalia
 Noctalia is available in Solus's official repositories.
 
 ```bash
-sudo eopkg install noctalia
+sudo eopkg install canopy
 ```
 ---
 
@@ -321,7 +321,7 @@ doas apk update
 **Step 3**: Install Noctalia
 
 ```sh
-doas apk add noctalia
+doas apk add canopy
 ```
 
 ---
@@ -403,8 +403,8 @@ Sanitizer runtime packages are only needed for ASan/UBSan builds configured with
 **Step 2**: Prepare directory
 
 ```bash
-git clone https://github.com/noctalia-dev/noctalia --branch main
-cd noctalia
+git clone https://github.com/canopy-dev/canopy --branch main
+cd canopy
 ```
 
 **Step 3**: Building and installing Noctalia

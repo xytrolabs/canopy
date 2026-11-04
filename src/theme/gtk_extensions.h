@@ -11,8 +11,8 @@ namespace noctalia::theme {
 
   // Community templates can ship app-scoped GTK CSS by declaring `gtk_extension = "gtk3"` (or
   // "gtk4") on an entry. Noctalia owns where that CSS lands and how GTK loads it: the rendered
-  // file goes to <gtk dir>/noctalia-extensions/, and noctalia-extensions.css, imported by the
-  // built-in GTK template's noctalia.css, lists the extensions of the enabled templates. Templates
+  // file goes to <gtk dir>/canopy-extensions/, and canopy-extensions.css, imported by the
+  // built-in GTK template's canopy.css, lists the extensions of the enabled templates. Templates
   // never edit gtk.css themselves.
 
   enum class GtkToolkit { Gtk3, Gtk4 };
@@ -31,7 +31,7 @@ namespace noctalia::theme {
   };
 
   inline constexpr std::string_view kGtkExtensionIndexFile = "noctalia-extensions.css";
-  inline constexpr std::string_view kGtkExtensionDir = "noctalia-extensions";
+  inline constexpr std::string_view kGtkExtensionDir = "canopy-extensions";
 
   // $XDG_CONFIG_HOME/gtk-3.0 or $XDG_CONFIG_HOME/gtk-4.0.
   [[nodiscard]] std::filesystem::path gtkConfigDir(GtkToolkit toolkit);

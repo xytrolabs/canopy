@@ -180,7 +180,7 @@ bool PipeWireSpectrum::Stream::start() {
     return false;
   }
 
-  m_stream = pw_stream_new(core, "noctalia-spectrum", props);
+  m_stream = pw_stream_new(core, "canopy-spectrum", props);
   if (m_stream == nullptr) {
     pw_properties_free(props);
     kLog.warn("failed to create spectrum stream");

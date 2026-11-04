@@ -21,8 +21,8 @@ namespace noctalia::cli {
       "Generate shell completion scripts",
       "Generate a completion script from the live CLI schema.\n\n"
       "Examples:\n"
-      "  source <(noctalia completions bash)\n"
-      "  noctalia completions fish > ~/.config/fish/completions/noctalia.fish",
+      "  source <(canopy completions bash)\n"
+      "  canopy completions fish > ~/.config/fish/completions/canopy.fish",
       {},
       {},
       kCompletionsPositionals,
@@ -40,10 +40,10 @@ namespace noctalia::cli {
   };
 
   inline constexpr Command kRootCmd{
-      "noctalia",
+      "canopy",
       "A sleek, customizable desktop shell crafted for Wayland",
       {},
-      "For more information and documentation, visit:\n  https://noctalia.dev",
+      "For more information and documentation, visit:\n  https://canopy.dev",
       kRootFlags,
       {},
       kRootSubcommands,

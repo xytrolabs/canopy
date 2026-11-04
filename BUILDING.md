@@ -181,11 +181,11 @@ Unit tests are not compiled by `just build`, which targets only the Noctalia exe
 Meson installs the binary and shipped assets using the normal prefix layout:
 
 ```text
-/usr/local/bin/noctalia
-/usr/local/share/noctalia/assets/...
+/usr/local/bin/canopy
+/usr/local/share/canopy/assets/...
 ```
 
-Noctalia needs the shipped `assets/` tree at runtime. Copying only the `noctalia` binary is not enough.
+Noctalia needs the shipped `assets/` tree at runtime. Copying only the `canopy` binary is not enough.
 
 Firefox theming uses the built-in template `post_action = "firefox-theme"` (same pattern as `kde-color-scheme`) plus the [Pywalfox](https://addons.mozilla.org/en-US/firefox/addon/pywalfox/) browser extension. Manual host helpers: `noctalia firefox-theme --help`.
 

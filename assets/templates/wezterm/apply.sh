@@ -2,7 +2,7 @@
 set -euo pipefail
 
 config_file="${XDG_CONFIG_HOME:-$HOME/.config}/wezterm/wezterm.lua"
-scheme_line='config.color_scheme = "Noctalia"'
+scheme_line='config.color_scheme = "Canopy"'
 
 if [ ! -f "$config_file" ]; then
     echo "Error: wezterm.lua not found at $config_file" >&2

@@ -17,7 +17,7 @@ namespace {
   const security::EncryptionContext kHistoryContext{"notification-history-v1", "history"};
 
   struct TestDirectory {
-    fs::path path = fs::temp_directory_path() / ("noctalia-notification-encryption-" + std::to_string(getpid()));
+    fs::path path = fs::temp_directory_path() / ("canopy-notification-encryption-" + std::to_string(getpid()));
     TestDirectory() {
       fs::remove_all(path);
       fs::create_directories(path);

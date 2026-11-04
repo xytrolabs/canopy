@@ -140,7 +140,7 @@ Desktop widgets live under `src/shell/desktop/` and do not use the bar `Widget` 
 
 ## Services
 
-- **Idle**: `IdleManager` runs `ext_idle_notifier_v1` behaviors. Each `[idle.behavior.*]` has a `command` and an optional `resume_command`. `noctalia:dpms-off` gets an automatic `noctalia:dpms-on` on resume. `pre_action_fade_seconds` drives `IdleGraceOverlay` on overlay layer surfaces.
+- **Idle**: `IdleManager` runs `ext_idle_notifier_v1` behaviors. Each `[idle.behavior.*]` has a `command` and an optional `resume_command`. `canopy:dpms-off` gets an automatic `canopy:dpms-on` on resume. `pre_action_fade_seconds` drives `IdleGraceOverlay` on overlay layer surfaces.
 - **PipeWire**: access SPA pod arrays with the stable `SPA_POD_ARRAY_*` macros from `spa/pod/pod.h`, not `spa_pod_get_array_full()` (added in PipeWire 1.6, absent in 1.4). Cast macro results from `size_t` to `uint32_t` explicitly.
 - **Clipboard**: large payloads are written across `POLLOUT` ticks; do not close the send fd on `EAGAIN`.
 - **Weather**: `auto_locate` is best effort and uses the cached location on failure. `[shell].offline_mode = true` disables all HTTP traffic. Never log coordinates or location names.
@@ -151,10 +151,10 @@ Desktop widgets live under `src/shell/desktop/` and do not use the bar `Widget` 
 - Plugins are trusted Luau code: installing one is equivalent to running a user-owned script. There is no permission broker, capability sandbox, consent prompt, or path sandbox. Luau sandboxing exists only for VM and global-state isolation.
 - A distributable plugin is a directory with one static `plugin.toml`. There are no single-file `define{}` plugins and no manifest defaults in script code.
 - Canonical ids are `author/plugin` and `author/plugin:entry`. Entry types are `[[widget]]`, `[[shortcut]]`, `[[service]]`, `[[desktop_widget]]`, `[[launcher_provider]]`, `[[panel]]`, and `[[layer]]`.
-- Defaults live once in `plugin.toml`. Plugin code reads them with `noctalia.getConfig(key)` or `barWidget.getConfig(key)`; undeclared keys are loud misses. Plugin-level overrides live under `[plugin_settings."author/plugin"]`.
+- Defaults live once in `plugin.toml`. Plugin code reads them with `canopy.getConfig(key)` or `barWidget.getConfig(key)`; undeclared keys are loud misses. Plugin-level overrides live under `[plugin_settings."author/plugin"]`.
 - Plugin bar widgets use the normal named `[widget.<name>]` settings, so separate widget names can reuse one plugin entry with different settings. Entry-specific settings belong to the owning surface's config model.
 - Git and path source lifecycle belongs to `PluginManager` and `plugin_git.*`. Source names and plugin ids are validated flat identifiers before they touch paths. Git sources use an app-managed repo cache and exported runtime files (no sparse checkout); `path` sources are for local development.
-- Changes to the plugin-facing API (bindings in `src/scripting/luau_host.cpp` and `src/scripting/plugin_bindings.cpp`, the `ui.*` prelude in `src/scripting/ui_prelude.h`, or the entry callbacks the host calls) require a matching update to `noctalia.d.luau` in the official-plugins repository.
+- Changes to the plugin-facing API (bindings in `src/scripting/luau_host.cpp` and `src/scripting/plugin_bindings.cpp`, the `ui.*` prelude in `src/scripting/ui_prelude.h`, or the entry callbacks the host calls) require a matching update to `canopy.d.luau` in the official-plugins repository.
 
 ## Theming and Style
 

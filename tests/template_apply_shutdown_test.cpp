@@ -65,7 +65,7 @@ namespace {
       const std::filesystem::path& root, const std::string& templates,
       const std::vector<std::filesystem::path>& pidFiles, std::vector<pid_t>& pids
   ) {
-    writeFile(root / "config" / "noctalia" / "config.toml", templates);
+    writeFile(root / "config" / "canopy" / "config.toml", templates);
 
     auto config = std::make_unique<ConfigService>();
     auto service = std::make_unique<TemplateApplyService>(*config, kGrace);
@@ -159,7 +159,7 @@ namespace {
         root / "assets" / "templates" / "builtin.toml",
         "[templates.stuck]\nundo_hook = \"" + hangCommand(pidFile) + "\"\n"
     );
-    writeFile(root / "state" / "noctalia" / "state.toml", "[theme_templates]\napplied_builtin_ids = \"stuck\"\n");
+    writeFile(root / "state" / "canopy" / "state.toml", "[theme_templates]\napplied_builtin_ids = \"stuck\"\n");
 
     std::vector<pid_t> pids;
     const double elapsed = applyThenDestroy(root, "", {pidFile}, pids);
@@ -173,10 +173,10 @@ namespace {
   // runs on the same synchronous path and must be bounded the same way.
   void test_stuck_community_undo_hook(const std::filesystem::path& root) {
     const auto pidFile = root / "community-undo.pid";
-    const auto templateDir = root / "state" / "noctalia" / "community-templates" / "stuck";
+    const auto templateDir = root / "state" / "canopy" / "community-templates" / "stuck";
     std::filesystem::create_directories(templateDir);
     writeFile(templateDir / "template.toml", "[templates.stuck]\nundo_hook = \"" + hangCommand(pidFile) + "\"\n");
-    writeFile(root / "state" / "noctalia" / "state.toml", "[theme_templates]\napplied_community_ids = \"stuck\"\n");
+    writeFile(root / "state" / "canopy" / "state.toml", "[theme_templates]\napplied_community_ids = \"stuck\"\n");
 
     std::vector<pid_t> pids;
     const double elapsed = applyThenDestroy(root, "", {pidFile}, pids);
@@ -190,10 +190,10 @@ namespace {
 
 int main() {
   const std::filesystem::path root =
-      std::filesystem::temp_directory_path() / ("noctalia-template-shutdown-" + std::to_string(::getpid()));
+      std::filesystem::temp_directory_path() / ("canopy-template-shutdown-" + std::to_string(::getpid()));
   std::filesystem::remove_all(root);
-  std::filesystem::create_directories(root / "config" / "noctalia");
-  std::filesystem::create_directories(root / "state" / "noctalia");
+  std::filesystem::create_directories(root / "config" / "canopy");
+  std::filesystem::create_directories(root / "state" / "canopy");
   std::filesystem::create_directories(root / "data");
   ::setenv("NOCTALIA_CONFIG_HOME", (root / "config").c_str(), 1);
   ::setenv("NOCTALIA_STATE_HOME", (root / "state").c_str(), 1);
@@ -204,7 +204,7 @@ int main() {
   std::filesystem::create_directories(root / "assets" / "templates");
   std::filesystem::create_directories(root / "assets" / "translations");
   writeFile(root / "assets" / "emoji.json", "[]\n");
-  writeFile(root / "assets" / "fonts" / "noctalia-tabler.ttf", "");
+  writeFile(root / "assets" / "fonts" / "canopy-tabler.ttf", "");
   writeFile(root / "assets" / "templates" / "builtin.toml", "");
   writeFile(root / "assets" / "translations" / "en.json", "{}\n");
   ::setenv("NOCTALIA_ASSETS_DIR", (root / "assets").c_str(), 1);

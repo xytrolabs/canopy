@@ -194,7 +194,7 @@ void Application::syncNotificationDaemon() {
         m_notificationPollSource.setDbusService(nullptr);
         m_notificationDaemonInitFailed = true;
         m_notificationManager.addInternal(
-            "Noctalia", i18n::tr("notifications.internal.dbus-disabled"), kdeError.what(), Urgency::Low
+            "Canopy", i18n::tr("notifications.internal.dbus-disabled"), kdeError.what(), Urgency::Low
         );
         return;
       }
@@ -205,7 +205,7 @@ void Application::syncNotificationDaemon() {
     m_notificationPollSource.setDbusService(nullptr);
     m_notificationDaemonInitFailed = true;
     m_notificationManager.addInternal(
-        "Noctalia", i18n::tr("notifications.internal.dbus-disabled"), ownerError.what(), Urgency::Low
+        "Canopy", i18n::tr("notifications.internal.dbus-disabled"), ownerError.what(), Urgency::Low
     );
   }
 }
@@ -404,7 +404,7 @@ void Application::syncPolkitAgent() {
       DeferredCall::callLater([this, error] {
         if (polkit_session::isNoSessionForPidError(error)) {
           notify::error(
-              "Noctalia", i18n::tr("notifications.internal.polkit-agent"),
+              "Canopy", i18n::tr("notifications.internal.polkit-agent"),
               i18n::tr("notifications.internal.polkit-no-session")
           );
         }
@@ -518,7 +518,7 @@ void Application::initServices() {
   // can now be reported with a translated message.
   if (m_earlySessionBusError.has_value()) {
     m_notificationManager.addInternal(
-        "Noctalia", i18n::tr("notifications.internal.session-bus-unavailable"), *m_earlySessionBusError, Urgency::Low
+        "Canopy", i18n::tr("notifications.internal.session-bus-unavailable"), *m_earlySessionBusError, Urgency::Low
     );
     m_earlySessionBusError.reset();
   }
@@ -634,7 +634,7 @@ void Application::initStyleThemeAndWayland() {
     m_scriptApi.setDateFormat(m_configService.config().shell.dateFormat);
   };
 
-  // Publish the connected outputs to plugin scripts (noctalia.outputs()), refreshed on every
+  // Publish the connected outputs to plugin scripts (canopy.outputs()), refreshed on every
   // output change so the worker-thread binding reads a race-free copy.
   m_syncScriptApiOutputs = [this] {
     std::vector<scripting::ScriptOutputInfo> infos;
@@ -1606,7 +1606,7 @@ void Application::initSessionBusServices() {
   if (m_bus != nullptr) {
     try {
       m_debugService = std::make_unique<DebugService>(*m_bus, m_notificationManager);
-      kLog.info("debug service active on dev.noctalia.Debug");
+      kLog.info("debug service active on dev.canopy.Debug");
     } catch (const std::exception& e) {
       kLog.warn("debug service disabled: {}", e.what());
       m_debugService.reset();
@@ -1640,7 +1640,7 @@ void Application::initSessionBusServices() {
       m_mprisService.reset();
       m_lockScreen.setLoginBoxServices(&m_sessionActionRunner, nullptr, &m_weatherService, &m_httpClient);
       m_notificationManager.addInternal(
-          "Noctalia", i18n::tr("notifications.internal.mpris-disabled"), e.what(), Urgency::Low
+          "Canopy", i18n::tr("notifications.internal.mpris-disabled"), e.what(), Urgency::Low
       );
     }
 
@@ -1657,7 +1657,7 @@ void Application::initSessionBusServices() {
   m_weatherService.initialize();
 
   // Mirror the calendar snapshot into the script API so plugins can read it through
-  // noctalia.calendarEvents(). Same pattern as the clipboard text mirror: converted once per sync on
+  // canopy.calendarEvents(). Same pattern as the clipboard text mirror: converted once per sync on
   // the main thread, then read race-free from plugin states. Registered before initialize() so the
   // first sync is not missed.
   auto pushCalendar = [this] {

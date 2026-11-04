@@ -19,10 +19,10 @@ A plugin id is canonical - only one copy of a given `author/plugin` ever loads. 
 noctalia msg plugin me/hello:hello focused greet "hi there"
 
 # A service - it is a singleton with no output, so address it with the `all` target:
-noctalia msg plugin me/hello:ticker all refresh
+canopy msg plugin me/hello:ticker all refresh
 
 # A panel - toggle by full entry id:
-noctalia msg panel-toggle me/hello:panel
+canopy msg panel-toggle me/hello:panel
 ```
 
 The target picks which live instances receive the event: `focused` (the focused output), a connector or `<connector>:<bar-name>`, or `all`. Services and other non-bar entries have no output, so they only match `all`.

@@ -441,7 +441,7 @@ In Noctalia's main config, put the same custom color definitions under `[theme.t
 warning = "#f97316"
 
 [theme.templates.user.my_app]
-input_path  = "$XDG_CONFIG_HOME/noctalia/templates/my-app.css"
+input_path  = "$XDG_CONFIG_HOME/canopy/templates/my-app.css"
 output_path = "$XDG_CONFIG_HOME/my-app/theme.css"
 ```
 
@@ -499,8 +499,8 @@ Each template entry supports:
 [templates.qt]
 input_path = "./qtct.conf"
 output_path = [
-  "$XDG_CONFIG_HOME/qt5ct/colors/noctalia.conf",
-  "$XDG_CONFIG_HOME/qt6ct/colors/noctalia.conf",
+  "$XDG_CONFIG_HOME/qt5ct/colors/canopy.conf",
+  "$XDG_CONFIG_HOME/qt6ct/colors/canopy.conf",
 ]
 ```
 
@@ -526,7 +526,7 @@ Set `hook_async = false` when the hook must not overlap with another one. Such a
 
 ```toml
 [theme.templates.user.my_app]
-input_path  = "$XDG_CONFIG_HOME/noctalia/templates/my-app.css"
+input_path  = "$XDG_CONFIG_HOME/canopy/templates/my-app.css"
 output_path = "$XDG_CONFIG_HOME/my-app/theme.css"
 post_hook   = "my-app --reload-theme"
 hook_async  = false

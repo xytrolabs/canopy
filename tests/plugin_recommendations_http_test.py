@@ -1,6 +1,6 @@
 """Exercise the native HTTP/state paths against isolated HTTPS and registry fixtures.
 
-The proxy terminates TLS for api.noctalia.dev locally; its CA is trusted only by the
+The proxy terminates TLS for api.canopy.dev locally; its CA is trusted only by the
 child process. The client keeps its production URL, and no public vote is submitted.
 Run: python3 tests/plugin_recommendations_http_test.py build-debug/plugin_recommendations_test
 """
@@ -21,12 +21,12 @@ import threading
 
 
 def run(binary):
-    with tempfile.TemporaryDirectory(prefix="noctalia-recommendations-") as directory:
+    with tempfile.TemporaryDirectory(prefix="canopy-recommendations-") as directory:
         root = Path(directory)
         api = int(subprocess.check_output([str(Path(binary).resolve()), "--api"]))
         names = ["CasePlugin", "Hidden", "Lost", "Conflict", "Limited", "Unavailable", "Proxy", "Uninstalled", "Deprecated", "Delisted"]
-        state_root = root / "state/noctalia"
-        config_dir = root / "config/noctalia"
+        state_root = root / "state/canopy"
+        config_dir = root / "config/canopy"
         config_dir.mkdir(parents=True)
         (config_dir / "config.toml").write_text("[shell]\ntelemetry_enabled = false\nsetup_wizard_enabled = false\n")
         for source in ["official", "community"]:
@@ -48,7 +48,7 @@ def run(binary):
 
         key = root / "key.pem"
         cert = root / "cert.pem"
-        subprocess.run(["openssl", "req", "-x509", "-newkey", "rsa:2048", "-nodes", "-keyout", str(key), "-out", str(cert), "-days", "1", "-subj", "/CN=api.noctalia.dev", "-addext", "subjectAltName=DNS:api.noctalia.dev", "-addext", "basicConstraints=critical,CA:TRUE"], check=True, capture_output=True)
+        subprocess.run(["openssl", "req", "-x509", "-newkey", "rsa:2048", "-nodes", "-keyout", str(key), "-out", str(cert), "-days", "1", "-subj", "/CN=api.canopy.dev", "-addext", "subjectAltName=DNS:api.canopy.dev", "-addext", "basicConstraints=critical,CA:TRUE"], check=True, capture_output=True)
         context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
         context.load_cert_chain(cert, key)
         database = sqlite3.connect(":memory:", check_same_thread=False)
@@ -140,7 +140,7 @@ def run(binary):
                 pass
 
             def do_CONNECT(self):
-                if self.path != "api.noctalia.dev:443":
+                if self.path != "api.canopy.dev:443":
                     violations.append("unexpected proxy destination")
                     self.send_error(403)
                     return

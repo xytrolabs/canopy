@@ -959,7 +959,7 @@
       "calendar-reminder-open": "Открыть",
       "calendar-reminder-untitled": "Событие без названия",
       "calendar-reminder-with-location": "{when}\n{location}",
-      "config-migration-body": "Обновите {path} в исходном файле. Noctalia применяет эту замену временно. Выполните «noctalia config validate», чтобы просмотреть список всех необходимых изменений.",
+      "config-migration-body": "Обновите {path} в исходном файле. Noctalia применяет эту замену временно. Выполните «canopy config validate», чтобы просмотреть список всех необходимых изменений.",
       "config-migration-title": "Требуется обновление конфигурации",
       "dbus-disabled": "DBus-уведомления отключены",
       "desktop-widgets-editor": "Редактор виджетов",
@@ -969,12 +969,12 @@
       "greeter-sync-pending-console": "Синхронизация внешнего вида с экраном входа. Если потребуется авторизация, подтвердите запрос polkit в Noctalia, в TTY или в консоли.",
       "greeter-sync-pending-legacy": "Синхронизация через устаревший модуль с авторизацией. Требуется подтверждение администратора.",
       "greeter-sync-pending-manual": "Файлы подготовлены для устаревшей синхронизации с аутентификацией. Запустите консольную утилиту применения в терминале (сохранив переменную NOCTALIA_GREETER_STATE_DIR, если вы используете кастомный путь) или настройте параметр shell.greeter_sync.privilege_command и повторите синхронизацию.",
-      "greeter-sync-pending-manual-pkexec": "Синхронизация внешнего вида с экраном входа. Если требуется авторизация администратора, а запрос не появляется, выполните в терминале: pkexec noctalia-greeter-apply-appearance --sync \"/run/user/$(id -u)/noctalia-greeter-sync\".",
+      "greeter-sync-pending-manual-pkexec": "Синхронизация внешнего вида с экраном входа. Если требуется авторизация администратора, а запрос не появляется, выполните в терминале: pkexec canopy-greeter-apply-appearance --sync \"/run/user/$(id -u)/noctalia-greeter-sync\".",
       "greeter-sync-success": "Внешний вид синхронизирован. Изменения вступят в силу на следующем экране входа.",
       "greeter-sync-timeout": "Синхронизация с экраном входа всё ещё ожидает авторизации. Проверьте TTY или консоль на наличие запроса polkit, включите агент polkit в разделе «Безопасность» или выполните pkexec вручную.",
       "greeter-sync-timeout-manual": "Для устаревшей синхронизации с аутентификацией по-прежнему требуется подтверждение администратора. Запустите позиционный вспомогательный инструмент применения (apply helper) в терминале, сохранив переменную NOCTALIA_GREETER_STATE_DIR, если вы используете нестандартный путь.",
-      "greeter-sync-timeout-manual-pkexec": "Синхронизация с экраном входа всё ещё требует авторизации. Выполните в терминале: pkexec noctalia-greeter-apply-appearance --sync \"/run/user/$(id -u)/noctalia-greeter-sync\"",
-      "keybind-app": "Noctalia",
+      "greeter-sync-timeout-manual-pkexec": "Синхронизация с экраном входа всё ещё требует авторизации. Выполните в терминале: pkexec canopy-greeter-apply-appearance --sync \"/run/user/$(id -u)/noctalia-greeter-sync\"",
+      "keybind-app": "Canopy",
       "keybind-invalid-modifier": "Это сочетание клавиш принимает одну клавишу без модификаторов.",
       "keybind-invalid-printable": "Печатные клавиши (буквы, цифры, символы) требуют модификатор, например Ctrl или Alt.",
       "keybind-invalid-super": "Клавишу Super/Windows нельзя использовать в сочетаниях клавиш командной строки.",
@@ -1361,7 +1361,7 @@
       "sync-greeter": "Не удалось синхронизировать внешний вид с Noctalia Greeter.",
       "sync-greeter-timeout": "Синхронизация с экраном входа всё ещё ожидает авторизации. Проверьте TTY или консоль на наличие запроса polkit, включите агент polkit в разделе «Безопасность» или выполните pkexec вручную.",
       "sync-greeter-timeout-manual": "Для устаревшей синхронизации с аутентификацией по-прежнему требуется подтверждение администратора. Запустите позиционный вспомогательный инструмент применения (apply helper) в терминале, сохранив переменную NOCTALIA_GREETER_STATE_DIR, если вы используете нестандартный путь.",
-      "sync-greeter-timeout-manual-pkexec": "Синхронизация с экраном входа всё ещё требует авторизации. Выполните в терминале: pkexec noctalia-greeter-apply-appearance --sync \"/run/user/$(id -u)/noctalia-greeter-sync\"",
+      "sync-greeter-timeout-manual-pkexec": "Синхронизация с экраном входа всё ещё требует авторизации. Выполните в терминале: pkexec canopy-greeter-apply-appearance --sync \"/run/user/$(id -u)/noctalia-greeter-sync\"",
       "widget": {
         "rename": "Не удалось переименовать виджет."
       },
@@ -1847,8 +1847,8 @@
         },
         "kind-label": "Тип",
         "location-label": "Местоположение",
-        "location-placeholder-git": "https://github.com/me/noctalia-plugins",
-        "location-placeholder-path": "~/dev/noctalia-plugins",
+        "location-placeholder-git": "https://github.com/me/canopy-plugins",
+        "location-placeholder-path": "~/dev/canopy-plugins",
         "name-label": "ID источника",
         "name-placeholder": "my-plugins",
         "precedence-hint": "Источники, расположенные ниже, имеют приоритет над высшими при совпадении плагинов.",
@@ -1871,7 +1871,7 @@
         "loading": "Загрузка каталога…",
         "no-readme": "Описание недоступно",
         "not-listed": "Нет в списке",
-        "open-page": "Открыть страницу плагина на noctalia.dev",
+        "open-page": "Открыть страницу плагина на canopy.dev",
         "open-source": "Открыть репозиторий исходного кода плагина",
         "recommend": "Рекомендовать",
         "recommendation-error": "Изменение не подтверждено. Предыдущая рекомендация осталась без изменений. Повторите попытку, чтобы применить это изменение",
@@ -1943,7 +1943,7 @@
           "label": "Скругление углов"
         },
         "custom-palette": {
-          "description": "Выберите палитру из ~/.config/noctalia/palettes/",
+          "description": "Выберите палитру из ~/.config/canopy/palettes/",
           "label": "Пользовательская палитра",
           "search-placeholder": "Поиск пользовательских палитр…"
         },
@@ -3134,7 +3134,7 @@
           "placeholder": "Город, страна"
         },
         "location-auto-locate": {
-          "description": "Автоматически определять местоположение по IP-адресу через noctalia.dev",
+          "description": "Автоматически определять местоположение по IP-адресу через canopy.dev",
           "label": "Автоматическое определение местоположения (IP)"
         },
         "longitude": {
@@ -3378,7 +3378,7 @@
           "label": "Формат даты"
         },
         "external-ip": {
-          "description": "Определять публичный WAN-адрес подключения (через api.noctalia.dev) и показывать его в Центре управления во вкладке \"Сеть\"",
+          "description": "Определять публичный WAN-адрес подключения (через api.canopy.dev) и показывать его в Центре управления во вкладке \"Сеть\"",
           "label": "Показывать WAN IP"
         },
         "greeter-sync-auto": {
@@ -4249,7 +4249,7 @@
             "label": "Открыть настройки"
           },
           "settings-open-plugin": {
-            "description": "Открыть окно настроек на настройках плагина (например, noctalia/notes)",
+            "description": "Открыть окно настроек на настройках плагина (например, canopy/notes)",
             "label": "Открыть настройки плагина"
           },
           "settings-open-widget": {
@@ -5148,7 +5148,7 @@
       "export-config": "Экспортировать конфигурацию…",
       "export-config-saved": "Экспорт конфигурации сохранён.",
       "filter-overridden": "Измененные",
-      "legacy-config-warning": "Устаревшая настройка: {issue}. Отредактируйте эту запись в исходном файле; Noctalia применяет замену только временно. Выполните «noctalia config validate», чтобы просмотреть список всех необходимых изменений.",
+      "legacy-config-warning": "Устаревшая настройка: {issue}. Отредактируйте эту запись в исходном файле; Noctalia применяет замену только временно. Выполните «canopy config validate», чтобы просмотреть список всех необходимых изменений.",
       "native-title": "Настройки Noctalia",
       "no-results": "Настройки не найдены",
       "no-results-hint": "Попробуйте другое имя параметра или ключ конфигурации.",
