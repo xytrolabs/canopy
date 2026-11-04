@@ -1207,6 +1207,34 @@ install_data(
   install_dir: get_option('datadir') / 'icons' / 'hicolor' / 'scalable' / 'apps',
 )
 
+# ── Desktop environment integration ─────────────────────────────────────────
+# Packaging a shell is not the same as packaging a desktop: the session entry,
+# the portal configuration and the session helper are what make this a DE that
+# a display manager can start.
+install_data(
+  'config/canopy-session.desktop',
+  install_dir: get_option('datadir') / 'wayland-sessions',
+  rename: 'canopy.desktop',
+)
+
+install_data(
+  'config/xdg-desktop-portal/canopy-portals.conf',
+  install_dir: get_option('datadir') / 'xdg-desktop-portal',
+)
+
+install_data(
+  'scripts/canopy-session',
+  install_dir: get_option('bindir'),
+  install_mode: 'rwxr-xr-x',
+)
+
+install_data(
+  'scripts/canopy-screenshot',
+  'scripts/canopy-update',
+  install_dir: get_option('bindir'),
+  install_mode: 'rwxr-xr-x',
+)
+
 if build_tests
   wayland_server_dep = dependency('wayland-server')
 

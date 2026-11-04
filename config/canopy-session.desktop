@@ -2,6 +2,7 @@
 Type=Application
 Name=Canopy
 Comment=Canopy desktop environment (Xytro Labs)
-Exec=labwc
-TryExec=labwc
+Exec=canopy-session
+TryExec=canopy-session
 DesktopNames=Canopy
+Keywords=canopy;desktop;wayland;labwc;

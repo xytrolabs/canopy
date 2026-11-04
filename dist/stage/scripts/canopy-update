@@ -1,0 +1,147 @@
+#!/bin/sh
+# canopy-update — check for and install a newer Canopy release.
+#
+#   canopy-update check            # human readable
+#   canopy-update check --json     # {"installed":..,"latest":..,"update_available":..}
+#   canopy-update apply [--yes]    # download, verify, install
+#
+# Releases come from GitHub (github.com/xytrolabs/canopy). The same
+# self-extracting payload that installed Canopy is what upgrades it, and every
+# download is verified against SHA256SUMS before it runs.
+#
+#   CANOPY_REPO        override the repository (owner/name)
+#   CANOPY_BASE_URL    point at a mirror or local test server
+#   CANOPY_UPDATE_SOURCE=github|site
+set -eu
+
+GH_REPO="${CANOPY_REPO:-xytrolabs/canopy}"
+BASE_URL="${CANOPY_BASE_URL:-}"
+SOURCE="${CANOPY_UPDATE_SOURCE:-auto}"
+
+MODE="${1:-check}"
+shift 2>/dev/null || true
+ASSUME_YES=0
+JSON=0
+for a in "$@"; do
+    case "$a" in
+        --json) JSON=1 ;;
+        -y|--yes) ASSUME_YES=1 ;;
+    esac
+done
+
+say() { printf '%s\n' "$*"; }
+die() { printf 'canopy-update: %s\n' "$*" >&2; exit 1; }
+
+# Where is this install? A user install keeps VERSION next to the config; a
+# system install keeps it in /usr/local/share/canopy.
+install_dir() {
+    for d in \
+        "${XDG_CONFIG_HOME:-$HOME/.config}/canopy" \
+        "$HOME/.config/canopy" \
+        /usr/local/share/canopy
+    do
+        [ -f "$d/VERSION" ] && { printf '%s\n' "$d"; return; }
+    done
+    printf '%s\n' ""
+}
+
+INSTALL_DIR="$(install_dir)"
+INSTALLED=""
+if [ -n "$INSTALL_DIR" ]; then
+    INSTALLED="$(tr -d ' \t\r\n' < "$INSTALL_DIR/VERSION")"
+fi
+
+fetch() {
+    if command -v curl >/dev/null 2>&1; then curl -fsSL "$1" -o "$2"
+    elif command -v wget >/dev/null 2>&1; then wget -qO "$2" "$1"
+    else die "need curl or wget"; fi
+}
+
+TMP="$(mktemp -d "${TMPDIR:-/tmp}/canopy-update.XXXXXX")"
+trap 'rm -rf "$TMP"' EXIT INT TERM
+
+LATEST=""
+REL_BASE=""
+
+resolve_github() {
+    [ "$SOURCE" = "mirror" ] && return 1
+    fetch "https://api.github.com/repos/$GH_REPO/releases/latest" "$TMP/gh.json" 2>/dev/null || return 1
+    _tag="$(sed -n 's/.*"tag_name"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' "$TMP/gh.json" | head -1)"
+    [ -n "$_tag" ] || return 1
+    LATEST="$(printf '%s' "$_tag" | sed 's/^v//')"
+    REL_BASE="https://github.com/$GH_REPO/releases/download/$_tag"
+    return 0
+}
+
+resolve_mirror() {
+    _site="$1"
+    [ -n "$_site" ] || return 1
+    fetch "$_site/releases/latest" "$TMP/latest" 2>/dev/null || return 1
+    _name="$(tr -d ' \t\r\n' < "$TMP/latest")"
+    [ -n "$_name" ] || return 1
+    LATEST="$(printf '%s' "$_name" | sed 's/^canopy-//; s/\.run$//')"
+    REL_BASE="$_site/releases"
+    return 0
+}
+
+if [ -n "$BASE_URL" ]; then
+    resolve_mirror "$BASE_URL" || true
+else
+    resolve_github || true
+fi
+
+[ -n "$LATEST" ] || die "could not resolve the latest release"
+
+# Dotted dates compare correctly as strings (YYYY.MM.DD, zero padded).
+if [ -n "$INSTALLED" ] && [ "$LATEST" = "$INSTALLED" ]; then
+    UPDATE=no
+else
+    UPDATE=yes
+fi
+
+if [ "$MODE" = "check" ]; then
+    if [ "$JSON" -eq 1 ]; then
+        printf '{"installed":"%s","latest":"%s","update_available":%s}\n' \
+            "${INSTALLED:-unknown}" "$LATEST" \
+            "$([ "$UPDATE" = yes ] && echo true || echo false)"
+        exit 0
+    fi
+    say "installed : ${INSTALLED:-unknown}"
+    say "latest    : $LATEST"
+    if [ "$UPDATE" = yes ]; then
+        say "status    : update available"
+    else
+        say "status    : up to date"
+    fi
+    exit 0
+fi
+
+[ "$MODE" = "apply" ] || die "usage: canopy-update {check|apply} [--json|--yes]"
+
+if [ "$UPDATE" = no ]; then
+    say "Canopy $INSTALLED is already the latest release."
+    exit 0
+fi
+
+if [ "$ASSUME_YES" -eq 0 ]; then
+    printf 'Install Canopy %s (currently %s)? [y/N] ' "$LATEST" "${INSTALLED:-unknown}"
+    read -r answer
+    case "$answer" in
+        y|Y|yes|YES) ;;
+        *) say "cancelled"; exit 0 ;;
+    esac
+fi
+
+RUN="canopy-$LATEST.run"
+fetch "$REL_BASE/$RUN" "$TMP/$RUN" || die "could not download $RUN"
+fetch "$REL_BASE/SHA256SUMS" "$TMP/SHA256SUMS" || die "could not download SHA256SUMS"
+
+(
+    cd "$TMP"
+    grep " $RUN\$" SHA256SUMS > expected.sha || cp SHA256SUMS expected.sha
+    sha256sum -c expected.sha >/dev/null 2>&1 || die "checksum verification failed"
+)
+
+say "installing Canopy $LATEST..."
+sh "$TMP/$RUN"
+say "done. Restart the shell to use it: pkill -x canopy; canopy -d"

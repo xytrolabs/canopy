@@ -1,7 +1,19 @@
-QT_QPA_PLATFORMTHEME=qt6ct
+# Canopy session environment (read by labwc at startup).
+#
+# Exported for every process the compositor starts, so the desktop identity is
+# consistent even for applications launched outside the shell. The session
+# wrapper (`canopy-session`) exports the same values for the display manager.
 XDG_CURRENT_DESKTOP=Canopy
-XDG_SESSION_DESKTOP=Canopy
-QT_QPA_PLATFORM=wayland
-GDK_BACKEND=wayland
+XDG_SESSION_DESKTOP=canopy
+DESKTOP_SESSION=canopy
+XDG_SESSION_TYPE=wayland
+
+# Toolkits: Wayland native, X11 as fallback for legacy apps via XWayland.
+QT_QPA_PLATFORM=wayland;xcb
+GDK_BACKEND=wayland,x11
 SDL_VIDEODRIVER=wayland
+CLUTTER_BACKEND=wayland
 _JAVA_AWT_WM_NONREPARENTING=1
+
+# Qt applications follow the Canopy palette and icon theme.
+QT_QPA_PLATFORMTHEME=qt6ct

@@ -1,0 +1,13 @@
+# Canopy session autostart (Labwc)
+#
+# One shell, started after the compositor is up. The wrapper already clears a
+# stale instance, but keep this here so `labwc` can also be started by hand
+# without a leaked second panel.
+#
+# ~/.cache does not exist on a fresh account; a redirect into a missing
+# directory aborts the line and the shell would never start.
+mkdir -p "$HOME/.cache"
+
+pkill -x canopy 2>/dev/null
+sleep 1
+canopy >"$HOME/.cache/canopy-shell.log" 2>&1 &

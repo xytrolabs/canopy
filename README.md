@@ -1,110 +1,141 @@
 # Canopy
 
-Canopy is a native Wayland desktop shell for people who want a polished, configurable Linux desktop. It is built on the Canopy/Noctalia v5 foundation, customized for Xytro Labs with its own identity, defaults, and release process.
+The **Xytro Labs** desktop environment for Linux: a native Wayland shell on
+**Labwc**, built on the Noctalia v5 foundation.
 
-It provides the shell layer around your compositor: bars, widgets, dock, launcher, control center, notifications, wallpaper, lock screen, session actions, clipboard history, OSDs, tray integration, and desktop widgets. The project is built directly on Wayland and OpenGL ES with no Qt or GTK dependency, so the UI, rendering, configuration, and IPC model are designed as one cohesive shell instead of a collection of unrelated panels and scripts.
+> **Powerful when needed. Simple by default.**
+> _Mac functionality with Windows simplicity._
 
-<p><br/></p>
+<p align="center"><img src="assets/canopy.svg" alt="Canopy" width="120"></p>
 
-<p align="center">
-  <img src="https://assets.canopy.dev/canopy-logo.svg?v=2" alt="Noctalia Logo" style="width: 192px" />
-</p>
+## What Canopy is
 
-<p align="center">
-  <a href="https://docs.canopy.dev/canopy/getting-started/installation/">
-    <img
-      src="https://img.shields.io/badge/Install_Noctalia-FFF59B?style=for-the-badge&labelColor=FFF59B"
-      alt="Install Noctalia"
-      style="height: 50px"
-    />
-  </a>
-</p>
+Canopy is a desktop environment, not a bar you bolt onto someone else's session.
+One process owns the desktop surfaces; the compositor owns the windows; the
+installer owns the session.
 
-<p><br/></p>
+| Layer | Component |
+|---|---|
+| Compositor | Labwc (stacking, movable, resizable windows) |
+| Shell | `canopy` — panel, tray, dock, launcher, quick settings, notifications, OSD, lock screen, wallpaper |
+| Session | `canopy-session` + `wayland-sessions/canopy.desktop` |
+| Portals | `xdg-desktop-portal-{gtk,wlr}` with Canopy's preferred-backend config |
+| Toolkit theming | GTK 3/4, Qt 6 (palette, fonts, icons, cursor) |
+| Default apps | `mimeapps.list` baseline |
+| Lifecycle | `deps.sh`, `install.sh`, `uninstall.sh`, `canopy-update`, single-file release payload |
 
-<p align="center">
-  <a href="https://github.com/noctalia-dev/canopy/commits">
-    <img src="https://img.shields.io/github/last-commit/canopy-dev/canopy?style=for-the-badge&labelColor=FFF59B&color=FFF59B&logo=git&logoColor=070722&label=commit" alt="Last commit" />
-  </a>
-  <a href="https://github.com/noctalia-dev/canopy/stargazers">
-    <img src="https://img.shields.io/github/stars/canopy-dev/canopy?style=for-the-badge&labelColor=FFF59B&color=FFF59B&logo=github&logoColor=070722" alt="GitHub stars" />
-  </a>
-  <a href="https://docs.canopy.dev">
-    <img src="https://img.shields.io/badge/docs-FFF59B?style=for-the-badge&logo=gitbook&logoColor=070722&labelColor=FFF59B" alt="Documentation" />
-  </a>
-  <a href="https://discord.canopy.dev">
-    <img src="https://img.shields.io/badge/discord-FFF59B?style=for-the-badge&labelColor=FFF59B&logo=discord&logoColor=070722" alt="Discord" />
-  </a>
-</p>
+The shell is native: no Qt, no GTK, no Quickshell. It speaks Wayland and OpenGL
+ES directly, so the panel, dock, launcher and settings share one event loop, one
+theme palette, one configuration store and one IPC socket.
 
-## Why Noctalia?
+## Layout
 
-Most Wayland setups leave the desktop shell to a stack of small tools: one bar, another launcher, another notification daemon, a lock screen, a wallpaper daemon, scripts for session actions, and separate config formats for each piece. That can be flexible, but it also makes a complete desktop feel fragile and hard to keep visually consistent.
+```
+┌──────────────────────────────────────────────────────────────┐
+│  launcher  workspaces  window      clock      tray · session  │  System Panel
+└──────────────────────────────────────────────────────────────┘
+ ┌──┐
+ │  │  launcher                                              ▓▓▓ │
+ │  │  settings                                        ▓ quick ▓  │  System Tray (left)
+ │  │  network                                           ▓ sett.▓ │
+ │  │  sound                                             ▓▓▓▓▓▓▓ │
+ └──┘
+                    ┌──────────────────────────┐
+                    │  pinned │ running │ min  │                    Dock (bottom)
+                    └──────────────────────────┘
+```
 
-Noctalia solves that by providing one configurable shell layer that owns the common desktop surfaces and services while still fitting into compositor-driven Wayland workflows. It is meant for users who want the control of a custom desktop environment with fewer moving parts and a consistent UI.
+- **System Panel** — top, slim, floating: launcher, workspaces, active window,
+  centred clock, media, notifications, network, Bluetooth, volume, battery,
+  quick settings, session.
+- **System Tray** — vertical pill on the left edge: launcher, settings, network,
+  audio, Bluetooth, notifications, quick settings.
+- **Dock** — bottom centre: pinned ǀ running ǀ minimized, with context menus,
+  tooltips and multi-window handling.
+- **Quick Settings** — attached to the right edge: Wi-Fi, Bluetooth, audio,
+  microphone, brightness, power profiles, night light, Do Not Disturb.
 
-To understand the values and philosophy guiding the project, read our [ethos](https://noctalia.dev/ethos).
+Defaults live in [`config/canopy/config.toml`](config/canopy/config.toml) and are
+seeded on first run or by the installer, never over an existing setup.
 
-## What It Includes
+## Design
 
-- Multi-monitor bars with configurable widgets, taskbar, workspaces, system tray, media, network, battery, brightness, weather, clipboard, and custom script-backed widgets.
-- Dock, launcher, control center, notification toasts/history, wallpaper picker, OSD overlays, lock screen, session panel, and desktop widgets.
-- TOML configuration with hot reload, GUI-managed overrides, theme/palette support, template application, and IPC for runtime control.
-- Direct Wayland integration for layer-shell, session lock, idle behavior, clipboard, foreign toplevels, workspaces, fractional scaling, and compositor-specific workspace backends where needed.
+- Acrylic-inspired translucency with controlled blur — and surfaces that stay
+  readable with blur and animations disabled.
+- Rounded geometry, one corner scale, subtle shadows.
+- Restrained purple accent: `#8B6BFF` (dark) / `#6D4CF5` (light) on neutral
+  surfaces, in the built-in `Canopy` palette.
+- Inter for UI text, Tabler for icons. No emoji stand-ins, no missing-icon
+  placeholders, no magenta artefacts.
+- Short, purposeful transitions.
 
-## Wayland Compositor Support
+Full notes: [docs/CANOPY_DESIGN.md](docs/CANOPY_DESIGN.md).
 
-Noctalia supports Wayland compositors that provide the layer-shell protocols it needs for shell surfaces. Workspace integration works through compositor-native backends where needed, or through `ext-workspace-v1` on compositors that implement it.
+## Install
 
-Current compositor integrations include Niri, Hyprland, Sway, Scroll, Mango, Labwc, dwl, and other compatible Wayland compositors. Other compositors may run Noctalia but can have reduced workspace, window, output, or session-action integration depending on the protocols and IPC they expose.
+### From a release
 
-## Scope
+```sh
+curl -fsSLO https://github.com/xytrolabs/canopy/releases/latest/download/canopy-2026.11.04.run
+curl -fsSLO https://github.com/xytrolabs/canopy/releases/latest/download/SHA256SUMS
+sha256sum -c SHA256SUMS
+sh canopy-*.run          # user install
+sudo sh canopy-*.run     # system install + Wayland session entry
+```
 
-Noctalia is a desktop shell, not a full desktop environment. It provides the visual and service layer around your Wayland compositor; window management, compositor configuration, and standalone desktop applications belong elsewhere, and non-essential features live in plugins. See [SCOPE.md](SCOPE.md) for what the project takes on and declines.
+Log out and pick **Canopy** in the display manager, or start it from a TTY:
 
-## Build from source
+```sh
+canopy-session
+```
 
-Source dependencies, distro-specific package commands, build modes, and install layouts live in [BUILDING.md](BUILDING.md).
+### From source
 
-## Configuration
+```sh
+sh scripts/deps.sh plan      # what this machine is missing
+sh scripts/deps.sh build     # build dependencies (distro-specific names)
+just configure release
+just build release
+sudo sh scripts/install.sh
+```
 
-A ready-to-use starting config with all defaults is at [example.toml](example.toml). The full configuration reference lives in the [documentation site](https://docs.canopy.dev/canopy/). The source MDX files are in [`docs/user/`](docs/user/); sync them to a local docs checkout with `tools/sync-docs.sh`.
+## Working on it
 
-## Contributing
+```sh
+canopy-session --nested        # run the whole desktop inside your current session
+canopy msg panel-toggle launcher
+canopy msg settings-open
+canopy config validate         # check ~/.config/canopy/config.toml
+just test                      # unit tests
+```
 
-Developer notes, code style, contribution rules, testing, project layout, and debugging commands live in [CONTRIBUTING.md](CONTRIBUTING.md). The architecture and its invariants are described in [ARCHITECTURE.md](ARCHITECTURE.md).
+Useful scripts:
 
-Bug reports, fixes, documentation updates, themes, and configuration examples are welcome. For general help and design discussion, join the community on [Discord](https://discord.canopy.dev).
+```sh
+sh scripts/deps.sh plan        # runtime/build gaps on this distribution
+sh scripts/uninstall.sh        # remove the install, keep the configuration
+canopy-update check            # is there a newer release?
+sh scripts/build-release.sh    # dist/canopy-<version>.run
+```
 
-## Credits
+## Project layout
 
-Thank you to the [contributors](https://github.com/noctalia-dev/canopy/graphs/contributors) and community members who test Noctalia, report issues, share configurations, and help shape the project.
+| Path | Contents |
+|---|---|
+| `src/` | shell sources (C++23, Wayland + OpenGL ES) |
+| `assets/` | icon font, translations, wallpapers, default config, desktop entries |
+| `config/` | Canopy defaults, Labwc session, portals, GTK/Qt, mimeapps |
+| `scripts/` | session, install, uninstall, deps, update, release |
+| `docs/` | design system, desktop scope, packaging, upstream fork notes |
+| `protocols/` | Wayland protocol XML used by the shell |
 
-## Donations
+## Upstream and licensing
 
-Donations are appreciated but completely optional.
+Canopy is an independent Xytro Labs project built on
+[Noctalia](https://github.com/noctalia-dev/noctalia) v5.4.1 (MIT). Upstream
+copyright, attribution and third-party acknowledgements are preserved — see
+[LICENSE](LICENSE), [CREDITS.md](CREDITS.md) and
+[docs/UPSTREAM_FORK.md](docs/UPSTREAM_FORK.md) for the pinned commit and the
+upstream-sync procedure.
 
-<p>
-  <a href="https://www.buymeacoffee.com/noctalia">
-    <img src="https://img.shields.io/badge/Buy_Me_a_Coffee-FFF59B?style=for-the-badge&logo=buymeacoffee&logoColor=070722&labelColor=FFF59B" alt="Buy Me a Coffee">
-  </a>
-  <a href="https://ko-fi.com/canopydev">
-    <img src="https://img.shields.io/badge/Ko--fi-FFF59B?style=for-the-badge&logo=kofi&logoColor=070722&labelColor=FFF59B" alt="Ko-fi">
-  </a>
-</p>
-
-## License
-
-MIT License. See [LICENSE](LICENSE) for details.
-
-## Packaging
-
-Distro packaging notes (description, deps, install layout, Meson options) live in [PACKAGING.md](PACKAGING.md).
-
-## Star History
-
-<p align="center">
-  <a href="https://github.com/noctalia-dev/canopy/stargazers">
-    <img src="https://api.noctalia.dev/stars-animated/canopy" alt="Star History" />
-  </a>
-</p>
+Canopy itself is MIT licensed.

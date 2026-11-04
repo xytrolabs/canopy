@@ -1,9 +1,24 @@
 name: Release
 
+# Tag a commit (v2026.11.04) and this builds the complete Canopy desktop as a
+# single self-extracting installer, checksums it, and publishes it next to a
+# source archive.
+#
+#   dist/canopy-<version>.run   ← what canopy-update downloads
+#   dist/SHA256SUMS             ← what canopy-update verifies
+#
+# The asset names must stay exactly like this: scripts/canopy-update builds its
+# URLs from the tag and these filenames.
+
 on:
   push:
     tags:
       - 'v*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version to build (e.g. 2026.11.04)"
+        required: true
 
 permissions:
   contents: write
@@ -13,81 +28,111 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  release:
-    runs-on: ubuntu-latest
+  installer:
+    runs-on: ubuntu-24.04
 
     steps:
       - name: Check out release tag
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
         with:
-          fetch-depth: 0 # release notes need full history and tags
+          fetch-depth: 0
 
-      - name: Validate release tag
-        env:
-          RELEASE_TAG: ${{ github.ref_name }}
+      - name: Resolve version
+        id: ver
         run: |
           set -euo pipefail
-          version=$(<VERSION)
-          if [[ -z "$version" || "$version" == *$'\n'* ]]; then
-            printf 'VERSION must contain one non-empty line.\n' >&2
-            exit 1
+          if [ -n "${{ github.event.inputs.version }}" ]; then
+            version="${{ github.event.inputs.version }}"
+          else
+            version="$(<VERSION)"
+            version="${version#v}"
           fi
-          if [[ "$RELEASE_TAG" != "v$version" ]]; then
-            printf 'Tag %q does not match VERSION %q.\n' "$RELEASE_TAG" "$version" >&2
-            exit 1
-          fi
+          printf 'version=%s\n' "$version" >> "$GITHUB_OUTPUT"
+          printf 'building %s\n' "$version"
 
-      - name: Create release archive
-        env:
-          RELEASE_TAG: ${{ github.ref_name }}
+      - name: Install build dependencies
         run: |
           set -euo pipefail
-          mkdir -p ../canopy-release
-          rsync -a \
-            --exclude='.git' \
-            --exclude='.github' \
-            --exclude='nix' \
-            --exclude='flake.nix' \
-            --exclude='flake.lock' \
-            --exclude='result*' \
-            ./ ../canopy-release/
-          tar -C .. -czf "noctalia-${RELEASE_TAG}.tar.gz" canopy-release/
-          cp "noctalia-${RELEASE_TAG}.tar.gz" canopy-latest.tar.gz
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            meson ninja-build g++ pkg-config \
+            libwayland-dev wayland-protocols libegl-dev libgles-dev \
+            libfreetype-dev libfontconfig-dev libcairo2-dev libpango1.0-dev \
+            libharfbuzz-dev libxkbcommon-dev libglib2.0-dev libsecret-1-dev \
+            libsodium-dev libsdbus-c++-dev libpipewire-0.3-dev \
+            libwireplumber-0.5-dev libpam0g-dev libpolkit-agent-1-dev \
+            libpolkit-gobject-1-dev libcurl4-openssl-dev libwebp-dev \
+            libjxl-dev libsndfile1-dev librsvg2-dev libqalculate-dev \
+            libxml2-dev libmd4c-dev libtomlplusplus-dev libical-dev \
+            nlohmann-json3-dev libstb-dev libjemalloc-dev
+
+      - name: Build the installer
+        env:
+          CANOPY_VERSION: ${{ steps.ver.outputs.version }}
+        run: |
+          set -euo pipefail
+          meson setup build-release --buildtype=release -Dcpp_std=c++23 -Db_lto=true --prefix=/usr/local
+          meson compile -C build-release
+          sh scripts/build-release.sh
+          ls -l dist/
+
+      - name: Checksums
+        working-directory: dist
+        run: |
+          set -euo pipefail
+          sha256sum "canopy-${{ steps.ver.outputs.version }}.run" > SHA256SUMS
+          cat SHA256SUMS
+
+      - name: Source archive
+        run: |
+          set -euo pipefail
+          mkdir -p ../canopy-src
+          rsync -a --exclude='.git' --exclude='build-*' --exclude='dist' \
+            ./ ../canopy-src/
+          tar -C .. -czf "canopy-${{ steps.ver.outputs.version }}.tar.gz" canopy-src/
 
       - name: Generate release notes
-        env:
-          RELEASE_TAG: ${{ github.ref_name }}
         run: |
           set -euo pipefail
-          # Prefer the previous tag on the same history; otherwise the most recent other tag.
-          prev_tag=$(git describe --tags --abbrev=0 "${RELEASE_TAG}^" 2>/dev/null || true)
-          if [[ -z "$prev_tag" ]]; then
-            prev_tag=$(git tag --sort=-version:refname | grep -vxF "$RELEASE_TAG" | head -n1 || true)
-          fi
-          if [[ -z "$prev_tag" ]]; then
-            range="$(git rev-list --max-parents=0 HEAD)..${RELEASE_TAG}"
-            since_label="project start"
+          tag="${{ github.ref_name }}"
+          prev_tag=$(git describe --tags --abbrev=0 "${tag}^" 2>/dev/null || true)
+          if [ -z "$prev_tag" ]; then
+            range="$(git rev-list --max-parents=0 HEAD)..${tag}"
+            since="project start"
           else
-            range="${prev_tag}..${RELEASE_TAG}"
-            since_label="$prev_tag"
+            range="${prev_tag}..${tag}"
+            since="$prev_tag"
           fi
           {
-            printf '# Release %s\n\n' "$RELEASE_TAG"
-            printf '## Changes since %s\n\n' "$since_label"
+            printf '# Canopy %s\n\n' "$tag"
+            printf '## Changes since %s\n\n' "$since"
             git log "$range" --pretty=format:"- %s ([%h](https://github.com/${GITHUB_REPOSITORY}/commit/%H)) by %an"
-            printf '\n'
+            printf '\n\n## Install or upgrade\n\n'
+            printf '```sh\n'
+            printf 'curl -fsSLO https://github.com/%s/releases/download/%s/canopy-%s.run\n' \
+              "$GITHUB_REPOSITORY" "$tag" "${{ steps.ver.outputs.version }}"
+            printf 'curl -fsSLO https://github.com/%s/releases/download/%s/SHA256SUMS\n' \
+              "$GITHUB_REPOSITORY" "$tag"
+            printf 'sha256sum -c SHA256SUMS\n'
+            printf 'sh canopy-%s.run        # user install\n' "${{ steps.ver.outputs.version }}"
+            printf 'sudo sh canopy-%s.run   # system install + Wayland session\n' "${{ steps.ver.outputs.version }}"
+            printf '```\n\n'
+            printf '`canopy-update check` reads this release directly.\n'
           } > release_notes.md
 
-      - name: Create GitHub release
+      - name: Publish release
         env:
           GH_TOKEN: ${{ github.token }}
-          RELEASE_TAG: ${{ github.ref_name }}
         run: |
           set -euo pipefail
-          assets=("canopy-${RELEASE_TAG}.tar.gz" noctalia-latest.tar.gz)
-          if gh release view "$RELEASE_TAG" > /dev/null 2>&1; then
-            printf 'GitHub release %s already exists; refreshing assets only.\n' "$RELEASE_TAG"
-            gh release upload "$RELEASE_TAG" "${assets[@]}" --clobber
-            exit 0
+          tag="${{ github.ref_name }}"
+          assets=(
+            "dist/canopy-${{ steps.ver.outputs.version }}.run"
+            "dist/SHA256SUMS"
+            "canopy-${{ steps.ver.outputs.version }}.tar.gz"
+          )
+          if gh release view "$tag" >/dev/null 2>&1; then
+            gh release upload "$tag" "${assets[@]}" --clobber
+          else
+            gh release create "$tag" --verify-tag --notes-file release_notes.md "${assets[@]}"
           fi
-          gh release create "$RELEASE_TAG" --verify-tag --notes-file release_notes.md "${assets[@]}"
