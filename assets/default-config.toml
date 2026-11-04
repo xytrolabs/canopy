@@ -120,21 +120,9 @@ capsule             = false
 
 start  = ["launcher", "wordmark", "active_window"]
 center = []
-end    = ["media", "group:status", "control-center", "clock", "session"]
-
-# Status cluster collapses to one icon and unfolds on hover — the menu bar stays
-# short until you actually need the indicators.
-[[bar.main.capsule_group]]
-id           = "status"
-members      = ["network", "bluetooth", "battery"]
-fill         = "surface_container"
-border       = "outline_variant"
-border_width = 1.0
-padding      = 6.0
-radius       = 999.0
-opacity      = 1.0
-accordion    = true
-accordion_delay_ms = 120
+# The side island already carries network, bluetooth and battery, so the menu
+# bar does not repeat them: media, clock, quick settings and power only.
+end    = ["media", "clock", "control-center", "session"]
 
 # ── System Tray — vertical pill, left edge ────────────────────────────────────
 # Canopy's own surface: launcher, settings and the quick system controls in one
@@ -142,16 +130,20 @@ accordion_delay_ms = 120
 
 [bar.tray]
 position            = "left"
-thickness           = 56
-radius              = 26
+# Thickness is the pill's cross size, so it is sized to the widget row rather
+# than to a fixed slab: the island hugs what is inside it.
+thickness           = 40
+radius              = 20
 margin_ends         = 24
 margin_edge         = 10
-padding             = 6
+padding             = 4
 widget_spacing      = 2
 background_opacity  = 0.80
 compositor_blur     = true
 shadow              = true
-auto_hide           = false
+# Slide away with the pointer, come back when it touches the edge.
+auto_hide           = true
+auto_hide_delay_ms  = 400
 reserve_space       = false
 capsule             = true
 capsule_fill        = "surface_container"
@@ -198,8 +190,9 @@ show_running        = true
 # Three islands: pinned applications, running (unpinned), minimized windows.
 sections            = "islands"
 section_gap         = 8
-auto_hide           = false
+auto_hide           = true
 smart_auto_hide     = false
+auto_hide_delay_ms  = 350
 reserve_space       = false
 layer               = "top"
 active_scale        = 1.0
@@ -269,5 +262,5 @@ text = "Canopy"
 # The mark carries the accent, like a Start button that is actually branded.
 color        = "primary"
 glyph        = "canopy"
-custom_image = "~/.local/share/icons/hicolor/scalable/apps/canopy-mark.svg"
+custom_image = "~/.local/share/icons/hicolor/scalable/apps/canopy.png"
 custom_image_colorize = false

@@ -163,6 +163,9 @@ install_session() {
         [ -f "$PROJECT_DIR/assets/canopy-mark.svg" ] && \
             run install -Dm644 "$PROJECT_DIR/assets/canopy-mark.svg" \
                 /usr/local/share/icons/hicolor/scalable/apps/canopy-mark.svg
+        [ -f "$PROJECT_DIR/assets/canopy.png" ] && \
+            run install -Dm644 "$PROJECT_DIR/assets/canopy.png" \
+                /usr/local/share/icons/hicolor/scalable/apps/canopy.png
         if [ "$DRY_RUN" -eq 0 ] && command -v gtk-update-icon-cache >/dev/null 2>&1; then
             gtk-update-icon-cache -q -t /usr/local/share/icons/hicolor 2>/dev/null || true
         fi
@@ -218,7 +221,17 @@ seed_labwc() {
     for f in rc.xml menu.xml environment autostart; do
         [ -f "$PROJECT_DIR/config/labwc/$f" ] || continue
         if [ -f "$XDG_CONFIG_HOME/labwc/$f" ]; then
-            say "keeping existing labwc/$f"
+            if [ "$REFRESH_CONFIG" -eq 1 ]; then
+                # The window decorations (titlebar layout, corner radius) live in
+                # rc.xml, so a refreshed install has to take the new file or the
+                # decorations keep looking like the previous release.
+                _backup="$XDG_CONFIG_HOME/labwc/$f.bak-$(date +%Y%m%d-%H%M%S)"
+                run cp "$XDG_CONFIG_HOME/labwc/$f" "$_backup"
+                run cp "$PROJECT_DIR/config/labwc/$f" "$XDG_CONFIG_HOME/labwc/$f"
+                say "refreshed labwc/$f (backup: $_backup)"
+            else
+                say "keeping existing labwc/$f (use --refresh-config to update)"
+            fi
         else
             run cp "$PROJECT_DIR/config/labwc/$f" "$XDG_CONFIG_HOME/labwc/$f"
         fi
@@ -318,6 +331,13 @@ seed_assets() {
         if [ "$DRY_RUN" -eq 0 ] && command -v gtk-update-icon-cache >/dev/null 2>&1; then
             gtk-update-icon-cache -q -t "$XDG_DATA_HOME/icons/hicolor" 2>/dev/null || true
         fi
+    fi
+    # The launcher widget points at the PNG mark; the vector stays for the menu
+    # entry and window icons.
+    if [ -f "$PROJECT_DIR/assets/canopy.png" ]; then
+        run mkdir -p "$XDG_DATA_HOME/icons/hicolor/scalable/apps"
+        run cp -f "$PROJECT_DIR/assets/canopy.png" \
+            "$XDG_DATA_HOME/icons/hicolor/scalable/apps/canopy.png"
     fi
     # A system install also seeds the desktop-wide defaults used by accounts
     # that have never logged into Canopy before.

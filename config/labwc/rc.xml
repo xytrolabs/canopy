@@ -23,6 +23,12 @@
     <dropShadows>yes</dropShadows>
     <cornerRadius>10</cornerRadius>
     <font name="Inter" size="10" weight="semibold" slant="normal"/>
+    <!-- macOS order: the traffic lights live on the left, in close/iconify/max
+         order, and the title is centred in the remaining space. -->
+    <titlebar>
+      <layout>close,iconify,max:</layout>
+      <showTitle>yes</showTitle>
+    </titlebar>
     <padding>
       <titlebar>
         <height>30</height>
