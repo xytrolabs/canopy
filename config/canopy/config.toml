@@ -54,16 +54,31 @@ direction = "down"
 alpha     = 0.45
 
 [shell.launcher]
+# Start-menu behaviour, not a Noctalia search panel: pinned applications in a
+# grid are the first thing shown, “All applications” is one click away, and
+# the search field is where a Windows or macOS user expects it — on top.
 layout                = "full"
 width                 = 720
-compact               = false
-track_usage           = true
-sort_by_usage         = true
+search_position       = "top"
+default_view          = "pinned"
+categories            = true
+app_grid              = true
+show_navigation_labels = true
 show_settings_button  = true
 show_session_button   = true
 show_icons            = true
-categories            = true
-pinned                = []
+compact               = false
+track_usage           = true
+sort_by_usage         = true
+pinned                = ["firefox", "thunar", "org.gnome.Nautilus", "alacritty", "kitty", "org.gnome.TextEditor"]
+
+[shell.window_switcher]
+# Windows Alt+Tab: a compact strip in most-recently-used order.
+style         = "compact"
+mru           = true
+show_caption  = true
+show_app_icon = true
+show_count    = false
 
 # ── Theme ─────────────────────────────────────────────────────────────────────
 # The Canopy palette is a restrained purple accent on neutral surfaces, and it
@@ -103,7 +118,7 @@ capsule             = false
 
 start  = ["launcher", "active_window"]
 center = []
-end    = ["media", "notifications", "network", "volume", "bluetooth", "battery", "control-center", "clock"]
+end    = ["media", "notifications", "network", "volume", "bluetooth", "battery", "control-center", "clock", "session"]
 
 # ── System Tray — vertical pill, left edge ────────────────────────────────────
 # Canopy's own surface: launcher, settings and the quick system controls in one
