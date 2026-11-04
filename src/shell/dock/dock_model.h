@@ -14,6 +14,14 @@ struct wl_output;
 
 namespace shell::dock {
 
+  // Which island an item belongs to when the dock is drawn with separate
+  // sections: pinned applications, running-but-unpinned, and minimized windows.
+  enum class DockSection : std::uint8_t {
+    Pinned = 0,
+    Active = 1,
+    Minimized = 2,
+  };
+
   struct DockItemModel {
     DesktopEntry entry;
     std::string idLower;
@@ -21,6 +29,8 @@ namespace shell::dock {
     // Compositor app id + WM class used to find windows (matches taskbar policy).
     std::string windowLookupIdLower;
     std::string windowLookupWmClassLower;
+    bool pinned = false;
+    DockSection section = DockSection::Active;
     bool running = false;
     bool active = false;
     std::size_t instanceCount = 0;

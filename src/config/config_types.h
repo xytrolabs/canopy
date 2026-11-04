@@ -748,6 +748,10 @@ struct DockConfig {
   std::int32_t marginEdge = 0;         // distance from the nearest screen edge (floats the dock when > 0)
   bool shadow = true;                  // use the global shell shadow
   bool showRunning = true;             // also show running apps not in pinned list
+  // "unified": one pill for every item. "islands": three pills — pinned,
+  // running-but-unpinned, minimized — separated by section_gap.
+  std::string sections = "unified";
+  std::int32_t sectionGap = 6;         // gap between islands, in logical pixels
   bool autoHide = false;               // slide out when not hovered (overlay mode)
   bool smartAutoHide = false;          // hide while the active workspace has windows; show when it is empty
   std::string layer = "top";           // top | overlay

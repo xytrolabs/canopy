@@ -140,8 +140,25 @@ namespace shell::dock {
       if (dockItem.allMinimized) {
         dockItem.active = false;
       }
+
+      dockItem.pinned = std::ranges::any_of(deps.pinnedEntries, [&entry](const DesktopEntry& pinned) {
+        return pinned.id == entry.id;
+      });
+      if (dockItem.pinned) {
+        dockItem.section = DockSection::Pinned;
+      } else if (dockItem.allMinimized) {
+        dockItem.section = DockSection::Minimized;
+      } else {
+        dockItem.section = DockSection::Active;
+      }
       snapshot.items.push_back(std::move(dockItem));
     }
+
+    // Islands draw in section order; keep the vector contiguous per section so a
+    // section is always one run of adjacent cells.
+    std::stable_sort(snapshot.items.begin(), snapshot.items.end(), [](const DockItemModel& a, const DockItemModel& b) {
+      return static_cast<std::uint8_t>(a.section) < static_cast<std::uint8_t>(b.section);
+    });
 
     return snapshot;
   }

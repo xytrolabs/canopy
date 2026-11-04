@@ -198,6 +198,9 @@ margin_ends         = 0
 margin_edge         = 10
 shadow              = true
 show_running        = true
+# Three islands: pinned applications, running (unpinned), minimized windows.
+sections            = "islands"
+section_gap         = 8
 auto_hide           = false
 smart_auto_hide     = false
 reserve_space       = false

@@ -94,6 +94,136 @@ namespace shell::dock {
       }
     }
 
+    // ── Section islands ──────────────────────────────────────────────────────
+    // One span per contiguous run of items that share a section. Spans are in
+    // main-axis coordinates of the item row, which is what the layout already
+    // produced, so islands never fight the flex layout or magnification.
+    struct IslandSpan {
+      DockSection section;
+      float start;
+      float end;
+    };
+
+    [[nodiscard]] float dockCellSize(const DockConfig& cfg) {
+      // Matches kCellPad in dock_items.cpp: icon plus padding on both sides.
+      constexpr float kCellPad = 6.0F;
+      return static_cast<float>(cfg.iconSize) + kCellPad * 2.0F;
+    }
+
+    [[nodiscard]] std::vector<IslandSpan> computeIslandSpans(const DockInstance& instance, const DockConfig& cfg) {
+      std::vector<IslandSpan> spans;
+      const float cell = dockCellSize(cfg);
+
+      for (std::size_t i = 0; i < instance.items.size() && i < instance.snapshot.items.size(); ++i) {
+        const auto* area = instance.items[i].area;
+        if (area == nullptr) {
+          continue;
+        }
+        const auto section = instance.snapshot.items[i].section;
+        const float start = instance.items[i].restMainPos;
+        const float end = start + cell;
+        if (!spans.empty() && spans.back().section == section) {
+          spans.back().start = std::min(spans.back().start, start);
+          spans.back().end = std::max(spans.back().end, end);
+        } else {
+          spans.push_back(IslandSpan{.section = section, .start = start, .end = end});
+        }
+      }
+
+      // The launcher belongs to the pinned island, which is where it is drawn.
+      if (cfg.launcherPosition != DockLauncherPosition::None && instance.launcherArea != nullptr) {
+        const float launcherStart = instance.launcherRestMainPos;
+        const float launcherEnd = launcherStart + cell;
+        if (!spans.empty() && spans.front().section == DockSection::Pinned
+            && cfg.launcherPosition == DockLauncherPosition::Start)
+        {
+          spans.front().start = std::min(spans.front().start, launcherStart);
+          spans.front().end = std::max(spans.front().end, launcherEnd);
+        } else if (spans.empty()) {
+          spans.push_back(IslandSpan{.section = DockSection::Pinned, .start = launcherStart, .end = launcherEnd});
+        }
+      }
+
+      return spans;
+    }
+
+    void applyPanelPaletteTo(Box& box, const DockConfig& cfg) {
+      box.setFill(colorSpecFromRole(ColorRole::Surface, cfg.backgroundOpacity));
+      box.setBorder(cfg.border, cfg.borderWidth);
+    }
+
+    // Draws one rounded background per section, inset by half the configured gap
+    // so the islands read as separate surfaces without moving a single icon.
+    void applySectionIslands(
+        DockInstance& instance, const DockConfig& cfg, const DockPanelGeometry& panelGeometry,
+        const DockConcaveShape& concave, bool vertical
+    ) {
+      const bool islands = cfg.sections == "islands";
+      auto& boxes = instance.sectionPanels;
+
+      if (!islands) {
+        for (auto* box : boxes) {
+          box->setOpacity(0.0F);
+        }
+        if (instance.panel != nullptr) {
+          instance.panel->setOpacity(1.0F);
+        }
+        return;
+      }
+
+      if (instance.panel != nullptr) {
+        instance.panel->setOpacity(0.0F);
+      }
+      if (instance.slideRoot == nullptr) {
+        return;
+      }
+
+      const auto spans = computeIslandSpans(instance, cfg);
+      while (boxes.size() < spans.size()) {
+        auto* box = static_cast<Box*>(instance.slideRoot->addChild(ui::box({})));
+        box->setClipChildren(false);
+        box->setZIndex(0);
+        boxes.push_back(box);
+      }
+
+      const float gap = static_cast<float>(std::max<std::int32_t>(0, cfg.sectionGap));
+      const float insetL = concave.logicalInset.left;
+      const float insetT = concave.logicalInset.top;
+      const float insetR = concave.logicalInset.right;
+      const float insetB = concave.logicalInset.bottom;
+
+      for (std::size_t i = 0; i < boxes.size(); ++i) {
+        auto* box = boxes[i];
+        if (i >= spans.size()) {
+          box->setOpacity(0.0F);
+          continue;
+        }
+        box->setOpacity(1.0F);
+        applyPanelPaletteTo(*box, cfg);
+        box->setRadius(static_cast<float>(cfg.radius));
+
+        // Shrink each island by half the gap on its own edges: two neighbouring
+        // islands end up exactly `sectionGap` pixels apart.
+        float start = spans[i].start - gap * 0.5F;
+        float end = spans[i].end + gap * 0.5F;
+        if (end - start < 4.0F) {
+          end = start + 4.0F;
+        }
+
+        if (vertical) {
+          box->setPosition(panelGeometry.panelX - insetL, panelGeometry.panelY + start - insetT);
+          box->setSize(
+              panelGeometry.panelW + insetL + insetR, (end - start) + insetT + insetB
+          );
+        } else {
+          box->setPosition(panelGeometry.panelX + start - insetL, panelGeometry.panelY - insetT);
+          box->setSize(
+              (end - start) + insetL + insetR, panelGeometry.panelH + insetT + insetB
+          );
+        }
+      }
+    }
+
   } // namespace
 
   void prepareFrame(
@@ -392,6 +522,7 @@ namespace shell::dock {
     applyDockScrollOffset(instance, cfg);
     instance.row->layout(renderer);
     shell::dock::syncDockItemRestPositions(instance, cfg);
+    applySectionIslands(instance, cfg, panelGeometry, concave, vert);
 
     if (dockUsesAnyAutoHide(cfg)) {
       const auto hiddenDelta = shell::dock::computeHiddenSlideDelta(cfg, shadowConfig, w, h, panelGeometry);

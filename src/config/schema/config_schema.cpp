@@ -2492,6 +2492,24 @@ namespace noctalia::config::schema {
         field(&DockConfig::marginEdge, "margin_edge", kDockMarginEdgeRange),
         field(&DockConfig::shadow, "shadow"),
         field(&DockConfig::showRunning, "show_running"),
+        custom<DockConfig>(
+            "sections",
+            [](const toml::table& tbl, DockConfig& out, std::string_view parentPath, Diagnostics& diag) {
+              if (auto v = tbl["sections"].value<std::string>()) {
+                if (*v == "unified" || *v == "islands") {
+                  out.sections = *v;
+                } else {
+                  diag.warn(
+                      joinPath(parentPath, "sections"), "expected unified or islands, got \"" + *v + "\""
+                  );
+                }
+              } else {
+                warnWrongType(tbl, "sections", parentPath, diag, "a string");
+              }
+            },
+            [](toml::table& tbl, const DockConfig& in) { tbl.insert_or_assign("sections", in.sections); }
+        ),
+        field(&DockConfig::sectionGap, "section_gap", kDockItemSpacingRange),
         field(&DockConfig::autoHide, "auto_hide"),
         field(&DockConfig::smartAutoHide, "smart_auto_hide"),
         custom<DockConfig>(

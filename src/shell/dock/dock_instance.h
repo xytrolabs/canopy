@@ -50,6 +50,9 @@ namespace shell::dock {
     float slideHiddenDy = 0.0F;
     Box* shadow = nullptr;
     Box* panel = nullptr;
+    // One background per island when sections == "islands" (pinned, active,
+    // minimized). Empty in unified mode, where `panel` is the only background.
+    std::vector<Box*> sectionPanels;
     InputArea* viewport = nullptr;
     Flex* row = nullptr;
     float scrollOffset = 0.0F;
