@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=Check for Canopy Updates
+Comment=Check whether a newer Canopy release is available
+Exec=canopy-update check --notify
+Icon=canopy
+Terminal=false
+Categories=System;
+Keywords=canopy;update;upgrade;
+NoDisplay=false

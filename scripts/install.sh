@@ -358,8 +358,26 @@ install_helpers() {
     run mkdir -p "$HOME/.local/bin"
     for helper in canopy-session canopy-screenshot canopy-update; do
         [ -f "$PROJECT_DIR/scripts/$helper" ] || continue
+        # canopy-update lives in /usr/local/bin for image installs; symlinking a
+        # copy into ~/.local/bin is what lets the timer and the menu entry call
+        # it without depending on PATH order.
         run install -m755 "$PROJECT_DIR/scripts/$helper" "$HOME/.local/bin/$helper"
     done
+
+    # Daily update check (systemd user timer), plus a launcher entry so the
+    # check is discoverable from the application menu.
+    if [ -d "$PROJECT_DIR/config/systemd/user" ] && \
+       [ "${XDG_DATA_HOME:-$HOME/.local/share}/systemd/user" != "/" ]; then
+        run mkdir -p "$XDG_CONFIG_HOME/systemd/user"
+        for u in canopy-update.service canopy-update.timer; do
+            run cp -f "$PROJECT_DIR/config/systemd/user/$u" "$XDG_CONFIG_HOME/systemd/user/$u"
+        done
+    fi
+    if [ -f "$PROJECT_DIR/assets/canopy-update.desktop" ]; then
+        run mkdir -p "$XDG_DATA_HOME/applications"
+        run cp -f "$PROJECT_DIR/assets/canopy-update.desktop" \
+            "$XDG_DATA_HOME/applications/canopy-update.desktop"
+    fi
     # Helper copies of the distribution knowledge, so `deps.sh` still works
     # after the release payload has been extracted to a temporary directory.
     run mkdir -p "$XDG_DATA_HOME/canopy/scripts"

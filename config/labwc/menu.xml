@@ -39,6 +39,9 @@
     <item label="Screenshot">
       <action name="Execute" command="canopy msg screenshot-region"/>
     </item>
+    <item label="Check for Updates">
+      <action name="Execute" command="canopy-update check --notify"/>
+    </item>
     <item label="Lock Screen">
       <action name="Execute" command="canopy msg session lock"/>
     </item>

@@ -52,6 +52,20 @@ cp "$PROJECT_DIR/LICENSE" "$STAGE/share/LICENSE" 2>/dev/null || true
 cp "$PROJECT_DIR/docs/CANOPY_DESIGN.md" "$STAGE/share/CANOPY_DESIGN.md" 2>/dev/null || true
 printf '%s\n' "$VERSION" > "$STAGE/VERSION"
 
+# The login greeter is part of the desktop, so it ships in the same payload when
+# it has been built. `install.sh --with-greeter` picks it up from greeter/build.
+GREETER_BUILD="${CANOPY_GREETER_BUILD:-$PROJECT_DIR/greeter/build}"
+if [ -x "$GREETER_BUILD/canopy-greeter" ]; then
+    say ">> including Canopy Greeter"
+    mkdir -p "$STAGE/greeter/build"
+    for b in canopy-greeter canopy-greeter-compositor canopy-greeter-apply-appearance; do
+        [ -x "$GREETER_BUILD/$b" ] && cp "$GREETER_BUILD/$b" "$STAGE/greeter/build/$b"
+    done
+    mkdir -p "$STAGE/greeter/scripts" "$STAGE/greeter/assets"
+    cp "$PROJECT_DIR/greeter/scripts/canopy-greeter-session" "$STAGE/greeter/scripts/" 2>/dev/null || true
+    cp -a "$PROJECT_DIR"/greeter/assets/. "$STAGE/greeter/assets/" 2>/dev/null || true
+fi
+
 # The payload's installer expects the layout of a source tree.
 mv "$STAGE/bin/canopy" "$STAGE/canopy"
 rmdir "$STAGE/bin"
@@ -111,9 +125,17 @@ echo "## helpers"
 echo "  canopy-update check          # is there a newer release?"
 echo "  canopy-session               # start the desktop"
 echo "  sh scripts/uninstall.sh      # remove it again"
-echo ""
-echo "Canopy needs labwc and xdg-desktop-portal-{gtk,wlr}; missing pieces:"
-echo "  sh scripts/deps.sh plan"
+
+# Only mention dependencies when something is actually missing: printing a
+# warning on a machine that already has them reads like the install failed.
+_missing_deps=""
+command -v labwc >/dev/null 2>&1 || _missing_deps="$_missing_deps labwc"
+command -v xdg-desktop-portal >/dev/null 2>&1 || _missing_deps="$_missing_deps xdg-desktop-portal"
+if [ -n "$_missing_deps" ]; then
+    echo ""
+    echo "missing runtime pieces:$_missing_deps"
+    echo "  sh scripts/deps.sh plan     # what is missing, and how to install it"
+fi
 echo ""
 echo "Done."
 exit 0

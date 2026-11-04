@@ -26,6 +26,9 @@ app_icon_colorize       = false
 clipboard_enabled       = true
 
 [shell.panel]
+# Floating panels get the Windows 11 card treatment: hairline outline, soft
+# shadow, translucency. Blur is requested but this compositor has no
+# ext-background-effect, so depth comes from opacity plus the border.
 transparency_mode          = "glass"
 borders                    = true
 border_color               = "outline_variant"
@@ -82,23 +85,25 @@ enable_community_templates  = false
 # ── System Panel — top ────────────────────────────────────────────────────────
 
 [bar.main]
+# macOS menu bar: thin, full width, app on the left, status items and the clock
+# on the right. Windows 11 material: translucent fill, hairline border, shadow.
 position            = "top"
-thickness           = 34
+thickness           = 28
 radius              = 0
 margin_ends         = 0
 margin_edge         = 0
-padding             = 14
-widget_spacing      = 8
-background_opacity  = 0.86
-compositor_blur     = false
+padding             = 10
+widget_spacing      = 6
+background_opacity  = 0.78
+compositor_blur     = true
 shadow              = false
 auto_hide           = false
 reserve_space       = true
 capsule             = false
 
-start  = ["launcher", "workspaces", "active_window"]
-center = ["clock"]
-end    = ["media", "notifications", "network", "bluetooth", "volume", "battery", "control-center", "session"]
+start  = ["launcher", "active_window"]
+center = []
+end    = ["media", "notifications", "network", "volume", "bluetooth", "battery", "control-center", "clock"]
 
 # ── System Tray — vertical pill, left edge ────────────────────────────────────
 # Canopy's own surface: launcher, settings and the quick system controls in one
@@ -107,26 +112,26 @@ end    = ["media", "notifications", "network", "bluetooth", "volume", "battery",
 [bar.tray]
 position            = "left"
 thickness           = 56
-radius              = 28
+radius              = 26
 margin_ends         = 200
 margin_edge         = 10
-padding             = 8
-widget_spacing      = 6
-background_opacity  = 0.86
-compositor_blur     = false
+padding             = 6
+widget_spacing      = 2
+background_opacity  = 0.80
+compositor_blur     = true
 shadow              = true
 auto_hide           = false
 reserve_space       = false
 capsule             = true
 capsule_fill        = "surface_container"
-capsule_radius      = 28
-capsule_opacity     = 0.94
+capsule_radius      = 16
+capsule_opacity     = 0.88
 capsule_border      = "outline_variant"
 capsule_border_width = 1.0
 
 start  = []
-center = ["launcher", "settings", "network", "volume", "bluetooth", "notifications", "control-center"]
-end    = ["lock_keys", "battery"]
+center = ["launcher", "control-center", "notifications", "network", "volume", "bluetooth", "battery"]
+end    = ["settings"]
 
 # ── Dock — bottom centre ──────────────────────────────────────────────────────
 # Pinned ǀ running ǀ minimized. Pinned ordering is stored in `pinned`, running
@@ -135,33 +140,33 @@ end    = ["lock_keys", "battery"]
 [dock]
 enabled             = true
 position            = "bottom"
-icon_size           = 48
+icon_size           = 44
 main_axis_padding   = 12
 cross_axis_padding  = 8
-item_spacing        = 6
-background_opacity  = 0.88
+item_spacing        = 8
+background_opacity  = 0.80
 compositor_blur     = true
-radius              = 18
-radius_top_left     = 18
-radius_top_right    = 18
-radius_bottom_left  = 18
-radius_bottom_right = 18
+radius              = 12
+radius_top_left     = 12
+radius_top_right    = 12
+radius_bottom_left  = 12
+radius_bottom_right = 12
 margin_ends         = 0
 margin_edge         = 10
 shadow              = true
 show_running        = true
-auto_hide           = true
-smart_auto_hide     = true
+auto_hide           = false
+smart_auto_hide     = false
 reserve_space       = false
 layer               = "top"
 active_scale        = 1.0
-inactive_scale      = 0.88
+inactive_scale      = 0.92
 magnification       = false
 active_opacity      = 1.0
-inactive_opacity    = 0.88
-show_dots           = false
-show_instance_count = true
-launcher_position   = "start"
+inactive_opacity    = 0.92
+show_dots           = true
+show_instance_count = false
+launcher_position   = "none"
 launcher_icon       = "grid-dots"
 pinned              = []
 

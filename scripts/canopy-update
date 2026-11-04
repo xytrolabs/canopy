@@ -22,15 +22,32 @@ MODE="${1:-check}"
 shift 2>/dev/null || true
 ASSUME_YES=0
 JSON=0
+NOTIFY=0
 for a in "$@"; do
     case "$a" in
         --json) JSON=1 ;;
         -y|--yes) ASSUME_YES=1 ;;
+        --notify) NOTIFY=1 ;;
     esac
 done
 
 say() { printf '%s\n' "$*"; }
 die() { printf 'canopy-update: %s\n' "$*" >&2; exit 1; }
+
+# Desktop notification. The shell owns org.freedesktop.Notifications, so
+# notify-send reaches Canopy's own toast; without it the message is dropped
+# silently rather than failing the check.
+notify() {
+    _title="$1"
+    _body="$2"
+    if command -v notify-send >/dev/null 2>&1; then
+        notify-send -a Canopy -i software-update-available "$_title" "$_body" 2>/dev/null && return 0
+    fi
+    if [ -n "${WAYLAND_DISPLAY:-}" ] && command -v canopy >/dev/null 2>&1; then
+        : # the shell has no send-notification IPC; logging is the fallback
+    fi
+    printf '%s: %s\n' "$_title" "$_body"
+}
 
 # Where is this install? A user install keeps VERSION next to the config; a
 # system install keeps it in /usr/local/share/canopy.
@@ -92,8 +109,13 @@ fi
 
 [ -n "$LATEST" ] || die "could not resolve the latest release"
 
-# Dotted dates compare correctly as strings (YYYY.MM.DD, zero padded).
-if [ -n "$INSTALLED" ] && [ "$LATEST" = "$INSTALLED" ]; then
+# Dotted dates compare with version ordering, not string equality: a local build
+# ahead of the newest published tag is up to date, not "downgradable".
+if [ -z "$INSTALLED" ]; then
+    UPDATE=yes
+elif [ "$LATEST" = "$INSTALLED" ]; then
+    UPDATE=no
+elif [ "$(printf '%s\n%s\n' "$INSTALLED" "$LATEST" | sort -V | tail -n 1)" = "$INSTALLED" ]; then
     UPDATE=no
 else
     UPDATE=yes
@@ -104,6 +126,15 @@ if [ "$MODE" = "check" ]; then
         printf '{"installed":"%s","latest":"%s","update_available":%s}\n' \
             "${INSTALLED:-unknown}" "$LATEST" \
             "$([ "$UPDATE" = yes ] && echo true || echo false)"
+        exit 0
+    fi
+    if [ "$NOTIFY" -eq 1 ]; then
+        if [ "$UPDATE" = yes ]; then
+            notify "Canopy ${LATEST} is available" \
+                "Installed: ${INSTALLED:-unknown}. Run 'canopy-update apply' to install it."
+        else
+            notify "Canopy is up to date" "Installed: ${INSTALLED:-unknown}"
+        fi
         exit 0
     fi
     say "installed : ${INSTALLED:-unknown}"

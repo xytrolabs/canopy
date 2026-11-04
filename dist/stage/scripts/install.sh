@@ -22,9 +22,13 @@ XDG_DATA_HOME="${XDG_DATA_HOME:-$HOME/.local/share}"
 BUILD_DIR="${CANOPY_BUILD_DIR:-$PROJECT_DIR/build-release}"
 VERSION="$(tr -d ' \t\r\n' < "$PROJECT_DIR/VERSION" 2>/dev/null || echo dev)"
 DRY_RUN=0
+REFRESH_CONFIG=0
+WITH_GREETER=0
 for a in "$@"; do
     case "$a" in
         --dry-run|-n) DRY_RUN=1 ;;
+        --refresh-config) REFRESH_CONFIG=1 ;;
+        --with-greeter) WITH_GREETER=1 ;;
     esac
 done
 
@@ -39,6 +43,48 @@ run() {
 
 is_system=0
 [ "$(id -u)" -eq 0 ] && is_system=1
+
+# ------------------------------------------------------------- dependencies --
+# Canopy should not leave the user to discover that portals or the compositor
+# are missing. Missing runtime pieces are installed through the distribution's
+# package manager (scripts/lib-distro.sh knows the names).
+ensure_dependencies() {
+    [ "${CANOPY_SKIP_DEPS:-0}" = "1" ] && return 0
+
+    _missing=""
+    for b in labwc; do
+        command -v "$b" >/dev/null 2>&1 || _missing="$_missing $b"
+    done
+    for p in xdg-desktop-portal xdg-desktop-portal-gtk xdg-desktop-portal-wlr; do
+        canopy_pkg_available "$p" >/dev/null 2>&1 || _missing="$_missing $p"
+    done
+
+    [ -n "$_missing" ] || return 0
+
+    say "missing runtime pieces:$_missing"
+    if [ "$DRY_RUN" -eq 1 ]; then
+        say "would install:"
+        canopy_install_hint runtime | sed 's/^/  /'
+        return 0
+    fi
+
+    _pkgs="$(canopy_pkgs runtime)"
+    if [ "$is_system" -eq 1 ]; then
+        _sudo=""
+    else
+        command -v sudo >/dev/null 2>&1 || { say "install these yourself: $_pkgs" >&2; return 0; }
+        _sudo="sudo"
+    fi
+
+    say "installing them now:"
+    case "$(canopy_family)" in
+        arch)   $_sudo pacman -S --needed --noconfirm $_pkgs ;;
+        fedora) $_sudo dnf install -y --skip-unavailable $_pkgs ;;
+        debian) $_sudo apt-get update && $_sudo apt-get install -y $_pkgs ;;
+        suse)   $_sudo zypper install -y $_pkgs ;;
+        *) say "unknown distribution - install these yourself: $_pkgs" >&2 ;;
+    esac
+}
 
 # ---------------------------------------------------------------- binary -----
 install_binary() {
@@ -101,7 +147,15 @@ install_session() {
 seed_config() {
     run mkdir -p "$XDG_CONFIG_HOME/canopy"
     if [ -f "$XDG_CONFIG_HOME/canopy/config.toml" ]; then
-        say "keeping existing $XDG_CONFIG_HOME/canopy/config.toml"
+        if [ "$REFRESH_CONFIG" -eq 1 ]; then
+            _backup="$XDG_CONFIG_HOME/canopy/config.toml.bak-$(date +%Y%m%d-%H%M%S)"
+            run cp "$XDG_CONFIG_HOME/canopy/config.toml" "$_backup"
+            say "backed up existing config -> $_backup"
+            run cp "$PROJECT_DIR/config/canopy/config.toml" "$XDG_CONFIG_HOME/canopy/config.toml"
+            say "refreshed $XDG_CONFIG_HOME/canopy/config.toml from Canopy defaults"
+        else
+            say "keeping existing $XDG_CONFIG_HOME/canopy/config.toml (use --refresh-config to replace it)"
+        fi
     else
         run cp "$PROJECT_DIR/config/canopy/config.toml" "$XDG_CONFIG_HOME/canopy/config.toml"
         say "installed Canopy defaults -> $XDG_CONFIG_HOME/canopy/config.toml"
@@ -224,6 +278,45 @@ seed_assets() {
     fi
 }
 
+# ---------------------------------------------------------------- greeter ----
+# The login screen is Canopy Greeter (the vendored fork in greeter/). It needs
+# greetd and its own compositor, so it is opt-in per install and never replaces
+# a display manager silently.
+install_greeter() {
+    [ "$WITH_GREETER" -eq 1 ] || return 0
+
+    GREETER_BUILD="${CANOPY_GREETER_BUILD:-$PROJECT_DIR/greeter/build}"
+    [ -x "$GREETER_BUILD/canopy-greeter" ] || {
+        say "greeter: $GREETER_BUILD/canopy-greeter is missing; build it with:"
+        say "  meson setup greeter/build --buildtype=release && meson compile -C greeter/build"
+        return 0
+    }
+
+    if [ "$is_system" -eq 1 ]; then
+        for b in canopy-greeter canopy-greeter-compositor canopy-greeter-apply-appearance; do
+            run install -Dm755 "$GREETER_BUILD/$b" "/usr/local/bin/$b"
+        done
+        run install -Dm755 "$PROJECT_DIR/greeter/scripts/canopy-greeter-session" \
+            /usr/local/bin/canopy-greeter-session
+        run mkdir -p /usr/local/share/canopy-greeter
+        run cp -a "$PROJECT_DIR/greeter/assets" /usr/local/share/canopy-greeter/assets
+
+        if [ -d /etc/greetd ]; then
+            if [ -f /etc/greetd/config.toml ]; then
+                say "greeter: /etc/greetd/config.toml exists; leaving it alone"
+                say "         point its [default_session] command at /usr/local/bin/canopy-greeter-session"
+            else
+                run install -Dm644 "$PROJECT_DIR/config/greetd-config.toml" /etc/greetd/config.toml
+                say "greeter: configured /etc/greetd/config.toml"
+            fi
+        else
+            say "greeter: greetd is not installed; install it and point it at canopy-greeter-session"
+        fi
+    else
+        say "greeter: a login screen must be installed system-wide; run 'sudo sh scripts/install.sh --with-greeter'"
+    fi
+}
+
 # ---------------------------------------------------------------- helpers ----
 install_helpers() {
     run mkdir -p "$HOME/.local/bin"
@@ -243,10 +336,13 @@ install_helpers() {
 install_binary
 install_session
 install_helpers
+install_greeter
+install_greeter
 seed_config
 seed_labwc
 seed_toolkits
 seed_assets
+ensure_dependencies
 
 say ""
 if [ "$is_system" -eq 1 ]; then

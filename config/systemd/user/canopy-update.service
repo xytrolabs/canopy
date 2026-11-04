@@ -1,0 +1,9 @@
+[Unit]
+Description=Canopy update check
+
+[Service]
+Type=oneshot
+# --notify shows a desktop toast when a release is available; with no update the
+# notification says the desktop is current (hourly timers are quiet, so this is
+# only ever seen once a day).
+ExecStart=/usr/local/bin/canopy-update check --notify
