@@ -134,7 +134,7 @@ lib.warnIf cudaSupport
 
   meta = with lib; {
     description = "A sleek, customizable desktop shell crafted for Wayland.";
-    homepage = "https://github.com/canopy-dev/canopy";
+    homepage = "https://github.com/noctalia-dev/canopy";
     license = licenses.mit;
     platforms = platforms.linux;
     mainProgram = "canopy";

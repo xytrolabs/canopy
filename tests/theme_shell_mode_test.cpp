@@ -58,9 +58,9 @@ int main() {
   std::filesystem::create_directories(root / "config" / "canopy");
   std::filesystem::create_directories(root / "state" / "canopy");
   std::filesystem::create_directories(root / "data");
-  ::setenv("NOCTALIA_CONFIG_HOME", (root / "config").c_str(), 1);
-  ::setenv("NOCTALIA_STATE_HOME", (root / "state").c_str(), 1);
-  ::setenv("NOCTALIA_DATA_HOME", (root / "data").c_str(), 1);
+  ::setenv("CANOPY_CONFIG_HOME", (root / "config").c_str(), 1);
+  ::setenv("CANOPY_STATE_HOME", (root / "state").c_str(), 1);
+  ::setenv("CANOPY_DATA_HOME", (root / "data").c_str(), 1);
 
   // ConfigService reads its persisted overrides from <state dir>/settings.toml, the same file
   // the settings GUI writes.

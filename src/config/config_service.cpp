@@ -13,6 +13,7 @@
 #include "config/widget_config.h"
 #include "core/build_info.h"
 #include "core/deferred_call.h"
+#include "core/files/resource_paths.h"
 #include "core/log.h"
 #include "core/scoped_timer.h"
 #include "i18n/i18n.h"
@@ -1446,9 +1447,50 @@ void ConfigService::deepMerge(toml::table& base, const toml::table& overlay) {
   }
 }
 
+void ConfigService::seedDefaultConfigIfMissing() {
+  const std::filesystem::path configDir(m_configDir);
+  std::error_code ec;
+  if (!std::filesystem::is_directory(configDir, ec)) {
+    std::filesystem::create_directories(configDir, ec);
+    if (ec) {
+      kLog.warn("cannot create config directory {}: {}", configDir.string(), ec.message());
+      return;
+    }
+  }
+
+  // Any existing TOML in the config directory means this is not a first run.
+  for (const auto& entry : std::filesystem::directory_iterator(configDir, ec)) {
+    if (ec) {
+      return;
+    }
+    if (entry.is_regular_file(ec) && entry.path().extension() == ".toml") {
+      return;
+    }
+  }
+
+  const auto bundled = paths::assetPath("default-config.toml");
+  if (!std::filesystem::is_regular_file(bundled, ec)) {
+    return;
+  }
+
+  const auto target = configDir / "config.toml";
+  std::filesystem::copy_file(bundled, target, std::filesystem::copy_options::none, ec);
+  if (ec) {
+    kLog.warn("could not write default config to {}: {}", target.string(), ec.message());
+    return;
+  }
+  kLog.info("installed Canopy defaults at {}", target.string());
+}
+
 void ConfigService::loadAll() {
   noctalia::profiling::ScopedTimer parseTimer(kLog, "reload: parse (loadAll)");
   m_effectiveOverrideCache.clear();
+
+  // First run: install the shipped Canopy defaults so a fresh session starts
+  // with the Canopy layout instead of the bare upstream defaults. Only ever
+  // creates config.toml when the config directory has no configuration at all,
+  // so an existing user setup is never touched.
+  seedDefaultConfigIfMissing();
 
   Config nextConfig;
   noctalia::config::seedBuiltinWidgets(nextConfig);

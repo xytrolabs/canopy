@@ -222,7 +222,7 @@ namespace {
       const std::string path = "/org/freedesktop/UPower/devices/battery_" + id;
       batteries.push_back(
           std::make_unique<FakeBattery>(
-              *connection, path, "NOCTALIA_TEST_" + id, std::move(model), powerSupply, registerChargeMethod,
+              *connection, path, "CANOPY_TEST_" + id, std::move(model), powerSupply, registerChargeMethod,
               unregisterBeforeFirstIntrospection
           )
       );

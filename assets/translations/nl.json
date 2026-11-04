@@ -691,7 +691,7 @@
       "dbus-disabled": "D-Bus-meldingen uitgeschakeld",
       "desktop-widgets-editor": "Widget-editor",
       "desktop-widgets-editor-enabled": "Widget-editor voor bureaublad staat aan. Schakel over naar een lege werkruimte om de editor-overlay te zien.",
-      "greeter-sync": "Noctalia Greeter",
+      "greeter-sync": "Canopy Greeter",
       "greeter-sync-success": "Uiterlijk gesynchroniseerd. Wijzigingen worden toegepast bij het volgende aanmeldingsscherm.",
       "keybind-app": "Canopy",
       "keybind-invalid-modifier": "Deze sneltoets accepteert een enkele toets zonder modificatietoetsen.",
@@ -959,7 +959,7 @@
       },
       "reset-page": "Herstellen van sommige instellingen mislukt.",
       "support-report": "Opslaan van ondersteuningsrapport mislukt.",
-      "sync-greeter": "Kon uiterlijk niet synchroniseren met Noctalia Greeter.",
+      "sync-greeter": "Kon uiterlijk niet synchroniseren met Canopy Greeter.",
       "widget": {
         "rename": "Kon benoemde widget niet hernoemen."
       },
@@ -1670,7 +1670,7 @@
             "label": "Bij uitschakelen"
           },
           "started": {
-            "description": "Commando om uit te voeren nadat Noctalia start",
+            "description": "Commando om uit te voeren nadat Canopy start",
             "label": "Bij opstarten"
           },
           "theme-mode-changed": {
@@ -2151,7 +2151,7 @@
           "label": "Datumnotatie"
         },
         "launch-apps-as-systemd-services": {
-          "description": "Start applicaties in aparte systemd-diensten zodat ze Noctalia's cgroup niet delen",
+          "description": "Start applicaties in aparte systemd-diensten zodat ze Canopy's cgroup niet delen",
           "label": "Apps starten als systemd-diensten"
         },
         "niri-overview-type-to-launch": {
@@ -2289,8 +2289,8 @@
         },
         "sync-greeter": {
           "button": "Nu synchroniseren",
-          "description": "Kopiëer de huidige achtergrond en kleuren naar Noctalia Greeter (vereist beheerdersrechten)",
-          "label": "Noctalia Greeter"
+          "description": "Kopiëer de huidige achtergrond en kleuren naar Canopy Greeter (vereist beheerdersrechten)",
+          "label": "Canopy Greeter"
         },
         "telemetry": {
           "description": "Verzendt een kleine anonieme opstartping met versie, OS, compositor, monitorresoluties, RAM en UI-schaal",
@@ -2885,7 +2885,7 @@
     "window": {
       "export-config": "Configuratie exporteren…",
       "export-config-saved": "Configuratie-export opgeslagen.",
-      "native-title": "Noctalia Instellingen",
+      "native-title": "Canopy Instellingen",
       "no-results": "Geen instellingen gevonden",
       "no-results-hint": "Probeer een andere instellingsnaam of configuratiesleutel.",
       "reset-page": "Pagina herstellen",
@@ -2906,7 +2906,7 @@
     "no-wallpaper-selected": "Geen bureaubladachtergrond geselecteerd",
     "select-wallpaper": "Selecteer bureaubladachtergrond",
     "subtitle": "Een paar snelle keuzes om aan de slag te gaan.",
-    "title": "Welkom bij Noctalia",
+    "title": "Welkom bij Canopy",
     "wallpaper": "Bureaubladachtergrond",
     "wallpaper-scheme": "Achtergrondschema"
   },

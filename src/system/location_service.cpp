@@ -183,7 +183,7 @@ void LocationService::startGeolocate() {
   const auto path = transportCacheDir() / "geolocate.json";
   const std::uint64_t serial = ++m_requestSerial;
   m_requestKind = RequestKind::Geolocate;
-  m_httpClient.download("https://api.canopy.dev/geolocate", path, [this, path, serial](bool success) {
+  m_httpClient.download("https://api.noctalia.dev/geolocate", path, [this, path, serial](bool success) {
     handleResponse(path, true, success, serial);
   });
 }
@@ -192,7 +192,7 @@ void LocationService::startAddressGeocode() {
   std::error_code ec;
   std::filesystem::create_directories(transportCacheDir(), ec);
   const auto path = transportCacheDir() / "geocode.json";
-  const std::string url = "https://api.canopy.dev/geocode?city=" + StringUtils::urlEncode(m_config.address);
+  const std::string url = "https://api.noctalia.dev/geocode?city=" + StringUtils::urlEncode(m_config.address);
   const std::uint64_t serial = ++m_requestSerial;
   m_requestKind = RequestKind::GeocodeAddress;
   m_httpClient.download(url, path, [this, path, serial](bool success) {

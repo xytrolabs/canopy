@@ -35,7 +35,7 @@ namespace {
   // NOCTALIA_GAMMA_PROFILE=1 times each upload against an empty roundtrip, isolating what set_gamma
   // costs the compositor. It adds two blocking roundtrips per upload, so it is diagnostics only.
   bool gammaProfiling() {
-    static const bool enabled = std::getenv("NOCTALIA_GAMMA_PROFILE") != nullptr;
+    static const bool enabled = std::getenv("CANOPY_GAMMA_PROFILE") != nullptr;
     return enabled;
   }
 

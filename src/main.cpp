@@ -38,7 +38,7 @@ namespace {
 
   enum class SpawnResult { Parent, Error };
 
-  constexpr const char* kDaemonPipeEnv = "NOCTALIA_DAEMON_PIPE_FD";
+  constexpr const char* kDaemonPipeEnv = "CANOPY_DAEMON_PIPE_FD";
   int g_daemonPipe = -1;
 
   void closeFd(int& fd) {

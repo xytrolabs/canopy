@@ -119,7 +119,7 @@ namespace {
 
   std::string userHostLine() { return std::format("{}@{}", sessionUserName(), hostName()); }
 
-  std::string canopyVersionLine() { return std::format("Noctalia {}", noctalia::build_info::displayVersion()); }
+  std::string canopyVersionLine() { return std::format("Canopy {}", noctalia::build_info::displayVersion()); }
 
   // The compositor's own version line already names it; fall back to the detected name.
   std::string compositorLine(const std::optional<std::string>& versionLine) {

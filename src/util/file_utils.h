@@ -373,7 +373,7 @@ namespace FileUtils {
   }
 
   [[nodiscard]] inline std::string configDir() {
-    const char* canopy = std::getenv("NOCTALIA_CONFIG_HOME");
+    const char* canopy = std::getenv("CANOPY_CONFIG_HOME");
     if (canopy != nullptr && canopy[0] != '\0') {
       return std::string(canopy) + "/noctalia";
     }
@@ -389,7 +389,7 @@ namespace FileUtils {
   }
 
   [[nodiscard]] inline std::string stateDir() {
-    const char* noctalia = std::getenv("NOCTALIA_STATE_HOME");
+    const char* noctalia = std::getenv("CANOPY_STATE_HOME");
     if (noctalia != nullptr && noctalia[0] != '\0') {
       return std::string(noctalia) + "/canopy";
     }
@@ -405,7 +405,7 @@ namespace FileUtils {
   }
 
   [[nodiscard]] inline std::string dataDir() {
-    const char* noctalia = std::getenv("NOCTALIA_DATA_HOME");
+    const char* noctalia = std::getenv("CANOPY_DATA_HOME");
     if (noctalia != nullptr && noctalia[0] != '\0') {
       return std::string(noctalia) + "/canopy";
     }

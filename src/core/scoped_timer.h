@@ -15,7 +15,7 @@ namespace noctalia::profiling {
   // Evaluated once on first use.
   inline bool enabled() {
     static const bool value = [] {
-      const char* v = std::getenv("NOCTALIA_PROFILE");
+      const char* v = std::getenv("CANOPY_PROFILE");
       return v != nullptr && v[0] != '\0';
     }();
     return value;

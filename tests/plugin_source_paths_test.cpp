@@ -30,8 +30,8 @@ namespace {
 } // namespace
 
 int main() {
-  ::setenv("NOCTALIA_STATE_HOME", "/tmp/canopy-path-test-state", 1);
-  ::setenv("NOCTALIA_DATA_HOME", "/tmp/canopy-path-test-data", 1);
+  ::setenv("CANOPY_STATE_HOME", "/tmp/canopy-path-test-state", 1);
+  ::setenv("CANOPY_DATA_HOME", "/tmp/canopy-path-test-data", 1);
 
   const PluginSourceConfig gitSource{
       .kind = PluginSourceKind::Git,

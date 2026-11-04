@@ -161,7 +161,7 @@ mode   = "dark"                     # dark | light | auto
 source = "builtin"                  # builtin | wallpaper | community
 builtin = "Canopy"                # Ayu | Catppuccin | Dracula | Eldritch | Gruvbox |
                                     # Kanagawa | Noctalia | Nord | Rosé Pine | Tokyo-Night
-# community_palette = "Canopy"    # fetched from api.canopy.dev, cached locally
+# community_palette = "Canopy"    # fetched from api.noctalia.dev, cached locally
 # wallpaper_scheme  = "m3-content"  # m3-tonal-spot | m3-content | m3-fruit-salad |
                                     # m3-rainbow | m3-monochrome | vibrant | faithful |
                                     # dysfunctional | muted
@@ -172,7 +172,7 @@ pure_black_dark = false             # anchor dark surfaces to true black (OLED);
 enable_builtin_templates            = true
 builtin_ids                = []     # opt-in; list ids with: canopy theme --list-templates
 enable_community_templates = true
-community_ids              = []     # fetched from api.canopy.dev/templates, cached locally
+community_ids              = []     # fetched from api.noctalia.dev/templates, cached locally
 
 # User-defined templates are declared directly in config.
 # [theme.templates.user.my_app]

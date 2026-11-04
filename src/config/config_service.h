@@ -202,6 +202,8 @@ public:
 
 private:
   void loadAll();
+  // Writes the shipped Canopy defaults into the config directory on first run.
+  void seedDefaultConfigIfMissing();
   void applyPendingWatchReload();
   [[nodiscard]] static Config makeDefaultConfig();
   static void

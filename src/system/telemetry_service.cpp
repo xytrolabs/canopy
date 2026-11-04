@@ -125,7 +125,7 @@ void TelemetryService::maybeSend(
   };
 
   kLog.info("sending anonymous ping");
-  httpClient.post("https://api.canopy.dev/ping", payload.dump(), "application/json", [](bool success) {
+  httpClient.post("https://api.noctalia.dev/ping", payload.dump(), "application/json", [](bool success) {
     if (success) {
       kLog.debug("ping sent");
     } else {

@@ -1,14 +1,15 @@
 [Desktop Entry]
 Type=Application
-Name=Noctalia
-Comment=A sleek, customizable desktop shell crafted for Wayland.
-Exec=noctalia --daemon
-Icon=noctalia
+Name=Canopy
+GenericName=Desktop Shell
+Comment=Canopy desktop environment by Xytro Labs
+Exec=canopy --daemon
+Icon=canopy
 Terminal=false
 Categories=Settings;DesktopSettings;
 StartupNotify=false
 Actions=Settings;
-Keywords=desktop;shell;wayland;
+Keywords=desktop;shell;wayland;canopy;
 
 [Desktop Action Settings]
 Name=Open Settings

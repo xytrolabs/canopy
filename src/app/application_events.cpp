@@ -193,9 +193,9 @@ void Application::onPowerProfileChangedForEvents(const PowerProfilesState& state
     }
     m_hookManager.fire(
         HookKind::PowerProfileChanged,
-        {{"NOCTALIA_POWER_PROFILE", state.activeProfile},
-         {"NOCTALIA_POWER_PROFILE_PREVIOUS", prev},
-         {"NOCTALIA_POWER_PROFILE_ORIGIN", std::string(powerProfileOriginName(origin))}}
+        {{"CANOPY_POWER_PROFILE", state.activeProfile},
+         {"CANOPY_POWER_PROFILE_PREVIOUS", prev},
+         {"CANOPY_POWER_PROFILE_ORIGIN", std::string(powerProfileOriginName(origin))}}
     );
   }
   m_prevPowerProfileActiveForEvents = state.activeProfile;

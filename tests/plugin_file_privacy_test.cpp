@@ -40,7 +40,7 @@ int main() {
     return 1;
   }
   const fs::path root(made);
-  ::setenv("NOCTALIA_STATE_HOME", root.c_str(), 1);
+  ::setenv("CANOPY_STATE_HOME", root.c_str(), 1);
 
   // A data dir left world-readable by an older release must be tightened.
   const fs::path dataDir = root / "canopy" / "plugins" / "data" / "test" / "plugin";

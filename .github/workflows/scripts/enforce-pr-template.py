@@ -12,7 +12,7 @@ from typing import Any
 
 COMMENT_MARKER = "<!-- canopy-pr-template-enforcement -->"
 TEMPLATE_URL = (
-    "https://github.com/canopy-dev/canopy/blob/main/.github/PULL_REQUEST_TEMPLATE.md"
+    "https://github.com/noctalia-dev/canopy/blob/main/.github/PULL_REQUEST_TEMPLATE.md"
 )
 REQUIRED_HEADINGS = (
     "## Summary",

@@ -84,7 +84,7 @@ namespace {
 
   bool idleProfileEnabled() {
     static const bool enabled = [] {
-      const char* value = std::getenv("NOCTALIA_IDLE_PROFILE");
+      const char* value = std::getenv("CANOPY_IDLE_PROFILE");
       return value != nullptr
           && value[0] != '\0'
           && std::string_view(value) != "0"

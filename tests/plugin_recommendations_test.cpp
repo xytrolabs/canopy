@@ -84,7 +84,7 @@ namespace {
   }
 
   void httpTests(std::filesystem::path caBundlePath) {
-    const char* fixture = std::getenv("NOCTALIA_RECOMMENDATION_FIXTURE");
+    const char* fixture = std::getenv("CANOPY_RECOMMENDATION_FIXTURE");
     TEST_CHECK(fixture != nullptr && std::string_view(fixture) == "1");
     const char* proxy = std::getenv("HTTPS_PROXY");
     TEST_CHECK(proxy != nullptr && std::string_view(proxy).starts_with("http://127.0.0.1:"));
@@ -207,7 +207,7 @@ namespace {
 
     // Read-only cache is separate from remembered state and survives a bodyless 304.
     HttpRequest request;
-    request.url = "https://api.canopy.dev/v1/plugin-metrics";
+    request.url = "https://api.noctalia.dev/v1/plugin-metrics";
     bool readDone = false;
     std::string etag;
     http.request(request, [&](HttpResponse response) {

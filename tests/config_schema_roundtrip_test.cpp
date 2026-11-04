@@ -636,7 +636,7 @@ location = "https://example.invalid/bad"
     c.plugins.sources = {
         {.kind = PluginSourceKind::Git,
          .name = "official",
-         .location = "https://github.com/canopy-dev/official-plugins"},
+         .location = "https://github.com/noctalia-dev/official-plugins"},
     };
     c.plugins.enabled = {"canopy/notes"};
     c.plugins.autoUpdate = PluginAutoUpdateMode::None; // non-default (default is All) so the round-trip exercises it
@@ -852,7 +852,7 @@ location = "https://example.invalid/bad"
         defaultPluginSources()[0], // the official source
         {.kind = PluginSourceKind::Git,
          .name = "community",
-         .location = "https://github.com/canopy-dev/community-plugins"},
+         .location = "https://github.com/noctalia-dev/community-plugins"},
         {.kind = PluginSourceKind::Git,
          .name = "disabled",
          .location = "https://example.invalid/disabled",
@@ -878,12 +878,12 @@ location = "https://example.invalid/bad"
     };
     expectLocations("defaults", sources, PluginAutoUpdateMode::None, {});
     expectLocations(
-        "defaults", sources, PluginAutoUpdateMode::Official, {"https://github.com/canopy-dev/official-plugins"}
+        "defaults", sources, PluginAutoUpdateMode::Official, {"https://github.com/noctalia-dev/official-plugins"}
     );
     // Every enabled git source; disabled and path sources stay out.
     expectLocations(
         "defaults", sources, PluginAutoUpdateMode::All,
-        {"https://github.com/canopy-dev/official-plugins", "https://github.com/canopy-dev/community-plugins"}
+        {"https://github.com/noctalia-dev/official-plugins", "https://github.com/noctalia-dev/community-plugins"}
     );
     // A single source reusing the "official" name with an untrusted location is
     // legal config (names must be unique, locations need not), but the location
@@ -892,12 +892,12 @@ location = "https://example.invalid/bad"
         {.kind = PluginSourceKind::Git, .name = "official", .location = "https://example.invalid/untrusted"},
         {.kind = PluginSourceKind::Git,
          .name = "community",
-         .location = "https://github.com/canopy-dev/community-plugins"},
+         .location = "https://github.com/noctalia-dev/community-plugins"},
     };
     expectLocations("untrustedOfficial", untrustedOfficial, PluginAutoUpdateMode::Official, {});
     expectLocations(
         "untrustedOfficial", untrustedOfficial, PluginAutoUpdateMode::All,
-        {"https://example.invalid/untrusted", "https://github.com/canopy-dev/community-plugins"}
+        {"https://example.invalid/untrusted", "https://github.com/noctalia-dev/community-plugins"}
     );
   }
 
@@ -912,7 +912,7 @@ location = "https://example.invalid/bad"
 [[source]]
 name = "official"
 kind = "git"
-location = "https://github.com/canopy-dev/official-plugins"
+location = "https://github.com/noctalia-dev/official-plugins"
 
 [[source]]
 name = "official"
@@ -921,7 +921,7 @@ location = "https://example.invalid/untrusted"
 )");
     if (!erroredOnSource(legitDiag)
         || legitPlugins.sources.size() != 1
-        || legitPlugins.sources[0].location != "https://github.com/canopy-dev/official-plugins") {
+        || legitPlugins.sources[0].location != "https://github.com/noctalia-dev/official-plugins") {
       fail("plugins.source: duplicate names must error and keep the first entry");
     }
   }

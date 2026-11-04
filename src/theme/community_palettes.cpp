@@ -23,8 +23,8 @@ namespace noctalia::theme {
   namespace {
 
     constexpr Logger kLog("community_palettes");
-    constexpr std::string_view kCatalogUrl = "https://api.canopy.dev/palettes";
-    constexpr std::string_view kPaletteUrlBase = "https://api.canopy.dev/palette";
+    constexpr std::string_view kCatalogUrl = "https://api.noctalia.dev/palettes";
+    constexpr std::string_view kPaletteUrlBase = "https://api.noctalia.dev/palette";
 
     std::filesystem::path catalogCachePath() { return communityPaletteCacheDir() / ".catalog" / "palettes.json"; }
 

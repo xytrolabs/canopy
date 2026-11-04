@@ -23,10 +23,10 @@ It provides the shell layer around your compositor: bars, widgets, dock, launche
 <p><br/></p>
 
 <p align="center">
-  <a href="https://github.com/canopy-dev/canopy/commits">
+  <a href="https://github.com/noctalia-dev/canopy/commits">
     <img src="https://img.shields.io/github/last-commit/canopy-dev/canopy?style=for-the-badge&labelColor=FFF59B&color=FFF59B&logo=git&logoColor=070722&label=commit" alt="Last commit" />
   </a>
-  <a href="https://github.com/canopy-dev/canopy/stargazers">
+  <a href="https://github.com/noctalia-dev/canopy/stargazers">
     <img src="https://img.shields.io/github/stars/canopy-dev/canopy?style=for-the-badge&labelColor=FFF59B&color=FFF59B&logo=github&logoColor=070722" alt="GitHub stars" />
   </a>
   <a href="https://docs.canopy.dev">
@@ -43,7 +43,7 @@ Most Wayland setups leave the desktop shell to a stack of small tools: one bar, 
 
 Noctalia solves that by providing one configurable shell layer that owns the common desktop surfaces and services while still fitting into compositor-driven Wayland workflows. It is meant for users who want the control of a custom desktop environment with fewer moving parts and a consistent UI.
 
-To understand the values and philosophy guiding the project, read our [ethos](https://canopy.dev/ethos).
+To understand the values and philosophy guiding the project, read our [ethos](https://noctalia.dev/ethos).
 
 ## What It Includes
 
@@ -78,7 +78,7 @@ Bug reports, fixes, documentation updates, themes, and configuration examples ar
 
 ## Credits
 
-Thank you to the [contributors](https://github.com/canopy-dev/canopy/graphs/contributors) and community members who test Noctalia, report issues, share configurations, and help shape the project.
+Thank you to the [contributors](https://github.com/noctalia-dev/canopy/graphs/contributors) and community members who test Noctalia, report issues, share configurations, and help shape the project.
 
 ## Donations
 
@@ -104,7 +104,7 @@ Distro packaging notes (description, deps, install layout, Meson options) live i
 ## Star History
 
 <p align="center">
-  <a href="https://github.com/canopy-dev/canopy/stargazers">
-    <img src="https://api.canopy.dev/stars-animated/canopy" alt="Star History" />
+  <a href="https://github.com/noctalia-dev/canopy/stargazers">
+    <img src="https://api.noctalia.dev/stars-animated/canopy" alt="Star History" />
   </a>
 </p>

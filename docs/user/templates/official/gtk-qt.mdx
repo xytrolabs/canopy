@@ -48,7 +48,7 @@ GTK applications include most GNOME apps and many Linux applications. Noctalia c
 - Open **Settings → Templates**
 - Toggle on **GTK 3** and/or **GTK 4**
 
-Enabling those built-in templates writes `canopy.css` and runs the shipped [`apply.sh`](https://github.com/canopy-dev/canopy/blob/main/assets/templates/gtk/apply.sh) `post_hook` (`bash '…/gtk/apply.sh' dark|light`). That script imports `canopy.css` into `gtk.css` and selects `adw-gtk3` / `adw-gtk3-dark`. A theme mode change re-applies the templates, so the same full hook runs again; you do not need a separate hook for that path.
+Enabling those built-in templates writes `canopy.css` and runs the shipped [`apply.sh`](https://github.com/noctalia-dev/canopy/blob/main/assets/templates/gtk/apply.sh) `post_hook` (`bash '…/gtk/apply.sh' dark|light`). That script imports `canopy.css` into `gtk.css` and selects `adw-gtk3` / `adw-gtk3-dark`. A theme mode change re-applies the templates, so the same full hook runs again; you do not need a separate hook for that path.
 
 The GNOME `org.gnome.desktop.interface.color-scheme` preference, which browsers and other apps read through the desktop portal, is not part of the GTK templates. Noctalia syncs it on its own, with or without these templates; see [`sync_color_scheme`](/canopy/theming/#sync_color_scheme) to turn that off.
 

@@ -90,7 +90,7 @@ If you'd prefer the latest git version or would like to use one of the modules, 
         commit = ""; # replace this with an actual commit id or tag
       in
         fetchTarball {
-          url = "https://github.com/canopy-dev/canopy/archive/${commit}.tar.gz";
+          url = "https://github.com/noctalia-dev/canopy/archive/${commit}.tar.gz";
           sha256 = ""; # replace this with hash from nix build output, or by using `nix-prefetch-url --unpack`
         };
       
@@ -361,7 +361,7 @@ Overriding any of Noctalia's inputs (e.g. via `inputs.nixpkgs.follows` with flak
 
 Additionally, tracking `main` directly may pull in a commit that hasn't been cached yet by CI.
 
-To avoid this, the [`cachix`](https://github.com/canopy-dev/canopy/tree/cachix) branch always points to the latest cached commit. Pinning to this branch guarantees you always track the latest commit that has already been cached:
+To avoid this, the [`cachix`](https://github.com/noctalia-dev/canopy/tree/cachix) branch always points to the latest cached commit. Pinning to this branch guarantees you always track the latest commit that has already been cached:
 
 <Tabs>
   <TabItem label="flakes">

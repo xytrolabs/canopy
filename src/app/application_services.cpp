@@ -746,9 +746,9 @@ void Application::initStyleThemeAndWayland() {
     if (previousMode.has_value() && *previousMode != resolvedMode) {
       m_hookManager.fire(
           HookKind::ThemeModeChanged,
-          {{"NOCTALIA_THEME_MODE", resolvedMode},
-           {"NOCTALIA_THEME_MODE_PREVIOUS", *previousMode},
-           {"NOCTALIA_THEME_MODE_CONFIGURED", configuredMode}}
+          {{"CANOPY_THEME_MODE", resolvedMode},
+           {"CANOPY_THEME_MODE_PREVIOUS", *previousMode},
+           {"CANOPY_THEME_MODE_CONFIGURED", configuredMode}}
       );
     }
   });
@@ -990,7 +990,7 @@ void Application::initAuxServicesAndHooks() {
     scheduleGreeterAutoSync();
     const auto fireWallpaperChangedHook = [this](const std::string& path, const std::string& connector) {
       m_hookManager.fire(
-          HookKind::WallpaperChanged, {{"NOCTALIA_WALLPAPER_PATH", path}, {"NOCTALIA_WALLPAPER_CONNECTOR", connector}}
+          HookKind::WallpaperChanged, {{"CANOPY_WALLPAPER_PATH", path}, {"CANOPY_WALLPAPER_CONNECTOR", connector}}
       );
     };
     if (wallpaperChanges.empty()) {

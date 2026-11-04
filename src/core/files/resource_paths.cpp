@@ -60,13 +60,13 @@ namespace paths {
     std::vector<std::filesystem::path> assetCandidates() {
       std::vector<std::filesystem::path> candidates;
 
-      if (const char* env = std::getenv("NOCTALIA_ASSETS_DIR"); env != nullptr && env[0] != '\0') {
+      if (const char* env = std::getenv("CANOPY_ASSETS_DIR"); env != nullptr && env[0] != '\0') {
         const std::filesystem::path overridePath(env);
         if (isAssetRoot(overridePath)) {
           candidates.push_back(overridePath);
           return candidates;
         }
-        kLog.warn("NOCTALIA_ASSETS_DIR is not a valid asset bundle: {}", overridePath.string());
+        kLog.warn("CANOPY_ASSETS_DIR is not a valid asset bundle: {}", overridePath.string());
       }
 
       if (auto exe = executablePath()) {
@@ -79,6 +79,16 @@ namespace paths {
           appendUnique(candidates, exeDir.parent_path() / datadir / "canopy" / "assets");
         }
         appendUnique(candidates, exeDir.parent_path() / "share" / "canopy" / "assets");
+      }
+
+      // A per-user install keeps its bundle under XDG_DATA_HOME even when the
+      // running binary lives somewhere else on PATH (for example a stale
+      // /usr/local/bin entry). Prefer that over the compiled-in prefix.
+      if (const char* xdgData = std::getenv("XDG_DATA_HOME"); xdgData != nullptr && xdgData[0] != '\0') {
+        appendUnique(candidates, std::filesystem::path(xdgData) / "canopy" / "assets");
+      }
+      if (const char* home = std::getenv("HOME"); home != nullptr && home[0] != '\0') {
+        appendUnique(candidates, std::filesystem::path(home) / ".local" / "share" / "canopy" / "assets");
       }
 
       appendUnique(candidates, installedAssetsRoot());

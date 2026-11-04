@@ -312,7 +312,7 @@ namespace noctalia::config {
       std::println();
       std::println("Run with:");
       std::println(
-          "  NOCTALIA_CONFIG_HOME={} NOCTALIA_STATE_HOME={} {}", StringUtils::shellQuote(configHome.string()),
+          "  CANOPY_CONFIG_HOME={} CANOPY_STATE_HOME={} {}", StringUtils::shellQuote(configHome.string()),
           StringUtils::shellQuote(stateHome.string()), StringUtils::shellQuote(argv0)
       );
       return 0;

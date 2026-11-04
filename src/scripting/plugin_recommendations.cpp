@@ -20,7 +20,7 @@
 namespace scripting {
   namespace {
     constexpr Logger kLog("plugin-recommendations");
-    constexpr std::string_view kApi = "https://api.canopy.dev";
+    constexpr std::string_view kApi = "https://api.noctalia.dev";
     constexpr std::string_view kOwner = "plugin_store";
     using Clock = std::chrono::steady_clock;
 

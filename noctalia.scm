@@ -6,7 +6,7 @@
 ;;; --8<---------------cut here---------------start------------->8---
 ;;; (channel
 ;;;   (name 'noctalia)
-;;;   (url "https://github.com/canopy-dev/canopy")
+;;;   (url "https://github.com/noctalia-dev/canopy")
 ;;;   (branch "main"))
 ;;; --8<---------------cut here---------------end--------------->8---
 ;;;
@@ -123,7 +123,7 @@
            wayland
            wayland-protocols-1.48
            wireplumber))
-    (home-page "https://canopy.dev/")
+    (home-page "https://noctalia.dev/")
     (synopsis "Wayland shell and bar")
     (description
      "Noctalia is a lightweight Wayland shell and bar built directly on
