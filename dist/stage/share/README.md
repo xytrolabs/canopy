@@ -63,8 +63,8 @@ seeded on first run or by the installer, never over an existing setup.
 - Acrylic-inspired translucency with controlled blur — and surfaces that stay
   readable with blur and animations disabled.
 - Rounded geometry, one corner scale, subtle shadows.
-- Restrained purple accent: `#8B6BFF` (dark) / `#6D4CF5` (light) on neutral
-  surfaces, in the built-in `Canopy` palette.
+- Restrained purple accent: `#7C5CFC` on a near-black violet base `#0B0A10`,
+  with tinted-glass surfaces (`#16151F`, `#201E2C`).
 - Inter for UI text, Tabler for icons. No emoji stand-ins, no missing-icon
   placeholders, no magenta artefacts.
 - Short, purposeful transitions.

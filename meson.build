@@ -1207,6 +1207,22 @@ install_data(
   install_dir: get_option('datadir') / 'icons' / 'hicolor' / 'scalable' / 'apps',
 )
 
+# Canopy's own typefaces, installed as ordinary fonts so fontconfig sees them in
+# the compositor, the shell and every application. The icon font stays in the
+# asset bundle: it is a glyph set, not a text face.
+install_data(
+  'assets/fonts/SpaceGrotesk-Regular.ttf',
+  'assets/fonts/SpaceGrotesk-Medium.ttf',
+  'assets/fonts/SpaceGrotesk-SemiBold.ttf',
+  'assets/fonts/SpaceGrotesk-Bold.ttf',
+  'assets/fonts/Inter-Regular.ttf',
+  'assets/fonts/Inter-Medium.ttf',
+  'assets/fonts/Inter-SemiBold.ttf',
+  'assets/fonts/JetBrainsMono-Regular.ttf',
+  'assets/fonts/JetBrainsMono-Medium.ttf',
+  install_dir: get_option('datadir') / 'fonts' / 'canopy',
+)
+
 # ── Desktop environment integration ─────────────────────────────────────────
 # Packaging a shell is not the same as packaging a desktop: the session entry,
 # the portal configuration and the session helper are what make this a DE that

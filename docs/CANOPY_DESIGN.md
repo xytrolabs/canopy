@@ -24,9 +24,9 @@ one theme palette, one configuration store and one IPC socket.
 
 | Token | Value |
 |---|---|
-| Accent (dark / light) | `#8B6BFF` / `#6D4CF5` |
-| Dark surfaces | `#14121A` / `#1E1B26` |
-| Light surfaces | `#FAF9FD` / `#F0EDF7` |
+| Accent | `#7C5CFC` (hover `#8E72FF`, pressed `#6A4BE0`) |
+| Dark base / surfaces | `#0B0A10` / `#16151F` / `#201E2C` |
+| Light base / surfaces | `#F3F3F7` / `#FFFFFF` / `#F2F2F7` |
 | Corner scale | 1.0 (`theme.corner_radius_scale`) |
 | Panel translucency | glass, 0.82 opacity, compositor blur |
 | Animation | enabled, speed 1.0 |

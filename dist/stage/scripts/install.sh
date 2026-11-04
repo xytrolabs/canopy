@@ -165,10 +165,39 @@ seed_toolkits() {
 }
 
 seed_assets() {
+    # Canopy ships its own typefaces so the desktop looks the same everywhere:
+    # Space Grotesk (display), Inter (body), JetBrains Mono (numerals). The icon
+    # font stays in the asset bundle - installing it as a text font would make
+    # it selectable in every application's font picker.
+    if [ -d "$PROJECT_DIR/assets/fonts" ]; then
+        run mkdir -p "$XDG_DATA_HOME/fonts/canopy"
+        for f in "$PROJECT_DIR"/assets/fonts/*.ttf; do
+            case "$f" in
+                *canopy-tabler.ttf) continue ;;
+            esac
+            run cp -f "$f" "$XDG_DATA_HOME/fonts/canopy/"
+        done
+        if [ "$DRY_RUN" -eq 0 ] && command -v fc-cache >/dev/null 2>&1; then
+            fc-cache -f "$XDG_DATA_HOME/fonts/canopy" >/dev/null 2>&1 || true
+        fi
+    fi
+
+    if [ -d "$PROJECT_DIR/assets/wallpapers" ]; then
+        run mkdir -p "$XDG_DATA_HOME/backgrounds"
+        for w in "$PROJECT_DIR"/assets/wallpapers/*.png; do
+            [ -f "$w" ] || continue
+            run cp -n "$w" "$XDG_DATA_HOME/backgrounds/"
+        done
+    fi
     if [ -f "$PROJECT_DIR/assets/canopy-wallpaper.png" ]; then
         run mkdir -p "$XDG_DATA_HOME/backgrounds"
         run cp -n "$PROJECT_DIR/assets/canopy-wallpaper.png" \
             "$XDG_DATA_HOME/backgrounds/canopy-wallpaper.png"
+    fi
+    if [ -f "$PROJECT_DIR/assets/canopy-mark.svg" ]; then
+        run mkdir -p "$XDG_DATA_HOME/icons/hicolor/scalable/apps"
+        run cp -f "$PROJECT_DIR/assets/canopy-mark.svg" \
+            "$XDG_DATA_HOME/icons/hicolor/scalable/apps/canopy-mark.svg"
     fi
     if [ -f "$PROJECT_DIR/assets/canopy.svg" ]; then
         run mkdir -p "$XDG_DATA_HOME/icons/hicolor/scalable/apps"

@@ -16,7 +16,7 @@
 
 [shell]
 corner_radius_scale     = 1.0
-font_family             = "Inter"
+font_family             = "Space Grotesk"
 time_format             = "{:%H:%M}"
 date_format             = "%a %d %b"
 polkit_agent            = true
@@ -84,14 +84,14 @@ enable_community_templates  = false
 [bar.main]
 position            = "top"
 thickness           = 34
-radius              = 12
-margin_ends         = 140
-margin_edge         = 8
-padding             = 12
+radius              = 0
+margin_ends         = 0
+margin_edge         = 0
+padding             = 14
 widget_spacing      = 8
-background_opacity  = 0.82
-compositor_blur     = true
-shadow              = true
+background_opacity  = 0.86
+compositor_blur     = false
+shadow              = false
 auto_hide           = false
 reserve_space       = true
 capsule             = false
@@ -112,15 +112,15 @@ margin_ends         = 200
 margin_edge         = 10
 padding             = 8
 widget_spacing      = 6
-background_opacity  = 0.82
-compositor_blur     = true
+background_opacity  = 0.86
+compositor_blur     = false
 shadow              = true
 auto_hide           = false
 reserve_space       = false
 capsule             = true
 capsule_fill        = "surface_container"
 capsule_radius      = 28
-capsule_opacity     = 0.92
+capsule_opacity     = 0.94
 capsule_border      = "outline_variant"
 capsule_border_width = 1.0
 
@@ -150,8 +150,9 @@ margin_ends         = 0
 margin_edge         = 10
 shadow              = true
 show_running        = true
-auto_hide           = false
-reserve_space       = true
+auto_hide           = true
+smart_auto_hide     = true
+reserve_space       = false
 layer               = "top"
 active_scale        = 1.0
 inactive_scale      = 0.88
@@ -188,6 +189,11 @@ enabled         = false
 blur_intensity  = 0.45
 tint_intensity  = 0.30
 
+[wallpaper.default]
+# Canopy ships three gradient washes; the shell renders them itself, so there is
+# no wallpaper daemon to manage.
+path = ""
+
 [audio]
 enable_overdrive      = false
 enable_sounds         = false
@@ -199,3 +205,12 @@ connection_notifications = false
 
 [brightness]
 enable_ddcutil = false
+# ── Widgets ───────────────────────────────────────────────────────────────────
+# The panel launcher shows the Canopy mark instead of a generic search glyph.
+# Installer copies the mark to ~/.local/share/icons; if it is missing the widget
+# falls back to the bundled glyph named below.
+
+[widget.launcher]
+glyph        = "canopy"
+custom_image = "~/.local/share/icons/hicolor/scalable/apps/canopy-mark.svg"
+custom_image_colorize = false
