@@ -36,8 +36,10 @@ border_width               = 1.0
 shadow                     = true
 launcher_placement         = "floating"
 launcher_position          = "center"
-control_center_placement   = "attached"
-control_center_position    = "right"
+# Win11 flyout: floating card anchored right, opened from the bar's click.
+control_center_placement   = "floating"
+control_center_position    = "center_right"
+open_near_click_control_center = true
 session_placement          = "floating"
 session_position           = "center"
 wallpaper_placement        = "floating"
@@ -216,6 +218,8 @@ show_avatar_border = true
 
 [notification]
 enable_daemon             = true
+# Windows toast corner, not the macOS top-right one.
+position                  = "bottom_right"
 keep_dismissed_in_history = true
 background_opacity        = 0.95
 border                    = true
