@@ -145,7 +145,9 @@ capsule_border      = "outline_variant"
 capsule_border_width = 1.0
 
 start  = []
-center = ["launcher", "control-center", "notifications", "network", "volume", "bluetooth", "battery"]
+# Desktop and system functions only. Notifications, audio and background
+# processes (StatusNotifierItem) belong to the shell's own surfaces, not here.
+center = ["launcher", "control-center", "network", "bluetooth", "battery"]
 end    = ["settings"]
 
 # ── Dock — bottom centre ──────────────────────────────────────────────────────

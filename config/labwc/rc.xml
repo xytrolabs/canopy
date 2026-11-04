@@ -69,63 +69,67 @@
     <layoutScope>global</layoutScope>
 
     <!-- ── Canopy shell ────────────────────────────────────────────────────
-         Super on its own opens the launcher. onRelease="yes" means the binding
-         only fires when Super is pressed and released without another key, so
-         Super+<key> shortcuts still reach their own binds. -->
+         One behaviour model: Windows shortcuts on a macOS-shaped desktop.
+         Super on its own opens the launcher (Start). onRelease="yes" means the
+         binding only fires when Super is pressed and released without another
+         key, so Super+<key> shortcuts still reach their own binds. -->
     <keybind key="Super_L" onRelease="yes">
       <action name="Execute" command="canopy msg panel-toggle launcher"/>
     </keybind>
+    <!-- Win+S: search — the same launcher, with the search field focused -->
     <keybind key="W-s">
+      <action name="Execute" command="canopy msg panel-toggle launcher"/>
+    </keybind>
+    <!-- Win+A: quick settings (Windows Action Center) -->
+    <keybind key="W-a">
       <action name="Execute" command="canopy msg panel-toggle control-center"/>
     </keybind>
+    <!-- Win+N: notifications -->
     <keybind key="W-n">
       <action name="Execute" command="canopy msg panel-toggle notifications"/>
     </keybind>
+    <!-- Win+V: clipboard history -->
     <keybind key="W-v">
       <action name="Execute" command="canopy msg panel-toggle clipboard"/>
     </keybind>
-    <keybind key="W-comma">
+    <!-- Win+I: settings -->
+    <keybind key="W-i">
       <action name="Execute" command="canopy msg settings-open"/>
     </keybind>
+    <!-- Win+L: lock -->
     <keybind key="W-l">
-      <action name="Execute" command="canopy msg session lock"/>
-    </keybind>
-    <keybind key="W-Escape">
       <action name="Execute" command="canopy msg session lock"/>
     </keybind>
 
     <!-- ── Applications ──────────────────────────────────────────────────── -->
+    <!-- Win+E: file manager -->
+    <keybind key="W-e">
+      <action name="Execute" command="xdg-open ~"/>
+    </keybind>
+    <!-- Win+R: run dialog, i.e. the launcher in search mode -->
+    <keybind key="W-r">
+      <action name="Execute" command="canopy msg panel-toggle launcher"/>
+    </keybind>
     <keybind key="W-Return">
       <action name="Execute" command="sh -c 'xdg-terminal-exec 2>/dev/null || alacritty 2>/dev/null || kitty 2>/dev/null || foot'" />
     </keybind>
-    <keybind key="W-q">
+    <!-- Alt+F4: close (Windows). No Super+Q: that is macOS and would fire by accident. -->
+    <keybind key="A-F4">
       <action name="Close"/>
     </keybind>
 
     <!-- ── Windows ───────────────────────────────────────────────────────── -->
-    <keybind key="W-m">
+    <keybind key="W-Up">
       <action name="ToggleMaximize"/>
     </keybind>
-    <keybind key="W-f">
-      <action name="ToggleFullscreen"/>
-    </keybind>
-    <keybind key="W-S-m">
-      <action name="ToggleMaximize" direction="horizontal"/>
-    </keybind>
-    <keybind key="W-S-f">
-      <action name="ToggleMaximize" direction="vertical"/>
+    <keybind key="W-Down">
+      <action name="Iconify"/>
     </keybind>
     <keybind key="W-Left">
       <action name="ToggleSnapToEdge" direction="left"/>
     </keybind>
     <keybind key="W-Right">
       <action name="ToggleSnapToEdge" direction="right"/>
-    </keybind>
-    <keybind key="W-Up">
-      <action name="ToggleSnapToEdge" direction="up"/>
-    </keybind>
-    <keybind key="W-Down">
-      <action name="Iconify"/>
     </keybind>
     <keybind key="W-S-Left">
       <action name="MoveToEdge" direction="left"/>
@@ -139,20 +143,20 @@
     <keybind key="W-S-Down">
       <action name="MoveToEdge" direction="down"/>
     </keybind>
-    <keybind key="W-a">
+    <!-- Win+P: move window to the next output (Windows projection picker analogue) -->
+    <keybind key="W-p">
       <action name="MoveToOutput" direction="right"/>
     </keybind>
-    <keybind key="W-Tab">
-      <action name="NextWindow"/>
+    <!-- Win+D: show desktop -->
+    <keybind key="W-d">
+      <action name="ToggleShowDesktop"/>
     </keybind>
+    <!-- Alt+Tab: MRU window switcher (compact strip) -->
     <keybind key="A-Tab">
       <action name="NextWindow"/>
     </keybind>
     <keybind key="A-S-Tab">
       <action name="PreviousWindow"/>
-    </keybind>
-    <keybind key="W-d">
-      <action name="ToggleShowDesktop"/>
     </keybind>
 
     <!-- ── Workspaces ────────────────────────────────────────────────────── -->
