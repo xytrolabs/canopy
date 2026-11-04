@@ -50,6 +50,29 @@ cannot disagree.
 `scripts/install.sh` seeds the file from `config/canopy/config.toml` only when
 one does not already exist.
 
+### Precedence (why the palette can look "stock")
+
+There are two stores, and they are not the same file:
+
+| Store | Path | Written by |
+| --- | --- | --- |
+| Declarative config | `~/.config/canopy/config.toml` | you, the installer, `canopy msg config-set` on first use |
+| App overlay | `~/.local/state/canopy/settings.toml` | the Settings UI and the scheme/wallpaper pickers |
+
+**The overlay wins.** Picking a colour scheme in the UI writes
+`[theme] builtin = "<scheme>"` there, which then overrides
+`theme.builtin = "Canopy"` in the config file — so the desktop keeps looking like
+that scheme even after the config is refreshed. That is intended (a UI choice
+must stick), but it is why a desktop can suddenly look like stock Noctalia.
+
+Reset it with either:
+
+```sh
+canopy msg config-set theme.builtin Canopy     # while the shell is running
+# or
+rm ~/.local/state/canopy/settings.toml         # next start re-reads the config
+```
+
 ## Labwc integration
 
 | Need | Mechanism |

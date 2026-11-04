@@ -163,6 +163,16 @@ seed_config() {
     if [ "$DRY_RUN" -eq 0 ]; then
         printf '%s\n' "$VERSION" > "$XDG_CONFIG_HOME/canopy/VERSION"
     fi
+
+    # A colour scheme picked in the UI is stored in the app overlay, which wins
+    # over config.toml. Say so instead of leaving a "why is it not Canopy?" mystery.
+    _overlay="${XDG_STATE_HOME:-$HOME/.local/state}/canopy/settings.toml"
+    if [ -f "$_overlay" ] && grep -q '^builtin = "Canopy"' "$_overlay" 2>/dev/null; then
+        :
+    elif [ -f "$_overlay" ] && grep -q '^builtin = ' "$_overlay" 2>/dev/null; then
+        say "note: $_overlay overrides the palette; reset with:"
+        say "        canopy msg config-set theme.builtin Canopy"
+    fi
 }
 
 seed_labwc() {
