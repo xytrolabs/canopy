@@ -103,10 +103,10 @@ enable_community_templates  = false
 # macOS menu bar: thin, full width, app on the left, status items and the clock
 # on the right. Windows 11 material: translucent fill, hairline border, shadow.
 position            = "top"
-thickness           = 28
-radius              = 0
-margin_ends         = 0
-margin_edge         = 0
+thickness           = 30
+radius              = 14
+margin_ends         = 24
+margin_edge         = 8
 padding             = 10
 widget_spacing      = 6
 background_opacity  = 0.78
@@ -118,7 +118,21 @@ capsule             = false
 
 start  = ["launcher", "active_window"]
 center = []
-end    = ["media", "notifications", "network", "volume", "bluetooth", "battery", "control-center", "clock", "session"]
+end    = ["media", "group:status", "control-center", "clock", "session"]
+
+# Status cluster collapses to one icon and unfolds on hover — the menu bar stays
+# short until you actually need the indicators.
+[[bar.main.capsule_group]]
+id           = "status"
+members      = ["network", "bluetooth", "battery"]
+fill         = "surface_container"
+border       = "outline_variant"
+border_width = 1.0
+padding      = 6.0
+radius       = 999.0
+opacity      = 1.0
+accordion    = true
+accordion_delay_ms = 120
 
 # ── System Tray — vertical pill, left edge ────────────────────────────────────
 # Canopy's own surface: launcher, settings and the quick system controls in one
@@ -144,11 +158,23 @@ capsule_opacity     = 0.88
 capsule_border      = "outline_variant"
 capsule_border_width = 1.0
 
+# The side pill is Canopy's own surface: desktop functions plus the background
+# processes (StatusNotifierItem) of the session. Notifications and audio are
+# deliberately not here — they have their own panels.
 start  = []
-# Desktop and system functions only. Notifications, audio and background
-# processes (StatusNotifierItem) belong to the shell's own surfaces, not here.
-center = ["launcher", "control-center", "network", "bluetooth", "battery"]
-end    = ["settings"]
+center = ["launcher", "control-center", "group:apps"]
+end    = ["network", "bluetooth", "battery", "settings"]
+
+# Accent outline around the running applications: the signature of the pill.
+[[bar.tray.capsule_group]]
+id           = "apps"
+members      = ["tray"]
+fill         = "surface_container"
+border       = "primary"
+border_width = 1.0
+padding      = 4.0
+radius       = 12.0
+opacity      = 1.0
 
 # ── Dock — bottom centre ──────────────────────────────────────────────────────
 # Pinned ǀ running ǀ minimized. Pinned ordering is stored in `pinned`, running
@@ -233,6 +259,8 @@ enable_ddcutil = false
 # falls back to the bundled glyph named below.
 
 [widget.launcher]
+# The mark carries the accent, like a Start button that is actually branded.
+color        = "primary"
 glyph        = "canopy"
 custom_image = "~/.local/share/icons/hicolor/scalable/apps/canopy-mark.svg"
 custom_image_colorize = false
