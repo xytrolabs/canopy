@@ -422,7 +422,11 @@ namespace shell::dock {
       });
       instance.viewport = static_cast<InputArea*>(instance.slideRoot->addChild(std::move(viewport)));
       instance.row = static_cast<Flex*>(instance.viewport->addChild(makeDockItemRow(cfg, vert)));
-      instance.row->setZIndex(1);
+      // Explicit z-order: island backgrounds (0) < viewport (1) < items (2).
+      // Without this the section boxes were added last and sat on top of the
+      // icon row, swallowing clicks.
+      instance.viewport->setZIndex(1);
+      instance.row->setZIndex(2);
 
       // Wire up InputDispatcher.
       instance.inputDispatcher.setSceneRoot(instance.sceneRoot.get());

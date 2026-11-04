@@ -161,20 +161,12 @@ capsule_border_width = 1.0
 # The side pill is Canopy's own surface: desktop functions plus the background
 # processes (StatusNotifierItem) of the session. Notifications and audio are
 # deliberately not here — they have their own panels.
+#
+# The tray widget is placed bare, not inside a capsule group: a group with no
+# items still draws its padding, which showed up as an empty pill at the top.
 start  = []
-center = ["launcher", "control-center", "group:apps"]
+center = ["launcher", "control-center", "tray"]
 end    = ["network", "bluetooth", "battery", "settings"]
-
-# Accent outline around the running applications: the signature of the pill.
-[[bar.tray.capsule_group]]
-id           = "apps"
-members      = ["tray"]
-fill         = "surface_container"
-border       = "primary"
-border_width = 1.0
-padding      = 4.0
-radius       = 12.0
-opacity      = 1.0
 
 # ── Dock — bottom centre ──────────────────────────────────────────────────────
 # Pinned ǀ running ǀ minimized. Pinned ordering is stored in `pinned`, running
