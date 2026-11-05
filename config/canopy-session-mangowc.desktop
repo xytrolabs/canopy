@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Canopy (MangoWC, beta)
+Comment=Canopy on the MangoWC tiling compositor (beta, second session)
+Exec=canopy-session --compositor mangowc
+TryExec=canopy-session
+DesktopNames=Canopy
+Keywords=canopy;desktop;wayland;mangowc;tiling;beta;

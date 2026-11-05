@@ -8,7 +8,48 @@
 #
 #   canopy-session            start (or take over) the session
 #   canopy-session --nested   run nested inside an existing Wayland session
+#   canopy-session --compositor mangowc
+#
+# labwc is the default compositor. MangoWC is a second, beta session that runs
+# the same shell - it does not replace labwc anywhere.
 set -eu
+
+# --------------------------------------------------------------- compositor --
+COMPOSITOR="${CANOPY_COMPOSITOR:-labwc}"
+PRINT_LIST=0
+for arg in "$@"; do
+    case "$arg" in
+        --compositor=*) COMPOSITOR="${arg#--compositor=}" ;;
+        --mangowc) COMPOSITOR="mangowc" ;;
+        --list-compositors) PRINT_LIST=1 ;;
+    esac
+done
+# --compositor VALUE (space separated) needs a small manual scan.
+_prev=""
+for arg in "$@"; do
+    if [ "$_prev" = "--compositor" ]; then COMPOSITOR="$arg"; fi
+    _prev="$arg"
+done
+
+compositor_binary() {
+    case "$1" in
+        labwc) printf 'labwc\n' ;;
+        mangowc|mango) printf 'mangowc\n' ;;
+        *) printf '\n' ;;
+    esac
+}
+
+if [ "$PRINT_LIST" -eq 1 ]; then
+    printf 'labwc    default session, server-side decorations\n'
+    printf 'mangowc  beta tiling session (package: mangowm)\n'
+    exit 0
+fi
+
+COMPOSITOR_BIN="$(compositor_binary "$COMPOSITOR")"
+if [ -z "$COMPOSITOR_BIN" ]; then
+    printf 'canopy-session: unknown compositor "%s" (use labwc or mangowc)\n' "$COMPOSITOR" >&2
+    exit 2
+fi
 
 # --------------------------------------------------------------- environment --
 # Exported here rather than in a profile snippet so every process started from
@@ -64,19 +105,32 @@ if [ -n "$NESTED" ]; then
     printf '  for the real session: log out and choose Canopy, or run this from a TTY\n'
 fi
 
-if ! command -v labwc >/dev/null 2>&1; then
-    printf 'canopy-session: labwc is not installed\n' >&2
-    printf '  install it with your package manager, or run: sh scripts/deps.sh plan\n' >&2
+if ! command -v "$COMPOSITOR_BIN" >/dev/null 2>&1; then
+    printf 'canopy-session: %s is not installed\n' "$COMPOSITOR_BIN" >&2
+    case "$COMPOSITOR" in
+        mangowc) printf '  install it with your package manager (Arch: mangowm)\n' >&2 ;;
+        *) printf '  install it with your package manager, or run: sh scripts/deps.sh plan\n' >&2 ;;
+    esac
     exit 1
 fi
 
-# Only one shell. A second instance would draw a second panel and a second set
-# of tray icons, so clear stale processes before the compositor starts.
-pkill -x canopy 2>/dev/null || true
-sleep 0.3
+# Only one shell per compositor. A second instance would draw a second panel
+# and a second set of tray icons. This must NOT run in nested mode: the host
+# session's shell is a real session, and killing it takes the user's desktop
+# down with it.
+if [ -z "$NESTED" ]; then
+    pkill -x canopy 2>/dev/null || true
+    sleep 0.3
+fi
 
-if [ -n "$NESTED" ]; then
+if [ -n "$NESTED" ] && [ "$COMPOSITOR" = "labwc" ]; then
     exec labwc -S 'canopy' -t 'Canopy (nested)'
+fi
+
+if [ -n "$NESTED" ] && [ "$COMPOSITOR" != "labwc" ]; then
+    # Tiling compositors take their startup command from their own config, so
+    # there is no -S equivalent to pass here.
+    exec "$COMPOSITOR_BIN"
 fi
 
 # ------------------------------------------------------------ first login ----
@@ -107,8 +161,37 @@ fi
 # command instead - passing both would run two shells, which is exactly what
 # produces a duplicated panel and a duplicated set of tray icons.
 AUTOSTART="${XDG_CONFIG_HOME:-$HOME/.config}/labwc/autostart"
-if [ -f "$AUTOSTART" ] && grep -q 'canopy' "$AUTOSTART" 2>/dev/null; then
+if [ "$COMPOSITOR" = "labwc" ] && [ -f "$AUTOSTART" ] && grep -q 'canopy' "$AUTOSTART" 2>/dev/null; then
     exec labwc -t Canopy
 fi
 
-exec labwc -S 'canopy' -t Canopy
+if [ "$COMPOSITOR" = "labwc" ]; then
+    exec labwc -S 'canopy' -t Canopy
+fi
+
+# ------------------------------------------------------------------ mangowc --
+# MangoWC starts the shell through `exec-once=` in its own config, and exports
+# MANGO_INSTANCE_SIGNATURE so the shell can reach it over the compositor socket.
+# Seed the config on first use; never overwrite an edited one.
+MANGO_CONFIG="${XDG_CONFIG_HOME:-$HOME/.config}/mango/config.conf"
+if [ ! -f "$MANGO_CONFIG" ]; then
+    for candidate in \
+        /usr/local/share/canopy/mangowc/config.conf \
+        /usr/share/canopy/mangowc/config.conf
+    do
+        if [ -f "$candidate" ]; then
+            mkdir -p "$(dirname "$MANGO_CONFIG")"
+            cp "$candidate" "$MANGO_CONFIG"
+            printf 'canopy-session: seeded %s from %s\n' "$MANGO_CONFIG" "$candidate"
+            break
+        fi
+    done
+fi
+
+if [ ! -f "$MANGO_CONFIG" ]; then
+    printf 'canopy-session: no MangoWC config found\n' >&2
+    printf '  run sudo sh scripts/install.sh --with-mangowc to install the Canopy one\n' >&2
+    exit 1
+fi
+
+exec "$COMPOSITOR_BIN"

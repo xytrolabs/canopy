@@ -89,6 +89,17 @@ Log out and pick **Canopy** in the display manager, or start it from a TTY:
 canopy-session
 ```
 
+Canopy runs on labwc. MangoWC is available as a separate beta session for
+testing, side by side — it never replaces the default one:
+
+```sh
+sudo sh scripts/install.sh --with-mangowc
+canopy-session --compositor mangowc    # back with: canopy-session --compositor labwc
+```
+
+See [docs/COMPOSITORS.md](docs/COMPOSITORS.md) for what differs (decorations,
+tiling, tags) before trying it.
+
 ### From source
 
 ```sh

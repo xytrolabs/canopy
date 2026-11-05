@@ -24,11 +24,13 @@ VERSION="$(tr -d ' \t\r\n' < "$PROJECT_DIR/VERSION" 2>/dev/null || echo dev)"
 DRY_RUN=0
 REFRESH_CONFIG=0
 WITH_GREETER=0
+WITH_MANGOWC=0
 for a in "$@"; do
     case "$a" in
         --dry-run|-n) DRY_RUN=1 ;;
         --refresh-config) REFRESH_CONFIG=1 ;;
         --with-greeter) WITH_GREETER=1 ;;
+        --with-mangowc) WITH_MANGOWC=1 ;;
     esac
 done
 
@@ -117,6 +119,14 @@ install_session() {
         run install -Dm755 "$PROJECT_DIR/scripts/canopy-session" /usr/local/bin/canopy-session
         run install -Dm644 "$PROJECT_DIR/config/canopy-session.desktop" \
             /usr/local/share/wayland-sessions/canopy.desktop
+        # Second, beta session: the same shell on MangoWC. Installed alongside
+        # the labwc entry, never instead of it.
+        if [ "$WITH_MANGOWC" -eq 1 ]; then
+            run install -Dm644 "$PROJECT_DIR/config/canopy-session-mangowc.desktop" \
+                /usr/local/share/wayland-sessions/canopy-mangowc.desktop
+            run install -Dm644 "$PROJECT_DIR/config/mangowc/config.conf" \
+                /usr/local/share/canopy/mangowc/config.conf
+        fi
         if [ -d /usr/share/xdg-desktop-portal ]; then
             run install -Dm644 "$PROJECT_DIR/config/xdg-desktop-portal/canopy-portals.conf" \
                 /usr/share/xdg-desktop-portal/canopy-portals.conf
@@ -180,6 +190,10 @@ install_session() {
         run install -m755 "$PROJECT_DIR/scripts/canopy-session" "$HOME/.local/bin/canopy-session"
         run install -m644 "$PROJECT_DIR/config/canopy-session.desktop" \
             "$XDG_DATA_HOME/wayland-sessions/canopy.desktop"
+        if [ "$WITH_MANGOWC" -eq 1 ]; then
+            run install -m644 "$PROJECT_DIR/config/canopy-session-mangowc.desktop" \
+                "$XDG_DATA_HOME/wayland-sessions/canopy-mangowc.desktop"
+        fi
     fi
 }
 
@@ -354,6 +368,63 @@ seed_assets() {
     if [ "$DRY_RUN" -eq 0 ] && command -v update-desktop-database >/dev/null 2>&1; then
         update-desktop-database "$XDG_DATA_HOME/applications" 2>/dev/null || true
     fi
+}
+
+# ---------------------------------------------------------------- mangowc ----
+# MangoWC is Canopy's second, beta compositor: a tiling dwl derivative. It is
+# installed *next to* labwc - its own session entry, its own config, its own
+# package - so testing it can never change or break the default session.
+install_mangowc() {
+    [ "$WITH_MANGOWC" -eq 1 ] || return 0
+
+    _pkgs="$(canopy_pkgs mangowc)"
+
+    if ! command -v mangowc >/dev/null 2>&1; then
+        if [ -z "$_pkgs" ]; then
+            say "mangowc: not packaged for $(canopy_family); build it from https://github.com/mangowm/mango"
+            say "         then re-run this installer with --with-mangowc"
+            return 0
+        fi
+        say "mangowc: installing $_pkgs"
+        if [ "$DRY_RUN" -eq 0 ]; then
+            if [ "$is_system" -eq 1 ]; then
+                _sudo=""
+            elif command -v sudo >/dev/null 2>&1; then
+                _sudo="sudo"
+            else
+                say "mangowc: install $_pkgs yourself, then re-run with --with-mangowc"
+                return 0
+            fi
+            case "$(canopy_family)" in
+                arch)   $_sudo pacman -S --needed --noconfirm $_pkgs ;;
+                fedora) $_sudo dnf install -y --skip-unavailable $_pkgs ;;
+                debian) $_sudo apt-get update && $_sudo apt-get install -y $_pkgs ;;
+                suse)   $_sudo zypper install -y $_pkgs ;;
+            esac
+        fi
+    fi
+
+    # The config the session seeds on first use.
+    if [ "$is_system" -eq 1 ]; then
+        run install -Dm644 "$PROJECT_DIR/config/mangowc/config.conf" \
+            /usr/local/share/canopy/mangowc/config.conf
+    else
+        run mkdir -p "$XDG_DATA_HOME/canopy/mangowc"
+        run cp -f "$PROJECT_DIR/config/mangowc/config.conf" \
+            "$XDG_DATA_HOME/canopy/mangowc/config.conf"
+    fi
+
+    _mango_cfg="$XDG_CONFIG_HOME/mango/config.conf"
+    if [ -f "$_mango_cfg" ]; then
+        say "mangowc: keeping existing $_mango_cfg"
+    else
+        run mkdir -p "$XDG_CONFIG_HOME/mango"
+        run cp "$PROJECT_DIR/config/mangowc/config.conf" "$_mango_cfg"
+        say "mangowc: wrote $_mango_cfg"
+    fi
+
+    say "mangowc: session entry installed; pick \"Canopy (MangoWC, beta)\" at login"
+    say "         or run now with: canopy-session --compositor mangowc"
 }
 
 # ---------------------------------------------------------------- greeter ----
@@ -533,6 +604,10 @@ verify_install() {
         _check "icon font" /usr/local/share/canopy/assets/fonts/canopy-tabler.ttf
         _check "wallpaper" /usr/local/share/backgrounds/canopy-wallpaper.png
         [ "$WITH_GREETER" -eq 1 ] && _check "greeter" /usr/local/bin/canopy-greeter-session
+        if [ "$WITH_MANGOWC" -eq 1 ]; then
+            _check "mangowc session" /usr/local/share/wayland-sessions/canopy-mangowc.desktop
+            _check "mangowc config" /usr/local/share/canopy/mangowc/config.conf
+        fi
     else
         _check "shell binary" "$HOME/.local/bin/canopy"
         _check "runtime assets" "$XDG_DATA_HOME/canopy/assets"
@@ -554,6 +629,7 @@ install_binary
 install_session
 install_helpers
 install_greeter
+install_mangowc
 seed_config
 seed_labwc
 seed_toolkits

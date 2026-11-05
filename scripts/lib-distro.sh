@@ -76,6 +76,9 @@ canopy_pkgs() {
         # ---------------------------------------------------------------- arch
         arch:runtime)
             printf '%s\n' "labwc xdg-desktop-portal xdg-desktop-portal-gtk xdg-desktop-portal-wlr xorg-xwayland pipewire wireplumber networkmanager bluez upower polkit polkit-gnome grim slurp wl-clipboard" ;;
+        # Optional second session (beta). Install with: install.sh --with-mangowc
+        arch:mangowc)
+            printf '%s\n' "mangowm" ;;
         arch:build)
             printf '%s\n' "base-devel meson ninja git wayland wayland-protocols sdbus-cpp libglvnd freetype2 fontconfig cairo pango harfbuzz libxkbcommon glib2 libsecret libsodium pipewire wireplumber polkit pam curl libwebp libjxl libsndfile librsvg libqalculate libxml2 md4c tomlplusplus libical nlohmann-json stb jemalloc" ;;
 
@@ -84,6 +87,9 @@ canopy_pkgs() {
             printf '%s\n' "labwc xdg-desktop-portal xdg-desktop-portal-gtk xdg-desktop-portal-wlr NetworkManager bluez pipewire wireplumber upower polkit polkit-gnome grim slurp wl-clipboard" ;;
         fedora:build)
             printf '%s\n' "meson gcc-c++ just git wayland-devel wayland-protocols-devel libEGL-devel mesa-libGLES-devel freetype-devel fontconfig-devel cairo-devel pango-devel harfbuzz-devel libxkbcommon-devel glib2-devel libsecret-devel libsodium-devel sdbus-cpp-devel pipewire-devel wireplumber-devel pam-devel polkit-devel libcurl-devel libwebp-devel libjxl-devel libsndfile-devel librsvg2-devel libqalculate-devel libxml2-devel md4c-devel tomlplusplus-devel libical-devel json-devel stb_image_resize2-devel stb_image_write-devel jemalloc-devel" ;;
+        # MangoWC is not packaged for this family; build it from source.
+        fedora:mangowc)
+            printf '\n' ;;
 
         # -------------------------------------------------------------- debian
         debian:runtime)
@@ -96,6 +102,11 @@ canopy_pkgs() {
             printf '%s\n' "labwc xdg-desktop-portal xdg-desktop-portal-gtk xdg-desktop-portal-wlr pipewire wireplumber NetworkManager bluez upower polkit grim slurp wl-clipboard" ;;
         suse:build)
             printf '%s\n' "meson gcc-c++ just git wayland-devel wayland-protocols-devel Mesa-libEGL-devel Mesa-libGLESv2-devel freetype2-devel fontconfig-devel cairo-devel pango-devel harfbuzz-devel libxkbcommon-devel glib2-devel libsecret-devel libsodium-devel sdbus-cpp-devel pipewire-devel wireplumber-devel pam-devel polkit-devel libcurl-devel libwebp-devel libjxl-devel libsndfile-devel librsvg-devel libqalculate-devel libxml2-devel md4c-devel tomlplusplus-devel libical-devel nlohmann_json-devel stb-devel jemalloc-devel" ;;
+        # MangoWC is not packaged for this family; build it from source.
+        suse:mangowc)
+            printf '\n' ;;
+        debian:mangowc)
+            printf '\n' ;;
 
         *)
             printf '\n' ;;
@@ -180,10 +191,11 @@ if [ "${0##*/}" = "lib-distro.sh" ]; then
         name)     canopy_distro_name ;;
         runtime)  canopy_pkgs runtime ;;
         build)    canopy_pkgs build ;;
+        mangowc)  canopy_pkgs mangowc ;;
         hint)     canopy_install_hint "${2:-runtime}" ;;
         theme)    canopy_icon_theme ;;
         cursor)   canopy_cursor_theme ;;
         available) canopy_pkg_available "${2:?package name}" ;;
-        *) printf 'usage: %s {family|name|runtime|build|hint [runtime|build]|theme|cursor|available PKG}\n' "$0" >&2; exit 2 ;;
+        *) printf 'usage: %s {family|name|runtime|build|mangowc|hint [runtime|build]|theme|cursor|available PKG}\n' "$0" >&2; exit 2 ;;
     esac
 fi
