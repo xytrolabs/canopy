@@ -113,6 +113,30 @@ install_binary() {
     fi
 }
 
+# ------------------------------------------------------------ compositor -----
+# Canopy's own compositor, built from compositor/ into build-compositor/. The
+# session falls back to labwc when it is missing, so a checkout that has never
+# been built still gives you a desktop instead of a black screen.
+install_compositor() {
+    _bin="${CANOPY_COMPOSITOR_BIN:-$PROJECT_DIR/build-compositor/canopywc}"
+    if [ ! -x "$_bin" ]; then
+        say "note: $_bin is not built; the Canopy session will fall back to labwc"
+        say "      build it with: sh scripts/build-compositor.sh"
+        return 0
+    fi
+    if [ "$is_system" -eq 1 ]; then
+        run install -Dm755 "$_bin" /usr/local/bin/canopywc
+        run install -Dm644 "$PROJECT_DIR/config/compositor.toml" \
+            /usr/local/share/canopy/compositor.toml
+    else
+        run mkdir -p "$HOME/.local/bin" "$XDG_DATA_HOME/canopy"
+        run install -m755 "$_bin" "$HOME/.local/bin/canopywc"
+        run install -m644 "$PROJECT_DIR/config/compositor.toml" \
+            "$XDG_DATA_HOME/canopy/compositor.toml"
+    fi
+    say "installed canopywc (Canopy compositor)"
+}
+
 # ------------------------------------------------------- session + portals ---
 install_session() {
     if [ "$is_system" -eq 1 ]; then
@@ -209,6 +233,14 @@ seed_config() {
             say "refreshed $XDG_CONFIG_HOME/canopy/config.toml from Canopy defaults"
         else
             say "keeping existing $XDG_CONFIG_HOME/canopy/config.toml (use --refresh-config to replace it)"
+            # ...but keep it current: shipped design changes only reach a user
+            # whose config still holds the old value for a key. Anything edited
+            # by hand is left alone.
+            if [ "$DRY_RUN" -eq 0 ] && command -v python3 >/dev/null 2>&1; then
+                python3 "$PROJECT_DIR/scripts/migrate-config.py" \
+                    "$XDG_CONFIG_HOME/canopy/config.toml" || \
+                    say "warning: could not update defaults in the existing config"
+            fi
         fi
     else
         run cp "$PROJECT_DIR/config/canopy/config.toml" "$XDG_CONFIG_HOME/canopy/config.toml"
@@ -603,6 +635,14 @@ repair_icon_theme_index() {
             rm -f "$_tmp"
         fi
     done
+
+    # A user-level hicolor theme shadows the system one, so every directory its
+    # index forgets is invisible to every application. Complete the index from
+    # the system theme: that is what makes tray icons in status/ resolve.
+    if command -v python3 >/dev/null 2>&1; then
+        python3 "$PROJECT_DIR/scripts/repair-icon-index.py" || \
+            say "warning: could not complete the hicolor index"
+    fi
 }
 
 # ---------------------------------------------------------------- helpers ----
@@ -701,6 +741,7 @@ verify_install() {
 }
 
 install_binary
+install_compositor
 install_session
 install_helpers
 install_greeter

@@ -1,8 +1,8 @@
 [Desktop Entry]
 Type=Application
 Name=Canopy
-Comment=Canopy desktop environment (Xytro Labs)
+Comment=Canopy desktop environment on its own compositor (canopywc)
 Exec=canopy-session
 TryExec=canopy-session
 DesktopNames=Canopy
-Keywords=canopy;desktop;wayland;labwc;
+Keywords=canopy;desktop;wayland;canopywc;

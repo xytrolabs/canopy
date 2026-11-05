@@ -15,13 +15,16 @@
 # the same shell - it does not replace labwc anywhere. `umbriel` is Canopy's own
 # Canopy's own compositor (compositor/ in the source tree, binary `canopywc`)
 # is the direction the desktop is heading; labwc stays the default until the
-# fork passes its checklist. See docs/COMPOSITOR_FORK.md.
+# Canopy runs on its own compositor, canopywc (compositor/ in the source tree).
+# labwc is still supported and is used automatically when canopywc is not
+# installed, so a half-built checkout never leaves you without a session.
+# See docs/COMPOSITOR_FORK.md.
 set -eu
 
 SCRIPT_DIR="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)"
 
 # --------------------------------------------------------------- compositor --
-COMPOSITOR="${CANOPY_COMPOSITOR:-labwc}"
+COMPOSITOR="${CANOPY_COMPOSITOR:-canopywc}"
 PRINT_LIST=0
 for arg in "$@"; do
     case "$arg" in
@@ -66,16 +69,26 @@ canopywc_binary() {
 }
 
 if [ "$PRINT_LIST" -eq 1 ]; then
-    printf 'labwc     default session, server-side decorations\n'
-    printf 'canopywc  the Canopy compositor (beta, not yet the default)\n'
+    printf 'canopywc  the Canopy compositor (default)\n'
+    printf 'labwc     fallback session, server-side decorations\n'
     printf 'mangowc   beta tiling session (package: mangowm)\n'
     exit 0
 fi
 
 COMPOSITOR_BIN="$(compositor_binary "$COMPOSITOR")"
 if [ -z "$COMPOSITOR_BIN" ]; then
-    printf 'canopy-session: unknown compositor "%s" (use labwc, canopywc or mangowc)\n' "$COMPOSITOR" >&2
+    printf 'canopy-session: unknown compositor "%s" (use canopywc, labwc or mangowc)\n' "$COMPOSITOR" >&2
     exit 2
+fi
+
+# A default that is not built yet must not cost you the session: fall back to
+# labwc, loudly, instead of exiting from a display manager that will not show
+# the message.
+if ! command -v "$COMPOSITOR_BIN" >/dev/null 2>&1 && [ "$COMPOSITOR" = "canopywc" ]; then
+    printf 'canopy-session: canopywc is not built or installed; falling back to labwc\n' >&2
+    printf '  build it with: sh scripts/build-compositor.sh\n' >&2
+    COMPOSITOR=labwc
+    COMPOSITOR_BIN=labwc
 fi
 
 # --------------------------------------------------------------- environment --
@@ -217,6 +230,7 @@ if [ "$COMPOSITOR" = "canopywc" ] || [ "$COMPOSITOR" = "umbriel" ]; then
     if [ ! -f "$WC_CONFIG" ]; then
         for candidate in \
             "$SCRIPT_DIR/../config/compositor.toml" \
+            "${XDG_DATA_HOME:-$HOME/.local/share}/canopy/compositor.toml" \
             /usr/local/share/canopy/compositor.toml \
             /usr/share/canopy/compositor.toml
         do

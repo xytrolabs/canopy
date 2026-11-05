@@ -1,7 +1,8 @@
 # Canopy's own compositor
 
-Status: **rebranded, building, and running the shell headless.** The fork lives
-at `compositor/`, is called `canopywc`, and defaults to a stacking desktop.
+Status: **it is the default session.** `canopy-session` starts `canopywc`; labwc
+stays installed as the fallback, and is used automatically when `canopywc` has
+not been built or installed.
 
 ## Why this is the right move
 
@@ -44,10 +45,14 @@ It is vendored at `compositor/` (a squashed subtree of upstream `b6c4b7d`,
 
 ```sh
 sh scripts/build-compositor.sh                     # -> build-compositor/canopywc
-sh scripts/canopy-session --compositor canopywc     # a session with it
+sh scripts/canopy-session                         # the session, on canopywc
+sh scripts/canopy-session --compositor labwc       # the fallback
 ```
 
-`canopy-session --list-compositors` shows it next to labwc and MangoWC.
+`canopy-session --list-compositors` shows the three session options.
+`sh scripts/install.sh` installs the compositor to `~/.local/bin/canopywc` (or
+`/usr/local/bin` for a system install) and its config to
+`~/.local/share/canopy/compositor.toml`, so a display-manager login finds it.
 
 ### What the rebrand changed
 
