@@ -4,6 +4,23 @@ Canopy is a fork of Noctalia. Forking the code is the easy half; what makes a
 desktop feel like *itself* is a small number of decisions applied consistently.
 This file is that list, so a change can be judged against it instead of taste.
 
+## Structure and styling
+
+Canopy takes its **structure from macOS** and its **styling from Windows 11**.
+The two are kept separate on purpose, so a change can be judged against one or
+the other instead of against taste.
+
+| From macOS (structure) | From Windows 11 (styling) |
+| --- | --- |
+| One full-width menu bar at the top | Fluent corner scale: 4 / 8 / 12 / 16 px |
+| A floating dock of island pills, off the screen edge | Acrylic: translucency + real blur + hairline |
+| Traffic lights on the left, in window order | Neutral hairlines; the accent is for interaction |
+| Centred flyouts that open over the desktop | Elevation as a hint, never a halo |
+| A dock that gets out of the way | Inter, on a 4 px grid |
+
+When the two disagree: **macOS decides where a thing is, Windows decides how it
+looks.**
+
 ## What Canopy is
 
 A desktop that stays out of the way: one thin bar, one island, one dock, and
@@ -55,28 +72,44 @@ the identity contract.
 
 ## Materials
 
-There is no background blur on labwc (no `ext-background-effect-v1`), so depth is
-built from three things, always together:
+Depth is built from three things, always together:
 
-1. **Translucency** — panels at 0.78–0.88 opacity.
-2. **A hairline** — 1 px `outline`, or the accent for the menu bar.
-3. **A shadow** — soft, offset, never a glow.
+1. **Translucency** — panels at 0.78–0.92 opacity.
+2. **A hairline** — 1 px `outline_variant` on panels and windows; the accent is
+   reserved for focus, selection and the running indicator.
+3. **A shadow** — soft, offset, alpha 0.35. A hint of elevation, not a glow.
 
-An acrylic panel without the hairline looks broken; a shadow without translucency
-looks like a 2010 theme.
+Under `canopywc` the translucency is real blur, with a little grain
+(`noise = 0.03`) and lifted saturation so a glass surface keeps the colours
+behind it instead of turning grey. Under labwc there is no background-blur
+protocol, so blur is approximated; the hairline and shadow are what make the
+approximation hold together.
+
+An acrylic panel without the hairline looks broken; a shadow without
+translucency looks like a 2010 theme.
 
 ## Spacing
 
-- Everything is a multiple of **4 px**; panels pad by 8–12.
+- Everything is a multiple of **4 px**; cards and panels pad by 16
+  (`Style::cardPadding`, `Style::panelPadding`).
+- Corners come from the token scale, never from a literal: `radiusSm` 4 for
+  controls, `radiusMd` 8 for buttons and inputs, `radiusLg` 12 for cards and
+  flyouts, `radiusXl` 16 for the launcher, overview and lock screen.
+- Motion follows Windows: 120 ms for a hover, 220 ms for a flyout, 380 ms for a
+  full-surface transition.
 - Icons sit in a cell with **6 px** of padding. A pill that is trimmed to the icon
-  edge reads as cramped — that is a bug, not a style.
+  edge reads as cramped — that is a bug, not a style. The dock's worth a second
+  look: 56 px icons in a 76 px pill fills 74 % of the height.
 
 ## Type
 
-- Wordmark: Space Grotesk, sentence case, never all-caps.
-- Window and panel titles: Space Grotesk semibold at 10–11 px.
-- Body and menus: Inter 10.
+- One face for the interface: **Inter** (`shell.font_family`). It ships with the
+  shell, so the UI is identical on every machine instead of inheriting whatever
+  the distribution installed.
+- **Space Grotesk** stays for the mark and wordmark artwork, where its wider
+  letterforms are part of the logo rather than of the text.
 - Numbers (clock, sysmon): JetBrains Mono.
+- Sizes: 11 mini, 13 caption, 14 body, 16 title, 20 header (`Style::fontSize*`).
 
 ## Voice
 
@@ -89,7 +122,9 @@ socket" are not). Error messages say what to do next.
 | Surface | File |
 | --- | --- |
 | Palette, accent, ANSI | `src/theme/builtin_palettes.cpp` (`Canopy`) |
+| Design tokens (radius, spacing, motion, type) | `src/ui/style.h` |
 | Menu bar, island, dock geometry | `config/canopy/config.toml` |
+| Windows, title bars, blur, layout | `config/compositor.toml` (seeded to `~/.config/canopywc/`) |
 | Window decorations (SSD) | `config/labwc/themes/canopy/openbox-3/` |
 | Window decorations (CSD apps) | `config/gtk-3.0/gtk.css`, `config/gtk-4.0/gtk.css` |
 | Login screen | `greeter/assets/` |

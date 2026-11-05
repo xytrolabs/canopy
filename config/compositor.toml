@@ -30,8 +30,9 @@ gap = 8
 
 # ── Appearance ───────────────────────────────────────────────────────────────
 [appearance]
-# The same radius the shell's bar, dock and islands use.
-corner_radius = 12
+# Fluent corner scale, the same numbers the shell's tokens use: 8 for windows
+# and cards, 12 for flyouts, 16 for full surfaces.
+corner_radius = 8
 border_width = 1
 outer_border_width = 0
 # Ask clients for server-side decorations, so every window gets one Canopy
@@ -40,16 +41,17 @@ prefer_no_csd = true
 opaque_fullscreen = true
 drag_opacity = 0.9
 
-# Frosted glass behind translucent surfaces and windows that ask for it.
+# Mica, not a milk blur: keep the colours behind the glass, lift them slightly
+# and add a hint of grain so a translucent surface never looks like flat grey.
 [appearance.blur]
 enabled = true
 optimized = true
 passes = 3
-radius = 6
-noise = 0.0
-brightness = 1.0
+radius = 8
+noise = 0.03
+brightness = 1.02
 contrast = 1.0
-saturation = 1.0
+saturation = 1.15
 
 # A soft drop shadow, light enough to read as depth rather than as a border.
 [appearance.shadow]
@@ -58,15 +60,16 @@ softness = 40
 offset_x = 0
 offset_y = 8
 
-# The Canopy title bar: one flat strip, traffic lights on the right, drawn by
-# the compositor so no application can render a different one.
+# The Canopy title bar: one flat strip, traffic lights on the left the way macOS
+# puts them, drawn by the compositor so no application can render a different
+# one. The buttons are macOS circles with Windows hover behaviour.
 [appearance.title_bar]
 mode = "on"
 height = 30
 font = "Inter 10"
-button_position = "right"
-buttons = ["minimize", "maximize", "close"]
-button_corner_radius = 12
+button_position = "left"
+buttons = ["maximize", "minimize", "close"]
+button_corner_radius = 100
 button_glyph = "hover"
 button_background = true
 

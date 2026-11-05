@@ -16,7 +16,9 @@
 
 [shell]
 corner_radius_scale     = 1.0
-font_family             = "Space Grotesk"
+# Fluent's face. Canopy ships Inter (Closest free match to Segoe UI) so the UI
+# renders the same on every machine instead of depending on what is installed.
+font_family             = "Inter"
 time_format             = "{:%H:%M}"
 date_format             = "%a %d %b"
 polkit_agent            = true
@@ -52,8 +54,10 @@ enabled = true
 speed   = 1.0
 
 [shell.shadow]
+# Windows elevation is a hint, not a drop shadow: enough to lift a flyout off
+# the desktop, never enough to read as a border.
 direction = "down"
-alpha     = 0.45
+alpha     = 0.35
 
 [shell.launcher]
 # Start-menu behaviour, not a Noctalia search panel: pinned applications in a
@@ -113,8 +117,10 @@ radius              = 0
 margin_ends         = 0
 margin_edge         = 0
 padding             = 12
-widget_spacing      = 6
-border              = "primary"
+widget_spacing      = 8
+# Fluent hairlines are neutral; the accent belongs to the focused or active
+# item, not to the frame around everything.
+border              = "outline_variant"
 border_width        = 1.0
 background_opacity  = 0.78
 compositor_blur     = true
@@ -200,21 +206,21 @@ opacity      = 0.88
 [dock]
 enabled             = true
 position            = "bottom"
-icon_size           = 48
+# The pill is icon + 2x6 cell pad + 2x cross_axis_padding. Icons get the room:
+# 56 + 12 + 8 = 76, so the dock stays where it is and the icons grow into it.
+icon_size           = 56
 # Room between the icons and the pill's own edge: without it the first and last
-# icon sit on the rounded end and the row looks like it is falling out. Kept
-# tight on the cross axis so the pill hugs the icons instead of padding them
-# into a tall box (thickness is icon + 2x6 cell + 2x this).
+# icon sit on the rounded end and the row looks like it is falling out.
 main_axis_padding   = 20
-cross_axis_padding  = 8
+cross_axis_padding  = 4
 item_spacing        = 14
 background_opacity  = 0.80
 compositor_blur     = true
-radius              = 12
-radius_top_left     = 12
-radius_top_right    = 12
-radius_bottom_left  = 12
-radius_bottom_right = 12
+radius              = 8
+radius_top_left     = 8
+radius_top_right    = 8
+radius_bottom_left  = 8
+radius_bottom_right = 8
 margin_ends         = 0
 margin_edge         = 10
 shadow              = true
@@ -228,8 +234,10 @@ auto_hide           = true
 smart_auto_hide     = false
 reserve_space       = false
 layer               = "top"
+# Icons keep their full size when a window is not focused; the dot underneath
+# says which app is running, the way a dock is supposed to.
 active_scale        = 1.0
-inactive_scale      = 0.95
+inactive_scale      = 1.0
 magnification       = false
 active_opacity      = 1.0
 inactive_opacity    = 0.92
@@ -250,7 +258,7 @@ enable_daemon             = true
 # Windows toast corner, not the macOS top-right one.
 position                  = "bottom_right"
 keep_dismissed_in_history = true
-background_opacity        = 0.95
+background_opacity        = 0.92
 border                    = true
 border_color              = "outline_variant"
 border_width              = 1

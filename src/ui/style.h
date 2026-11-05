@@ -6,14 +6,19 @@ namespace Style {
 
   inline constexpr int barThicknessDefault = 34;
 
-  inline constexpr int animFast = 100;
-  inline constexpr int animNormal = 200;
-  inline constexpr int animSlow = 400;
+  // Windows 11 motion durations. Fast is a hover, normal is a flyout opening,
+  // slow is a full-surface transition.
+  inline constexpr int animFast = 120;
+  inline constexpr int animNormal = 220;
+  inline constexpr int animSlow = 380;
 
-  inline constexpr float radiusSm = 3.0F;
-  inline constexpr float radiusMd = 6.0F;
-  inline constexpr float radiusLg = 9.0F;
-  inline constexpr float radiusXl = 12.0F;
+  // Fluent corner scale: 4 for controls, 8 for cards and inputs, 12 for flyouts,
+  // 16 for the large surfaces (launcher, overview, lock screen). macOS structure,
+  // Windows geometry.
+  inline constexpr float radiusSm = 4.0F;
+  inline constexpr float radiusMd = 8.0F;
+  inline constexpr float radiusLg = 12.0F;
+  inline constexpr float radiusXl = 16.0F;
 
   inline constexpr float borderWidth = 1.0F;
   inline constexpr float emphasizedBorderWidth = 3.0F;
@@ -26,8 +31,9 @@ namespace Style {
   inline constexpr float spaceMd = 12.0F;
   inline constexpr float spaceLg = 16.0F;
 
-  inline constexpr float cardPadding = 14.0F;
-  inline constexpr float panelPadding = 14.0F;
+  // 4 px spacing grid: Fluent surfaces breathe on 16, not 14.
+  inline constexpr float cardPadding = 16.0F;
+  inline constexpr float panelPadding = 16.0F;
 
   // Default inner inset for bar widget capsules (logical px, before bar content scale).
   inline constexpr float barCapsulePadding = 6.0F;
