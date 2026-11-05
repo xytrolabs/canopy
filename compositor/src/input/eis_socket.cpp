@@ -17,7 +17,7 @@
 #include <vector>
 #include <wayland-server-core.h>
 
-namespace umbriel {
+namespace canopy {
 
   namespace {
     constexpr Logger kLog("eis");
@@ -257,7 +257,7 @@ namespace umbriel {
         kLog.error("XDG_RUNTIME_DIR is unavailable for input emulation");
         return;
       }
-      std::string directory = std::string(runtime) + "/umbriel-eis.XXXXXX";
+      std::string directory = std::string(runtime) + "/canopy-eis.XXXXXX";
       if (mkdtemp(directory.data()) == nullptr) {
         kLog.error("failed to create private input socket directory: {}", std::strerror(errno));
         return;
@@ -368,4 +368,4 @@ namespace umbriel {
   EisSocket::~EisSocket() = default;
   int EisSocket::fd() const { return m_impl->endpoint; }
 
-} // namespace umbriel
+} // namespace canopy

@@ -8,7 +8,7 @@
 #include "wlr.h"
 // clang-format on
 
-namespace umbriel {
+namespace canopy {
 
   // Borders
   void ViewDecoration::ensureBorders(wlr_scene_tree* parent) {
@@ -212,4 +212,4 @@ namespace umbriel {
     m_shadow.hide();
   }
 
-} // namespace umbriel
+} // namespace canopy

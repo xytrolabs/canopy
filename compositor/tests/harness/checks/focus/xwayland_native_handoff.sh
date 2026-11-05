@@ -6,14 +6,14 @@
 # refreshes that must not clear either signal.
 set -euo pipefail
 
-source "$UMBRIEL_HARNESS_LIB"
+source "$CANOPY_HARNESS_LIB"
 
-readonly X_CLIENT="${UMBRIEL_XWAYLAND_FOCUS_CLIENT:-./build-debug/tests/xwayland-focus-client}"
-readonly NATIVE_CLIENT="${UMBRIEL_SEAT_LOG_CLIENT:-./build-debug/tests/seat-log-client}"
-readonly KEYBOARD="${UMBRIEL_POINTER_CLIENT:-./build-debug/tests/pointer-client}"
-readonly X_LOG="$UMBRIEL_RUNTIME_DIR/xwayland-focus.log"
-readonly NATIVE_LOG="$UMBRIEL_RUNTIME_DIR/xwayland-native.log"
-readonly X_CONTROL="$UMBRIEL_RUNTIME_DIR/xwayland-focus-control"
+readonly X_CLIENT="${CANOPY_XWAYLAND_FOCUS_CLIENT:-./build-debug/tests/xwayland-focus-client}"
+readonly NATIVE_CLIENT="${CANOPY_SEAT_LOG_CLIENT:-./build-debug/tests/seat-log-client}"
+readonly KEYBOARD="${CANOPY_POINTER_CLIENT:-./build-debug/tests/pointer-client}"
+readonly X_LOG="$CANOPY_RUNTIME_DIR/xwayland-focus.log"
+readonly NATIVE_LOG="$CANOPY_RUNTIME_DIR/xwayland-native.log"
+readonly X_CONTROL="$CANOPY_RUNTIME_DIR/xwayland-focus-control"
 readonly X_TITLE_A=xwayland-focus-a
 readonly NATIVE_TITLE=xwayland-native
 
@@ -22,12 +22,12 @@ if [[ ! -x $X_CLIENT || ! -x $NATIVE_CLIENT || ! -x $KEYBOARD || -z ${DISPLAY:-}
   exit 1
 fi
 
-cat >> "$UMBRIEL_CONFIG" <<'EOF'
+cat >> "$CANOPY_CONFIG" <<'EOF'
 
 [animation]
 enabled = false
 EOF
-"$UMBRIEL" msg config-reload > /dev/null
+"$CANOPY" msg config-reload > /dev/null
 
 mkfifo "$X_CONTROL"
 exec {x_control_fd}<>"$X_CONTROL"
@@ -37,34 +37,34 @@ exec {x_control_fd}<>"$X_CONTROL"
 wait_for_windows() {
   for _ in $(seq 60); do
     local windows
-    windows=$("$UMBRIEL" windows --json)
+    windows=$("$CANOPY" windows --json)
     if [[ $(jq -r --arg x "$X_TITLE_A" --arg n "$NATIVE_TITLE" \
       '[.[] | select(.title == $x or .title == $n)] | length' <<< "$windows") == 2 ]]; then
       return 0
     fi
     sleep 0.1
   done
-  echo "the X11 and native focus fixtures did not all map: $("$UMBRIEL" windows --json)"
+  echo "the X11 and native focus fixtures did not all map: $("$CANOPY" windows --json)"
   echo "X11 log: $(tr '\n' '|' < "$X_LOG")"
   echo "native log: $(tr '\n' '|' < "$NATIVE_LOG")"
   return 1
 }
 
 window_id() {
-  "$UMBRIEL" windows --json | jq -r --arg title "$1" '.[] | select(.title == $title) | .id'
+  "$CANOPY" windows --json | jq -r --arg title "$1" '.[] | select(.title == $title) | .id'
 }
 
 focus_window() {
   local id=$1 title=$2
-  "$UMBRIEL" msg window-focus "$id" > /dev/null
+  "$CANOPY" msg window-focus "$id" > /dev/null
   for _ in $(seq 60); do
-    if [[ $("$UMBRIEL" windows --json | jq -r --arg id "$id" \
+    if [[ $("$CANOPY" windows --json | jq -r --arg id "$id" \
       '.[] | select(.id == $id) | (.focused and .active)') == true ]]; then
       return 0
     fi
     sleep 0.1
   done
-  echo "$title did not become focused and active: $("$UMBRIEL" windows --json)"
+  echo "$title did not become focused and active: $("$CANOPY" windows --json)"
   return 1
 }
 

@@ -2,7 +2,7 @@
 
 #include "wlr.h"
 
-namespace umbriel {
+namespace canopy {
 
   ManualShortcutsInhibit::~ManualShortcutsInhibit() { clear(); }
 
@@ -41,4 +41,4 @@ namespace umbriel {
     entry->owner->disable(entry->surface);
   }
 
-} // namespace umbriel
+} // namespace canopy

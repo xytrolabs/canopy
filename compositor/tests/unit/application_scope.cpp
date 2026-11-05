@@ -20,29 +20,29 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
-using umbriel::ApplicationScopeEnvironmentArguments;
-using umbriel::applicationScopeEnvironmentArguments;
-using umbriel::captureSystemdControlEnvironment;
-using umbriel::closeChildFileDescriptors;
-using umbriel::currentSystemdUnit;
-using umbriel::execApplicationInScope;
-using umbriel::isDirectSystemdService;
-using umbriel::resolveExecutable;
-using umbriel::restoreSystemdControlEnvironment;
-using umbriel::systemdUnitFromCgroup;
+using canopy::ApplicationScopeEnvironmentArguments;
+using canopy::applicationScopeEnvironmentArguments;
+using canopy::captureSystemdControlEnvironment;
+using canopy::closeChildFileDescriptors;
+using canopy::currentSystemdUnit;
+using canopy::execApplicationInScope;
+using canopy::isDirectSystemdService;
+using canopy::resolveExecutable;
+using canopy::restoreSystemdControlEnvironment;
+using canopy::systemdUnitFromCgroup;
 
 namespace {
   bool gForceCloseRangeFailure = false;
 }
 
-extern "C" int __real_umbrielCloseRange(unsigned int first, unsigned int last, int flags);
+extern "C" int __real_canopyCloseRange(unsigned int first, unsigned int last, int flags);
 
-extern "C" int __wrap_umbrielCloseRange(unsigned int first, unsigned int last, int flags) {
+extern "C" int __wrap_canopyCloseRange(unsigned int first, unsigned int last, int flags) {
   if (gForceCloseRangeFailure) {
     errno = ENOSYS;
     return -1;
   }
-  return __real_umbrielCloseRange(first, last, flags);
+  return __real_canopyCloseRange(first, last, flags);
 }
 
 namespace {
@@ -209,7 +209,7 @@ namespace {
   }
 } // namespace
 
-UMBRIEL_TEST(managedSessionDetectionRequiresTheDirectSystemdProcess) {
+CANOPY_TEST(managedSessionDetectionRequiresTheDirectSystemdProcess) {
   CHECK(!isDirectSystemdService(42, nullptr));
   CHECK(!isDirectSystemdService(42, ""));
   CHECK(!isDirectSystemdService(42, "41"));
@@ -218,26 +218,26 @@ UMBRIEL_TEST(managedSessionDetectionRequiresTheDirectSystemdProcess) {
   CHECK(isDirectSystemdService(42, "42"));
 }
 
-UMBRIEL_TEST(cgroupParsingFindsTheInnermostOwningUnit) {
+CANOPY_TEST(cgroupParsingFindsTheInnermostOwningUnit) {
   CHECK_EQ(
-      systemdUnitFromCgroup("0::/user.slice/user-1000.slice/user@1000.service/session.slice/umbriel.service\n"),
-      "umbriel.service"
+      systemdUnitFromCgroup("0::/user.slice/user-1000.slice/user@1000.service/session.slice/canopywc.service\n"),
+      "canopywc.service"
   );
   CHECK_EQ(
-      systemdUnitFromCgroup("0::/user.slice/user-1000.slice/user@1000.service/app.slice/app-umbriel-test.scope\n"),
-      "app-umbriel-test.scope"
+      systemdUnitFromCgroup("0::/user.slice/user-1000.slice/user@1000.service/app.slice/app-canopy-test.scope\n"),
+      "app-canopy-test.scope"
   );
   CHECK_EQ(
       systemdUnitFromCgroup(
-          "2:name=systemd:/user.slice/user-1000.slice/user@1000.service/session.slice/umbriel.service\n"
+          "2:name=systemd:/user.slice/user-1000.slice/user@1000.service/session.slice/canopywc.service\n"
           "1:memory:/user.slice/user-1000.slice/user@1000.service\n"
       ),
-      "umbriel.service"
+      "canopywc.service"
   );
   CHECK_EQ(systemdUnitFromCgroup("12:devices:/user.slice\n11:memory:/\n"), "");
 }
 
-UMBRIEL_TEST(applicationScopeEnvironmentKeepsTheControlConnectionSeparate) {
+CANOPY_TEST(applicationScopeEnvironmentKeepsTheControlConnectionSeparate) {
   const std::vector<std::pair<std::string, std::string>> configured{
       {"UNRELATED", "ignored"},
       {"XDG_RUNTIME_DIR", "/tmp/application runtime"},
@@ -289,7 +289,7 @@ UMBRIEL_TEST(applicationScopeEnvironmentKeepsTheControlConnectionSeparate) {
   }
 }
 
-UMBRIEL_TEST(managedChildClosesInheritedDescriptors) {
+CANOPY_TEST(managedChildClosesInheritedDescriptors) {
   int inherited[2]{-1, -1};
   CHECK(pipe2(inherited, O_CLOEXEC) == 0);
   if (inherited[0] < 0) {
@@ -337,7 +337,7 @@ UMBRIEL_TEST(managedChildClosesInheritedDescriptors) {
   }
 }
 
-UMBRIEL_TEST(closeRangeFallbackUsesTheHardDescriptorLimit) {
+CANOPY_TEST(closeRangeFallbackUsesTheHardDescriptorLimit) {
   rlimit originalLimit{};
   CHECK(getrlimit(RLIMIT_NOFILE, &originalLimit) == 0);
   if (originalLimit.rlim_cur <= 128 || originalLimit.rlim_max <= 128) {
@@ -388,7 +388,7 @@ UMBRIEL_TEST(closeRangeFallbackUsesTheHardDescriptorLimit) {
   }
 }
 
-UMBRIEL_TEST(systemdRunReceivesExactScopeArguments) {
+CANOPY_TEST(systemdRunReceivesExactScopeArguments) {
   int outputPipe[2]{-1, -1};
   CHECK(pipe2(outputPipe, O_CLOEXEC | O_NONBLOCK) == 0);
   if (outputPipe[0] < 0) {
@@ -410,8 +410,8 @@ UMBRIEL_TEST(systemdRunReceivesExactScopeArguments) {
     }
     close(outputPipe[1]);
     execApplicationInScope(
-        "/proc/self/exe", "--unit=app-umbriel-arguments.scope", "--property=PartOf=umbriel-session.target",
-        "--property=BindsTo=umbriel.service", "--property=After=umbriel.service", environmentArguments, command
+        "/proc/self/exe", "--unit=app-canopy-arguments.scope", "--property=PartOf=canopywc-session.target",
+        "--property=BindsTo=canopywc.service", "--property=After=canopywc.service", environmentArguments, command
     );
   }
   close(outputPipe[1]);
@@ -444,11 +444,11 @@ UMBRIEL_TEST(systemdRunReceivesExactScopeArguments) {
           + "--collect\n"
           + "--expand-environment=no\n"
           + "--slice=app.slice\n"
-          + "--description=Umbriel application\n"
-          + "--unit=app-umbriel-arguments.scope\n"
-          + "--property=PartOf=umbriel-session.target\n"
-          + "--property=BindsTo=umbriel.service\n"
-          + "--property=After=umbriel.service\n"
+          + "--description=Canopy application\n"
+          + "--unit=app-canopy-arguments.scope\n"
+          + "--property=PartOf=canopywc-session.target\n"
+          + "--property=BindsTo=canopywc.service\n"
+          + "--property=After=canopywc.service\n"
           + "--setenv=XDG_RUNTIME_DIR=/tmp/application runtime\n"
           + "--setenv=DBUS_SESSION_BUS_ADDRESS=unix:path=/tmp/application-$bus\n"
           + "--setenv=SYSTEMD_BUS_ADDRESS=unix:path=/tmp/application=systemd\n"
@@ -460,7 +460,7 @@ UMBRIEL_TEST(systemdRunReceivesExactScopeArguments) {
   );
 }
 
-UMBRIEL_TEST(missingSystemdRunFailsClosed) {
+CANOPY_TEST(missingSystemdRunFailsClosed) {
   int outputPipe[2]{-1, -1};
   CHECK(pipe2(outputPipe, O_CLOEXEC) == 0);
   if (outputPipe[0] < 0) {
@@ -477,9 +477,9 @@ UMBRIEL_TEST(missingSystemdRunFailsClosed) {
     close(outputPipe[1]);
     const ApplicationScopeEnvironmentArguments environmentArguments{};
     execApplicationInScope(
-        "/nonexistent/umbriel-systemd-run", "--unit=app-umbriel-missing.scope",
-        "--property=PartOf=umbriel-session.target", "--property=BindsTo=umbriel.service",
-        "--property=After=umbriel.service", environmentArguments, "printf launched"
+        "/nonexistent/canopy-systemd-run", "--unit=app-canopy-missing.scope",
+        "--property=PartOf=canopywc-session.target", "--property=BindsTo=canopywc.service",
+        "--property=After=canopywc.service", environmentArguments, "printf launched"
     );
   }
   close(outputPipe[1]);
@@ -505,8 +505,8 @@ UMBRIEL_TEST(missingSystemdRunFailsClosed) {
   close(outputPipe[0]);
 }
 
-UMBRIEL_TEST(systemdRunMovesTheCommandIntoAnApplicationScope) {
-  if (std::getenv("UMBRIEL_REQUIRE_SYSTEMD_SCOPE_TEST") == nullptr) {
+CANOPY_TEST(systemdRunMovesTheCommandIntoAnApplicationScope) {
+  if (std::getenv("CANOPY_REQUIRE_SYSTEMD_SCOPE_TEST") == nullptr) {
     return;
   }
   const std::string systemdRun = resolveExecutable("systemd-run");
@@ -519,19 +519,19 @@ UMBRIEL_TEST(systemdRunMovesTheCommandIntoAnApplicationScope) {
     return;
   }
 
-  const std::string unit = "app-umbriel-test-"
+  const std::string unit = "app-canopy-test-"
       + std::to_string(getpid())
       + "-"
       + std::to_string(std::chrono::steady_clock::now().time_since_epoch().count())
       + ".scope";
   const std::string unitArgument = "--unit=" + unit;
-  const std::string partOfProperty = "--property=PartOf=umbriel-session.target";
+  const std::string partOfProperty = "--property=PartOf=canopywc-session.target";
   const std::string bindsToProperty = "--property=BindsTo=" + ownerUnit;
   const std::string afterProperty = "--property=After=" + ownerUnit;
   const ApplicationScopeEnvironmentArguments environmentArguments{
-      "--setenv=XDG_RUNTIME_DIR=/tmp/umbriel application $runtime",
-      "--setenv=DBUS_SESSION_BUS_ADDRESS=unix:path=/tmp/umbriel-application-dbus",
-      "--setenv=SYSTEMD_BUS_ADDRESS=unix:path=/tmp/umbriel-application=systemd",
+      "--setenv=XDG_RUNTIME_DIR=/tmp/canopy application $runtime",
+      "--setenv=DBUS_SESSION_BUS_ADDRESS=unix:path=/tmp/canopy-application-dbus",
+      "--setenv=SYSTEMD_BUS_ADDRESS=unix:path=/tmp/canopy-application=systemd",
   };
   int inputPipe[2]{-1, -1};
   int outputPipe[2]{-1, -1};
@@ -586,16 +586,16 @@ UMBRIEL_TEST(systemdRunMovesTheCommandIntoAnApplicationScope) {
   std::getline(outputStream, systemd);
   const std::string cgroup{std::istreambuf_iterator<char>(outputStream), std::istreambuf_iterator<char>()};
   CHECK_EQ(literal, "$HOME ${USER} $$");
-  CHECK_EQ(runtime, "/tmp/umbriel application $runtime");
-  CHECK_EQ(dbus, "unix:path=/tmp/umbriel-application-dbus");
-  CHECK_EQ(systemd, "unix:path=/tmp/umbriel-application=systemd");
+  CHECK_EQ(runtime, "/tmp/canopy application $runtime");
+  CHECK_EQ(dbus, "unix:path=/tmp/canopy-application-dbus");
+  CHECK_EQ(systemd, "unix:path=/tmp/canopy-application=systemd");
   CHECK(cgroup.contains("/app.slice/" + unit));
 
   CHECK_EQ(systemctlProperty(systemctl, unit, "Slice"), "app.slice");
   CHECK_EQ(systemctlProperty(systemctl, unit, "CollectMode"), "inactive-or-failed");
-  CHECK_EQ(systemctlProperty(systemctl, unit, "Description"), "Umbriel application");
+  CHECK_EQ(systemctlProperty(systemctl, unit, "Description"), "Canopy application");
   const std::string partOf = systemctlProperty(systemctl, unit, "PartOf");
-  CHECK(containsWord(partOf, "umbriel-session.target"));
+  CHECK(containsWord(partOf, "canopywc-session.target"));
   const std::string bindsTo = systemctlProperty(systemctl, unit, "BindsTo");
   CHECK(containsWord(bindsTo, ownerUnit));
   CHECK(containsWord(systemctlProperty(systemctl, unit, "After"), ownerUnit));

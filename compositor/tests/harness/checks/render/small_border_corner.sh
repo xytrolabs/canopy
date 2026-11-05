@@ -4,12 +4,12 @@
 # Positive inner contours stay rounded, while zero preserves a square corner.
 set -euo pipefail
 
-readonly CLIENT="${UMBRIEL_UNMAP_CLIENT:-./build-debug/tests/unmap-client}"
-readonly CLIENT_LOG="$UMBRIEL_RUNTIME_DIR/small-border-client.log"
-readonly SCREENSHOT="$UMBRIEL_RUNTIME_DIR/small-border.png"
+readonly CLIENT="${CANOPY_UNMAP_CLIENT:-./build-debug/tests/unmap-client}"
+readonly CLIENT_LOG="$CANOPY_RUNTIME_DIR/small-border-client.log"
+readonly SCREENSHOT="$CANOPY_RUNTIME_DIR/small-border.png"
 readonly TOTAL_WIDTH=9
 
-cat >> "$UMBRIEL_CONFIG" <<'EOF'
+cat >> "$CANOPY_CONFIG" <<'EOF'
 
 [animation]
 duration_ms = 1
@@ -25,7 +25,7 @@ border_width = 1
 outer_border_width = 8
 corner_radius = 1
 EOF
-"$UMBRIEL" msg config-reload > /dev/null
+"$CANOPY" msg config-reload > /dev/null
 
 "$CLIENT" small-border 640 480 > "$CLIENT_LOG" 2>&1 &
 for _ in $(seq 60); do
@@ -36,11 +36,11 @@ if ! grep -q '^mapped$' "$CLIENT_LOG"; then
   echo "small border client never mapped: $(cat "$CLIENT_LOG")"
   exit 1
 fi
-"$UMBRIEL" settle
+"$CANOPY" settle
 
-window=$("$UMBRIEL" windows --json | jq -c '.[] | select(.title == "small-border")')
+window=$("$CANOPY" windows --json | jq -c '.[] | select(.title == "small-border")')
 if [[ -z $window ]]; then
-  echo "small border client was not registered: $("$UMBRIEL" windows --json)"
+  echo "small border client was not registered: $("$CANOPY" windows --json)"
   exit 1
 fi
 x=$(jq -r '.x' <<< "$window")
@@ -48,7 +48,7 @@ y=$(jq -r '.y' <<< "$window")
 
 grim -o HEADLESS-1 "$SCREENSHOT"
 sample() {
-  "$UMBRIEL_PIXEL_PROBE" "$SCREENSHOT" pixel "$1" "$2"
+  "$CANOPY_PIXEL_PROBE" "$SCREENSHOT" pixel "$1" "$2"
 }
 
 corner=$(sample "$((x - TOTAL_WIDTH))" "$((y - TOTAL_WIDTH))")
@@ -63,9 +63,9 @@ fi
 
 echo "one-pixel outer radius stayed independent of border width: corner=$corner edge=$edge"
 
-sed -i 's/^corner_radius = 1$/corner_radius = 8/' "$UMBRIEL_CONFIG"
-"$UMBRIEL" msg config-reload > /dev/null
-"$UMBRIEL" settle
+sed -i 's/^corner_radius = 1$/corner_radius = 8/' "$CANOPY_CONFIG"
+"$CANOPY" msg config-reload > /dev/null
+"$CANOPY" settle
 grim -o HEADLESS-1 "$SCREENSHOT"
 rounded_inner=$(sample "$x" "$y")
 read -r rounded_inner_red rounded_inner_green rounded_inner_blue <<< "$rounded_inner"
@@ -76,9 +76,9 @@ fi
 
 echo "eight-pixel outer radius kept its inner contour rounded: corner=$rounded_inner"
 
-sed -i 's/^corner_radius = 8$/corner_radius = 0/' "$UMBRIEL_CONFIG"
-"$UMBRIEL" msg config-reload > /dev/null
-"$UMBRIEL" settle
+sed -i 's/^corner_radius = 8$/corner_radius = 0/' "$CANOPY_CONFIG"
+"$CANOPY" msg config-reload > /dev/null
+"$CANOPY" settle
 grim -o HEADLESS-1 "$SCREENSHOT"
 square_corner=$(sample "$((x - TOTAL_WIDTH))" "$((y - TOTAL_WIDTH))")
 read -r square_red square_green square_blue <<< "$square_corner"

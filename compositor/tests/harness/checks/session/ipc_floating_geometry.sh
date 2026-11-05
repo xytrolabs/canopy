@@ -2,12 +2,12 @@
 # Floating geometry must reach subscribers during a held move or resize,
 # before releasing the grab can trigger unrelated focus or layout updates.
 set -euo pipefail
-source "$UMBRIEL_HARNESS_LIB"
+source "$CANOPY_HARNESS_LIB"
 
 readonly TITLE=ipc-floating-geometry
-readonly EVENTS="$UMBRIEL_RUNTIME_DIR/floating-geometry-events.jsonl"
+readonly EVENTS="$CANOPY_RUNTIME_DIR/floating-geometry-events.jsonl"
 
-cat >> "$UMBRIEL_CONFIG" <<'CONFIG'
+cat >> "$CANOPY_CONFIG" <<'CONFIG'
 [animation]
 enabled = false
 [appearance]
@@ -22,17 +22,17 @@ default_floating = true
 default_floating_size_px = { width = 480, height = 300 }
 default_position = { x = 173, y = 109, anchor = "top_left" }
 CONFIG
-"$UMBRIEL" msg config-reload > /dev/null
-"$UMBRIEL_FRACTIONAL_CLIENT" "$TITLE" 480 300 > "$UMBRIEL_RUNTIME_DIR/floating-geometry-client.log" 2>&1 &
+"$CANOPY" msg config-reload > /dev/null
+"$CANOPY_FRACTIONAL_CLIENT" "$TITLE" 480 300 > "$CANOPY_RUNTIME_DIR/floating-geometry-client.log" 2>&1 &
 for _ in $(seq 100); do
-  window=$("$UMBRIEL" windows --json | jq -c --arg title "$TITLE" '.[] | select(.title == $title)')
+  window=$("$CANOPY" windows --json | jq -c --arg title "$TITLE" '.[] | select(.title == $title)')
   [[ -n $window ]] && break
   sleep 0.05
 done
 window_id=$(jq -r '.id' <<< "$window")
-"$UMBRIEL" msg window-focus "$window_id" > /dev/null
-"$UMBRIEL" settle > /dev/null
-"$UMBRIEL" subscribe windows > "$EVENTS" &
+"$CANOPY" msg window-focus "$window_id" > /dev/null
+"$CANOPY" settle > /dev/null
+"$CANOPY" subscribe windows > "$EVENTS" &
 
 await_box() {
   local label=$1 x=$2 y=$3 width=$4 height=$5
@@ -49,7 +49,7 @@ await_box() {
   done
   echo "$label: subscriber missed $width x $height at $x,$y"
   echo "latest event: $(tail -n 1 "$EVENTS")"
-  echo "current listing: $("$UMBRIEL" windows --json)"
+  echo "current listing: $("$CANOPY" windows --json)"
   exit 1
 }
 
@@ -61,7 +61,7 @@ await_box held-move 333 189 480 300
 pointer_step moved
 await_box continued-move 413 229 480 300
 pointer_release
-"$UMBRIEL" settle > /dev/null
+"$CANOPY" settle > /dev/null
 await_box released-move 413 229 480 300
 
 pointer_hold 1280 720 move 873 509 mod logo press 273 move 953 569 \
@@ -70,7 +70,7 @@ await_box held-resize 413 229 560 360
 pointer_step resized
 await_box continued-resize 413 229 600 380
 pointer_release
-"$UMBRIEL" settle > /dev/null
+"$CANOPY" settle > /dev/null
 
 pointer_hold 1280 720 move 433 249 mod logo press 273 move 373 209 \
   -- move 333 189 mark anchored hold release 273 mod none
@@ -78,10 +78,10 @@ await_box anchored-resize 353 189 660 420
 pointer_step anchored
 await_box continued-anchored-resize 313 169 700 440
 pointer_release
-"$UMBRIEL" settle > /dev/null
+"$CANOPY" settle > /dev/null
 
-"$UMBRIEL" msg window-set-primary-extent 0.5 > /dev/null
-"$UMBRIEL" settle > /dev/null
+"$CANOPY" msg window-set-primary-extent 0.5 > /dev/null
+"$CANOPY" settle > /dev/null
 await_box keyboard-resize 313 169 640 440
 
 echo 'floating moves, anchored resizes, and keyboard resizes reached windows subscribers'

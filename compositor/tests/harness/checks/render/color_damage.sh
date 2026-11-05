@@ -2,9 +2,9 @@
 # Unchanged color and opacity must deliver requested callbacks without pixel damage.
 # Real transitions must repaint, including cached and independent child commits.
 set -euo pipefail
-source "$UMBRIEL_HARNESS_LIB"
+source "$CANOPY_HARNESS_LIB"
 
-cat >> "$UMBRIEL_CONFIG" <<'CONFIG'
+cat >> "$CANOPY_CONFIG" <<'CONFIG'
 [animation]
 enabled = false
 [appearance]
@@ -26,14 +26,14 @@ match.app_id = "^color-feedback-client$"
 match.title = "^color-feedback-translucent$"
 opacity = 0.95
 CONFIG
-"$UMBRIEL" msg config-reload > /dev/null
+"$CANOPY" msg config-reload > /dev/null
 # The inotify reload must finish before capture measurements can observe title-only transitions.
 sleep 0.3 # real time: inotify reload timer
 
-readonly CAPTURE_LOG="$UMBRIEL_RUNTIME_DIR/color-damage-capture.log"
-mkfifo "$UMBRIEL_RUNTIME_DIR/color-damage-capture.fifo"
-CAPTURE_CONTROL=1 "$UMBRIEL_CAPTURE_CLIENT" < "$UMBRIEL_RUNTIME_DIR/color-damage-capture.fifo" > "$CAPTURE_LOG" 2>&1 &
-exec {CAPTURE_FD}> "$UMBRIEL_RUNTIME_DIR/color-damage-capture.fifo"
+readonly CAPTURE_LOG="$CANOPY_RUNTIME_DIR/color-damage-capture.log"
+mkfifo "$CANOPY_RUNTIME_DIR/color-damage-capture.fifo"
+CAPTURE_CONTROL=1 "$CANOPY_CAPTURE_CLIENT" < "$CANOPY_RUNTIME_DIR/color-damage-capture.fifo" > "$CAPTURE_LOG" 2>&1 &
+exec {CAPTURE_FD}> "$CANOPY_RUNTIME_DIR/color-damage-capture.fifo"
 await_lines "$CAPTURE_LOG" 'session-ready HEADLESS-1' 1
 await_lines "$CAPTURE_LOG" 'frame HEADLESS-1' 1
 
@@ -62,7 +62,7 @@ expect_frames() {
   if [[ $command == frame ]]; then
     await_lines "$CLIENT_LOG" '{"event":"frame",' "$((callbacks + 1))"
   fi
-  "$UMBRIEL" settle > /dev/null
+  "$CANOPY" settle > /dev/null
   capture_count
   after=$frame_count
   if ((after - before != expected)); then
@@ -72,20 +72,20 @@ expect_frames() {
 }
 
 for mode in toplevel subsurface subsurface-desync; do
-  CLIENT_LOG="$UMBRIEL_RUNTIME_DIR/color-damage-$mode.log"
-  fifo="$UMBRIEL_RUNTIME_DIR/color-damage-$mode.fifo"
+  CLIENT_LOG="$CANOPY_RUNTIME_DIR/color-damage-$mode.log"
+  fifo="$CANOPY_RUNTIME_DIR/color-damage-$mode.fifo"
   mkfifo "$fifo"
   args=()
   [[ $mode == toplevel ]] || args+=("$mode")
-  "$UMBRIEL_COLOR_FEEDBACK_CLIENT" "${args[@]}" < "$fifo" > "$CLIENT_LOG" 2>&1 &
+  "$CANOPY_COLOR_FEEDBACK_CLIENT" "${args[@]}" < "$fifo" > "$CLIENT_LOG" 2>&1 &
   client_pid=$!
   exec {CLIENT_FD}> "$fifo"
   await_lines "$CLIENT_LOG" '{"event":"mapped"}' 1
-  "$UMBRIEL" settle > /dev/null
+  "$CANOPY" settle > /dev/null
   # The helper initially requests fullscreen, where opaque_fullscreen bypasses rule opacity.
-  "$UMBRIEL" msg window-toggle-fullscreen > /dev/null
-  "$UMBRIEL" settle > /dev/null
-  if ! "$UMBRIEL" tearing --json | jq -e '
+  "$CANOPY" msg window-toggle-fullscreen > /dev/null
+  "$CANOPY" settle > /dev/null
+  if ! "$CANOPY" tearing --json | jq -e '
     [.surfaces[] | select(.app_id == "color-feedback-client")] as $clients
     | ($clients | length) == 1 and $clients[0].fullscreen == false
   ' > /dev/null; then
@@ -127,5 +127,5 @@ for mode in toplevel subsurface subsurface-desync; do
   kill -TERM "$client_pid"
   wait "$client_pid" || true
   exec {CLIENT_FD}>&-
-  "$UMBRIEL" settle > /dev/null
+  "$CANOPY" settle > /dev/null
 done

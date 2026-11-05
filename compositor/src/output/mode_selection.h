@@ -7,10 +7,10 @@
 struct wlr_output;
 struct wlr_output_mode;
 
-namespace umbriel {
+namespace canopy {
 
   // Whether an output that has no matching config section exposes enough
-  // information for Umbriel to choose a safe initial mode automatically.
+  // information for Canopy to choose a safe initial mode automatically.
   bool outputCanAutoEnable(wlr_output* output);
 
   // The advertised mode a configured `mode` names, or nullptr when the output advertises no mode at that resolution.
@@ -32,4 +32,4 @@ namespace umbriel {
   // a modeset when the live mode is kept.
   bool colorChangeNeedsModeset(const wlr_output& output, uint32_t renderFormat, bool hdr);
 
-} // namespace umbriel
+} // namespace canopy

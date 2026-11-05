@@ -3,9 +3,9 @@
 # Builds with wayland-protocols 1.49 expose version 3 for Windows BT.2100.
 set -euo pipefail
 
-readonly GLOBAL_CLIENT="${UMBRIEL_GLOBAL_CLIENT:-./build-debug/tests/global-client}"
-readonly UNMAP_CLIENT="${UMBRIEL_UNMAP_CLIENT:-./build-debug/tests/unmap-client}"
-readonly POINTER_CLIENT="${UMBRIEL_POINTER_CLIENT:-./build-debug/tests/pointer-client}"
+readonly GLOBAL_CLIENT="${CANOPY_GLOBAL_CLIENT:-./build-debug/tests/global-client}"
+readonly UNMAP_CLIENT="${CANOPY_UNMAP_CLIENT:-./build-debug/tests/unmap-client}"
+readonly POINTER_CLIENT="${CANOPY_POINTER_CLIENT:-./build-debug/tests/pointer-client}"
 CLIENT_PID=
 
 if [[ ! -x $GLOBAL_CLIENT || ! -x $POINTER_CLIENT ]]; then
@@ -28,12 +28,12 @@ echo "wp_color_manager_v1 version $COLOR_MANAGER_VERSION advertised to native an
 # TOML cannot redefine [output.HEADLESS-1], so each phase below replaces the
 # whole config rather than appending to the previous one. Holding the pristine
 # config in a variable keeps that reset from needing a file on disk.
-BASELINE=$(< "$UMBRIEL_CONFIG")
+BASELINE=$(< "$CANOPY_CONFIG")
 
-printf '\n[output.HEADLESS-1]\nhdr = "on"\n' >> "$UMBRIEL_CONFIG"
-"$UMBRIEL" msg config-reload > /dev/null
+printf '\n[output.HEADLESS-1]\nhdr = "on"\n' >> "$CANOPY_CONFIG"
+"$CANOPY" msg config-reload > /dev/null
 
-if ! grep -F "output 'HEADLESS-1': HDR unavailable: display does not advertise PQ" "$UMBRIEL_LOG" > /dev/null; then
+if ! grep -F "output 'HEADLESS-1': HDR unavailable: display does not advertise PQ" "$CANOPY_LOG" > /dev/null; then
   echo "missing expected headless HDR fallback: display does not advertise PQ"
   exit 1
 fi
@@ -41,11 +41,11 @@ fi
 foot --title=color-diagnostics sh -c 'sleep 120' > /dev/null 2>&1 &
 CLIENT_PID=$!
 for _ in $(seq 40); do
-  [[ $("$UMBRIEL" windows --json | jq 'length') -eq 1 ]] && break
+  [[ $("$CANOPY" windows --json | jq 'length') -eq 1 ]] && break
   sleep 0.1
 done
 
-color=$("$UMBRIEL" color --json)
+color=$("$CANOPY" color --json)
 if ! jq -e '
   .color_manager == true
   and .renderer.input_color_transform == true
@@ -76,7 +76,7 @@ if ! jq -e '
   exit 1
 fi
 
-color_human=$("$UMBRIEL" color)
+color_human=$("$CANOPY" color)
 if ! grep -F "fallback: display does not advertise PQ" <<< "$color_human" > /dev/null \
     || ! grep -F "surface " <<< "$color_human" > /dev/null \
     || ! grep -F "mastering luminance: unset; MaxCLL: 0; MaxFALL: 0" <<< "$color_human" > /dev/null; then
@@ -85,20 +85,20 @@ if ! grep -F "fallback: display does not advertise PQ" <<< "$color_human" > /dev
 fi
 
 # A live SDR white selection targets the preferred or named output and lasts until a reload changes output state.
-sdr_white() { "$UMBRIEL" color --json | jq '.outputs[0].sdr_white'; }
-sdr_white_is() { "$UMBRIEL" color --json | jq -e --argjson nits "$1" '.outputs[0].sdr_white == $nits' > /dev/null; }
-"$UMBRIEL" msg output-sdr-white 150 > /dev/null
+sdr_white() { "$CANOPY" color --json | jq '.outputs[0].sdr_white'; }
+sdr_white_is() { "$CANOPY" color --json | jq -e --argjson nits "$1" '.outputs[0].sdr_white == $nits' > /dev/null; }
+"$CANOPY" msg output-sdr-white 150 > /dev/null
 if ! sdr_white_is 150; then
   echo "preferred-output SDR white was not selected: $(sdr_white)"
   exit 1
 fi
-"$UMBRIEL" msg output-sdr-white 120 --output HEADLESS-1 > /dev/null
-if "$UMBRIEL" msg output-sdr-white 300 --output missing-output > /dev/null 2>&1 || ! sdr_white_is 120; then
+"$CANOPY" msg output-sdr-white 120 --output HEADLESS-1 > /dev/null
+if "$CANOPY" msg output-sdr-white 300 --output missing-output > /dev/null 2>&1 || ! sdr_white_is 120; then
   echo "named-output SDR white was not selected exactly once: $(sdr_white)"
   exit 1
 fi
-printf '%s\n\n[output.HEADLESS-1]\nhdr = "on"\nsdr_white = 250\n' "$BASELINE" > "$UMBRIEL_CONFIG"
-"$UMBRIEL" msg config-reload > /dev/null
+printf '%s\n\n[output.HEADLESS-1]\nhdr = "on"\nsdr_white = 250\n' "$BASELINE" > "$CANOPY_CONFIG"
+"$CANOPY" msg config-reload > /dev/null
 if ! sdr_white_is 250; then
   echo "output-state reload did not restore the configured SDR white: $(sdr_white)"
   exit 1
@@ -108,7 +108,7 @@ kill -TERM "$CLIENT_PID"
 wait "$CLIENT_PID" 2>/dev/null || true
 CLIENT_PID=
 
-CLIENT_LOG="$UMBRIEL_RUNTIME_DIR/wine-scrgb-client.log"
+CLIENT_LOG="$CANOPY_RUNTIME_DIR/wine-scrgb-client.log"
 env COLOR_WINDOWS_SCRGB=1 REDRAW_ON_CLOSE=once APP_ID=wine-scrgb \
   bash -c 'exec -a wine "$@"' _ \
   "$UNMAP_CLIENT" wine-scrgb > "$CLIENT_LOG" 2>&1 &
@@ -123,7 +123,7 @@ if ! grep -q '^mapped$' "$CLIENT_LOG"; then
 fi
 
 for _ in $(seq 40); do
-  color=$("$UMBRIEL" color --json)
+  color=$("$CANOPY" color --json)
   jq -e '
     .outputs[0].hdr_mode == "on"
     and .outputs[0].hdr_requested == true
@@ -143,9 +143,9 @@ fi
 
 # The overview mirrors client buffers into raw scene buffers. Their color must match the normal scene surface even
 # after the surface's committed color description is resolved for the mirror.
-normal_shot="$UMBRIEL_RUNTIME_DIR/wine-scrgb-normal.png"
-overview_shot="$UMBRIEL_RUNTIME_DIR/wine-scrgb-overview.png"
-window_json=$("$UMBRIEL" windows --json | jq '.[] | select(.title == "wine-scrgb")')
+normal_shot="$CANOPY_RUNTIME_DIR/wine-scrgb-normal.png"
+overview_shot="$CANOPY_RUNTIME_DIR/wine-scrgb-overview.png"
+window_json=$("$CANOPY" windows --json | jq '.[] | select(.title == "wine-scrgb")')
 window_x=$(jq -r '.x' <<< "$window_json")
 window_y=$(jq -r '.y' <<< "$window_json")
 window_w=$(jq -r '.w' <<< "$window_json")
@@ -156,17 +156,17 @@ overview_x=$((320 + normal_x / 2))
 overview_y=$((180 + normal_y / 2))
 
 sample_rgb() {
-  "$UMBRIEL_PIXEL_PROBE" "$1" mean "20x20+$(($2 - 10))+$(($3 - 10))"
+  "$CANOPY_PIXEL_PROBE" "$1" mean "20x20+$(($2 - 10))+$(($3 - 10))"
 }
 
 # Both samples must come from settled windows: let the opening animation finish first.
-"$UMBRIEL" settle
+"$CANOPY" settle
 grim "$normal_shot"
-"$UMBRIEL" msg overview-open > /dev/null
+"$CANOPY" msg overview-open > /dev/null
 # The sample point assumes the settled half-scale card, so wait out the overview and card motion.
-"$UMBRIEL" settle
-wine_scrgb_id=$("$UMBRIEL" windows --json | jq -r '.[] | select(.title == "wine-scrgb") | .id')
-"$UMBRIEL" msg window-close "$wine_scrgb_id" > /dev/null
+"$CANOPY" settle
+wine_scrgb_id=$("$CANOPY" windows --json | jq -r '.[] | select(.title == "wine-scrgb") | .id')
+"$CANOPY" msg window-close "$wine_scrgb_id" > /dev/null
 for _ in $(seq 40); do
   grep -q '^redrawn$' "$CLIENT_LOG" && break
   sleep 0.1
@@ -175,7 +175,7 @@ if ! grep -q '^redrawn$' "$CLIENT_LOG"; then
   echo "Wine scRGB client did not redraw inside overview: $(cat "$CLIENT_LOG")"
   exit 1
 fi
-"$UMBRIEL" settle
+"$CANOPY" settle
 grim "$overview_shot"
 read -r normal_r normal_g normal_b < <(sample_rgb "$normal_shot" "$normal_x" "$normal_y")
 read -r overview_r overview_g overview_b < <(sample_rgb "$overview_shot" "$overview_x" "$overview_y")
@@ -189,10 +189,10 @@ for channel in r g b; do
     exit 1
   fi
 done
-"$UMBRIEL" msg overview-close > /dev/null
+"$CANOPY" msg overview-close > /dev/null
 
-wine_scrgb_id=$("$UMBRIEL" windows --json | jq -r '.[] | select(.title == "wine-scrgb") | .id')
-"$UMBRIEL" msg window-close "$wine_scrgb_id" > /dev/null
+wine_scrgb_id=$("$CANOPY" windows --json | jq -r '.[] | select(.title == "wine-scrgb") | .id')
+"$CANOPY" msg window-close "$wine_scrgb_id" > /dev/null
 for _ in $(seq 40); do
   grep -q '^unmapped$' "$CLIENT_LOG" && break
   sleep 0.1
@@ -206,11 +206,11 @@ kill -TERM "$CLIENT_PID"
 wait "$CLIENT_PID" 2>/dev/null || true
 CLIENT_PID=
 
-printf '%s\n' "$BASELINE" > "$UMBRIEL_CONFIG"
-printf '\n[output.HEADLESS-1]\nhdr = "auto"\n' >> "$UMBRIEL_CONFIG"
-"$UMBRIEL" msg config-reload > /dev/null
+printf '%s\n' "$BASELINE" > "$CANOPY_CONFIG"
+printf '\n[output.HEADLESS-1]\nhdr = "auto"\n' >> "$CANOPY_CONFIG"
+"$CANOPY" msg config-reload > /dev/null
 
-color=$("$UMBRIEL" color --json)
+color=$("$CANOPY" color --json)
 if ! jq -e '
   .outputs[0].hdr_mode == "auto"
   and .outputs[0].hdr_requested == false
@@ -221,7 +221,7 @@ if ! jq -e '
   exit 1
 fi
 
-CLIENT_LOG="$UMBRIEL_RUNTIME_DIR/wine-scrgb-auto-child-client.log"
+CLIENT_LOG="$CANOPY_RUNTIME_DIR/wine-scrgb-auto-child-client.log"
 env REQUEST_FULLSCREEN=1 COLOR_WINDOWS_SCRGB=1 COLOR_ON_SUBSURFACE=1 COLOR_CHILD_LIFECYCLE=1 \
   APP_ID=wine-scrgb-auto-child \
   bash -c 'exec -a wine "$@"' _ \
@@ -236,7 +236,7 @@ if ! grep -q '^mapped$' "$CLIENT_LOG"; then
   exit 1
 fi
 
-color=$("$UMBRIEL" color --json)
+color=$("$CANOPY" color --json)
 if ! jq -e '
   .outputs[0].hdr_mode == "auto"
   and .outputs[0].hdr_requested == false
@@ -247,14 +247,14 @@ if ! jq -e '
   exit 1
 fi
 
-wine_scrgb_auto_child_id=$("$UMBRIEL" windows --json \
+wine_scrgb_auto_child_id=$("$CANOPY" windows --json \
   | jq -r '.[] | select(.title == "wine-scrgb-auto-child") | .id')
-"$UMBRIEL" msg window-close "$wine_scrgb_auto_child_id" > /dev/null
+"$CANOPY" msg window-close "$wine_scrgb_auto_child_id" > /dev/null
 for _ in $(seq 40); do
   grep -q '^color-child-mapped$' "$CLIENT_LOG" && break
   sleep 0.1
 done
-color=$("$UMBRIEL" color --json)
+color=$("$CANOPY" color --json)
 if ! grep -q '^color-child-mapped$' "$CLIENT_LOG" \
     || ! jq -e '
       .outputs[0].hdr_requested == false
@@ -264,13 +264,13 @@ if ! grep -q '^color-child-mapped$' "$CLIENT_LOG" \
   exit 1
 fi
 
-"$UMBRIEL" msg window-close "$wine_scrgb_auto_child_id" > /dev/null
+"$CANOPY" msg window-close "$wine_scrgb_auto_child_id" > /dev/null
 for _ in $(seq 40); do
   grep -q '^color-child-hdr$' "$CLIENT_LOG" && break
   sleep 0.1
 done
 for _ in $(seq 40); do
-  color=$("$UMBRIEL" color --json)
+  color=$("$CANOPY" color --json)
   jq -e '
     .outputs[0].hdr_mode == "auto"
     and .outputs[0].hdr_requested == true
@@ -295,13 +295,13 @@ if ! jq -e '
   exit 1
 fi
 
-"$UMBRIEL" msg window-close "$wine_scrgb_auto_child_id" > /dev/null
+"$CANOPY" msg window-close "$wine_scrgb_auto_child_id" > /dev/null
 for _ in $(seq 40); do
   grep -q '^color-child-unmapped$' "$CLIENT_LOG" && break
   sleep 0.1
 done
 for _ in $(seq 40); do
-  color=$("$UMBRIEL" color --json)
+  color=$("$CANOPY" color --json)
   jq -e '
     .outputs[0].hdr_mode == "auto"
     and .outputs[0].hdr_requested == false
@@ -321,7 +321,7 @@ if ! grep -q '^color-child-unmapped$' "$CLIENT_LOG" \
   exit 1
 fi
 
-"$UMBRIEL" msg window-close "$wine_scrgb_auto_child_id" > /dev/null
+"$CANOPY" msg window-close "$wine_scrgb_auto_child_id" > /dev/null
 for _ in $(seq 40); do
   grep -q '^unmapped$' "$CLIENT_LOG" && break
   sleep 0.1
@@ -336,7 +336,7 @@ wait "$CLIENT_PID" 2>/dev/null || true
 CLIENT_PID=
 
 if ((COLOR_MANAGER_VERSION >= 3)); then
-  CLIENT_LOG="$UMBRIEL_RUNTIME_DIR/wine-bt2100-client.log"
+  CLIENT_LOG="$CANOPY_RUNTIME_DIR/wine-bt2100-client.log"
   env REQUEST_FULLSCREEN=1 COLOR_WINDOWS_BT2100=1 APP_ID=wine-bt2100 \
     bash -c 'exec -a wine "$@"' _ \
     "$UNMAP_CLIENT" wine-bt2100 > "$CLIENT_LOG" 2>&1 &
@@ -351,7 +351,7 @@ if ((COLOR_MANAGER_VERSION >= 3)); then
   fi
 
   for _ in $(seq 40); do
-    color=$("$UMBRIEL" color --json)
+    color=$("$CANOPY" color --json)
     jq -e '
       .outputs[0].hdr_mode == "auto"
       and .outputs[0].hdr_requested == true
@@ -380,13 +380,13 @@ if ((COLOR_MANAGER_VERSION >= 3)); then
     exit 1
   fi
 
-  wine_bt2100_id=$("$UMBRIEL" windows --json | jq -r '.[] | select(.title == "wine-bt2100") | .id')
-  "$UMBRIEL" msg window-close "$wine_bt2100_id" > /dev/null
+  wine_bt2100_id=$("$CANOPY" windows --json | jq -r '.[] | select(.title == "wine-bt2100") | .id')
+  "$CANOPY" msg window-close "$wine_bt2100_id" > /dev/null
   for _ in $(seq 40); do
     grep -q '^unmapped$' "$CLIENT_LOG" && break
     sleep 0.1
   done
-  color=$("$UMBRIEL" color --json)
+  color=$("$CANOPY" color --json)
   if ! grep -q '^unmapped$' "$CLIENT_LOG" \
       || ! jq -e '
         .outputs[0].hdr_mode == "auto"
@@ -403,7 +403,7 @@ if ((COLOR_MANAGER_VERSION >= 3)); then
   CLIENT_PID=
 fi
 
-CLIENT_LOG="$UMBRIEL_RUNTIME_DIR/auto-hdr-client.log"
+CLIENT_LOG="$CANOPY_RUNTIME_DIR/auto-hdr-client.log"
 env REQUEST_FULLSCREEN=1 COLOR_HDR=1 \
   "$UNMAP_CLIENT" auto-hdr > "$CLIENT_LOG" 2>&1 &
 CLIENT_PID=$!
@@ -417,7 +417,7 @@ if ! grep -q '^mapped$' "$CLIENT_LOG"; then
 fi
 
 for _ in $(seq 40); do
-  color=$("$UMBRIEL" color --json)
+  color=$("$CANOPY" color --json)
   jq -e '
     .outputs[0].hdr_mode == "auto"
     and .outputs[0].hdr_requested == true
@@ -438,13 +438,13 @@ if ! jq -e '
   exit 1
 fi
 
-auto_hdr_id=$("$UMBRIEL" windows --json | jq -r '.[] | select(.title == "auto-hdr") | .id')
-"$UMBRIEL" msg window-close "$auto_hdr_id" > /dev/null
+auto_hdr_id=$("$CANOPY" windows --json | jq -r '.[] | select(.title == "auto-hdr") | .id')
+"$CANOPY" msg window-close "$auto_hdr_id" > /dev/null
 for _ in $(seq 40); do
   grep -q '^unmapped$' "$CLIENT_LOG" && break
   sleep 0.1
 done
-color=$("$UMBRIEL" color --json)
+color=$("$CANOPY" color --json)
 if ! grep -q '^unmapped$' "$CLIENT_LOG" \
     || ! jq -e '
       .outputs[0].hdr_mode == "auto"
@@ -460,11 +460,11 @@ kill -TERM "$CLIENT_PID"
 wait "$CLIENT_PID" 2>/dev/null || true
 CLIENT_PID=
 
-printf '%s\n' "$BASELINE" > "$UMBRIEL_CONFIG"
-printf '\n[output.HEADLESS-1]\nhdr = "fullscreen"\n' >> "$UMBRIEL_CONFIG"
-"$UMBRIEL" msg config-reload > /dev/null
+printf '%s\n' "$BASELINE" > "$CANOPY_CONFIG"
+printf '\n[output.HEADLESS-1]\nhdr = "fullscreen"\n' >> "$CANOPY_CONFIG"
+"$CANOPY" msg config-reload > /dev/null
 
-color=$("$UMBRIEL" color --json)
+color=$("$CANOPY" color --json)
 if ! jq -e '
   .outputs[0].hdr_mode == "fullscreen"
   and .outputs[0].hdr_requested == false
@@ -475,7 +475,7 @@ if ! jq -e '
   exit 1
 fi
 
-CLIENT_LOG="$UMBRIEL_RUNTIME_DIR/fullscreen-hdr-client.log"
+CLIENT_LOG="$CANOPY_RUNTIME_DIR/fullscreen-hdr-client.log"
 env REQUEST_FULLSCREEN=1 \
   "$UNMAP_CLIENT" fullscreen-hdr > "$CLIENT_LOG" 2>&1 &
 CLIENT_PID=$!
@@ -489,7 +489,7 @@ if ! grep -q '^mapped$' "$CLIENT_LOG"; then
 fi
 
 for _ in $(seq 40); do
-  color=$("$UMBRIEL" color --json)
+  color=$("$CANOPY" color --json)
   jq -e '
     .outputs[0].hdr_mode == "fullscreen"
     and .outputs[0].hdr_requested == true
@@ -510,13 +510,13 @@ if ! jq -e '
   exit 1
 fi
 
-fullscreen_hdr_id=$("$UMBRIEL" windows --json | jq -r '.[] | select(.title == "fullscreen-hdr") | .id')
-"$UMBRIEL" msg window-close "$fullscreen_hdr_id" > /dev/null
+fullscreen_hdr_id=$("$CANOPY" windows --json | jq -r '.[] | select(.title == "fullscreen-hdr") | .id')
+"$CANOPY" msg window-close "$fullscreen_hdr_id" > /dev/null
 for _ in $(seq 40); do
   grep -q '^unmapped$' "$CLIENT_LOG" && break
   sleep 0.1
 done
-color=$("$UMBRIEL" color --json)
+color=$("$CANOPY" color --json)
 if ! grep -q '^unmapped$' "$CLIENT_LOG" \
     || ! jq -e '
       .outputs[0].hdr_mode == "fullscreen"
@@ -532,15 +532,15 @@ kill -TERM "$CLIENT_PID"
 wait "$CLIENT_PID" 2>/dev/null || true
 CLIENT_PID=
 
-printf '%s\n' "$BASELINE" > "$UMBRIEL_CONFIG"
+printf '%s\n' "$BASELINE" > "$CANOPY_CONFIG"
 printf '\n[output.HEADLESS-1]\nhdr = "off"\n\n[[window_rule]]\nmatch.app_id = "^hdr-rule-on$"\nhdr = "on"\n' \
-  >> "$UMBRIEL_CONFIG"
-"$UMBRIEL" msg config-reload > /dev/null
+  >> "$CANOPY_CONFIG"
+"$CANOPY" msg config-reload > /dev/null
 
 "$POINTER_CLIENT" 1280 720 pause 30000 tap 30 > /dev/null 2>&1 &
 sleep 0.1
 
-CLIENT_LOG="$UMBRIEL_RUNTIME_DIR/hdr-rule-on-client.log"
+CLIENT_LOG="$CANOPY_RUNTIME_DIR/hdr-rule-on-client.log"
 env APP_ID=hdr-rule-on \
   "$UNMAP_CLIENT" hdr-rule-on > "$CLIENT_LOG" 2>&1 &
 CLIENT_PID=$!
@@ -548,10 +548,10 @@ for _ in $(seq 60); do
   grep -q '^mapped$' "$CLIENT_LOG" && break
   sleep 0.1
 done
-hdr_rule_id=$("$UMBRIEL" windows --json | jq -r '.[] | select(.title == "hdr-rule-on") | .id')
-"$UMBRIEL" msg window-focus "$hdr_rule_id" > /dev/null
+hdr_rule_id=$("$CANOPY" windows --json | jq -r '.[] | select(.title == "hdr-rule-on") | .id')
+"$CANOPY" msg window-focus "$hdr_rule_id" > /dev/null
 for _ in $(seq 40); do
-  color=$("$UMBRIEL" color --json)
+  color=$("$CANOPY" color --json)
   jq -e '
     .outputs[0].hdr_mode == "off"
     and .outputs[0].hdr_requested == true
@@ -568,13 +568,13 @@ if ! jq -e '
   exit 1
 fi
 
-"$UMBRIEL" msg window-close "$hdr_rule_id" > /dev/null
+"$CANOPY" msg window-close "$hdr_rule_id" > /dev/null
 for _ in $(seq 40); do
   grep -q '^unmapped$' "$CLIENT_LOG" && break
   sleep 0.1
 done
 for _ in $(seq 40); do
-  color=$("$UMBRIEL" color --json)
+  color=$("$CANOPY" color --json)
   jq -e '
     .outputs[0].hdr_requested == false
     and .outputs[0].fallback_reason == ""
@@ -593,12 +593,12 @@ kill -TERM "$CLIENT_PID"
 wait "$CLIENT_PID" 2>/dev/null || true
 CLIENT_PID=
 
-printf '%s\n' "$BASELINE" > "$UMBRIEL_CONFIG"
+printf '%s\n' "$BASELINE" > "$CANOPY_CONFIG"
 printf '\n[output.HEADLESS-1]\nhdr = "on"\n\n[[window_rule]]\nmatch.app_id = "^hdr-rule-off$"\nhdr = "off"\n' \
-  >> "$UMBRIEL_CONFIG"
-"$UMBRIEL" msg config-reload > /dev/null
+  >> "$CANOPY_CONFIG"
+"$CANOPY" msg config-reload > /dev/null
 
-CLIENT_LOG="$UMBRIEL_RUNTIME_DIR/hdr-rule-off-client.log"
+CLIENT_LOG="$CANOPY_RUNTIME_DIR/hdr-rule-off-client.log"
 env APP_ID=hdr-rule-off \
   "$UNMAP_CLIENT" hdr-rule-off > "$CLIENT_LOG" 2>&1 &
 CLIENT_PID=$!
@@ -606,10 +606,10 @@ for _ in $(seq 60); do
   grep -q '^mapped$' "$CLIENT_LOG" && break
   sleep 0.1
 done
-hdr_rule_id=$("$UMBRIEL" windows --json | jq -r '.[] | select(.title == "hdr-rule-off") | .id')
-"$UMBRIEL" msg window-focus "$hdr_rule_id" > /dev/null
+hdr_rule_id=$("$CANOPY" windows --json | jq -r '.[] | select(.title == "hdr-rule-off") | .id')
+"$CANOPY" msg window-focus "$hdr_rule_id" > /dev/null
 for _ in $(seq 40); do
-  color=$("$UMBRIEL" color --json)
+  color=$("$CANOPY" color --json)
   jq -e '
     .outputs[0].hdr_mode == "on"
     and .outputs[0].hdr_requested == false
@@ -626,13 +626,13 @@ if ! jq -e '
   exit 1
 fi
 
-"$UMBRIEL" msg window-close "$hdr_rule_id" > /dev/null
+"$CANOPY" msg window-close "$hdr_rule_id" > /dev/null
 for _ in $(seq 40); do
   grep -q '^unmapped$' "$CLIENT_LOG" && break
   sleep 0.1
 done
 for _ in $(seq 40); do
-  color=$("$UMBRIEL" color --json)
+  color=$("$CANOPY" color --json)
   jq -e '
     .outputs[0].hdr_requested == true
     and .outputs[0].fallback_reason == "display does not advertise PQ"
@@ -685,14 +685,14 @@ SDR10_ACTIVE='
   and (.outputs[0].render_format == "XR30" or .outputs[0].render_format == "XB30")'
 
 write_color_config() {
-  printf '%s\n%s\n' "$BASELINE" "${1:-}" > "$UMBRIEL_CONFIG"
-  "$UMBRIEL" msg config-reload > /dev/null
+  printf '%s\n%s\n' "$BASELINE" "${1:-}" > "$CANOPY_CONFIG"
+  "$CANOPY" msg config-reload > /dev/null
 }
 
 expect_color_state() {
   local label=$1 filter=$2
   local state
-  state=$("$UMBRIEL" color --json)
+  state=$("$CANOPY" color --json)
   if ! jq -e "$filter" <<< "$state" > /dev/null; then
     echo "$label: unexpected color state: $state"
     exit 1
@@ -715,18 +715,18 @@ expect_rgb_near() {
 
 expect_rendered() {
   local label=$1
-  local screenshot="$UMBRIEL_RUNTIME_DIR/sdr10-$label.png"
+  local screenshot="$CANOPY_RUNTIME_DIR/sdr10-$label.png"
   local lit backdrop
-  "$UMBRIEL" settle
+  "$CANOPY" settle
   grim "$screenshot"
-  lit=$("$UMBRIEL_PIXEL_PROBE" "$screenshot" count 'r > 0 || g > 0 || b > 0')
+  lit=$("$CANOPY_PIXEL_PROBE" "$screenshot" count 'r > 0 || g > 0 || b > 0')
   if (( lit == 0 )); then
     echo "$label: screenshot is all-black"
     exit 1
   fi
-  backdrop=$("$UMBRIEL_PIXEL_PROBE" "$screenshot" pixel 2 2)
+  backdrop=$("$CANOPY_PIXEL_PROBE" "$screenshot" pixel 2 2)
   expect_rgb_near "$label backdrop at 2,2" "$backdrop" "30 30 46" 2
-  FRAME_MEAN=$("$UMBRIEL_PIXEL_PROBE" "$screenshot" mean)
+  FRAME_MEAN=$("$CANOPY_PIXEL_PROBE" "$screenshot" mean)
   echo "$label: frame rendered with blur/corner_radius active (backdrop=${backdrop}, mean=${FRAME_MEAN})"
 }
 
@@ -734,10 +734,10 @@ write_color_config "$FX_CONFIG"
 foot --config=/dev/null sh -c 'while :; do sleep 1; done' > /dev/null 2>&1 &
 CLIENT_PID=$!
 for _ in $(seq 60); do
-  [[ $("$UMBRIEL" windows --json | jq 'length') -ge 1 ]] && break
+  [[ $("$CANOPY" windows --json | jq 'length') -ge 1 ]] && break
   sleep 0.1
 done
-if [[ $("$UMBRIEL" windows --json | jq 'length') -lt 1 ]]; then
+if [[ $("$CANOPY" windows --json | jq 'length') -lt 1 ]]; then
   echo "SDR10: foot window never mapped"
   exit 1
 fi
@@ -753,19 +753,19 @@ expect_rgb_near "sdr8-return frame mean against sdr8" "$FRAME_MEAN" "$SDR8_MEAN"
 
 write_color_config "$SDR10_CONFIG"
 expect_color_state sdr8-to-sdr10 "$SDR10_ACTIVE"
-if ! grep -F '10-bit SDR: active' <<< "$("$UMBRIEL" color)" > /dev/null; then
+if ! grep -F '10-bit SDR: active' <<< "$("$CANOPY" color)" > /dev/null; then
   echo "sdr8-to-sdr10: missing active status in human color output"
   exit 1
 fi
 
 # Re-enabling the output must re-select the 10-bit format, not just retain the
 # configured value while the output is powered off.
-"$UMBRIEL" msg dpms-off > /dev/null
+"$CANOPY" msg dpms-off > /dev/null
 expect_color_state dpms-off '
   .outputs[0].bit_depth == 10
   and .outputs[0].bit_depth_active == false'
-"$UMBRIEL" msg dpms-on > /dev/null
-"$UMBRIEL" settle
+"$CANOPY" msg dpms-on > /dev/null
+"$CANOPY" settle
 expect_color_state dpms-on "$SDR10_ACTIVE"
 echo "dpms-cycle: XR30/XB30 re-selected after DPMS off/on"
 
@@ -789,7 +789,7 @@ expect_color_state hdr-unavailable-with-sdr10 "$SDR10_ACTIVE"'
   and .outputs[0].hdr_requested == true
   and .outputs[0].hdr_active == false
   and (.outputs[0].fallback_reason | length) > 0'
-if ! grep -F '10-bit SDR: active' <<< "$("$UMBRIEL" color)" > /dev/null; then
+if ! grep -F '10-bit SDR: active' <<< "$("$CANOPY" color)" > /dev/null; then
   echo "hdr-unavailable-with-sdr10: missing active status in human color output"
   exit 1
 fi

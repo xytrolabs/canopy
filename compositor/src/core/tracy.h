@@ -1,10 +1,10 @@
 #pragma once
 
-// Zones for the compositor's per-frame work, alongside umbrielfx's own zones
+// Zones for the compositor's per-frame work, alongside canopyfx's own zones
 // for the render pass. No-ops without -Dtracy=enabled.
 #ifdef TRACY_ENABLE
 #include <tracy/Tracy.hpp>
-#define UMBRIEL_ZONE(name) ZoneScopedN(name)
+#define CANOPY_ZONE(name) ZoneScopedN(name)
 #else
-#define UMBRIEL_ZONE(name)
+#define CANOPY_ZONE(name)
 #endif

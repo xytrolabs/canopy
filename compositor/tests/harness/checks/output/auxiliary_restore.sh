@@ -5,12 +5,12 @@
 # dwindle, and master workspaces so every layout participates in the recovery.
 set -euo pipefail
 
-readonly WORKSPACE="${UMBRIEL_WORKSPACE_CLIENT:-./build-debug/tests/workspace-client}"
-readonly UNMAP_CLIENT="${UMBRIEL_UNMAP_CLIENT:-./build-debug/tests/unmap-client}"
-readonly POINTER="${UMBRIEL_POINTER_CLIENT:-./build-debug/tests/pointer-client}"
+readonly WORKSPACE="${CANOPY_WORKSPACE_CLIENT:-./build-debug/tests/workspace-client}"
+readonly UNMAP_CLIENT="${CANOPY_UNMAP_CLIENT:-./build-debug/tests/unmap-client}"
+readonly POINTER="${CANOPY_POINTER_CLIENT:-./build-debug/tests/pointer-client}"
 readonly OUTPUT_LAYOUT_W=4480
 readonly OUTPUT_LAYOUT_H=1440
-readonly BASE_CONFIG="$(< "$UMBRIEL_CONFIG")"
+readonly BASE_CONFIG="$(< "$CANOPY_CONFIG")"
 readonly SCRATCHPAD=auxiliary
 
 layouts=(scroll dwindle master)
@@ -31,7 +31,7 @@ spawn_client() {
 wait_for_count() {
   local expected=$1 count=
   for _ in $(seq 80); do
-    count=$("$UMBRIEL" windows --json | jq 'length')
+    count=$("$CANOPY" windows --json | jq 'length')
     [[ $count == "$expected" ]] && return 0
     sleep 0.1
   done
@@ -40,7 +40,7 @@ wait_for_count() {
 }
 
 field_of() {
-  "$UMBRIEL" windows --json \
+  "$CANOPY" windows --json \
     | jq -r --arg title "$1" --arg field "$2" '.[] | select(.title == $title) | .[$field]'
 }
 
@@ -73,7 +73,7 @@ assert_workspace_evacuation() {
     for _ in $(seq 80); do
       workspace=$(field_of "$title" workspace)
       if [[ $workspace == HEADLESS-2:* && $workspace != "$native" ]] \
-        && "$UMBRIEL" workspaces --json | jq -e --arg id "$workspace" \
+        && "$CANOPY" workspaces --json | jq -e --arg id "$workspace" \
           'any(.[]; .id == $id and .named == false)' > /dev/null; then
         found=true
         break
@@ -111,7 +111,7 @@ wait_for_field() {
 }
 
 output_origin() {
-  "$UMBRIEL" outputs \
+  "$CANOPY" outputs \
     | awk -v name="$1" '$1 == name { found = 1; next } found && /Position:/ { split($2, p, ","); print p[1], p[2]; exit }'
 }
 
@@ -126,22 +126,22 @@ move_pointer_to_output() {
 }
 
 focus_window() {
-  "$UMBRIEL" msg window-focus-warp "$(field_of "$1" id)" > /dev/null
+  "$CANOPY" msg window-focus-warp "$(field_of "$1" id)" > /dev/null
 }
 
 move_to_workspace() {
   local title=$1 workspace=$2
   focus_window "$title"
-  "$UMBRIEL" msg window-move-to-workspace "$workspace" --output HEADLESS-1 > /dev/null
+  "$CANOPY" msg window-move-to-workspace "$workspace" --output HEADLESS-1 > /dev/null
   wait_for_home "$title" "HEADLESS-1/$workspace"
 }
 
 geometry_snapshot() {
-  "$UMBRIEL" windows --json | jq -Sc '[.[] | {title, x, y, w, h, floating}] | sort_by(.title)'
+  "$CANOPY" windows --json | jq -Sc '[.[] | {title, x, y, w, h, floating}] | sort_by(.title)'
 }
 
 anchor_snapshot() {
-  "$UMBRIEL" windows --json \
+  "$CANOPY" windows --json \
     | jq -Sc '[.[] | select(.title | endswith("-anchor")) | {title, x, y, w, h, floating}] | sort_by(.title)'
 }
 
@@ -188,8 +188,8 @@ wait_for_snapshot() {
 
 destroy_home_with_workspace_views() {
   local native
-  native=$("$UMBRIEL" workspaces --json | jq -r '.[] | select(.output == "HEADLESS-2" and .index == 1) | .id')
-  "$UMBRIEL" output-destroy HEADLESS-1 > /dev/null
+  native=$("$CANOPY" workspaces --json | jq -r '.[] | select(.output == "HEADLESS-2" and .index == 1) | .id')
+  "$CANOPY" output-destroy HEADLESS-1 > /dev/null
   if [[ ${1:-} == pinned ]]; then
     assert_workspace_evacuation "$native" "${anchors[@]}"
     for title in "${probes[@]}"; do
@@ -202,8 +202,8 @@ destroy_home_with_workspace_views() {
 
 destroy_home_with_scratchpad_views() {
   local native
-  native=$("$UMBRIEL" workspaces --json | jq -r '.[] | select(.output == "HEADLESS-2" and .index == 1) | .id')
-  "$UMBRIEL" output-destroy HEADLESS-1 > /dev/null
+  native=$("$CANOPY" workspaces --json | jq -r '.[] | select(.output == "HEADLESS-2" and .index == 1) | .id')
+  "$CANOPY" output-destroy HEADLESS-1 > /dev/null
   assert_workspace_evacuation "$native" "${anchors[@]}"
   for title in "${probes[@]}"; do
     wait_for_home "$title" ''
@@ -212,7 +212,7 @@ destroy_home_with_scratchpad_views() {
 
 recreate_home() {
   local created=
-  created=$("$UMBRIEL" output-create HEADLESS-1)
+  created=$("$CANOPY" output-create HEADLESS-1)
   if [[ $created != HEADLESS-1 ]]; then
     echo "expected recreated output HEADLESS-1, got '$created'"
     return 1
@@ -227,7 +227,7 @@ wait_for_workspace_homes() {
 }
 
 active_probe() {
-  "$UMBRIEL" windows --json \
+  "$CANOPY" windows --json \
     | jq -r '[.[] | select(.active and (.title | endswith("-probe"))) | .title][0] // ""'
 }
 
@@ -249,7 +249,7 @@ assert_visible_scratchpad_cycle() {
   local output=$1 active=
   declare -A seen=()
   for _ in 1 2 3; do
-    if ! "$UMBRIEL" msg scratchpad-focus-next "$SCRATCHPAD" > /dev/null; then
+    if ! "$CANOPY" msg scratchpad-focus-next "$SCRATCHPAD" > /dev/null; then
       echo "scratchpad on '$output' was not visible while cycling '$active'"
       return 1
     fi
@@ -305,11 +305,11 @@ layout.mode = "master"
 match.title = "^late-float$"
 default_floating = true
 EOF
-  } > "$UMBRIEL_CONFIG"
+  } > "$CANOPY_CONFIG"
 }
 
 write_matrix_config true true
-"$UMBRIEL" msg config-reload > /dev/null
+"$CANOPY" msg config-reload > /dev/null
 
 count=0
 for layout in "${layouts[@]}"; do
@@ -326,9 +326,9 @@ wait_for_workspace_homes "${titles[@]}"
 # Ordinary floating views retain exact geometry and stay outside every layout.
 for title in "${probes[@]}"; do
   focus_window "$title"
-  "$UMBRIEL" msg window-toggle-floating > /dev/null
+  "$CANOPY" msg window-toggle-floating > /dev/null
   wait_for_field "$title" floating true
-  "$UMBRIEL" msg window-center > /dev/null
+  "$CANOPY" msg window-center > /dev/null
 done
 floating_before=$(wait_for_stable_snapshot all)
 destroy_home_with_workspace_views
@@ -340,7 +340,7 @@ wait_for_workspace_homes "${titles[@]}"
 wait_for_snapshot all "$floating_before"
 for title in "${probes[@]}"; do
   focus_window "$title"
-  "$UMBRIEL" msg window-toggle-floating > /dev/null
+  "$CANOPY" msg window-toggle-floating > /dev/null
   wait_for_field "$title" floating false
 done
 
@@ -351,9 +351,9 @@ done
 # and retile there.
 for title in "${probes[@]}"; do
   focus_window "$title"
-  "$UMBRIEL" msg window-toggle-pinned > /dev/null
+  "$CANOPY" msg window-toggle-pinned > /dev/null
   wait_for_field "$title" floating true
-  "$UMBRIEL" msg window-center > /dev/null
+  "$CANOPY" msg window-center > /dev/null
 done
 pinned_before=$(wait_for_stable_snapshot all)
 destroy_home_with_workspace_views pinned
@@ -362,14 +362,14 @@ for title in "${probes[@]}"; do
 done
 recreate_home
 wait_for_workspace_homes "${anchors[@]}"
-active=$("$UMBRIEL" workspaces --json | jq -r '.[] | select(.output == "HEADLESS-1" and .active) | .name')
+active=$("$CANOPY" workspaces --json | jq -r '.[] | select(.output == "HEADLESS-1" and .active) | .name')
 for title in "${probes[@]}"; do
   wait_for_home "$title" "HEADLESS-1/$active"
 done
 wait_for_snapshot all "$pinned_before"
 for title in "${probes[@]}"; do
   focus_window "$title"
-  "$UMBRIEL" msg window-toggle-pinned > /dev/null
+  "$CANOPY" msg window-toggle-pinned > /dev/null
   wait_for_field "$title" floating false
   wait_for_home "$title" "HEADLESS-1/$active"
 done
@@ -382,9 +382,9 @@ done
 # observes the temporary home instead of skipping directly to the final one.
 for title in "${probes[@]}"; do
   focus_window "$title"
-  "$UMBRIEL" msg window-toggle-floating > /dev/null
+  "$CANOPY" msg window-toggle-floating > /dev/null
   wait_for_field "$title" floating true
-  "$UMBRIEL" msg window-center > /dev/null
+  "$CANOPY" msg window-center > /dev/null
 done
 spawn_client legit-scratch
 count=$((count + 1))
@@ -392,24 +392,24 @@ wait_for_count "$count"
 move_to_workspace legit-scratch 1
 move_pointer_to_output HEADLESS-1
 focus_window legit-scratch
-"$UMBRIEL" msg window-move-to-scratchpad "$SCRATCHPAD" > /dev/null
+"$CANOPY" msg window-move-to-scratchpad "$SCRATCHPAD" > /dev/null
 wait_for_home legit-scratch ''
-"$UMBRIEL" msg scratchpad-toggle "$SCRATCHPAD" > /dev/null
+"$CANOPY" msg scratchpad-toggle "$SCRATCHPAD" > /dev/null
 
 write_matrix_config false false
-"$UMBRIEL" msg config-reload > /dev/null
+"$CANOPY" msg config-reload > /dev/null
 for title in "${titles[@]}"; do
   wait_for_home "$title" ''
 done
 wait_for_home legit-scratch ''
-"$UNMAP_CLIENT" late-float 800 500 > "$UMBRIEL_RUNTIME_DIR/late-float.log" 2>&1 &
+"$UNMAP_CLIENT" late-float 800 500 > "$CANOPY_RUNTIME_DIR/late-float.log" 2>&1 &
 count=$((count + 1))
 wait_for_count "$count"
 wait_for_home late-float ''
 wait_for_field late-float floating true
 
 write_matrix_config false true
-"$UMBRIEL" msg config-reload > /dev/null
+"$CANOPY" msg config-reload > /dev/null
 wait_for_home late-float HEADLESS-2/1
 assert_workspace_evacuation "$(field_of late-float workspace)" "${titles[@]}"
 for title in "${probes[@]}"; do
@@ -417,27 +417,27 @@ for title in "${probes[@]}"; do
 done
 wait_for_field late-float floating true
 wait_for_home legit-scratch ''
-"$UMBRIEL" msg scratchpad-focus-next "$SCRATCHPAD" > /dev/null
+"$CANOPY" msg scratchpad-focus-next "$SCRATCHPAD" > /dev/null
 
 write_matrix_config true true
-"$UMBRIEL" msg config-reload > /dev/null
+"$CANOPY" msg config-reload > /dev/null
 wait_for_workspace_homes "${titles[@]}"
 for title in "${probes[@]}"; do
   wait_for_field "$title" floating true
 done
 wait_for_home legit-scratch ''
-"$UMBRIEL" msg scratchpad-focus-next "$SCRATCHPAD" > /dev/null
-"$UMBRIEL" msg window-close "$(field_of legit-scratch id)" > /dev/null
+"$CANOPY" msg scratchpad-focus-next "$SCRATCHPAD" > /dev/null
+"$CANOPY" msg window-close "$(field_of legit-scratch id)" > /dev/null
 count=$((count - 1))
 wait_for_count "$count"
 # Closing the last member leaves the empty scratchpad open; dismiss it before the next phase.
-"$UMBRIEL" msg scratchpad-toggle "$SCRATCHPAD" > /dev/null
-"$UMBRIEL" msg window-close "$(field_of late-float id)" > /dev/null
+"$CANOPY" msg scratchpad-toggle "$SCRATCHPAD" > /dev/null
+"$CANOPY" msg window-close "$(field_of late-float id)" > /dev/null
 count=$((count - 1))
 wait_for_count "$count"
 for title in "${probes[@]}"; do
   focus_window "$title"
-  "$UMBRIEL" msg window-toggle-floating > /dev/null
+  "$CANOPY" msg window-toggle-floating > /dev/null
   wait_for_field "$title" floating false
 done
 
@@ -447,20 +447,20 @@ scratchpad_phase() {
   if [[ $return_floating == true ]]; then
     for title in "${probes[@]}"; do
       focus_window "$title"
-      "$UMBRIEL" msg window-toggle-floating > /dev/null
+      "$CANOPY" msg window-toggle-floating > /dev/null
       wait_for_field "$title" floating true
-      "$UMBRIEL" msg window-center > /dev/null
+      "$CANOPY" msg window-center > /dev/null
     done
   fi
 
   move_pointer_to_output HEADLESS-1
   for title in "${probes[@]}"; do
     focus_window "$title"
-    "$UMBRIEL" msg window-move-to-scratchpad "$SCRATCHPAD" > /dev/null
+    "$CANOPY" msg window-move-to-scratchpad "$SCRATCHPAD" > /dev/null
     wait_for_home "$title" ''
     wait_for_field "$title" floating true
   done
-  "$UMBRIEL" msg scratchpad-toggle "$SCRATCHPAD" > /dev/null
+  "$CANOPY" msg scratchpad-toggle "$SCRATCHPAD" > /dev/null
   assert_visible_scratchpad_cycle HEADLESS-1
   scratch_anchor_before=$(wait_for_stable_snapshot anchors)
 
@@ -477,7 +477,7 @@ scratchpad_phase() {
 
   for title in "${probes[@]}"; do
     focus_window "$title"
-    "$UMBRIEL" msg window-restore-from-scratchpad "$SCRATCHPAD" > /dev/null
+    "$CANOPY" msg window-restore-from-scratchpad "$SCRATCHPAD" > /dev/null
     wait_for_home "$title" "HEADLESS-1/${workspace_of[$title]}"
     wait_for_field "$title" floating "$return_floating"
   done
@@ -485,7 +485,7 @@ scratchpad_phase() {
   if [[ $return_floating == true ]]; then
     for title in "${probes[@]}"; do
       focus_window "$title"
-      "$UMBRIEL" msg window-toggle-floating > /dev/null
+      "$CANOPY" msg window-toggle-floating > /dev/null
       wait_for_field "$title" floating false
     done
   fi

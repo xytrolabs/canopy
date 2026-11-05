@@ -1,0 +1,13 @@
+[Unit]
+Description=Canopy Wayland compositor
+Documentation=https://github.com/xytrolabs/canopy
+Wants=graphical-session-pre.target canopywc-session.target
+After=graphical-session-pre.target
+BindsTo=graphical-session.target
+PartOf=canopywc-session.target
+Before=canopywc-session.target graphical-session.target
+
+[Service]
+Type=notify
+Slice=session.slice
+ExecStart=@CANOPY_EXECUTABLE@

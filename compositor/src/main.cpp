@@ -26,7 +26,7 @@
 #include <vector>
 
 #ifdef __GLIBC__
-#ifdef UMBRIEL_USE_JEMALLOC
+#ifdef CANOPY_USE_JEMALLOC
 #include <jemalloc/jemalloc.h>
 #else
 #include <malloc.h>
@@ -52,14 +52,14 @@ namespace {
       }
     }
 
-    umbriel::loadConfig(configPath);
-    const auto& diags = umbriel::configDiagnostics();
+    canopy::loadConfig(configPath);
+    const auto& diags = canopy::configDiagnostics();
     if (json) {
       nlohmann::json diagnostics = nlohmann::json::array();
       for (const auto& d : diags) {
         const bool located = !d.file.empty();
         diagnostics.push_back({
-            {"severity", d.severity == umbriel::ConfigDiagnostic::Severity::Error ? "error" : "warning"},
+            {"severity", d.severity == canopy::ConfigDiagnostic::Severity::Error ? "error" : "warning"},
             {"message", d.message},
             {"file", located ? nlohmann::json(d.file) : nlohmann::json(nullptr)},
             {"line", located && d.line > 0 ? nlohmann::json(d.line) : nlohmann::json(nullptr)},
@@ -70,7 +70,7 @@ namespace {
           "{}",
           nlohmann::json{
               {"valid", diags.empty()},
-              {"path", umbriel::configRootPath().string()},
+              {"path", canopy::configRootPath().string()},
               {"diagnostics", std::move(diagnostics)},
           }
               .dump()
@@ -78,12 +78,12 @@ namespace {
       return diags.empty() ? EXIT_SUCCESS : EXIT_FAILURE;
     }
     if (diags.empty()) {
-      std::println("config: ok ({})", umbriel::configRootPath().string());
+      std::println("config: ok ({})", canopy::configRootPath().string());
       return EXIT_SUCCESS;
     }
     for (const auto& d : diags) {
       const std::string loc = d.location();
-      if (d.severity == umbriel::ConfigDiagnostic::Severity::Error) {
+      if (d.severity == canopy::ConfigDiagnostic::Severity::Error) {
         std::println(stderr, "error: {}{}", loc.empty() ? "" : loc + ": ", d.message);
       } else {
         std::println(stderr, "warning: {}{}", loc.empty() ? "" : loc + ": ", d.message);
@@ -94,18 +94,18 @@ namespace {
   }
 
   int printConfigSchema(bool json) {
-    const umbriel::registry::Descriptions keys = umbriel::registry::describeConfig(umbriel::Config{});
+    const canopy::registry::Descriptions keys = canopy::registry::describeConfig(canopy::Config{});
     if (!json) {
-      std::print("{}", umbriel::configSchemaSummary(keys));
+      std::print("{}", canopy::configSchemaSummary(keys));
       return EXIT_SUCCESS;
     }
     // Same rule as --version: a build outside git reports "unknown", which is no revision at all.
-    const std::string_view revision = umbriel::build_info::revision();
+    const std::string_view revision = canopy::build_info::revision();
     const bool knownRevision = !revision.empty() && revision != "unknown";
     std::print(
         "{}",
-        umbriel::configSchemaJson(
-            keys, umbriel::build_info::version(), knownRevision ? std::optional(revision) : std::nullopt
+        canopy::configSchemaJson(
+            keys, canopy::build_info::version(), knownRevision ? std::optional(revision) : std::nullopt
         )
     );
     return EXIT_SUCCESS;
@@ -116,8 +116,8 @@ namespace {
     auto row = [stream](std::string_view cmd, std::string_view desc) {
       std::println(stream, "  {:<30} {}", cmd, desc);
     };
-    auto specRows = [&row](umbriel::IpcCommandGroup group) {
-      for (const auto& spec : umbriel::ipcCommands()) {
+    auto specRows = [&row](canopy::IpcCommandGroup group) {
+      for (const auto& spec : canopy::ipcCommands()) {
         if (spec.group != group) {
           continue;
         }
@@ -130,9 +130,9 @@ namespace {
       }
     };
 
-    std::println(stream, "umbriel {}: a wayland compositor\n", umbriel::build_info::version());
-    std::println(stream, "Usage: umbriel [-s <command>] [-c <config>]   run the compositor");
-    std::println(stream, "       umbriel <command> [args...]            run a command");
+    std::println(stream, "canopywc {}: a wayland compositor\n", canopy::build_info::version());
+    std::println(stream, "Usage: canopywc [-s <command>] [-c <config>]   run the compositor");
+    std::println(stream, "       canopywc <command> [args...]            run a command");
 
     heading("Compositor options");
     row("-s <command>", "spawn <command> once the compositor starts");
@@ -140,13 +140,13 @@ namespace {
 
     heading("Control the running compositor");
     row("msg <action> [args...]", "send an action to the compositor");
-    specRows(umbriel::IpcCommandGroup::Control);
+    specRows(canopy::IpcCommandGroup::Control);
 
     heading("Inspect the running compositor");
-    specRows(umbriel::IpcCommandGroup::Inspect);
+    specRows(canopy::IpcCommandGroup::Inspect);
     {
       std::string names;
-      for (const auto& name : umbriel::Ipc::kEventNames) {
+      for (const auto& name : canopy::Ipc::kEventNames) {
         if (!names.empty()) {
           names += ", ";
         }
@@ -160,34 +160,34 @@ namespace {
     row("config validate [-c <config>]", "check the config file; --json lists diagnostics");
     row("config schema [--json]", "count or describe every config key");
 
-    if (std::ranges::any_of(umbriel::ipcCommands(), [](const auto& spec) {
-          return spec.group == umbriel::IpcCommandGroup::Harness;
+    if (std::ranges::any_of(canopy::ipcCommands(), [](const auto& spec) {
+          return spec.group == canopy::IpcCommandGroup::Harness;
         })) {
       heading("Test harness");
-      specRows(umbriel::IpcCommandGroup::Harness);
+      specRows(canopy::IpcCommandGroup::Harness);
     }
 
     heading("Other");
     row("help | -h | --help", "show this help");
     row("-v | -V | --version", "print version");
 
-    std::println(stream, "\nRun `umbriel msg --help` to list all available actions for `msg` and keybinds.");
+    std::println(stream, "\nRun `canopywc msg --help` to list all available actions for `msg` and keybinds.");
   }
 
-  // `umbriel msg --help`: every action with its arguments, grouped as the cheatsheet groups them.
+  // `canopy msg --help`: every action with its arguments, grouped as the cheatsheet groups them.
   void printActionHelp() {
-    std::println("Usage: umbriel msg <action> [args...]");
+    std::println("Usage: canopywc msg <action> [args...]");
     std::println("");
     std::println("Send an action to the running compositor.");
     std::println(
         "Arguments follow the action as separate words; `spawn` runs the remaining words as one shell command."
     );
     std::println("Available actions, grouped as the cheatsheet groups them:");
-    for (const umbriel::Group group : umbriel::fixedGroupOrder()) {
+    for (const canopy::Group group : canopy::fixedGroupOrder()) {
       std::vector<std::string> names;
       std::vector<std::string_view> summaries;
-      for (const auto& actionSpec : umbriel::actionSpecs()) {
-        if (umbriel::groupForAction(actionSpec.action) != group) {
+      for (const auto& actionSpec : canopy::actionSpecs()) {
+        if (canopy::groupForAction(actionSpec.action) != group) {
           continue;
         }
         names.emplace_back(
@@ -206,7 +206,7 @@ namespace {
         width = std::max(width, name.size());
       }
       std::println("");
-      std::println("{}", umbriel::groupTitle(group));
+      std::println("{}", canopy::groupTitle(group));
       for (size_t i = 0; i < names.size(); ++i) {
         std::println("  {:<{}}  {}", names[i], width, summaries[i]);
       }
@@ -214,18 +214,18 @@ namespace {
   }
 } // namespace
 
-#ifdef UMBRIEL_USE_JEMALLOC
+#ifdef CANOPY_USE_JEMALLOC
 // Read by jemalloc before its first allocation. Few arenas and fast dirty/muzzy decay bound fragmentation and return
 // freed pages to the OS promptly. The background thread runs decay even while the compositor is idle, otherwise pages
 // freed by a burst would wait for the next allocation to be returned.
 const char* malloc_conf = "background_thread:true,narenas:2,dirty_decay_ms:1000,muzzy_decay_ms:5000,lg_tcache_max:12";
 
-#define UMBRIEL_STRINGIFY_HELPER(x) #x
-#define UMBRIEL_STRINGIFY(x) UMBRIEL_STRINGIFY_HELPER(x)
+#define CANOPY_STRINGIFY_HELPER(x) #x
+#define CANOPY_STRINGIFY(x) CANOPY_STRINGIFY_HELPER(x)
 #endif
 
 int main(int argc, char** argv) {
-#if defined(__GLIBC__) && !defined(UMBRIEL_USE_JEMALLOC)
+#if defined(__GLIBC__) && !defined(CANOPY_USE_JEMALLOC)
   // glibc fallback when jemalloc is unavailable: a bounded arena count keeps a
   // long-running compositor from fragmenting across per-thread arenas.
   mallopt(M_ARENA_MAX, 2);
@@ -263,11 +263,11 @@ int main(int argc, char** argv) {
     }
     if (std::strcmp(argv[1], "--version") == 0 || std::strcmp(argv[1], "-v") == 0 || std::strcmp(argv[1], "-V") == 0) {
       constexpr std::string_view unknownRevision = "unknown";
-      const std::string_view revision = umbriel::build_info::revision();
+      const std::string_view revision = canopy::build_info::revision();
       if (!revision.empty() && revision != unknownRevision) {
-        std::println("umbriel {} ({})", umbriel::build_info::version(), revision);
+        std::println("canopywc {} ({})", canopy::build_info::version(), revision);
       } else {
-        std::println("umbriel {}", umbriel::build_info::version());
+        std::println("canopywc {}", canopy::build_info::version());
       }
       return EXIT_SUCCESS;
     }
@@ -306,7 +306,7 @@ int main(int argc, char** argv) {
         printHelp(stderr);
         return EXIT_FAILURE;
       }
-      return umbriel::runIpcSubscribe(events);
+      return canopy::runIpcSubscribe(events);
     }
 
     // Not an IpcCommandSpec: the words are parsed here and sent as a structured action request.
@@ -329,10 +329,10 @@ int main(int argc, char** argv) {
         printHelp(stderr);
         return EXIT_FAILURE;
       }
-      return umbriel::runIpcAction(words, jf);
+      return canopy::runIpcAction(words, jf);
     }
 
-    if (const auto* spec = umbriel::findIpcCommand(argv[1])) {
+    if (const auto* spec = canopy::findIpcCommand(argv[1])) {
       if (!spec->takesArgs) {
         bool jf = false;
         for (int i = 2; i < argc; ++i) {
@@ -347,11 +347,11 @@ int main(int argc, char** argv) {
             return EXIT_FAILURE;
           }
         }
-        return umbriel::runIpcCommand(*spec, {}, jf);
+        return canopy::runIpcCommand(*spec, {}, jf);
       }
 
       if (argc == 3 && isHelpFlag(argv[2])) {
-        std::println("Usage: umbriel {} {}", spec->name, spec->argSpec);
+        std::println("Usage: canopy {} {}", spec->name, spec->argSpec);
         std::println("");
         std::println("{}", spec->description);
         return EXIT_SUCCESS;
@@ -371,7 +371,7 @@ int main(int argc, char** argv) {
         printHelp(stderr);
         return EXIT_FAILURE;
       }
-      return umbriel::runIpcCommand(*spec, args, jf);
+      return canopy::runIpcCommand(*spec, args, jf);
     }
   }
 
@@ -383,7 +383,7 @@ int main(int argc, char** argv) {
 
   initLogFile();
   // wlroots debug output is mostly per-frame scan-out and buffer chatter, so it stays opt-in.
-  const char* wlrDebug = std::getenv("UMBRIEL_WLR_DEBUG");
+  const char* wlrDebug = std::getenv("CANOPY_WLR_DEBUG");
   const bool wlrDebugEnabled = wlrDebug != nullptr && std::strcmp(wlrDebug, "1") == 0;
   wlr_log_init(wlrDebugEnabled ? WLR_DEBUG : WLR_INFO, wlrLogHandler);
 
@@ -403,14 +403,14 @@ int main(int argc, char** argv) {
   }
 
   try {
-    kLog.info("starting umbriel version={} commit={}", umbriel::build_info::version(), umbriel::build_info::revision());
-    umbriel::loadConfig(configPath);
-    umbriel::Server server;
+    kLog.info("starting canopywc version={} commit={}", canopy::build_info::version(), canopy::build_info::revision());
+    canopy::loadConfig(configPath);
+    canopy::Server server;
 
     // SIGINT and SIGTERM are handled on the event loop by the server itself.
     // Exited children are reaped by a SIGCHLD handler. Every fork in Server
     // restores the default before exec.
-    umbriel::installChildReaper();
+    canopy::installChildReaper();
 
     if (!server.start(startupCmd)) {
       kLog.error("failed to start server");
@@ -419,7 +419,7 @@ int main(int argc, char** argv) {
 
     // Startup allocates heavily (config, scene tree, xwayland, banners) and none of that peak is needed once the
     // session is up. Purge the excess pages so steady-state RSS tracks what the session actually uses.
-#ifdef UMBRIEL_USE_JEMALLOC
+#ifdef CANOPY_USE_JEMALLOC
     // Log the effective configuration once so a wrong malloc_conf shows up in
     // the startup log instead of silently degrading allocator behavior.
     unsigned narenas = 0;
@@ -431,7 +431,7 @@ int main(int argc, char** argv) {
     kLog.info("jemalloc: narenas={} dirty_decay_ms={}ms", narenas, dirtyDecayMs);
 
     const int purgeResult =
-        mallctl("arena." UMBRIEL_STRINGIFY(MALLCTL_ARENAS_ALL) ".purge", nullptr, nullptr, nullptr, 0);
+        mallctl("arena." CANOPY_STRINGIFY(MALLCTL_ARENAS_ALL) ".purge", nullptr, nullptr, nullptr, 0);
     if (purgeResult != 0) {
       kLog.warn("failed to purge jemalloc arenas: {}", std::strerror(purgeResult));
     }

@@ -1,15 +1,15 @@
-# Installing Umbriel
+# Installing Canopy
 
-Umbriel is packaged for several Linux distributions. Prefer a distribution package when one is available; it provides the simplest installation and upgrade path.
+Canopy is packaged for several Linux distributions. Prefer a distribution package when one is available; it provides the simplest installation and upgrade path.
 
 > Distribution packages and third-party repositories are maintained by their respective maintainers. Review a repository before installing from it.
 
 ## Arch Linux
 
-[`umbriel-git`](https://aur.archlinux.org/packages/umbriel-git) is available in the AUR:
+[`canopy-git`](https://aur.archlinux.org/packages/canopy-git) is available in the AUR:
 
 ```sh
-yay -S umbriel-git
+yay -S canopy-git
 ```
 
 ## Fedora
@@ -17,30 +17,30 @@ yay -S umbriel-git
 [Terra](https://wiki.fyralabs.com/Terra) provides nightly builds:
 
 ```sh
-sudo dnf install umbriel-nightly
+sudo dnf install canopy-nightly
 ```
 
 ## openSUSE
 
-The [Noctalia OBS repository](https://build.opensuse.org/project/show/home\:neifua\:Noctalia) provides [`umbriel-git`](https://build.opensuse.org/package/show/home\:neifua\:Noctalia/umbriel-git).
+The [Noctalia OBS repository](https://build.opensuse.org/project/show/home\:neifua\:Noctalia) provides [`canopy-git`](https://build.opensuse.org/package/show/home\:neifua\:Noctalia/canopy-git).
 
 #### Tumbleweed
 
 ```sh
 sudo zypper addrepo --refresh --name Noctalia https://download.opensuse.org/repositories/home:neifua:Noctalia/openSUSE_Tumbleweed/home:neifua:Noctalia.repo
-sudo zypper refresh && sudo zypper install umbriel-git
+sudo zypper refresh && sudo zypper install canopy-git
 ```
 
 #### Slowroll
 
 ```sh
 sudo zypper addrepo --refresh --name Noctalia https://download.opensuse.org/repositories/home:neifua:Noctalia/openSUSE_Slowroll/home:neifua:Noctalia.repo
-sudo zypper refresh && sudo zypper install umbriel-git
+sudo zypper refresh && sudo zypper install canopy-git
 ```
 
 ## Debian and Ubuntu
 
-The NickH APT repository provides Umbriel for Debian-based distributions.
+The NickH APT repository provides Canopy for Debian-based distributions.
 
 ### Install the repository signing key
 
@@ -67,7 +67,7 @@ sudo wget -O /etc/apt/sources.list.d/noctalia-resolute.sources \
   https://pkg.noctalia.dev/deb/noctalia-resolute.sources
 ```
 
-### Install Umbriel
+### Install Canopy
 
 Choose the command matching your distribution:
 
@@ -75,17 +75,17 @@ Choose the command matching your distribution:
 sudo apt update
 
 # Debian Trixie
-sudo apt install -t trixie-backports umbriel
+sudo apt install -t trixie-backports canopy
 
 # Debian Sid and Ubuntu 26.04
-sudo apt install umbriel
+sudo apt install canopy
 ```
 
 The repository provides `amd64` and `arm64` packages only.
 
 ## GNU Guix
 
-Umbriel and its XDG portal are available through the third-party [`midnight`](https://codeberg.org/stampede/midnight) Guix channel. Add the channel to `~/.config/guix/channels.scm`:
+Canopy and its XDG portal are available through the third-party [`midnight`](https://codeberg.org/stampede/midnight) Guix channel. Add the channel to `~/.config/guix/channels.scm`:
 
 ```scheme
 (channel
@@ -99,43 +99,43 @@ Umbriel and its XDG portal are available through the third-party [`midnight`](ht
         "640A 2C3C E948 22D3 394B 40C3 CAFA EECA 00FF 9B1E"))))
 ```
 
-Run `guix pull`, then install `umbriel` and `xdg-desktop-portal-umbriel`. Adding them to the system configuration makes the Umbriel session available to display managers.
+Run `guix pull`, then install `canopy` and `xdg-desktop-portal-canopy`. Adding them to the system configuration makes the Canopy session available to display managers.
 
 ## NixOS
 
-Add Umbriel to your flake inputs:
+Add Canopy to your flake inputs:
 
 ```nix
 {
-  inputs.umbriel.url = "github:noctalia-dev/umbriel";
+  inputs.canopy.url = "github:noctalia-dev/canopy";
 }
 ```
 
-Import the NixOS module and enable Umbriel in your system configuration:
+Import the NixOS module and enable Canopy in your system configuration:
 
 ```nix
 { inputs, ... }:
 {
-  imports = [ inputs.umbriel.nixosModules.default ];
+  imports = [ inputs.canopy.nixosModules.default ];
 
-  programs.umbriel.enable = true;
+  programs.canopy.enable = true;
 }
 ```
 
-The module installs Umbriel, registers its display-manager session, enables the required graphics support, and installs and configures `xdg-desktop-portal-umbriel` for screen capture and sharing. Set `programs.umbriel.portalPackage = null` only when another portal setup should provide those services.
+The module installs Canopy, registers its display-manager session, enables the required graphics support, and installs and configures `xdg-desktop-portal-canopy` for screen capture and sharing. Set `programs.canopy.portalPackage = null` only when another portal setup should provide those services.
 
-Rebuild the system, then select Umbriel in the display manager or start it from a TTY with `start-umbriel`.
+Rebuild the system, then select Canopy in the display manager or start it from a TTY with `start-canopy`.
 
 ### Home Manager and hjem
 
-The Home Manager module (`inputs.umbriel.homeModules.default`) and the hjem module (`inputs.umbriel.hjemModules.default`) write the user configuration from Nix. `settings` is an attrset serialized to TOML; Home Manager also accepts a raw TOML string or a path:
+The Home Manager module (`inputs.canopy.homeModules.default`) and the hjem module (`inputs.canopy.hjemModules.default`) write the user configuration from Nix. `settings` is an attrset serialized to TOML; Home Manager also accepts a raw TOML string or a path:
 
 ```nix
 { inputs, ... }:
 {
-  imports = [ inputs.umbriel.homeModules.default ];
+  imports = [ inputs.canopy.homeModules.default ];
 
-  programs.umbriel = {
+  programs.canopy = {
     enable = true;
     settings = {
       general.autostart = [ "noctalia" ];
@@ -151,30 +151,30 @@ The Home Manager module (`inputs.umbriel.homeModules.default`) and the hjem modu
 }
 ```
 
-When `settings` is omitted, both modules leave the user configuration path untouched, so Umbriel loads its packaged configuration.
+When `settings` is omitted, both modules leave the user configuration path untouched, so Canopy loads its packaged configuration.
 
 ### Binary cache
 
-Pre-built `x86_64-linux` and `aarch64-linux` packages for Umbriel and its portal are available from [Cachix](https://app.cachix.org/cache/umbriel). Add the cache to the NixOS configuration to avoid compiling them locally:
+Pre-built `x86_64-linux` and `aarch64-linux` packages for Canopy and its portal are available from [Cachix](https://app.cachix.org/cache/canopy). Add the cache to the NixOS configuration to avoid compiling them locally:
 
 ```nix
 {
   nix.settings = {
-    extra-substituters = [ "https://umbriel.cachix.org" ];
+    extra-substituters = [ "https://canopy.cachix.org" ];
     extra-trusted-public-keys = [
-      "umbriel.cachix.org-1:JfNq/2yg2S6D6z4Z2dVSZrZlDPQTKtexB6GAVLD98nw="
+      "canopy.cachix.org-1:JfNq/2yg2S6D6z4Z2dVSZrZlDPQTKtexB6GAVLD98nw="
     ];
   };
 }
 ```
 
-Umbriel must use the locked `nixpkgs` input it was built against for its store paths to match the cache. Do not set `inputs.umbriel.inputs.nixpkgs.follows` when using the binary cache.
+Canopy must use the locked `nixpkgs` input it was built against for its store paths to match the cache. Do not set `inputs.canopy.inputs.nixpkgs.follows` when using the binary cache.
 
-The [`cachix`](https://github.com/noctalia-dev/umbriel/tree/cachix) branch points to the latest commit that CI cached successfully. Track it instead of `main` to avoid selecting a commit whose binaries are not available yet:
+The [`cachix`](https://github.com/xytrolabs/canopy/tree/cachix) branch points to the latest commit that CI cached successfully. Track it instead of `main` to avoid selecting a commit whose binaries are not available yet:
 
 ```nix
 {
-  inputs.umbriel.url = "github:noctalia-dev/umbriel/cachix";
+  inputs.canopy.url = "github:noctalia-dev/canopy/cachix";
 }
 ```
 
@@ -183,29 +183,29 @@ The [`cachix`](https://github.com/noctalia-dev/umbriel/tree/cachix) branch point
 The module links the bundled effect presets into the system profile, so they are available at a path that stays the same across rebuilds and updates:
 
 ```
-/run/current-system/sw/share/umbriel/effects
+/run/current-system/sw/share/canopy/effects
 ```
 
-Use it in place of `/usr/share/umbriel/effects` when including a preset:
+Use it in place of `/usr/share/canopy/effects` when including a preset:
 
 ```toml
 [include]
 files = [
-  "/run/current-system/sw/share/umbriel/effects/border/pulse/effect.toml",
+  "/run/current-system/sw/share/canopy/effects/border/pulse/effect.toml",
 ]
 ```
 
-Only the `effects` directory is linked. The example `config.toml` is not, since it is of little use for a declarative setup; it is still available in the package under `share/umbriel`.
+Only the `effects` directory is linked. The example `config.toml` is not, since it is of little use for a declarative setup; it is still available in the package under `share/canopy`.
 
 If you generate the config from Nix, you can reference the package directly instead, which doesn't depend on the module's link:
 
 ```nix
-"${config.programs.umbriel.package}/share/umbriel/effects/border/pulse/effect.toml"
+"${config.programs.canopy.package}/share/canopy/effects/border/pulse/effect.toml"
 ```
 
 ## Void Linux
 
-Umbriel is provided by the third-party repository [`UniversalRepository`](https://universalrepo.pages.dev).
+Canopy is provided by the third-party repository [`UniversalRepository`](https://universalrepo.pages.dev).
 
 ### Install repository
 
@@ -219,33 +219,33 @@ echo 'repository=https://universalrepo.pages.dev/void' | sudo tee /etc/xbps.d/10
 sudo xbps-install -S
 ```
 
-### Install Umbriel
+### Install Canopy
 
 ```bash
-sudo xbps-install -S umbriel
+sudo xbps-install -S canopy
 ```
 
 ## Manual build
 
 Manual installations have no automatic upgrade path. Prefer a distribution package when one is available.
 
-UmbrielFX builds as part of the source tree. No separate SceneFX package is needed.
+CanopyFX builds as part of the source tree. No separate SceneFX package is needed.
 
-Install a C++23 compiler, Meson, Ninja, `just`, `pkg-config`, `wayland-scanner`, and the development packages listed in [`PACKAGING.md`](https://github.com/noctalia-dev/umbriel/blob/main/PACKAGING.md#dependencies). Then clone, build, and install Umbriel:
+Install a C++23 compiler, Meson, Ninja, `just`, `pkg-config`, `wayland-scanner`, and the development packages listed in [`PACKAGING.md`](https://github.com/xytrolabs/canopy/blob/main/PACKAGING.md#dependencies). Then clone, build, and install Canopy:
 
 ```sh
-git clone https://github.com/noctalia-dev/umbriel.git
-cd umbriel
+git clone https://github.com/xytrolabs/canopy.git
+cd canopy
 just configure release /usr/local
 just release
 sudo meson install -C build-release --no-rebuild
 ```
 
-The release binary is written to `build-release/umbriel`. `just debug` builds the debug binary at `build-debug/umbriel`.
+The release binary is written to `build-release/canopy`. `just debug` builds the debug binary at `build-debug/canopy`.
 
 Release builds omit unit tests, harness clients, and harness-only IPC commands by default. Packagers can explicitly disable these with Meson's `-Dtests=disabled -Dharness=disabled` options.
 
-libxkbcommon 1.10.0 or newer is required at build time and runtime. Its pkg-config name is `xkbcommon`; Umbriel uses its server-side modifier API to preserve keyboard locks and latches.
+libxkbcommon 1.10.0 or newer is required at build time and runtime. Its pkg-config name is `xkbcommon`; Canopy uses its server-side modifier API to preserve keyboard locks and latches.
 
 X11 window shapes require the `xcb-shape` library from libxcb. Debian and Ubuntu need `libxcb-shape0-dev` for building and `libxcb-shape0` at runtime. On openSUSE, `libxcb-devel` provides the build files and `libxcb-shape0` provides the runtime library. Arch, Fedora, Alpine, Nix, Guix, and Void bundle the shape library with libxcb.
 
@@ -265,13 +265,13 @@ For a user-local installation, ensure `$HOME/.local/bin` is on `PATH` in your lo
 
 ```sh
 systemctl --user link \
-  "$HOME/.local/lib/systemd/user/umbriel.service" \
-  "$HOME/.local/lib/systemd/user/umbriel-session.target" \
-  "$HOME/.local/lib/systemd/user/umbriel-shutdown.target"
+  "$HOME/.local/lib/systemd/user/canopywc.service" \
+  "$HOME/.local/lib/systemd/user/canopywc-session.target" \
+  "$HOME/.local/lib/systemd/user/canopywc-shutdown.target"
 systemctl --user daemon-reload
 ```
 
-A user-local install places the session entry under `$HOME/.local/share/wayland-sessions`. Display-manager search paths vary, so the session may need additional display-manager configuration to appear in its menu. You can start it from a TTY with `start-umbriel` after the setup above.
+A user-local install places the session entry under `$HOME/.local/share/wayland-sessions`. Display-manager search paths vary, so the session may need additional display-manager configuration to appear in its menu. You can start it from a TTY with `start-canopy` after the setup above.
 
 ### Building with Nix
 
@@ -281,58 +281,58 @@ Build the package directly:
 nix build
 ```
 
-The resulting binary is available at `result/bin/umbriel`. For development, enter the project shell and use the Just recipes:
+The resulting binary is available at `result/bin/canopy`. For development, enter the project shell and use the Just recipes:
 
 ```sh
 nix develop
 just debug
 ```
 
-For unit tests, the headless compositor harness, and contributor checks, see [Development Commands](https://github.com/noctalia-dev/umbriel/blob/main/CONTRIBUTING.md#development-commands).
+For unit tests, the headless compositor harness, and contributor checks, see [Development Commands](https://github.com/xytrolabs/canopy/blob/main/CONTRIBUTING.md#development-commands).
 
-## Starting Umbriel
+## Starting Canopy
 
-Installed display-manager sessions start Umbriel through `start-umbriel`. Select Umbriel from your display manager, or start it from a TTY:
+Installed display-manager sessions start Canopy through `start-canopy`. Select Canopy from your display manager, or start it from a TTY:
 
 ```sh
-start-umbriel
+start-canopy
 ```
 
-The launcher loads the login profile for supported shells such as bash, zsh, and fish. Environment variables from that profile, including `PATH`, are available to Umbriel and applications started in the session. Interactive shell files such as `~/.zshrc` are not loaded. In a systemd-managed session, the launcher imports the login environment into the user manager before starting Umbriel. Login-profile values take precedence over values with the same names from `environment.d`; variables found only in the user manager remain available. The direct fallback inherits the same login environment without importing it.
+The launcher loads the login profile for supported shells such as bash, zsh, and fish. Environment variables from that profile, including `PATH`, are available to Canopy and applications started in the session. Interactive shell files such as `~/.zshrc` are not loaded. In a systemd-managed session, the launcher imports the login environment into the user manager before starting Canopy. Login-profile values take precedence over values with the same names from `environment.d`; variables found only in the user manager remain available. The direct fallback inherits the same login environment without importing it.
 
-In a managed native session, Umbriel places startup, autostart, event, and `spawn` commands in scopes bound to the compositor service, so they are cleaned up when the session ends. This requires systemd 254 or newer.
+In a managed native session, Canopy places startup, autostart, event, and `spawn` commands in scopes bound to the compositor service, so they are cleaned up when the session ends. This requires systemd 254 or newer.
 
 The compositor service queues the graphical session targets at startup and reports readiness only after its display and IPC sockets are available and its session environment has been published to systemd and D-Bus. Services ordered after `graphical-session.target`, including desktop portals, wait for that readiness notification. Configured startup commands also wait for the environment import to finish.
 
-Run `umbriel` directly only for a nested development session or an explicitly unmanaged launch.
+Run `canopy` directly only for a nested development session or an explicitly unmanaged launch.
 
 ## Screen sharing
 
-Screen sharing in Discord, browsers, and other portal-aware applications needs [`xdg-desktop-portal-umbriel`](https://github.com/noctalia-dev/xdg-desktop-portal-umbriel).
+Screen sharing in Discord, browsers, and other portal-aware applications needs [`xdg-desktop-portal-canopy`](https://github.com/noctalia-dev/xdg-desktop-portal-canopy).
 
 On rotated or flipped outputs, the shared cursor may appear offset because of a wlroots 0.20.2 cursor metadata issue.
 
 ### Picker missing after login
 
-Start the session through `start-umbriel` and install the matching `umbriel.service` alongside the compositor binary. The packaged service uses `Type=notify` to hold the graphical session targets until Umbriel is ready; portal services with `After=graphical-session.target` then inherit the published session environment. No portal service override is required for this startup ordering.
+Start the session through `start-canopy` and install the matching `canopywc.service` alongside the compositor binary. The packaged service uses `Type=notify` to hold the graphical session targets until Canopy is ready; portal services with `After=graphical-session.target` then inherit the published session environment. No portal service override is required for this startup ordering.
 
 If the picker is still missing, inspect the service and portal logs:
 
 ```sh
-systemctl --user cat umbriel.service
+systemctl --user cat canopywc.service
 journalctl --user -b \
   -u xdg-desktop-portal.service \
-  -u xdg-desktop-portal-umbriel.service \
+  -u xdg-desktop-portal-canopywc.service \
   -u xdg-desktop-portal-gtk.service \
   --no-pager
 ```
 
-A portal that was already running before the session startup transaction can retain an earlier environment. Umbriel does not automatically restart portal services. Nested and unmanaged launches do not provide the packaged service's readiness ordering.
+A portal that was already running before the session startup transaction can retain an earlier environment. Canopy does not automatically restart portal services. Nested and unmanaged launches do not provide the packaged service's readiness ordering.
 
 ## Logs
 
-Umbriel writes its main log to `$XDG_CACHE_HOME/umbriel/umbriel.log`. If `XDG_CACHE_HOME` is unset, the fallback path is `~/.cache/umbriel/umbriel.log`. The previous file is retained as `umbriel.log.1` when the current log reaches 1 MiB.
+Canopy writes its main log to `$XDG_CACHE_HOME/canopy/canopy.log`. If `XDG_CACHE_HOME` is unset, the fallback path is `~/.cache/canopy/canopy.log`. The previous file is retained as `canopy.log.1` when the current log reaches 1 MiB.
 
-Messages from wlroots appear with the `[wlr]` tag at info level and above. To include wlroots debug output when reporting a rendering or display problem, start Umbriel with `UMBRIEL_WLR_DEBUG=1` set in its environment.
+Messages from wlroots appear with the `[wlr]` tag at info level and above. To include wlroots debug output when reporting a rendering or display problem, start Canopy with `CANOPY_WLR_DEBUG=1` set in its environment.
 
-When standard output or standard error is connected to a TTY, raw writes from Umbriel and its child processes are redirected to `$XDG_CACHE_HOME/umbriel/umbriel-stderr.log`, or `~/.cache/umbriel/umbriel-stderr.log` when `XDG_CACHE_HOME` is unset.
+When standard output or standard error is connected to a TTY, raw writes from Canopy and its child processes are redirected to `$XDG_CACHE_HOME/canopy/canopy-stderr.log`, or `~/.cache/canopy/canopy-stderr.log` when `XDG_CACHE_HOME` is unset.

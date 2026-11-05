@@ -4,19 +4,19 @@
 set -euo pipefail
 umask 077
 
-readonly BUILD=$(realpath "${1:?usage: input_capture.sh UMBRIEL_BUILD PORTAL_BUILD [XDG_DESKTOP_PORTAL]}")
+readonly BUILD=$(realpath "${1:?usage: input_capture.sh CANOPY_BUILD PORTAL_BUILD [XDG_DESKTOP_PORTAL]}")
 readonly PORTAL_BUILD=$(realpath "${2:?portal build directory required}")
-readonly COMPOSITOR=${UMBRIEL_CAPTURE_COMPOSITOR:-$BUILD/tests/input-capture-compositor}
-readonly PORTAL_SERVER=${UMBRIEL_CAPTURE_PORTAL:-$PORTAL_BUILD/xdg-desktop-portal-umbriel}
+readonly COMPOSITOR=${CANOPY_CAPTURE_COMPOSITOR:-$BUILD/tests/input-capture-compositor}
+readonly PORTAL_SERVER=${CANOPY_CAPTURE_PORTAL:-$PORTAL_BUILD/xdg-desktop-portal-canopy}
 readonly FRONTEND=${3:-$(command -v xdg-desktop-portal || true)}
 readonly REPO=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
-readonly PORTAL_REPO=${UMBRIEL_PORTAL_REPO:-$(dirname "$REPO")/xdg-desktop-portal-umbriel}
+readonly PORTAL_REPO=${CANOPY_PORTAL_REPO:-$(dirname "$REPO")/xdg-desktop-portal-canopy}
 if [[ ! -x $FRONTEND ]]; then
   echo "Pass the xdg-desktop-portal executable as the third argument."
   exit 2
 fi
-readonly PERMISSION_STORE=${UMBRIEL_CAPTURE_PERMISSION_STORE:-$(dirname "$(realpath "$FRONTEND")")/xdg-permission-store}
-readonly RUNTIME=$(mktemp -d "${TMPDIR:-/tmp}/umbriel-input-capture.XXXXXXXX")
+readonly PERMISSION_STORE=${CANOPY_CAPTURE_PERMISSION_STORE:-$(dirname "$(realpath "$FRONTEND")")/xdg-permission-store}
+readonly RUNTIME=$(mktemp -d "${TMPDIR:-/tmp}/canopy-input-capture.XXXXXXXX")
 chmod 700 "$RUNTIME"
 PIDS=()
 SUCCESS=0
@@ -24,7 +24,7 @@ cleanup() {
   local pid
   for pid in "${PIDS[@]}"; do kill "$pid" 2> /dev/null || true; done
   for pid in "${PIDS[@]}"; do wait "$pid" 2> /dev/null || true; done
-  if ((SUCCESS)) && [[ ${UMBRIEL_CAPTURE_KEEP_LOGS:-0} != 1 ]]; then
+  if ((SUCCESS)) && [[ ${CANOPY_CAPTURE_KEEP_LOGS:-0} != 1 ]]; then
     rm -rf "$RUNTIME"
   else
     echo "InputCapture logs retained in $RUNTIME"
@@ -39,7 +39,7 @@ export XDG_CACHE_HOME=$RUNTIME/cache
 export XDG_STATE_HOME=$RUNTIME/state
 export XDG_DATA_DIRS=$RUNTIME/data
 export XDG_CONFIG_DIRS=$RUNTIME/config-dirs
-export XDG_CURRENT_DESKTOP=umbriel
+export XDG_CURRENT_DESKTOP=canopy
 export XDG_SESSION_TYPE=wayland
 export GSETTINGS_BACKEND=memory
 export NO_AT_BRIDGE=1
@@ -47,12 +47,12 @@ export DBUS_SESSION_BUS_ADDRESS=unix:path=$RUNTIME/bus
 export DBUS_SYSTEM_BUS_ADDRESS=unix:path=$RUNTIME/no-system-bus
 unset DISPLAY WAYLAND_SOCKET NOTIFY_SOCKET SYSTEMD_EXEC_PID
 mkdir -p "$XDG_CONFIG_HOME/xdg-desktop-portal" "$RUNTIME/portals" "$RUNTIME/data" "$XDG_DATA_HOME"
-cp "$PORTAL_REPO/data/umbriel.portal" "$RUNTIME/portals/umbriel.portal"
+cp "$PORTAL_REPO/data/canopy.portal" "$RUNTIME/portals/canopy.portal"
 export XDG_DESKTOP_PORTAL_DIR=$RUNTIME/portals
 cat > "$XDG_CONFIG_HOME/xdg-desktop-portal/portals.conf" << 'CONFIG'
 [preferred]
-default=umbriel
-org.freedesktop.impl.portal.InputCapture=umbriel
+default=canopy
+org.freedesktop.impl.portal.InputCapture=canopy
 CONFIG
 cat > "$RUNTIME/config.toml" << 'CONFIG'
 [general]
@@ -84,9 +84,9 @@ source "$REPO/tests/harness/lib.sh"
 await_events "$RUNTIME/compositor.log" 'ready display=' 1 "isolated physical-input compositor"
 export WAYLAND_DISPLAY
 WAYLAND_DISPLAY=$(sed -n 's/^ready display=\([^ ]*\).*/\1/p' "$RUNTIME/compositor.log" | head -1)
-export UMBRIEL_SOCKET
-UMBRIEL_SOCKET=$(sed -n 's/^ready .*socket=\([^ ]*\).*/\1/p' "$RUNTIME/compositor.log" | head -1)
-export UMBRIEL=$BUILD/umbriel
+export CANOPY_SOCKET
+CANOPY_SOCKET=$(sed -n 's/^ready .*socket=\([^ ]*\).*/\1/p' "$RUNTIME/compositor.log" | head -1)
+export CANOPY=$BUILD/canopy
 readonly LOCAL_LOG=$RUNTIME/local.log
 mkfifo "$RUNTIME/observer.fifo"
 exec {OBSERVER_FD}<> "$RUNTIME/observer.fifo"
@@ -163,7 +163,7 @@ PORTAL_PID=$!
 PIDS+=("$PORTAL_PID")
 for _ in $(seq 100); do
   if dbus-send --session --print-reply --dest=org.freedesktop.DBus /org/freedesktop/DBus \
-    org.freedesktop.DBus.NameHasOwner string:org.freedesktop.impl.portal.desktop.umbriel 2> /dev/null | grep -q 'boolean true'; then break; fi
+    org.freedesktop.DBus.NameHasOwner string:org.freedesktop.impl.portal.desktop.canopy 2> /dev/null | grep -q 'boolean true'; then break; fi
   sleep 0.025
 done
 "$FRONTEND" > "$RUNTIME/frontend.log" 2>&1 &
@@ -300,7 +300,7 @@ printf 'unlock\n' >&"$LOCK_FD"
 wait "$lock_pid"
 await_events "$RUNTIME/lock.log" unlocked 1 "unlocking the isolated session"
 
-"$UMBRIEL" output-create capture-hotplug 640x360 > /dev/null
+"$CANOPY" output-create capture-hotplug 640x360 > /dev/null
 await_events "$CAPTURE_LOG" zones-changed 1 "output change invalidates capture zones"
 await_events "$CAPTURE_LOG" 'ei-pointer-removed id=1' 1 "old pointer geometry removed after hotplug"
 await_events "$CAPTURE_LOG" 'ei-pointer-resumed id=2' 1 "replacement pointer geometry ready after hotplug"
@@ -424,8 +424,8 @@ mode = "1280x720"
 position = [0, -180]
 scale = 2
 CONFIG
-"$UMBRIEL" msg config-reload > /dev/null
-"$UMBRIEL" settle > /dev/null
+"$CANOPY" msg config-reload > /dev/null
+"$CANOPY" settle > /dev/null
 readonly LAYOUT_LOG=$RUNTIME/layout.log
 "$PORTAL_BUILD/input-capture-test-client" <&"$CLIENT_FD" > "$LAYOUT_LOG" 2>&1 &
 layout_pid=$!
@@ -511,8 +511,8 @@ done
 # Changing physical resolution and scale together can preserve logical bounds.
 # The immutable EI device still needs replacement to publish its new scale.
 sed -i 's/mode = "1280x720"/mode = "640x360"/; s/^scale = 2$/scale = 1/' "$RUNTIME/config.toml"
-"$UMBRIEL" msg config-reload > /dev/null
-"$UMBRIEL" settle > /dev/null
+"$CANOPY" msg config-reload > /dev/null
+"$CANOPY" settle > /dev/null
 await_events "$LAYOUT_LOG" 'ei-pointer-removed id=1' 1 "pointer removed after a scale-only layout change"
 await_events "$LAYOUT_LOG" 'ei-pointer-resumed id=2' 1 "pointer replaced after a scale-only layout change"
 send 'regions rescaled'

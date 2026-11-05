@@ -1,15 +1,15 @@
 #include "core/build_info.h"
 
-#include "umbriel_git_revision.h"
+#include "canopy_git_revision.h"
 
-#ifndef UMBRIEL_VERSION
-#define UMBRIEL_VERSION "unknown"
+#ifndef CANOPY_VERSION
+#define CANOPY_VERSION "unknown"
 #endif
 
-namespace umbriel::build_info {
+namespace canopy::build_info {
 
-  std::string_view version() noexcept { return UMBRIEL_VERSION; }
+  std::string_view version() noexcept { return CANOPY_VERSION; }
 
-  std::string_view revision() noexcept { return UMBRIEL_GIT_REVISION; }
+  std::string_view revision() noexcept { return CANOPY_GIT_REVISION; }
 
-} // namespace umbriel::build_info
+} // namespace canopy::build_info

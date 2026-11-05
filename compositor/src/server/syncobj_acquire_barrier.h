@@ -4,7 +4,7 @@
 
 struct wlr_compositor;
 
-namespace umbriel {
+namespace canopy {
 
   // wlroots holds a linux-drm-syncobj commit back only until its acquire fence materializes, so a commit applies while
   // the client's GPU work is still running. Direct scanout then hands KMS a buffer that is not ready, the page flip
@@ -25,4 +25,4 @@ namespace umbriel {
     wl_listener m_newSurface{};
   };
 
-} // namespace umbriel
+} // namespace canopy

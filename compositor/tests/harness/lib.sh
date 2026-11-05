@@ -1,4 +1,4 @@
-# Helpers shared by harness checks. A check sources it with: source "$UMBRIEL_HARNESS_LIB"
+# Helpers shared by harness checks. A check sources it with: source "$CANOPY_HARNESS_LIB"
 
 # Runs the pointer helper through a sequence and holds the resulting input state (a pressed button, a held modifier)
 # until pointer_release: pointer_hold <width> <height> <command>... [-- <command>...]. It returns once every command
@@ -12,11 +12,11 @@ pointer_hold() {
     shift
   done
   (($# > 0)) && shift
-  local fifo=$UMBRIEL_RUNTIME_DIR/pointer-hold.fifo
-  POINTER_HOLD_LOG=$UMBRIEL_RUNTIME_DIR/pointer-hold.log
+  local fifo=$CANOPY_RUNTIME_DIR/pointer-hold.fifo
+  POINTER_HOLD_LOG=$CANOPY_RUNTIME_DIR/pointer-hold.log
   rm -f "$fifo"
   mkfifo "$fifo"
-  "$UMBRIEL_POINTER_CLIENT" "$width" "$height" "${before[@]}" mark held hold "$@" < "$fifo" > "$POINTER_HOLD_LOG" 2>&1 &
+  "$CANOPY_POINTER_CLIENT" "$width" "$height" "${before[@]}" mark held hold "$@" < "$fifo" > "$POINTER_HOLD_LOG" 2>&1 &
   POINTER_HOLD_PID=$!
   exec {POINTER_HOLD_FD}> "$fifo"
   for _ in $(seq 200); do
@@ -77,8 +77,8 @@ await_lines() {
 
 # Shared fixture for live workspace reveal checks.
 workspace_reveal_config() {
-  cp "$UMBRIEL_REPO/examples/effects/animation/workspace_wipe/shader.glsl" "$UMBRIEL_RUNTIME_DIR/wipe.glsl"
-  cat >> "$UMBRIEL_CONFIG" <<'CONFIG'
+  cp "$CANOPY_REPO/examples/effects/animation/workspace_wipe/shader.glsl" "$CANOPY_RUNTIME_DIR/wipe.glsl"
+  cat >> "$CANOPY_CONFIG" <<'CONFIG'
 [animation]
 enabled = true
 [animation.windows_in]
@@ -105,7 +105,7 @@ CONFIG
 }
 
 # Query a mapped window by its exact title; wait for it before reading its state.
-window_by_title() { "$UMBRIEL" windows --json | jq -ce --arg title "$1" '.[] | select(.title == $title)'; }
+window_by_title() { "$CANOPY" windows --json | jq -ce --arg title "$1" '.[] | select(.title == $title)'; }
 await_window() {
   for _ in $(seq 100); do
     window_by_title "$1" > /dev/null && return
@@ -116,7 +116,7 @@ await_window() {
 
 # Plain colours make capture pixels independent of decorations and animation.
 capture_config() {
-  cat >> "$UMBRIEL_CONFIG" <<'CONFIG'
+  cat >> "$CANOPY_CONFIG" <<'CONFIG'
 [animation]
 enabled = false
 [appearance]
@@ -135,17 +135,17 @@ CONFIG
 # Two repaintable windows under an opaque magenta window. FDs 8/9 control
 # the lower clients; each check supplies its own layout and protection rules.
 capture_clients() {
-  mkfifo "$UMBRIEL_RUNTIME_DIR/left" "$UMBRIEL_RUNTIME_DIR/right"
-  exec 8<> "$UMBRIEL_RUNTIME_DIR/left"
-  exec 9<> "$UMBRIEL_RUNTIME_DIR/right"
+  mkfifo "$CANOPY_RUNTIME_DIR/left" "$CANOPY_RUNTIME_DIR/right"
+  exec 8<> "$CANOPY_RUNTIME_DIR/left"
+  exec 9<> "$CANOPY_RUNTIME_DIR/right"
   REPAINT_ON_STDIN=1 FOLLOW_CONFIGURES=1 FILL_COLOR=0xFF00FF00 \
-    "$UMBRIEL_UNMAP_CLIENT" left "$1" "$1" <&8 > "$UMBRIEL_RUNTIME_DIR/left.log" 2>&1 &
+    "$CANOPY_UNMAP_CLIENT" left "$1" "$1" <&8 > "$CANOPY_RUNTIME_DIR/left.log" 2>&1 &
   await_window left
   REPAINT_ON_STDIN=1 FOLLOW_CONFIGURES=1 FILL_COLOR=0xFF0000FF \
-    "$UMBRIEL_UNMAP_CLIENT" right "$1" "$1" <&9 > "$UMBRIEL_RUNTIME_DIR/right.log" 2>&1 &
+    "$CANOPY_UNMAP_CLIENT" right "$1" "$1" <&9 > "$CANOPY_RUNTIME_DIR/right.log" 2>&1 &
   await_window right
   OPAQUE_BUFFER=1 FOLLOW_CONFIGURES=1 FILL_COLOR=0xFFFF00FF \
-    "$UMBRIEL_UNMAP_CLIENT" protected 1280 720 > "$UMBRIEL_RUNTIME_DIR/protected.log" 2>&1 &
+    "$CANOPY_UNMAP_CLIENT" protected 1280 720 > "$CANOPY_RUNTIME_DIR/protected.log" 2>&1 &
   await_window protected
 }
 
@@ -153,13 +153,13 @@ capture_clients() {
 capture_assert_hidden() {
   grim "$1"
   local count
-  count=$("$UMBRIEL_PIXEL_PROBE" "$1" count 'r>0.9&&b>0.9&&g<0.1')
+  count=$("$CANOPY_PIXEL_PROBE" "$1" count 'r>0.9&&b>0.9&&g<0.1')
   [[ $count == 0 ]] || { echo "protected pixels leaked: $count"; return 1; }
 }
 
 # The first protection field belongs to the magenta window. Later rules stay
 # unchanged so feedback tests can keep another owner protected throughout.
 capture_set_protection() {
-  sed -i "0,/^block_capture = /s/^block_capture = .*/block_capture = $1/" "$UMBRIEL_CONFIG"
-  "$UMBRIEL" msg config-reload > /dev/null
+  sed -i "0,/^block_capture = /s/^block_capture = .*/block_capture = $1/" "$CANOPY_CONFIG"
+  "$CANOPY" msg config-reload > /dev/null
 }

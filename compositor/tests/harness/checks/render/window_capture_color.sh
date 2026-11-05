@@ -3,9 +3,9 @@
 # Only output scene surfaces inherit compositor opacity, including late children.
 # Check numeric pixels as well as matching views so a shared fallback cannot pass.
 set -euo pipefail
-source "$UMBRIEL_HARNESS_LIB"
+source "$CANOPY_HARNESS_LIB"
 
-cat >> "$UMBRIEL_CONFIG" <<'CONFIG'
+cat >> "$CANOPY_CONFIG" <<'CONFIG'
 [animation]
 enabled = false
 [appearance]
@@ -19,14 +19,14 @@ enabled = false
 [output.HEADLESS-1]
 hdr = "off"
 CONFIG
-"$UMBRIEL" msg config-reload > /dev/null
+"$CANOPY" msg config-reload > /dev/null
 
-readonly OUTPUT_IMAGE="$UMBRIEL_RUNTIME_DIR/window-color-output.png"
-readonly WINDOW_IMAGE="$UMBRIEL_RUNTIME_DIR/window-color-window.png"
-readonly CAPTURE_LOG="$UMBRIEL_RUNTIME_DIR/window-color-capture.log"
-mkfifo "$UMBRIEL_RUNTIME_DIR/window-color-capture.fifo"
-CAPTURE_CONTROL=1 "$UMBRIEL_CAPTURE_CLIENT" < "$UMBRIEL_RUNTIME_DIR/window-color-capture.fifo" > "$CAPTURE_LOG" 2>&1 &
-exec {CAPTURE_FD}> "$UMBRIEL_RUNTIME_DIR/window-color-capture.fifo"
+readonly OUTPUT_IMAGE="$CANOPY_RUNTIME_DIR/window-color-output.png"
+readonly WINDOW_IMAGE="$CANOPY_RUNTIME_DIR/window-color-window.png"
+readonly CAPTURE_LOG="$CANOPY_RUNTIME_DIR/window-color-capture.log"
+mkfifo "$CANOPY_RUNTIME_DIR/window-color-capture.fifo"
+CAPTURE_CONTROL=1 "$CANOPY_CAPTURE_CLIENT" < "$CANOPY_RUNTIME_DIR/window-color-capture.fifo" > "$CAPTURE_LOG" 2>&1 &
+exec {CAPTURE_FD}> "$CANOPY_RUNTIME_DIR/window-color-capture.fifo"
 await_lines "$CAPTURE_LOG" 'session-ready HEADLESS-1' 1
 await_lines "$CAPTURE_LOG" 'frame HEADLESS-1' 1
 
@@ -44,13 +44,13 @@ request() {
   previous=$(events "$CLIENT_LOG" "{\"event\":\"snapshot\",\"label\":\"$command\"")
   printf '%s\n' "$command" >&"$CLIENT_FD"
   await_lines "$CLIENT_LOG" "{\"event\":\"snapshot\",\"label\":\"$command\"" "$((previous + 1))"
-  "$UMBRIEL" settle > /dev/null
+  "$CANOPY" settle > /dev/null
 }
 
 expect_image_pixel() {
   local image=$1 px=$2 py=$3 expected_red=$4 expected_green=$5 expected_blue=$6 description=$7
   local red green blue
-  read -r red green blue < <("$UMBRIEL_PIXEL_PROBE" "$image" pixel "$px" "$py")
+  read -r red green blue < <("$CANOPY_PIXEL_PROBE" "$image" pixel "$px" "$py")
   if ((red < expected_red - 1 || red > expected_red + 1
        || green < expected_green - 1 || green > expected_green + 1
        || blue < expected_blue - 1 || blue > expected_blue + 1)); then
@@ -67,7 +67,7 @@ expect_pixels() {
     "$red" "$green" "$blue" "$description on the output"
   expect_image_pixel "$WINDOW_IMAGE" "$((width / 2))" "$((height / 2))" \
     "$red" "$green" "$blue" "$description in the window capture"
-  "$UMBRIEL" settle > /dev/null
+  "$CANOPY" settle > /dev/null
 }
 
 expect_callback_without_damage() {
@@ -77,7 +77,7 @@ expect_callback_without_damage() {
   callbacks=$(events "$CLIENT_LOG" '{"event":"frame",')
   request frame
   await_lines "$CLIENT_LOG" '{"event":"frame",' "$((callbacks + 1))"
-  "$UMBRIEL" settle > /dev/null
+  "$CANOPY" settle > /dev/null
   capture_count
   if ((frame_count != before)); then
     echo "$mode: a callback-only commit changed output capture count $before to $frame_count"
@@ -86,17 +86,17 @@ expect_callback_without_damage() {
 }
 
 for mode in toplevel subsurface subsurface-desync; do
-  CLIENT_LOG="$UMBRIEL_RUNTIME_DIR/window-color-$mode.log"
-  fifo="$UMBRIEL_RUNTIME_DIR/window-color-$mode.fifo"
+  CLIENT_LOG="$CANOPY_RUNTIME_DIR/window-color-$mode.log"
+  fifo="$CANOPY_RUNTIME_DIR/window-color-$mode.fifo"
   mkfifo "$fifo"
   args=(compound untagged)
   [[ $mode == toplevel ]] || args+=("$mode")
-  "$UMBRIEL_COLOR_FEEDBACK_CLIENT" "${args[@]}" < "$fifo" > "$CLIENT_LOG" 2>&1 &
+  "$CANOPY_COLOR_FEEDBACK_CLIENT" "${args[@]}" < "$fifo" > "$CLIENT_LOG" 2>&1 &
   client_pid=$!
   exec {CLIENT_FD}> "$fifo"
   await_lines "$CLIENT_LOG" '{"event":"mapped"}' 1
-  "$UMBRIEL" settle > /dev/null
-  window=$("$UMBRIEL" windows --json | jq -ce '.[] | select(.app_id == "color-feedback-client")')
+  "$CANOPY" settle > /dev/null
+  window=$("$CANOPY" windows --json | jq -ce '.[] | select(.app_id == "color-feedback-client")')
   read -r x y width height window_id < <(jq -r '"\(.x) \(.y) \(.w) \(.h) \(.id)"' <<< "$window")
 
   expect_pixels 16 16 16 'implicit SDR'
@@ -154,7 +154,7 @@ for mode in toplevel subsurface subsurface-desync; do
   kill -TERM "$client_pid"
   wait "$client_pid" || true
   exec {CLIENT_FD}>&-
-  "$UMBRIEL" settle > /dev/null
+  "$CANOPY" settle > /dev/null
   capture_count
   if ((frame_count <= before_teardown)); then
     echo "$mode: client teardown did not reach the ongoing output capture"
@@ -165,7 +165,7 @@ done
 # The child is created after the parent's 0.5 opacity has settled. Its first
 # independent commit must inherit that opacity without a rule or config change.
 # The isolated capture presents the same wl_surfaces at their client opacity.
-cat >> "$UMBRIEL_CONFIG" <<'CONFIG'
+cat >> "$CANOPY_CONFIG" <<'CONFIG'
 [colors]
 backdrop = "#00FF00FF"
 [[window_rule]]
@@ -177,24 +177,24 @@ match.app_id = "^capture-opacity-remapped$"
 default_floating = true
 opacity = 0.25
 CONFIG
-"$UMBRIEL" msg config-reload > /dev/null
-"$UMBRIEL" settle > /dev/null
+"$CANOPY" msg config-reload > /dev/null
+"$CANOPY" settle > /dev/null
 
 mode=late-subsurface
-readonly OPACITY_LOG="$UMBRIEL_RUNTIME_DIR/window-capture-opacity.log"
-mkfifo "$UMBRIEL_RUNTIME_DIR/window-capture-opacity.fifo"
+readonly OPACITY_LOG="$CANOPY_RUNTIME_DIR/window-capture-opacity.log"
+mkfifo "$CANOPY_RUNTIME_DIR/window-capture-opacity.fifo"
 env APP_ID=capture-opacity-initial APP_ID_AFTER_ACTIVATION=capture-opacity-remapped \
   FILL_COLOR=0xFFFFFFFF CONTENT_TYPE_ON_SUBSURFACE=1 CONTENT_TYPE_AFTER_MAP=game REMAP_ON_STDIN=1 \
-  "$UMBRIEL_UNMAP_CLIENT" capture-opacity 320 240 \
-  < "$UMBRIEL_RUNTIME_DIR/window-capture-opacity.fifo" > "$OPACITY_LOG" 2>&1 &
+  "$CANOPY_UNMAP_CLIENT" capture-opacity 320 240 \
+  < "$CANOPY_RUNTIME_DIR/window-capture-opacity.fifo" > "$OPACITY_LOG" 2>&1 &
 opacity_client_pid=$!
-exec {OPACITY_FD}> "$UMBRIEL_RUNTIME_DIR/window-capture-opacity.fifo"
+exec {OPACITY_FD}> "$CANOPY_RUNTIME_DIR/window-capture-opacity.fifo"
 await_lines "$OPACITY_LOG" 'mapped$' 1
 
 opacity_window() {
   local app_id=$1 window
   for _ in $(seq 60); do
-    window=$("$UMBRIEL" windows --json | jq -ce --arg app_id "$app_id" '.[] | select(.app_id == $app_id)') || true
+    window=$("$CANOPY" windows --json | jq -ce --arg app_id "$app_id" '.[] | select(.app_id == $app_id)') || true
     if [[ -n $window ]]; then
       read -r x y width height window_id < <(jq -r '"\(.x) \(.y) \(.w) \(.h) \(.id)"' <<< "$window")
       return 0
@@ -207,7 +207,7 @@ opacity_window() {
 
 expect_opacity_pixels() {
   local expected=$1 description=$2
-  "$UMBRIEL" settle > /dev/null
+  "$CANOPY" settle > /dev/null
   grim -o HEADLESS-1 "$OUTPUT_IMAGE"
   grim -T "$window_id" "$WINDOW_IMAGE"
   expect_image_pixel "$OUTPUT_IMAGE" "$((x + width / 2))" "$((y + height / 2))" \
@@ -224,9 +224,9 @@ expect_opacity_pixels 191 'the late child stacked over its parent at 0.5 opacity
 
 # Remapping retains the wl_surfaces while the new app id selects 0.25 opacity.
 # The first remapped frame must use the new multiplier for both surfaces.
-"$UMBRIEL" msg window-close "$window_id" > /dev/null
+"$CANOPY" msg window-close "$window_id" > /dev/null
 await_lines "$OPACITY_LOG" 'unmapped$' 1
-"$UMBRIEL" settle > /dev/null
+"$CANOPY" settle > /dev/null
 printf 'r' >&"$OPACITY_FD"
 await_lines "$OPACITY_LOG" 'mapped$' 2
 opacity_window capture-opacity-remapped

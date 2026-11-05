@@ -2,7 +2,7 @@
 
 #include <wlr/util/box.h>
 
-namespace umbriel {
+namespace canopy {
 
   struct CursorPlaneState {
     // Output-side only: false until the first cursorPlaneAdvance seeds the
@@ -32,4 +32,4 @@ namespace umbriel {
   // reported -- the box the cursor left and the box it entered.
   CursorPlaneDamage cursorPlaneDamageFor(const CursorPlaneState* previous, const CursorPlaneState* now);
 
-} // namespace umbriel
+} // namespace canopy

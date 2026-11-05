@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 # A window mapped into the outgoing workspace during a slide must be hidden when the slide finishes.
 set -euo pipefail
-source "$UMBRIEL_HARNESS_LIB"
+source "$CANOPY_HARNESS_LIB"
 
-cat >> "$UMBRIEL_CONFIG" <<'EOF'
+cat >> "$CANOPY_CONFIG" <<'EOF'
 [animation.workspaces]
 duration_ms = 1000
 curve = "linear"
@@ -19,17 +19,17 @@ match.app_id = "^late-map$"
 default_workspace = 1
 default_focused = false
 EOF
-"$UMBRIEL" msg config-reload > /dev/null
-"$UMBRIEL" clock-freeze
-"$UMBRIEL" msg workspace-switch 2 > /dev/null
-"$UMBRIEL" workspaces --json | jq -e '.[] | select(.name == "2" and .active)' > /dev/null
-APP_ID=late-map "$UMBRIEL_UNMAP_CLIENT" late-map 1200 700 > "$UMBRIEL_RUNTIME_DIR/client.log" 2>&1 &
-await_lines "$UMBRIEL_RUNTIME_DIR/client.log" 'mapped' 1
-"$UMBRIEL" clock-advance 1200
-"$UMBRIEL" clock-resume
-"$UMBRIEL" settle
-grim "$UMBRIEL_RUNTIME_DIR/late-map.png"
-read -r _ _ blue < <("$UMBRIEL_PIXEL_PROBE" "$UMBRIEL_RUNTIME_DIR/late-map.png" mean)
+"$CANOPY" msg config-reload > /dev/null
+"$CANOPY" clock-freeze
+"$CANOPY" msg workspace-switch 2 > /dev/null
+"$CANOPY" workspaces --json | jq -e '.[] | select(.name == "2" and .active)' > /dev/null
+APP_ID=late-map "$CANOPY_UNMAP_CLIENT" late-map 1200 700 > "$CANOPY_RUNTIME_DIR/client.log" 2>&1 &
+await_lines "$CANOPY_RUNTIME_DIR/client.log" 'mapped' 1
+"$CANOPY" clock-advance 1200
+"$CANOPY" clock-resume
+"$CANOPY" settle
+grim "$CANOPY_RUNTIME_DIR/late-map.png"
+read -r _ _ blue < <("$CANOPY_PIXEL_PROBE" "$CANOPY_RUNTIME_DIR/late-map.png" mean)
 if ((blue != 0)); then
   echo "inactive late-mapped window remains visible: mean blue=$blue"
   exit 1

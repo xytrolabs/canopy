@@ -28,8 +28,8 @@ show_cheatsheet = false
 autostart = ["$runtime/bin/capture-environment"]
 
 [environment]
-UMBRIEL_TEST_ONE = "alpha beta"
-UMBRIEL_TEST_TWO = "literal;\$HOME's"
+CANOPY_TEST_ONE = "alpha beta"
+CANOPY_TEST_TWO = "literal;\$HOME's"
 PATH = "$runtime/hostile-bin"
 XDG_RUNTIME_DIR = "$runtime/hostile-runtime"
 DBUS_SESSION_BUS_ADDRESS = "unix:path=$runtime/hostile-dbus"
@@ -39,8 +39,8 @@ EOF
   cat > "$runtime/bin/capture-environment" << 'EOF'
 #!/bin/sh
 printf '%s\n' \
-  "$UMBRIEL_TEST_ONE" \
-  "$UMBRIEL_TEST_TWO" \
+  "$CANOPY_TEST_ONE" \
+  "$CANOPY_TEST_TWO" \
   "$PATH" \
   "$XDG_RUNTIME_DIR" \
   "$DBUS_SESSION_BUS_ADDRESS" \
@@ -49,7 +49,7 @@ EOF
 
   cat > "$runtime/bin/capture-reloaded-environment" << 'EOF'
 #!/bin/sh
-printf '%s' "$UMBRIEL_TEST_ONE" > "$FIXTURE_ROOT/reloaded-environment"
+printf '%s' "$CANOPY_TEST_ONE" > "$FIXTURE_ROOT/reloaded-environment"
 EOF
 
   cat > "$runtime/bin/systemctl" << 'EOF'
@@ -68,11 +68,11 @@ control_environment_is_original() {
     [ "$XDG_RUNTIME_DIR" = "$FIXTURE_ROOT" ] &&
     [ "$DBUS_SESSION_BUS_ADDRESS" = "unix:path=$FIXTURE_ROOT/control-dbus" ] &&
     [ "$SYSTEMD_BUS_ADDRESS" = "unix:path=$FIXTURE_ROOT/control-systemd" ] &&
-    [ "${UMBRIEL_TEST_ONE+x}" != x ] && [ "${UMBRIEL_TEST_TWO+x}" != x ] &&
+    [ "${CANOPY_TEST_ONE+x}" != x ] && [ "${CANOPY_TEST_TWO+x}" != x ] &&
     [ "$WAYLAND_DISPLAY" = wayland-0 ] && display_is_expected &&
-    [ "$XDG_CURRENT_DESKTOP" = umbriel ] && [ "$XDG_SESSION_DESKTOP" = umbriel ] &&
+    [ "$XDG_CURRENT_DESKTOP" = canopy ] && [ "$XDG_SESSION_DESKTOP" = canopy ] &&
     [ "$XDG_SESSION_TYPE" = wayland ] &&
-    [ "$UMBRIEL_SOCKET" = "$FIXTURE_ROOT/umbriel-$WAYLAND_DISPLAY.sock" ]
+    [ "$CANOPY_SOCKET" = "$FIXTURE_ROOT/canopy-$WAYLAND_DISPLAY.sock" ]
 }
 
 fail() {
@@ -94,8 +94,8 @@ fi
 
 record_configured() {
   case "$1" in
-    'UMBRIEL_TEST_ONE=alpha beta') file=one ;;
-    "UMBRIEL_TEST_TWO=literal;\$HOME's") file=two ;;
+    'CANOPY_TEST_ONE=alpha beta') file=one ;;
+    "CANOPY_TEST_TWO=literal;\$HOME's") file=two ;;
     "PATH=$FIXTURE_ROOT/hostile-bin") file=path ;;
     "XDG_RUNTIME_DIR=$FIXTURE_ROOT/hostile-runtime") file=runtime ;;
     "DBUS_SESSION_BUS_ADDRESS=unix:path=$FIXTURE_ROOT/hostile-dbus") file=dbus ;;
@@ -120,14 +120,14 @@ case "$action" in
     printf '%s\n' systemd-configured >> "$TRACE_DIR/order"
     ;;
   import-environment)
-    [ "$*" = "WAYLAND_DISPLAY DISPLAY XDG_CURRENT_DESKTOP XDG_SESSION_DESKTOP XDG_SESSION_TYPE XCURSOR_THEME XCURSOR_SIZE UMBRIEL_SOCKET" ] ||
+    [ "$*" = "WAYLAND_DISPLAY DISPLAY XDG_CURRENT_DESKTOP XDG_SESSION_DESKTOP XDG_SESSION_TYPE XCURSOR_THEME XCURSOR_SIZE CANOPY_SOCKET" ] ||
       fail
     printf '%s\n' systemd-graphical >> "$TRACE_DIR/order"
     printf '%s' "${DISPLAY-}" > "$MANAGER_DIR/display"
     : > "$TRACE_DIR/systemd-graphical"
     ;;
   start)
-    [ "$*" = "--no-block umbriel-session.target" ] || fail
+    [ "$*" = "--no-block canopywc-session.target" ] || fail
     [ -e "$TRACE_DIR/systemd-graphical" ] || fail
     [ "$(cat "$MANAGER_DIR/one")" = "alpha beta" ] || fail
     [ "$(cat "$MANAGER_DIR/two")" = "literal;\$HOME's" ] || fail
@@ -156,15 +156,15 @@ set -eu
 [ "$XDG_RUNTIME_DIR" = "$FIXTURE_ROOT" ] || exit 1
 [ "$DBUS_SESSION_BUS_ADDRESS" = "unix:path=$FIXTURE_ROOT/control-dbus" ] || exit 1
 [ "$SYSTEMD_BUS_ADDRESS" = "unix:path=$FIXTURE_ROOT/control-systemd" ] || exit 1
-[ "${UMBRIEL_TEST_ONE+x}" != x ] && [ "${UMBRIEL_TEST_TWO+x}" != x ] || exit 1
+[ "${CANOPY_TEST_ONE+x}" != x ] && [ "${CANOPY_TEST_TWO+x}" != x ] || exit 1
 [ "$WAYLAND_DISPLAY" = wayland-0 ] || exit 1
 if [ "$EXPECT_DISPLAY" = true ]; then
   case "$DISPLAY" in :[0-9] | :[0-9][0-9]) ;; *) exit 1 ;; esac
 else
   [ "${DISPLAY+x}" != x ] || exit 1
 fi
-[ "$UMBRIEL_SOCKET" = "$FIXTURE_ROOT/umbriel-$WAYLAND_DISPLAY.sock" ] || exit 1
-[ "$*" = "WAYLAND_DISPLAY DISPLAY XDG_CURRENT_DESKTOP XDG_SESSION_DESKTOP XDG_SESSION_TYPE XCURSOR_THEME XCURSOR_SIZE UMBRIEL_SOCKET" ] ||
+[ "$CANOPY_SOCKET" = "$FIXTURE_ROOT/canopy-$WAYLAND_DISPLAY.sock" ] || exit 1
+[ "$*" = "WAYLAND_DISPLAY DISPLAY XDG_CURRENT_DESKTOP XDG_SESSION_DESKTOP XDG_SESSION_TYPE XCURSOR_THEME XCURSOR_SIZE CANOPY_SOCKET" ] ||
   exit 1
 
 printf '%s\n' dbus-graphical >> "$TRACE_DIR/order"
@@ -197,17 +197,17 @@ start_private() {
     "WLR_HEADLESS_OUTPUTS=1"
   )
   local -a unset=(
-    -u WAYLAND_SOCKET -u DISPLAY -u UMBRIEL_SOCKET
+    -u WAYLAND_SOCKET -u DISPLAY -u CANOPY_SOCKET
     -u XDG_CURRENT_DESKTOP -u XDG_SESSION_DESKTOP -u XDG_SESSION_TYPE
-    -u UMBRIEL_TEST_ONE -u UMBRIEL_TEST_TWO -u SYSTEMD_EXEC_PID
+    -u CANOPY_TEST_ONE -u CANOPY_TEST_TWO -u SYSTEMD_EXEC_PID
   )
 
   if [[ $nested == true ]]; then
     env "${unset[@]}" WAYLAND_DISPLAY=host-wayland "${environment[@]}" \
-      "$UMBRIEL" -c "$runtime/config.toml" > "$runtime/compositor.log" 2>&1 &
+      "$CANOPY" -c "$runtime/config.toml" > "$runtime/compositor.log" 2>&1 &
   else
     env "${unset[@]}" -u WAYLAND_DISPLAY "${environment[@]}" \
-      "$UMBRIEL" -c "$runtime/config.toml" > "$runtime/compositor.log" 2>&1 &
+      "$CANOPY" -c "$runtime/config.toml" > "$runtime/compositor.log" 2>&1 &
   fi
   PRIVATE_PID=$!
 }
@@ -268,10 +268,10 @@ assert_autostart_environment "$NATIVE"
 [[ $(< "$NATIVE/trace/order") == $'systemd-graphical\nsystemd-configured\ndbus-graphical\ntarget' ]]
 ! grep -Fq 'systemctl --user set-environment' "$NATIVE/compositor.log"
 
-sed -i 's/UMBRIEL_TEST_ONE = "alpha beta"/UMBRIEL_TEST_ONE = "reloaded"/' "$NATIVE/config.toml"
-env UMBRIEL_SOCKET="$NATIVE/umbriel-wayland-0.sock" "$UMBRIEL" msg config-reload > /dev/null
-env UMBRIEL_SOCKET="$NATIVE/umbriel-wayland-0.sock" \
-  "$UMBRIEL" msg spawn "$NATIVE/bin/capture-reloaded-environment" > /dev/null
+sed -i 's/CANOPY_TEST_ONE = "alpha beta"/CANOPY_TEST_ONE = "reloaded"/' "$NATIVE/config.toml"
+env CANOPY_SOCKET="$NATIVE/canopy-wayland-0.sock" "$CANOPY" msg config-reload > /dev/null
+env CANOPY_SOCKET="$NATIVE/canopy-wayland-0.sock" \
+  "$CANOPY" msg spawn "$NATIVE/bin/capture-reloaded-environment" > /dev/null
 wait_for_file "$NATIVE" "$NATIVE/reloaded-environment" true
 reloaded_value=$(< "$NATIVE/reloaded-environment")
 if [[ $reloaded_value != "alpha beta" ]]; then

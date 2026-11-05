@@ -7,12 +7,12 @@ set -euo pipefail
 readonly OUTPUT_W=1280
 readonly OUTPUT_H=720
 readonly BTN_MIDDLE=274
-readonly POINTER="${UMBRIEL_POINTER_CLIENT:-./build-debug/tests/pointer-client}"
-readonly CLIENT="${UMBRIEL_UNMAP_CLIENT:-./build-debug/tests/unmap-client}"
+readonly POINTER="${CANOPY_POINTER_CLIENT:-./build-debug/tests/pointer-client}"
+readonly CLIENT="${CANOPY_UNMAP_CLIENT:-./build-debug/tests/unmap-client}"
 
-source "$UMBRIEL_HARNESS_LIB"
+source "$CANOPY_HARNESS_LIB"
 
-cat >> "$UMBRIEL_CONFIG" <<'EOF'
+cat >> "$CANOPY_CONFIG" <<'EOF'
 
 [animation]
 enabled = false
@@ -27,7 +27,7 @@ follows_mouse = true
 [keybinds]
 "Mod+MouseMiddle" = "layout-scroll-drag"
 EOF
-"$UMBRIEL" msg config-reload > /dev/null
+"$CANOPY" msg config-reload > /dev/null
 
 pointer() {
   "$POINTER" "$OUTPUT_W" "$OUTPUT_H" "$@"
@@ -40,7 +40,7 @@ spawn_client() {
 wait_for_windows() {
   local expected=$1 count=
   for _ in $(seq 60); do
-    count=$("$UMBRIEL" windows --json | jq 'length')
+    count=$("$CANOPY" windows --json | jq 'length')
     [[ $count == "$expected" ]] && return 0
     sleep 0.1
   done
@@ -49,7 +49,7 @@ wait_for_windows() {
 }
 
 focused() {
-  "$UMBRIEL" windows --json | jq -r '.[] | select(.focused) | .title'
+  "$CANOPY" windows --json | jq -r '.[] | select(.focused) | .title'
 }
 
 wait_for_focus() {
@@ -59,7 +59,7 @@ wait_for_focus() {
     [[ $actual == "$expected" ]] && return 0
     sleep 0.1
   done
-  echo "expected '$expected' to be focused, got '$actual': $("$UMBRIEL" windows --json)"
+  echo "expected '$expected' to be focused, got '$actual': $("$CANOPY" windows --json)"
   return 1
 }
 
@@ -68,31 +68,31 @@ spawn_client tab-a
 wait_for_windows 1
 spawn_client tab-b
 wait_for_windows 2
-"$UMBRIEL" msg window-consume-left > /dev/null
-"$UMBRIEL" msg column-toggle-tabbed > /dev/null
+"$CANOPY" msg window-consume-left > /dev/null
+"$CANOPY" msg column-toggle-tabbed > /dev/null
 wait_for_focus tab-b
 spawn_client tab-c
 wait_for_windows 3
 wait_for_focus tab-c
-"$UMBRIEL" settle
+"$CANOPY" settle
 
 # Pan back to the group: the drag moves the strip right, revealing the column on the left.
 pointer_hold "$OUTPUT_W" "$OUTPUT_H" \
   move 300 360 mod logo press "$BTN_MIDDLE" move 350 360 move 1200 360 \
   -- release "$BTN_MIDDLE" mod none
 # Flush the last finger-driven position before release, so only the release transition can move the strip to its snap.
-"$UMBRIEL" settle
-held_x=$("$UMBRIEL" windows --json | jq -r '.[] | select(.title == "tab-b") | .x')
+"$CANOPY" settle
+held_x=$("$CANOPY" windows --json | jq -r '.[] | select(.title == "tab-b") | .x')
 pointer_release
-"$UMBRIEL" settle
+"$CANOPY" settle
 wait_for_focus tab-b
-released_x=$("$UMBRIEL" windows --json | jq -r '.[] | select(.title == "tab-b") | .x')
+released_x=$("$CANOPY" windows --json | jq -r '.[] | select(.title == "tab-b") | .x')
 if ((released_x >= held_x)); then
   echo "gesture release did not arrange tab-b at its left snap: x $held_x -> $released_x"
   exit 1
 fi
-if [[ $("$UMBRIEL" windows --json | jq -r '.[] | select(.title == "tab-a") | .tab_hidden') != true ]]; then
-  echo "expected tab-a to stay hidden behind tab-b: $("$UMBRIEL" windows --json)"
+if [[ $("$CANOPY" windows --json | jq -r '.[] | select(.title == "tab-a") | .tab_hidden') != true ]]; then
+  echo "expected tab-a to stay hidden behind tab-b: $("$CANOPY" windows --json)"
   exit 1
 fi
 

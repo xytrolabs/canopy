@@ -3,9 +3,9 @@
 # Headless outputs stay SDR: capture transitions verify provenance, while real
 # gamma 2.2 and compound-power tags render different dark pixels on that output.
 set -euo pipefail
-source "$UMBRIEL_HARNESS_LIB"
+source "$CANOPY_HARNESS_LIB"
 
-cat >> "$UMBRIEL_CONFIG" <<'CONFIG'
+cat >> "$CANOPY_CONFIG" <<'CONFIG'
 [animation]
 enabled = false
 [appearance.blur]
@@ -13,13 +13,13 @@ enabled = false
 [output.HEADLESS-1]
 hdr = "off"
 CONFIG
-"$UMBRIEL" msg config-reload > /dev/null
+"$CANOPY" msg config-reload > /dev/null
 
-readonly CAPTURE_LOG="$UMBRIEL_RUNTIME_DIR/color-transfer-capture.log"
-readonly IMAGE="$UMBRIEL_RUNTIME_DIR/color-transfer.png"
-mkfifo "$UMBRIEL_RUNTIME_DIR/color-transfer-capture.fifo"
-CAPTURE_CONTROL=1 "$UMBRIEL_CAPTURE_CLIENT" < "$UMBRIEL_RUNTIME_DIR/color-transfer-capture.fifo" > "$CAPTURE_LOG" 2>&1 &
-exec {CAPTURE_FD}> "$UMBRIEL_RUNTIME_DIR/color-transfer-capture.fifo"
+readonly CAPTURE_LOG="$CANOPY_RUNTIME_DIR/color-transfer-capture.log"
+readonly IMAGE="$CANOPY_RUNTIME_DIR/color-transfer.png"
+mkfifo "$CANOPY_RUNTIME_DIR/color-transfer-capture.fifo"
+CAPTURE_CONTROL=1 "$CANOPY_CAPTURE_CLIENT" < "$CANOPY_RUNTIME_DIR/color-transfer-capture.fifo" > "$CAPTURE_LOG" 2>&1 &
+exec {CAPTURE_FD}> "$CANOPY_RUNTIME_DIR/color-transfer-capture.fifo"
 await_lines "$CAPTURE_LOG" 'session-ready HEADLESS-1' 1
 await_lines "$CAPTURE_LOG" 'frame HEADLESS-1' 1
 
@@ -48,7 +48,7 @@ expect_frames() {
   if [[ $command == frame ]]; then
     await_lines "$CLIENT_LOG" '{"event":"frame",' "$((callbacks + 1))"
   fi
-  "$UMBRIEL" settle > /dev/null
+  "$CANOPY" settle > /dev/null
   capture_count
   if ((frame_count - before != expected)); then
     echo "$mode: $description changed capture count $before to $frame_count, expected $expected drawn frame(s)"
@@ -58,7 +58,7 @@ expect_frames() {
 
 expect_metadata() {
   local transfer=$1 primaries=$2 color
-  color=$("$UMBRIEL" color --json)
+  color=$("$CANOPY" color --json)
   if ! jq -e --arg transfer "$transfer" --arg primaries "$primaries" '
     any(.surfaces[]; .app_id == "color-feedback-client"
       and .transfer_function == $transfer and .primaries == $primaries)
@@ -71,29 +71,29 @@ expect_metadata() {
 expect_pixel() {
   local expected=$1 description=$2 tolerance=${3:-1} red green blue
   grim "$IMAGE"
-  read -r red green blue < <("$UMBRIEL_PIXEL_PROBE" "$IMAGE" pixel 640 360)
+  read -r red green blue < <("$CANOPY_PIXEL_PROBE" "$IMAGE" pixel 640 360)
   if ((red < expected - tolerance || red > expected + tolerance
        || green < expected - tolerance || green > expected + tolerance
        || blue < expected - tolerance || blue > expected + tolerance)); then
     echo "$mode: $description rendered $red $green $blue, expected $expected per channel"
     exit 1
   fi
-  "$UMBRIEL" settle > /dev/null
+  "$CANOPY" settle > /dev/null
 }
 
 for mode in v1-toplevel v1-subsurface v1-subsurface-desync v2-toplevel v2-subsurface v2-subsurface-desync; do
   version=${mode%%-*}
   surface_mode=${mode#*-}
-  CLIENT_LOG="$UMBRIEL_RUNTIME_DIR/color-transfer-$mode.log"
-  fifo="$UMBRIEL_RUNTIME_DIR/color-transfer-$mode.fifo"
+  CLIENT_LOG="$CANOPY_RUNTIME_DIR/color-transfer-$mode.log"
+  fifo="$CANOPY_RUNTIME_DIR/color-transfer-$mode.fifo"
   mkfifo "$fifo"
   args=(compound untagged "$version")
   [[ $surface_mode == toplevel ]] || args+=("$surface_mode")
-  "$UMBRIEL_COLOR_FEEDBACK_CLIENT" "${args[@]}" < "$fifo" > "$CLIENT_LOG" 2>&1 &
+  "$CANOPY_COLOR_FEEDBACK_CLIENT" "${args[@]}" < "$fifo" > "$CLIENT_LOG" 2>&1 &
   client_pid=$!
   exec {CLIENT_FD}> "$fifo"
   await_lines "$CLIENT_LOG" '{"event":"mapped"}' 1
-  "$UMBRIEL" settle > /dev/null
+  "$CANOPY" settle > /dev/null
   expect_metadata none none
   expect_pixel 16 'implicit SDR' 0
 
@@ -129,19 +129,19 @@ for mode in v1-toplevel v1-subsurface v1-subsurface-desync v2-toplevel v2-subsur
   for value in 29 30; do
     printf -v fill 'ff%02x%02x%02x' "$value" "$value" "$value"
     request "color $fill"
-    "$UMBRIEL" settle > /dev/null
+    "$CANOPY" settle > /dev/null
     expect_pixel "$value" 'explicit sRGB dark pixel' 0
     request unset
-    "$UMBRIEL" settle > /dev/null
+    "$CANOPY" settle > /dev/null
     expect_pixel "$value" 'implicit SDR dark pixel' 0
     request tag
-    "$UMBRIEL" settle > /dev/null
+    "$CANOPY" settle > /dev/null
   done
 
   kill -TERM "$client_pid"
   wait "$client_pid" || true
   exec {CLIENT_FD}>&-
-  "$UMBRIEL" settle > /dev/null
+  "$CANOPY" settle > /dev/null
 done
 
 echo 'native sRGB transfers preserve dark pixels and stay distinct from implicit SDR and gamma 2.2 across parent and child commits'

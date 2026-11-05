@@ -11,7 +11,7 @@ readonly BTN_LEFT=272 # evdev BTN_LEFT
 readonly BTN_RIGHT=273 # evdev BTN_RIGHT
 readonly OUTPUT_W=1280
 readonly OUTPUT_H=720
-readonly POINTER="${UMBRIEL_POINTER_CLIENT:-./build-debug/tests/pointer-client}"
+readonly POINTER="${CANOPY_POINTER_CLIENT:-./build-debug/tests/pointer-client}"
 
 if [[ ! -x $POINTER ]]; then
   echo "input helpers are not available"
@@ -23,12 +23,12 @@ pointer() {
 }
 
 window_box() {
-  "$UMBRIEL" windows --json | jq -r '.[0] | "\(.x) \(.y) \(.w) \(.h)"'
+  "$CANOPY" windows --json | jq -r '.[0] | "\(.x) \(.y) \(.w) \(.h)"'
 }
 
 # Geometry must be readable without settle: it waits for a drawn frame and
 # wedges while a button is held, which is exactly the state under test.
-cat >> "$UMBRIEL_CONFIG" <<'EOF'
+cat >> "$CANOPY_CONFIG" <<'EOF'
 
 [animation]
 enabled = false
@@ -36,14 +36,14 @@ enabled = false
 [input]
 mod_right_double_click = "maximize"
 EOF
-"$UMBRIEL" msg config-reload > /dev/null
+"$CANOPY" msg config-reload > /dev/null
 
 foot sh -c 'sleep 120' > /dev/null 2>&1 &
 for _ in $(seq 60); do
-  [[ $("$UMBRIEL" windows --json | jq 'length') -eq 1 ]] && break
+  [[ $("$CANOPY" windows --json | jq 'length') -eq 1 ]] && break
   sleep 0.25
 done
-"$UMBRIEL" settle
+"$CANOPY" settle
 
 # The press lands in the left third so it proposes a resize edge. The whole
 # sequence must leave the window alone: the deferred press holds its button, so
@@ -52,7 +52,7 @@ done
 # move-grab would look unchanged.
 repro_round() {
   local kind=$1 windows x y before after
-  windows=$("$UMBRIEL" windows --json)
+  windows=$("$CANOPY" windows --json)
   x=$(jq -r '.[0] | "\(.x + (.w * 0.2 | floor))"' <<< "$windows")
   y=$(jq -r '.[0] | "\(.y + (.h / 2 | floor))"' <<< "$windows")
   before=$(window_box)
@@ -62,7 +62,7 @@ repro_round() {
     release "$BTN_RIGHT" \
     move $((x + 40)) "$y" \
     release "$BTN_LEFT" mod none
-  "$UMBRIEL" settle
+  "$CANOPY" settle
 
   # Motion with no buttons held must not resize anything either. A grab that
   # outlives its button resizes during the motions themselves; poll so a late
@@ -83,8 +83,8 @@ repro_round() {
 
 failed=0
 repro_round tiled || failed=1
-"$UMBRIEL" msg window-toggle-floating > /dev/null
-"$UMBRIEL" settle
+"$CANOPY" msg window-toggle-floating > /dev/null
+"$CANOPY" settle
 repro_round floating || failed=1
 
 if (( failed != 0 )); then

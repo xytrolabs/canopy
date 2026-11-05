@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 # Geometric button symbols and their backgrounds reload independently, scale with their window, and survive closing.
 set -euo pipefail
-source "$(dirname "$UMBRIEL_HARNESS_LIB")/title_bar.sh"
+source "$(dirname "$CANOPY_HARNESS_LIB")/title_bar.sh"
 
-cat >> "$UMBRIEL_CONFIG" <<'EOF'
+cat >> "$CANOPY_CONFIG" <<'EOF'
 [animation]
 enabled = false
 [appearance]
@@ -40,32 +40,32 @@ default_floating = true
 default_floating_size_px = { width = 240, height = 140 }
 default_position = { x = 100, y = 100, anchor = "top_left" }
 EOF
-"$UMBRIEL" msg config-reload > /dev/null
-FILL_COLOR=0xFF000000 "$UMBRIEL_UNMAP_CLIENT" ssd-icons 240 140 > "$UMBRIEL_RUNTIME_DIR/window.log" 2>&1 &
+"$CANOPY" msg config-reload > /dev/null
+FILL_COLOR=0xFF000000 "$CANOPY_UNMAP_CLIENT" ssd-icons 240 140 > "$CANOPY_RUNTIME_DIR/window.log" 2>&1 &
 title_bar_wait_box ssd-icons 240x140+100+100
 title_bar_wait_field ssd-icons minimizable true
-image=$UMBRIEL_RUNTIME_DIR/title-bar-icons.png
+image=$CANOPY_RUNTIME_DIR/title-bar-icons.png
 
 capture() {
-  "$UMBRIEL" settle
+  "$CANOPY" settle
   grim -o HEADLESS-1 "$image"
 }
 flags() {
-  sed -i "s/^button_glyph = .*/button_glyph = \"$1\"/; s/^button_background = .*/button_background = $2/" "$UMBRIEL_CONFIG"
-  "$UMBRIEL" msg config-reload > /dev/null
+  sed -i "s/^button_glyph = .*/button_glyph = \"$1\"/; s/^button_background = .*/button_background = $2/" "$CANOPY_CONFIG"
+  "$CANOPY" msg config-reload > /dev/null
   capture
 }
-blue_pixels() { "$UMBRIEL_PIXEL_PROBE" "$image" count 'b > 0.4 && r < 0.3 && g < 0.3' "$region"; }
-white_pixels() { "$UMBRIEL_PIXEL_PROBE" "$image" count 'r > 0.4 && g > 0.4' "$region"; }
+blue_pixels() { "$CANOPY_PIXEL_PROBE" "$image" count 'b > 0.4 && r < 0.3 && g < 0.3' "$region"; }
+white_pixels() { "$CANOPY_PIXEL_PROBE" "$image" count 'r > 0.4 && g > 0.4' "$region"; }
 
 for scale in 1 1.25 2; do
-  sed -i "s/^scale = .*/scale = $scale/" "$UMBRIEL_CONFIG"
-  "$UMBRIEL" msg config-reload > /dev/null
-  read -r output_w output_h < <("$UMBRIEL" outputs --json | jq -r '.[0].logical_size | "\(.width) \(.height)"')
-  "$UMBRIEL_POINTER_CLIENT" "$output_w" "$output_h" move 0 0
+  sed -i "s/^scale = .*/scale = $scale/" "$CANOPY_CONFIG"
+  "$CANOPY" msg config-reload > /dev/null
+  read -r output_w output_h < <("$CANOPY" outputs --json | jq -r '.[0].logical_size | "\(.width) \(.height)"')
+  "$CANOPY_POINTER_CLIENT" "$output_w" "$output_h" move 0 0
   region=$(awk -v s="$scale" 'BEGIN { printf "%dx%d+%d+%d", 240*s, 40*s, 100*s, 60*s }')
   for side in left right; do
-    sed -i "s/^button_position = .*/button_position = \"$side\"/" "$UMBRIEL_CONFIG"
+    sed -i "s/^button_position = .*/button_position = \"$side\"/" "$CANOPY_CONFIG"
     flags always true
     (( $(white_pixels) > 10 )) || { echo "scale=$scale side=$side: symbols missing on colored buttons"; exit 1; }
     # Each control must carry its own symbol, including the floating window's minimize control.
@@ -76,7 +76,7 @@ for scale in 1 1.25 2; do
         x=$((110 + index * 28))
       fi
       button_region=$(awk -v s="$scale" -v x="$x" 'BEGIN { printf "%dx%d+%d+%d", 20*s, 20*s, x*s, 70*s }')
-      count=$("$UMBRIEL_PIXEL_PROBE" "$image" count 'r > 0.4 && g > 0.4' "$button_region")
+      count=$("$CANOPY_PIXEL_PROBE" "$image" count 'r > 0.4 && g > 0.4' "$button_region")
       (( count > 2 )) || { echo "scale=$scale side=$side: button $index lost its symbol"; exit 1; }
     done
     flags never true
@@ -93,33 +93,33 @@ for scale in 1 1.25 2; do
 done
 
 # Both visuals are off: the old close position is ordinary title space.
-"$UMBRIEL_POINTER_CLIENT" "$output_w" "$output_h" move 320 80 press 272 release 272
-"$UMBRIEL" settle
+"$CANOPY_POINTER_CLIENT" "$output_w" "$output_h" move 320 80 press 272 release 272
+"$CANOPY" settle
 [[ -n $(title_bar_window ssd-icons) ]] || { echo "hidden buttons retained an invisible close target"; exit 1; }
 
 # Symbols alone remain clickable and are copied into the window's close snapshot.
 flags always false
-sed -i '/^\[animation\]$/ { n; s/enabled = false/enabled = true/; }' "$UMBRIEL_CONFIG"
-cat >> "$UMBRIEL_CONFIG" <<'EOF'
+sed -i '/^\[animation\]$/ { n; s/enabled = false/enabled = true/; }' "$CANOPY_CONFIG"
+cat >> "$CANOPY_CONFIG" <<'EOF'
 [animation.windows_out]
 enabled = true
 style = "fade"
 duration_ms = 1000
 curve = "linear"
 EOF
-"$UMBRIEL" msg config-reload > /dev/null
-"$UMBRIEL" settle
-"$UMBRIEL" clock-freeze
-"$UMBRIEL_POINTER_CLIENT" "$output_w" "$output_h" move 320 80 press 272 release 272
+"$CANOPY" msg config-reload > /dev/null
+"$CANOPY" settle
+"$CANOPY" clock-freeze
+"$CANOPY_POINTER_CLIENT" "$output_w" "$output_h" move 320 80 press 272 release 272
 title_bar_wait_absent ssd-icons
 grim -o HEADLESS-1 "$image"
 (( $(white_pixels) > 5 )) || { echo "close snapshot lost its button symbols"; exit 1; }
 for x in 254 282 310; do
   button_region="40x40+$((x * 2))+140"
-  count=$("$UMBRIEL_PIXEL_PROBE" "$image" count 'r > 0.4 && g > 0.4' "$button_region")
+  count=$("$CANOPY_PIXEL_PROBE" "$image" count 'r > 0.4 && g > 0.4' "$button_region")
   (( count > 2 )) || { echo "close snapshot lost the cached symbol at x=$x"; exit 1; }
 done
-"$UMBRIEL" clock-advance 1100
+"$CANOPY" clock-advance 1100
 grim -o HEADLESS-1 "$image"
 (( $(white_pixels) == 0 )) || { echo "button symbols survived their close snapshot"; exit 1; }
 echo "button symbols and backgrounds reload independently at fractional scale and close with their window"

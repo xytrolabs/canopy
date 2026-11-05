@@ -9,14 +9,14 @@ set -euo pipefail
 # appending, because re-enabling means the key is gone again. Keeping the
 # instance's pristine config in a variable avoids restating the [general] block
 # that keeps Xwayland and the cheatsheet out of this instance.
-BASELINE=$(< "$UMBRIEL_CONFIG")
+BASELINE=$(< "$CANOPY_CONFIG")
 
-log_mark() { wc -l < "$UMBRIEL_LOG"; }
+log_mark() { wc -l < "$CANOPY_LOG"; }
 
 wait_for_log_since() {
   local mark=$1 pattern=$2
   for _ in $(seq 40); do
-    if tail -n +"$((mark + 1))" "$UMBRIEL_LOG" | grep -q "$pattern"; then
+    if tail -n +"$((mark + 1))" "$CANOPY_LOG" | grep -q "$pattern"; then
       return 0
     fi
     sleep 0.25
@@ -31,7 +31,7 @@ spawn_client() {
 wait_for_workspace() {
   local expected=$1 workspace= windows=
   for _ in $(seq 40); do
-    windows=$("$UMBRIEL" windows --json)
+    windows=$("$CANOPY" windows --json)
     if [[ $(jq 'length' <<< "$windows") -ne 1 ]]; then
       sleep 0.1
       continue
@@ -47,9 +47,9 @@ wait_for_workspace() {
 wait_for_temporary_workspace() {
   local native=$1 workspace=
   for _ in $(seq 40); do
-    workspace=$("$UMBRIEL" windows --json | jq -r '.[0].workspace // ""')
+    workspace=$("$CANOPY" windows --json | jq -r '.[0].workspace // ""')
     if [[ $workspace == HEADLESS-1:* && $workspace != "$native" ]] \
-      && "$UMBRIEL" workspaces --json | jq -e --arg id "$workspace" \
+      && "$CANOPY" workspaces --json | jq -e --arg id "$workspace" \
         'any(.[]; .id == $id and .named == false)' > /dev/null; then
       return 0
     fi
@@ -61,29 +61,29 @@ wait_for_temporary_workspace() {
 
 spawn_client
 wait_for_workspace 'HEADLESS-2:1'
-native_refuge=$("$UMBRIEL" workspaces --json | jq -r '.[] | select(.output == "HEADLESS-1" and .index == 1) | .id')
+native_refuge=$("$CANOPY" workspaces --json | jq -r '.[] | select(.output == "HEADLESS-1" and .index == 1) | .id')
 
 # Disable the output through a live reload.
 mark=$(log_mark)
 {
   printf '%s\n' "$BASELINE"
   printf '\n[output.HEADLESS-2]\nenabled = false\n'
-} > "$UMBRIEL_CONFIG"
-"$UMBRIEL" msg config-reload > /dev/null
+} > "$CANOPY_CONFIG"
+"$CANOPY" msg config-reload > /dev/null
 if ! wait_for_log_since "$mark" "output 'HEADLESS-2': disabled by config"; then
   echo "output was not disabled on reload"
-  tail -8 "$UMBRIEL_LOG" | sed 's/^/  | /'
+  tail -8 "$CANOPY_LOG" | sed 's/^/  | /'
   exit 1
 fi
 wait_for_temporary_workspace "$native_refuge"
 
 # Re-enable: the compositor must survive the disable and come back with a mode.
 mark=$(log_mark)
-printf '%s\n' "$BASELINE" > "$UMBRIEL_CONFIG"
-"$UMBRIEL" msg config-reload > /dev/null
+printf '%s\n' "$BASELINE" > "$CANOPY_CONFIG"
+"$CANOPY" msg config-reload > /dev/null
 if ! wait_for_log_since "$mark" "output 'HEADLESS-2': applied mode="; then
   echo "output was not re-enabled on reload"
-  tail -8 "$UMBRIEL_LOG" | sed 's/^/  | /'
+  tail -8 "$CANOPY_LOG" | sed 's/^/  | /'
   exit 1
 fi
 

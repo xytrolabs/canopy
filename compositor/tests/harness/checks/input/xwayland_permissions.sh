@@ -3,19 +3,19 @@
 # A physical keyboard authorizes EIS input. An already approved emulator cannot approve another application's prompt.
 # X11 client teardown releases held input, and lock surfaces accept physical keys while emulated keys are discarded.
 set -euo pipefail
-source "$UMBRIEL_REPO/tests/harness/eis_lib.sh"
+source "$CANOPY_REPO/tests/harness/eis_lib.sh"
 
-readonly APPROVED=umbriel-xtest-approved
-readonly DENIED=umbriel-xtest-denied
-readonly WINDOW_LOG="$UMBRIEL_RUNTIME_DIR/eis-permission-window.log"
-readonly LOCK_LOG="$UMBRIEL_RUNTIME_DIR/eis-permission-lock.log"
+readonly APPROVED=canopy-xtest-approved
+readonly DENIED=canopy-xtest-denied
+readonly WINDOW_LOG="$CANOPY_RUNTIME_DIR/eis-permission-window.log"
+readonly LOCK_LOG="$CANOPY_RUNTIME_DIR/eis-permission-lock.log"
 
-cat >> "$UMBRIEL_CONFIG" <<'CONFIG'
+cat >> "$CANOPY_CONFIG" <<'CONFIG'
 
 [animation]
 enabled = false
 CONFIG
-"$UMBRIEL" msg config-reload > /dev/null
+"$CANOPY" msg config-reload > /dev/null
 LOG_MODIFIERS=1 "$NATIVE_CLIENT" eis-permission-window > "$WINDOW_LOG" 2>&1 &
 eis_wait_window eis-permission-window
 
@@ -30,10 +30,10 @@ eis_permission requested "$DENIED"
 eis_send approved 'tap 28'
 eis_sync approved fake-approval
 sleep 0.2 # real time: the approved emulator's Enter must leave the other application's consent prompt open.
-"$UMBRIEL_POINTER_CLIENT" 1280 720 keyboard-only tap 1 > /dev/null
+"$CANOPY_POINTER_CLIENT" 1280 720 keyboard-only tap 1 > /dev/null
 eis_permission denied "$DENIED"
-if [[ $(events "$UMBRIEL_LOG" ".*input permission granted .*app='$DENIED'") -ne 0 ]]; then
-  echo "emulated Enter granted another application's input permission: $(cat "$UMBRIEL_LOG")"
+if [[ $(events "$CANOPY_LOG" ".*input permission granted .*app='$DENIED'") -ne 0 ]]; then
+  echo "emulated Enter granted another application's input permission: $(cat "$CANOPY_LOG")"
   exit 1
 fi
 eis_stop denied
@@ -62,9 +62,9 @@ eis_start resumed "$APPROVED"
 eis_send resumed 'tap 33'
 await_events "$WINDOW_LOG" 'keyboard-key code=33 state=pressed' 1 "the approved application after reconnect"
 
-mkfifo "$UMBRIEL_RUNTIME_DIR/eis-lock.fifo"
-exec {lock_fd}<> "$UMBRIEL_RUNTIME_DIR/eis-lock.fifo"
-LOG_LOCK_INPUT=1 "$UMBRIEL_LOCK_CLIENT" <&"$lock_fd" > "$LOCK_LOG" 2>&1 &
+mkfifo "$CANOPY_RUNTIME_DIR/eis-lock.fifo"
+exec {lock_fd}<> "$CANOPY_RUNTIME_DIR/eis-lock.fifo"
+LOG_LOCK_INPUT=1 "$CANOPY_LOCK_CLIENT" <&"$lock_fd" > "$LOCK_LOG" 2>&1 &
 lock_pid=$!
 await_events "$LOCK_LOG" locked 1 "the real session lock"
 await_events "$LOCK_LOG" keyboard-enter 1 "keyboard focus on the lock surface"
@@ -72,7 +72,7 @@ await_events "$LOCK_LOG" keyboard-enter 1 "keyboard focus on the lock surface"
 eis_send resumed 'tap 35'
 eis_sync resumed locked-input
 sleep 0.2 # real time: pending XTEST input must be processed while the lock is still held, without reaching its surface.
-"$UMBRIEL_POINTER_CLIENT" 1280 720 keyboard-only tap 31 > /dev/null
+"$CANOPY_POINTER_CLIENT" 1280 720 keyboard-only tap 31 > /dev/null
 await_events "$LOCK_LOG" 'keyboard-key code=31 state=pressed' 1 "the physical keyboard on the lock surface"
 if [[ $(events "$LOCK_LOG" 'keyboard-key code=35 state=pressed') -ne 0 ]]; then
   echo "emulated input reached the lock surface: $(cat "$LOCK_LOG")"
@@ -89,8 +89,8 @@ if [[ $(events "$WINDOW_LOG" 'keyboard-key code=35 state=pressed') -ne 0 ]]; the
   echo "XTEST input typed while locked was replayed after unlock: $(cat "$WINDOW_LOG")"
   exit 1
 fi
-if [[ $(events "$UMBRIEL_LOG" ".*input permission requested .*app='$APPROVED'") -ne 1 ]]; then
-  echo "approved application lost session consent: $(cat "$UMBRIEL_LOG")"
+if [[ $(events "$CANOPY_LOG" ".*input permission requested .*app='$APPROVED'") -ne 1 ]]; then
+  echo "approved application lost session consent: $(cat "$CANOPY_LOG")"
   exit 1
 fi
 eis_stop resumed

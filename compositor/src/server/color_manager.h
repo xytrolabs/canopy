@@ -8,7 +8,7 @@ struct wlr_scene;
 struct wlr_scene_buffer;
 struct wlr_surface;
 
-namespace umbriel {
+namespace canopy {
 
   class Server;
 
@@ -34,4 +34,4 @@ namespace umbriel {
     std::unique_ptr<Impl> m_impl;
   };
 
-} // namespace umbriel
+} // namespace canopy

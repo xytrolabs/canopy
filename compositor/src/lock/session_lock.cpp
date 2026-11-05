@@ -8,7 +8,7 @@
 
 #include <algorithm>
 
-namespace umbriel {
+namespace canopy {
 
   namespace {
     constexpr Logger kLog("lock");
@@ -486,4 +486,4 @@ namespace umbriel {
     return presentation != m_outputPresentations.end() ? &*presentation : nullptr;
   }
 
-} // namespace umbriel
+} // namespace canopy

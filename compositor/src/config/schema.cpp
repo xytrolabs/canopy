@@ -6,7 +6,7 @@
 #include <map>
 #include <vector>
 
-namespace umbriel {
+namespace canopy {
 
   namespace {
 
@@ -77,4 +77,4 @@ namespace umbriel {
     return root.dump(2) + "\n";
   }
 
-} // namespace umbriel
+} // namespace canopy

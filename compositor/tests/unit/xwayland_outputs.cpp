@@ -87,12 +87,12 @@ namespace {
 
 } // namespace
 
-UMBRIEL_TEST(logicalScreenIsTheLayoutMovedToTheOrigin) {
+CANOPY_TEST(logicalScreenIsTheLayoutMovedToTheOrigin) {
   Fixture fixture;
   CHECK(fixture.setUp(kMixedScales));
-  const umbriel::XwaylandOutputs outputs(fixture.display, fixture.layout, false);
+  const canopy::XwaylandOutputs outputs(fixture.display, fixture.layout, false);
 
-  const umbriel::XwaylandRegion main = outputs.region(fixture.outputs[0], 0, 0);
+  const canopy::XwaylandRegion main = outputs.region(fixture.outputs[0], 0, 0);
   CHECK_EQ(main.x.x, 0);
   CHECK_EQ(main.x.y, 1440);
   CHECK_EQ(main.x.width, 3072);
@@ -102,10 +102,10 @@ UMBRIEL_TEST(logicalScreenIsTheLayoutMovedToTheOrigin) {
   CHECK_EQ(main.toXWidth(640), 640);
 }
 
-UMBRIEL_TEST(nativeScreenKeepsTheArrangementWithoutOverlap) {
+CANOPY_TEST(nativeScreenKeepsTheArrangementWithoutOverlap) {
   Fixture fixture;
   CHECK(fixture.setUp(kMixedScales));
-  const umbriel::XwaylandOutputs outputs(fixture.display, fixture.layout, true);
+  const canopy::XwaylandOutputs outputs(fixture.display, fixture.layout, true);
 
   std::vector<wlr_box> boxes;
   boxes.reserve(fixture.outputs.size());
@@ -128,12 +128,12 @@ UMBRIEL_TEST(nativeScreenKeepsTheArrangementWithoutOverlap) {
   }
 }
 
-UMBRIEL_TEST(nativeScreenMapsWindowsThroughTheirOutputScale) {
+CANOPY_TEST(nativeScreenMapsWindowsThroughTheirOutputScale) {
   Fixture fixture;
   CHECK(fixture.setUp(kMixedScales));
-  const umbriel::XwaylandOutputs outputs(fixture.display, fixture.layout, true);
+  const canopy::XwaylandOutputs outputs(fixture.display, fixture.layout, true);
 
-  const umbriel::XwaylandRegion main = outputs.region(fixture.outputs[0], 0, 0);
+  const canopy::XwaylandRegion main = outputs.region(fixture.outputs[0], 0, 0);
   CHECK_EQ(main.scale, 1.25);
   CHECK_EQ(main.toX(800), main.x.x + 1000);
   CHECK_EQ(main.toLayoutX(main.x.x + 1000), 800);
@@ -142,27 +142,27 @@ UMBRIEL_TEST(nativeScreenMapsWindowsThroughTheirOutputScale) {
 
   // An X point in the gap between outputs belongs to the nearest one; one inside an output to that output.
   CHECK_EQ(outputs.regionAtX(main.x.x + 10, main.x.y + 10).scale, 1.25);
-  const umbriel::XwaylandRegion right = outputs.region(fixture.outputs[2], 0, 0);
+  const canopy::XwaylandRegion right = outputs.region(fixture.outputs[2], 0, 0);
   CHECK_EQ(outputs.regionAtX(right.x.x + 10, right.x.y + 10).scale, 1.0);
 }
 
-UMBRIEL_TEST(wholeOutputMapsExactlyAtFractionalScale) {
+CANOPY_TEST(wholeOutputMapsExactlyAtFractionalScale) {
   // 2560 / 1.5 rounds, so scaling the logical width back by 1.5 lands one pixel off the physical width.
   Fixture fixture;
   CHECK(fixture.setUp({{.width = 2560, .height = 1440, .scale = 1.5F, .x = 0, .y = 0}}));
-  const umbriel::XwaylandOutputs outputs(fixture.display, fixture.layout, true);
+  const canopy::XwaylandOutputs outputs(fixture.display, fixture.layout, true);
 
-  const umbriel::XwaylandRegion region = outputs.region(fixture.outputs[0], 0, 0);
+  const canopy::XwaylandRegion region = outputs.region(fixture.outputs[0], 0, 0);
   CHECK_EQ(region.toXWidth(region.layout.width), 2560);
   CHECK_EQ(region.toXHeight(region.layout.height), 1440);
   CHECK_EQ(region.toLayoutWidth(2560), region.layout.width);
   CHECK_EQ(region.toLayoutHeight(1440), region.layout.height);
 }
 
-UMBRIEL_TEST(primarySelectorFollowsIdentityAndLayoutMembership) {
+CANOPY_TEST(primarySelectorFollowsIdentityAndLayoutMembership) {
   Fixture fixture;
   CHECK(fixture.setUp(kMixedScales));
-  const umbriel::XwaylandOutputs outputs(fixture.display, fixture.layout, false);
+  const canopy::XwaylandOutputs outputs(fixture.display, fixture.layout, false);
   wlr_output* main = fixture.outputs[0];
   std::free(main->make);
   std::free(main->model);

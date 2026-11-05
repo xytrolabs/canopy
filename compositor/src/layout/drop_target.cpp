@@ -17,7 +17,7 @@
 #include "wlr.h"
 // clang-format on
 
-namespace umbriel {
+namespace canopy {
 
   namespace {
     constexpr int kColumnHintWidth = 300;
@@ -701,4 +701,4 @@ namespace umbriel {
     }
   }
 
-} // namespace umbriel
+} // namespace canopy

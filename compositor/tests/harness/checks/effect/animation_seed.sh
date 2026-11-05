@@ -3,27 +3,27 @@
 # begins another transition.
 set -euo pipefail
 
-readonly SHADER="${UMBRIEL_CONFIG%/*}/seed.glsl"
-readonly PASSTHROUGH="${UMBRIEL_CONFIG%/*}/seed-passthrough.glsl"
-readonly IMAGE="$UMBRIEL_RUNTIME_DIR/seed.png"
-readonly CLIENT_LOG="$UMBRIEL_RUNTIME_DIR/seed-client.log"
-readonly CONTROL_FIFO="$UMBRIEL_RUNTIME_DIR/seed-control"
+readonly SHADER="${CANOPY_CONFIG%/*}/seed.glsl"
+readonly PASSTHROUGH="${CANOPY_CONFIG%/*}/seed-passthrough.glsl"
+readonly IMAGE="$CANOPY_RUNTIME_DIR/seed.png"
+readonly CLIENT_LOG="$CANOPY_RUNTIME_DIR/seed-client.log"
+readonly CONTROL_FIFO="$CANOPY_RUNTIME_DIR/seed-control"
 
 cat > "$SHADER" <<'GLSL'
 vec4 animation(vec2 uv) {
-    float value = uv.x < 0.25 ? umbriel_random_seed.x
-        : uv.x < 0.5 ? umbriel_random_seed.y
-        : uv.x < 0.75 ? umbriel_random_seed.z
-        : umbriel_random_seed.w;
+    float value = uv.x < 0.25 ? canopy_random_seed.x
+        : uv.x < 0.5 ? canopy_random_seed.y
+        : uv.x < 0.75 ? canopy_random_seed.z
+        : canopy_random_seed.w;
     return vec4(value, value, value, 1.0);
 }
 GLSL
 
 cat > "$PASSTHROUGH" <<'GLSL'
-vec4 animation(vec2 uv) { return umbriel_sample(uv); }
+vec4 animation(vec2 uv) { return canopy_sample(uv); }
 GLSL
 
-cat >> "$UMBRIEL_CONFIG" <<'EOF'
+cat >> "$CANOPY_CONFIG" <<'EOF'
 
 [appearance]
 border_width = 0
@@ -56,21 +56,21 @@ match.title = "^shader-seed$"
 default_floating = true
 default_position = { x = 300, y = 180, anchor = "top_left" }
 EOF
-"$UMBRIEL" msg config-reload > /dev/null
+"$CANOPY" msg config-reload > /dev/null
 
 # Animation time only moves by clock-advance: samples land 150 ms and 500 ms into the 1800 ms opening timeline and
 # 150 ms into the 900 ms closing one.
-"$UMBRIEL" clock-freeze
+"$CANOPY" clock-freeze
 
 mkfifo "$CONTROL_FIFO"
 exec {control_fd}<>"$CONTROL_FIFO"
-REMAP_ON_STDIN=1 "$UMBRIEL_UNMAP_CLIENT" shader-seed 800 420 \
+REMAP_ON_STDIN=1 "$CANOPY_UNMAP_CLIENT" shader-seed 800 420 \
   <&"$control_fd" > "$CLIENT_LOG" 2>&1 &
 
 wait_for_map() {
   local count=$1
   for _ in $(seq 80); do
-    window=$("$UMBRIEL" windows --json | jq -c '.[] | select(.title == "shader-seed")')
+    window=$("$CANOPY" windows --json | jq -c '.[] | select(.title == "shader-seed")')
     [[ $(grep -c '^mapped$' "$CLIENT_LOG" || true) -eq $count && -n $window ]] && return 0
     sleep 0.025
   done
@@ -85,16 +85,16 @@ sample_seed() {
   grim "$IMAGE"
   for fraction in 0.125 0.375 0.625 0.875; do
     sample_x=$(awk -v x="$x" -v width="$width" -v fraction="$fraction" 'BEGIN { printf "%d", x + width * fraction }')
-    read -r red _ < <("$UMBRIEL_PIXEL_PROBE" "$IMAGE" mean "6x6+$((sample_x - 3))+$((sample_y - 3))")
+    read -r red _ < <("$CANOPY_PIXEL_PROBE" "$IMAGE" mean "6x6+$((sample_x - 3))+$((sample_y - 3))")
     values+=("$red")
   done
   echo "${values[*]}"
 }
 
 wait_for_map 1
-"$UMBRIEL" clock-advance 150
+"$CANOPY" clock-advance 150
 first=$(sample_seed)
-"$UMBRIEL" clock-advance 350
+"$CANOPY" clock-advance 350
 first_later=$(sample_seed)
 if [[ $first != "$first_later" ]]; then
   echo "shader seed changed during one transition: $first then $first_later"
@@ -102,8 +102,8 @@ if [[ $first != "$first_later" ]]; then
 fi
 
 window_id=$(jq -r .id <<< "$window")
-"$UMBRIEL" msg window-close "$window_id" > /dev/null
-"$UMBRIEL" clock-advance 150
+"$CANOPY" msg window-close "$window_id" > /dev/null
+"$CANOPY" clock-advance 150
 closing=$(sample_seed)
 if [[ $closing != "$first" ]]; then
   echo "closing snapshot did not preserve the opening seed: $first then $closing"
@@ -118,13 +118,13 @@ if [[ $(grep -c '^unmapped$' "$CLIENT_LOG" || true) -ne 1 ]]; then
   exit 1
 fi
 
-"$UMBRIEL" clock-advance 1800
-"$UMBRIEL" settle
+"$CANOPY" clock-advance 1800
+"$CANOPY" settle
 printf r >&"$control_fd"
 wait_for_map 2
-"$UMBRIEL" clock-advance 150
+"$CANOPY" clock-advance 150
 second=$(sample_seed)
-"$UMBRIEL" clock-advance 350
+"$CANOPY" clock-advance 350
 second_later=$(sample_seed)
 if [[ $second != "$second_later" ]]; then
   echo "shader seed changed during the second transition: $second then $second_later"

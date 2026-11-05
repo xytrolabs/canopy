@@ -13,8 +13,8 @@ namespace {
 
 } // namespace
 
-UMBRIEL_TEST(remembersNamedLayoutsPerSurface) {
-  umbriel::SurfaceLayoutMemory memory;
+CANOPY_TEST(remembersNamedLayoutsPerSurface) {
+  canopy::SurfaceLayoutMemory memory;
   TestSurface first;
   TestSurface second;
 
@@ -30,8 +30,8 @@ UMBRIEL_TEST(remembersNamedLayoutsPerSurface) {
   CHECK_EQ(memory.recall(&first.surface), std::optional<std::string_view>{"Persian"});
 }
 
-UMBRIEL_TEST(forgetsDestroyedSurfaces) {
-  umbriel::SurfaceLayoutMemory memory;
+CANOPY_TEST(forgetsDestroyedSurfaces) {
+  canopy::SurfaceLayoutMemory memory;
   TestSurface first;
   TestSurface second;
   memory.remember(&first.surface, "English (US)");

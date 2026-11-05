@@ -17,17 +17,17 @@
 #include <utility>
 #include <vector>
 
-namespace umbriel {
+namespace canopy {
 
   namespace {
     std::string resolveSocketPath() {
-      if (const char* sock = std::getenv("UMBRIEL_SOCKET"); sock != nullptr && sock[0] != '\0') {
+      if (const char* sock = std::getenv("CANOPY_SOCKET"); sock != nullptr && sock[0] != '\0') {
         return sock;
       }
       const char* runtimeDir = std::getenv("XDG_RUNTIME_DIR");
       const char* waylandDisplay = std::getenv("WAYLAND_DISPLAY");
       if (runtimeDir != nullptr && runtimeDir[0] != '\0' && waylandDisplay != nullptr && waylandDisplay[0] != '\0') {
-        return std::string(runtimeDir) + "/umbriel-" + waylandDisplay + ".sock";
+        return std::string(runtimeDir) + "/canopywc-" + waylandDisplay + ".sock";
       }
       return {};
     }
@@ -36,7 +36,7 @@ namespace umbriel {
     int connectToCompositor() {
       std::string socketPath = resolveSocketPath();
       if (socketPath.empty()) {
-        std::println(stderr, "error: cannot find umbriel socket (is the compositor running?)");
+        std::println(stderr, "error: cannot find canopy socket (is the compositor running?)");
         return -1;
       }
 
@@ -56,7 +56,7 @@ namespace umbriel {
       socketPath.copy(addr.sun_path, socketPath.size());
 
       if (connect(fd, reinterpret_cast<sockaddr*>(&addr), sizeof(addr)) < 0) {
-        std::println(stderr, "error: cannot connect to umbriel socket (is the compositor running?)");
+        std::println(stderr, "error: cannot connect to canopy socket (is the compositor running?)");
         close(fd);
         return -1;
       }
@@ -77,7 +77,7 @@ namespace umbriel {
     }
 
     std::string requestPayload(nlohmann::json request) {
-      if (const char* token = std::getenv("UMBRIEL_LAUNCH_TOKEN"); token != nullptr && token[0] != '\0') {
+      if (const char* token = std::getenv("CANOPY_LAUNCH_TOKEN"); token != nullptr && token[0] != '\0') {
         request["launch_token"] = token;
       }
       return request.dump() + "\n";
@@ -240,4 +240,4 @@ namespace umbriel {
     return EXIT_SUCCESS;
   }
 
-} // namespace umbriel
+} // namespace canopy

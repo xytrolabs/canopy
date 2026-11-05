@@ -8,9 +8,9 @@
 # tile.
 set -euo pipefail
 
-readonly SCREENSHOT="$UMBRIEL_RUNTIME_DIR/rule-only-window.png"
+readonly SCREENSHOT="$CANOPY_RUNTIME_DIR/rule-only-window.png"
 
-cat >> "$UMBRIEL_CONFIG" <<'EOF'
+cat >> "$CANOPY_CONFIG" <<'EOF'
 
 [animation]
 enabled = false
@@ -47,12 +47,12 @@ match.app_id = "^only-b$"
 match.is_only_window = true
 opacity = 0.5
 EOF
-"$UMBRIEL" msg config-reload > /dev/null
+"$CANOPY" msg config-reload > /dev/null
 
 client_pid=
 
 field_of() {
-  "$UMBRIEL" windows --json | jq -r --arg a "$1" --arg f "$2" '.[] | select(.app_id == $a) | .[$f]'
+  "$CANOPY" windows --json | jq -r --arg a "$1" --arg f "$2" '.[] | select(.app_id == $a) | .[$f]'
 }
 
 wait_mapped() {
@@ -78,7 +78,7 @@ wait_gone() {
 # Settles first, so the width is the one the client is holding rather than one a
 # transition is about to replace.
 width_of() {
-  "$UMBRIEL" settle
+  "$CANOPY" settle
   field_of only-a w
 }
 
@@ -89,16 +89,16 @@ width_of() {
 sample_green() {
   local x y w h
   read -r x y w h <<< "$(
-    "$UMBRIEL" windows --json | jq -r '.[] | select(.app_id == "only-a") | "\(.x) \(.y) \(.w) \(.h)"'
+    "$CANOPY" windows --json | jq -r '.[] | select(.app_id == "only-a") | "\(.x) \(.y) \(.w) \(.h)"'
   )"
   grim "$SCREENSHOT"
-  "$UMBRIEL_PIXEL_PROBE" "$SCREENSHOT" mean "20x20+$((x + w / 4 - 10))+$((y + h / 4 - 10))" | awk '{print $2}'
+  "$CANOPY_PIXEL_PROBE" "$SCREENSHOT" mean "20x20+$((x + w / 4 - 10))+$((y + h / 4 - 10))" | awk '{print $2}'
 }
 
 # Failures go to stderr: the caller captures stdout to report the samples it saw.
 expect_opacity() {
   local label=$1 want=$2 green=
-  "$UMBRIEL" settle
+  "$CANOPY" settle
   green=$(sample_green)
   if [[ $want == applied ]] && ((green < 96 || green > 160)); then
     echo "$label: the is_only_window rule did not apply (green=$green)" >&2

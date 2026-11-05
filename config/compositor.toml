@@ -1,0 +1,204 @@
+# ==============================================================================
+#  canopywc — Canopy's compositor
+#
+#  Installed to ~/.config/canopywc/config.toml on first session start. Most
+#  changes apply as soon as the file is saved; `canopywc config validate`
+#  checks edits without restarting.
+#
+#  It lives in its own directory because the shell merges every *.toml under
+#  ~/.config/canopy/ as shell configuration.
+#
+#  This is a traditional desktop: windows are placed by the user and stack over
+#  each other. The tiling layouts (scrolling, dwindle, master) are still built
+#  in and can be switched per workspace.
+#
+#  Reference: compositor/docs/user/ in the Canopy source tree.
+# ==============================================================================
+
+# ── Session ──────────────────────────────────────────────────────────────────
+[general]
+# One shell per compositor, started when the compositor is ready.
+autostart = ["canopy"]
+xwayland = true
+
+# ── Layout ───────────────────────────────────────────────────────────────────
+# Stacking is the default: windows float, focus follows the pointer's click,
+# and edge/corner drop zones snap them to halves and quarters.
+[layout]
+mode = "stacking"
+gap = 8
+
+# ── Appearance ───────────────────────────────────────────────────────────────
+[appearance]
+# The same radius the shell's bar, dock and islands use.
+corner_radius = 12
+border_width = 1
+outer_border_width = 0
+# Ask clients for server-side decorations, so every window gets one Canopy
+# title bar instead of a mix of headerbars and GTK/Adwaita chrome.
+prefer_no_csd = true
+opaque_fullscreen = true
+drag_opacity = 0.9
+
+# Frosted glass behind translucent surfaces and windows that ask for it.
+[appearance.blur]
+enabled = true
+optimized = true
+passes = 3
+radius = 6
+noise = 0.0
+brightness = 1.0
+contrast = 1.0
+saturation = 1.0
+
+# A soft drop shadow, light enough to read as depth rather than as a border.
+[appearance.shadow]
+enabled = true
+softness = 40
+offset_x = 0
+offset_y = 8
+
+# The Canopy title bar: one flat strip, traffic lights on the right, drawn by
+# the compositor so no application can render a different one.
+[appearance.title_bar]
+mode = "on"
+height = 30
+font = "Inter 10"
+button_position = "right"
+buttons = ["minimize", "maximize", "close"]
+button_corner_radius = 12
+button_glyph = "hover"
+button_background = true
+
+# ── Colours ──────────────────────────────────────────────────────────────────
+# The Canopy palette, identical to the shell's `theme.builtin = "Canopy"`.
+[colors]
+background = "#14131CFF"
+text_primary = "#F2F0F7FF"
+text_muted = "#A6A2B8FF"
+accent_primary = "#7C5CFCFF"
+accent_secondary = "#56CCF2FF"
+warning = "#F2C14EFF"
+error = "#FF5F57FF"
+insert_hint = "#7C5CFC80"
+backdrop = "#0B0A11FF"
+shadow = "#00000080"
+
+[colors.border]
+focused = "#7C5CFCFF"
+unfocused = "#2C2939FF"
+outer = "#1E1C29FF"
+
+[colors.title_bar]
+background = "#1E1C29FF"
+background_unfocused = "#14131CFF"
+text = "#F2F0F7FF"
+text_unfocused = "#A6A2B8FF"
+close = "#FF5F57FF"
+close_glyph = "#14131CFF"
+close_glyph_hover = "#14131CFF"
+maximize = "#56CCF2FF"
+maximize_glyph = "#14131CFF"
+maximize_glyph_hover = "#14131CFF"
+minimize = "#F2C14EFF"
+minimize_glyph = "#14131CFF"
+minimize_glyph_hover = "#14131CFF"
+
+[colors.overview]
+background_tint = "#0B0A1130"
+workspace_background = "#00000044"
+badge = "#7C5CFCFF"
+
+# ── Keybinds ─────────────────────────────────────────────────────────────────
+# The same set the labwc session ships, so muscle memory carries over between
+# the two sessions. Mod is Super on a native session.
+[keybinds]
+
+# Shell
+"Mod" = { action = "spawn canopy msg panel-toggle launcher", repeat = false }
+"Mod+S" = { action = "spawn canopy msg panel-toggle launcher", repeat = false }
+"Mod+A" = { action = "spawn canopy msg panel-toggle control-center", repeat = false }
+"Mod+N" = { action = "spawn canopy msg panel-toggle notifications", repeat = false }
+"Mod+V" = { action = "spawn canopy msg panel-toggle clipboard", repeat = false }
+"Mod+I" = { action = "spawn canopy msg settings-open", repeat = false }
+"Mod+L" = { action = "spawn canopy msg session lock", repeat = false }
+"Mod+O" = { action = "overview-toggle", repeat = false }
+
+# Applications
+"Mod+Return" = { action = "spawn sh -c 'xdg-terminal-exec 2>/dev/null || alacritty 2>/dev/null || kitty 2>/dev/null || foot'", repeat = false }
+"Mod+E" = { action = "spawn xdg-open .", repeat = false }
+"Mod+R" = { action = "spawn canopy msg panel-toggle launcher", repeat = false }
+"Alt+F4" = { action = "window-close", repeat = false }
+
+# Windows
+"Mod+Left" = "window-focus-left"
+"Mod+Right" = "window-focus-right"
+"Mod+Up" = "window-focus-up"
+"Mod+Down" = "window-focus-down"
+"Mod+Shift+Left" = "window-move-left"
+"Mod+Shift+Right" = "window-move-right"
+"Mod+Shift+Up" = "window-move-up"
+"Mod+Shift+Down" = "window-move-down"
+"Mod+Page_Up" = { action = "window-toggle-maximize-to-edges", repeat = false }
+"Mod+Page_Down" = { action = "window-minimize", repeat = false }
+"Mod+F" = { action = "window-toggle-fullscreen", repeat = false }
+"Mod+T" = { action = "window-toggle-floating", repeat = false }
+"Mod+P" = "window-move-to-output-next"
+"Alt+Tab" = "window-focus-next"
+"Alt+Shift+Tab" = "window-focus-previous"
+
+# Workspaces: switching, and sending the focused window along.
+"Mod+1" = "workspace-switch 1"
+"Mod+2" = "workspace-switch 2"
+"Mod+3" = "workspace-switch 3"
+"Mod+4" = "workspace-switch 4"
+"Mod+Shift+1" = "window-move-to-workspace 1"
+"Mod+Shift+2" = "window-move-to-workspace 2"
+"Mod+Shift+3" = "window-move-to-workspace 3"
+"Mod+Shift+4" = "window-move-to-workspace 4"
+
+# Session
+"Mod+Escape" = { action = "session-quit", repeat = false }
+
+# Media and brightness, routed through the shell so its OSDs show. Allowed
+# while the screen is locked, because the lock screen shows them too.
+"XF86AudioRaiseVolume" = { action = "spawn canopy msg volume-up", allow_when_locked = true }
+"XF86AudioLowerVolume" = { action = "spawn canopy msg volume-down", allow_when_locked = true }
+"XF86AudioMute" = { action = "spawn canopy msg volume-mute", allow_when_locked = true, repeat = false }
+"XF86AudioPlay" = { action = "spawn canopy msg media toggle", allow_when_locked = true, repeat = false }
+"XF86AudioNext" = { action = "spawn canopy msg media next", allow_when_locked = true }
+"XF86AudioPrev" = { action = "spawn canopy msg media previous", allow_when_locked = true }
+"XF86MonBrightnessUp" = { action = "spawn canopy msg brightness-up", allow_when_locked = true }
+"XF86MonBrightnessDown" = { action = "spawn canopy msg brightness-down", allow_when_locked = true }
+
+# ── Rules ────────────────────────────────────────────────────────────────────
+# Canopy's own windows: settings is a dialog, the annotator floats over the
+# window it is drawing on.
+[[window_rule]]
+match.app_id = "^dev\\.canopy\\.(Canopy|Noctalia)$"
+default_floating = true
+default_floating_size_px = { width = 1020, height = 900 }
+
+[[window_rule]]
+match.app_id = "^dev\\.canopy\\.Canopy\\.Annotator$"
+default_floating = true
+default_floating_size_px = { width = 800, height = 600 }
+
+# Picture-in-picture parks itself in a corner instead of joining the stack.
+[[window_rule]]
+match.title = "^(Picture-in-Picture|Picture in picture)$"
+default_floating = true
+default_maximize = false
+default_position = { x = 20, y = 20, anchor = "bottom_right" }
+
+# The shell's surfaces blur the live content behind them; the bar and desktop
+# widgets sit on the wallpaper and keep the cheaper cached blur.
+[[layer_rule]]
+match.namespace = "^canopy-(bar-[^\"]+|notification|dock|panel|attached-panel|osd|desktop-widget-[^\"]*)$"
+blur = true
+blur_ignore_alpha = 0.5
+blur_popups = true
+
+[[layer_rule]]
+match.namespace = "^canopy-(notification|dock|panel|attached-panel|osd)$"
+blur_optimized = false

@@ -8,7 +8,7 @@
 #include <xcb/shape.h>
 #include <xcb/xcbext.h>
 
-namespace umbriel {
+namespace canopy {
 
   namespace {
     constexpr Logger kLog("xwayland");
@@ -328,4 +328,4 @@ namespace umbriel {
     }
   }
 
-} // namespace umbriel
+} // namespace canopy

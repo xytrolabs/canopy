@@ -32,7 +32,7 @@ extern "C" {
 #include <wlr/util/box.h>
 }
 
-namespace umbriel {
+namespace canopy {
 
   enum class FormatTier : uint8_t;
   enum class HdrMode;
@@ -167,7 +167,7 @@ namespace umbriel {
     // running commits the damage. Single-threaded, non-blocking, bounded per
     // output.
     bool paceCursorPlaneTransition();
-#ifdef UMBRIEL_HARNESS
+#ifdef CANOPY_HARNESS
     // Harness-only: synthesize the plane sample a headless backend cannot produce.
     void setSyntheticPlaneCursorForTest(
         double x, double y, bool visible, std::uintptr_t image, int width, int height, int hotspotX, int hotspotY
@@ -266,7 +266,7 @@ namespace umbriel {
     bool m_animationRenderLocked = false;
     bool m_fullscreenAboveTopLayer = false;
     CursorPlaneState m_lastCursorPlane{};
-#ifdef UMBRIEL_HARNESS
+#ifdef CANOPY_HARNESS
     std::optional<CursorPlaneState> m_syntheticPlaneCursor;
 #endif
     bool m_desktopEnabled = true;
@@ -296,7 +296,7 @@ namespace umbriel {
     EffectAudio m_effectAudio{}; // bands and availability latched at the last effect frame
     uint64_t m_effectFrames = 0;
     float m_effectSeconds = 0.0F;
-    bool m_outputEffectsTimed = false; // a visible screen or cursor instance here reads umbriel_time
+    bool m_outputEffectsTimed = false; // a visible screen or cursor instance here reads canopy_time
     char m_cursorEffectOwner{};        // ledger identity of the cursor slot; the screen slot uses `this`
     bool m_effectCaptureBuilt = false; // the last built frame had an effect capture pending
     View* m_autoHdrOwner = nullptr;
@@ -325,4 +325,4 @@ namespace umbriel {
     wl_listener m_destroy{};
   };
 
-} // namespace umbriel
+} // namespace canopy

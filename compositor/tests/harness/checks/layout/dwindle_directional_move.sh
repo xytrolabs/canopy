@@ -5,36 +5,36 @@
 # geometrically nearest one. A directional swap afterwards exchanges two windows between their tiles.
 set -euo pipefail
 
-readonly CLIENT="${UMBRIEL_UNMAP_CLIENT:-./build-debug/tests/unmap-client}"
+readonly CLIENT="${CANOPY_UNMAP_CLIENT:-./build-debug/tests/unmap-client}"
 
 spawn_client() {
   local title=$1
-  "$CLIENT" "$title" 1200 700 > "$UMBRIEL_RUNTIME_DIR/$title.log" 2>&1 &
+  "$CLIENT" "$title" 1200 700 > "$CANOPY_RUNTIME_DIR/$title.log" 2>&1 &
 }
 
 wait_for_count() {
   local want=$1
   for _ in $(seq 60); do
-    [[ $("$UMBRIEL" windows --json | jq 'length') -eq $want ]] && return 0
+    [[ $("$CANOPY" windows --json | jq 'length') -eq $want ]] && return 0
     sleep 0.1
   done
-  echo "expected $want windows, got: $("$UMBRIEL" windows --json)"
+  echo "expected $want windows, got: $("$CANOPY" windows --json)"
   return 1
 }
 
 wait_for_focus() {
   local want=$1
   for _ in $(seq 40); do
-    if [[ $("$UMBRIEL" windows --json | jq -r --arg id "$want" '.[] | select(.id == $id) | .focused') == true ]]; then
+    if [[ $("$CANOPY" windows --json | jq -r --arg id "$want" '.[] | select(.id == $id) | .focused') == true ]]; then
       return 0
     fi
     sleep 0.1
   done
-  echo "expected $want to be focused: $("$UMBRIEL" windows --json)"
+  echo "expected $want to be focused: $("$CANOPY" windows --json)"
   return 1
 }
 
-cat >> "$UMBRIEL_CONFIG" <<'EOF'
+cat >> "$CANOPY_CONFIG" <<'EOF'
 
 [layout]
 mode = "dwindle"
@@ -43,7 +43,7 @@ mode = "dwindle"
 duration_ms = 1
 curve = "linear"
 EOF
-"$UMBRIEL" msg config-reload > /dev/null
+"$CANOPY" msg config-reload > /dev/null
 
 spawn_client dwindle-move-left
 wait_for_count 1
@@ -53,7 +53,7 @@ spawn_client dwindle-move-lower-right
 wait_for_count 3
 sleep 0.1
 
-windows=$("$UMBRIEL" windows --json)
+windows=$("$CANOPY" windows --json)
 left_x=$(jq -r '.[] | select(.title == "dwindle-move-left") | .x' <<< "$windows")
 left_y=$(jq -r '.[] | select(.title == "dwindle-move-left") | .y' <<< "$windows")
 upper_x=$(jq -r '.[] | select(.title == "dwindle-move-upper-right") | .x' <<< "$windows")
@@ -66,32 +66,32 @@ if [[ -z $lower_id || $left_x -ge $lower_x || $upper_x -ne $lower_x || $upper_y 
   exit 1
 fi
 
-"$UMBRIEL" msg window-focus "$lower_id" > /dev/null
+"$CANOPY" msg window-focus "$lower_id" > /dev/null
 wait_for_focus "$lower_id"
 
 upper_id=$(jq -r '.[] | select(.title == "dwindle-move-upper-right") | .id' <<< "$windows")
 left_id=$(jq -r '.[] | select(.title == "dwindle-move-left") | .id' <<< "$windows")
-"$UMBRIEL" msg window-focus-left > /dev/null
+"$CANOPY" msg window-focus-left > /dev/null
 wait_for_focus "$left_id"
-"$UMBRIEL" msg window-focus-right > /dev/null
+"$CANOPY" msg window-focus-right > /dev/null
 if ! wait_for_focus "$lower_id"; then
   echo "focus-right did not return to the last-focused tile of the right split (upper is $upper_id)"
   exit 1
 fi
-"$UMBRIEL" msg window-move-left > /dev/null
+"$CANOPY" msg window-move-left > /dev/null
 
 moved_x=$lower_x
 for _ in $(seq 40); do
-  moved_x=$("$UMBRIEL" windows --json | jq -r --arg id "$lower_id" '.[] | select(.id == $id) | .x')
+  moved_x=$("$CANOPY" windows --json | jq -r --arg id "$lower_id" '.[] | select(.id == $id) | .x')
   [[ $moved_x -lt $lower_x ]] && break
   sleep 0.1
 done
 if [[ $moved_x -ne $left_x ]]; then
-  echo "expected lower-right window to move left from x=$lower_x to x=$left_x, got: $("$UMBRIEL" windows --json)"
+  echo "expected lower-right window to move left from x=$lower_x to x=$left_x, got: $("$CANOPY" windows --json)"
   exit 1
 fi
 
-windows=$("$UMBRIEL" windows --json)
+windows=$("$CANOPY" windows --json)
 kept_x=$(jq -r --arg id "$left_id" '.[] | select(.id == $id) | .x' <<< "$windows")
 kept_y=$(jq -r --arg id "$left_id" '.[] | select(.id == $id) | .y' <<< "$windows")
 moved_y=$(jq -r --arg id "$lower_id" '.[] | select(.id == $id) | .y' <<< "$windows")
@@ -102,9 +102,9 @@ fi
 
 echo "Dwindle window movement follows horizontal screen geometry"
 
-"$UMBRIEL" msg window-swap-right > /dev/null
+"$CANOPY" msg window-swap-right > /dev/null
 for _ in $(seq 40); do
-  windows=$("$UMBRIEL" windows --json)
+  windows=$("$CANOPY" windows --json)
   swapped_x=$(jq -r --arg id "$lower_id" '.[] | select(.id == $id) | .x' <<< "$windows")
   upper_now_x=$(jq -r --arg id "$upper_id" '.[] | select(.id == $id) | .x' <<< "$windows")
   upper_now_y=$(jq -r --arg id "$upper_id" '.[] | select(.id == $id) | .y' <<< "$windows")
@@ -122,14 +122,14 @@ echo "Dwindle directional swap exchanges windows between tiles"
 # last makes it the right split's remembered tile, which a swap from the lower-left must still ignore.
 spawn_client dwindle-move-fourth
 wait_for_count 4
-fourth_id=$("$UMBRIEL" windows --json | jq -r '.[] | select(.title == "dwindle-move-fourth") | .id')
-"$UMBRIEL" msg window-focus "$lower_id" > /dev/null
+fourth_id=$("$CANOPY" windows --json | jq -r '.[] | select(.title == "dwindle-move-fourth") | .id')
+"$CANOPY" msg window-focus "$lower_id" > /dev/null
 wait_for_focus "$lower_id"
-"$UMBRIEL" msg window-focus "$upper_id" > /dev/null
+"$CANOPY" msg window-focus "$upper_id" > /dev/null
 wait_for_focus "$upper_id"
-"$UMBRIEL" msg window-swap-right > /dev/null
+"$CANOPY" msg window-swap-right > /dev/null
 for _ in $(seq 40); do
-  windows=$("$UMBRIEL" windows --json)
+  windows=$("$CANOPY" windows --json)
   upper_now_x=$(jq -r --arg id "$upper_id" '.[] | select(.id == $id) | .x' <<< "$windows")
   upper_now_y=$(jq -r --arg id "$upper_id" '.[] | select(.id == $id) | .y' <<< "$windows")
   fourth_x=$(jq -r --arg id "$fourth_id" '.[] | select(.id == $id) | .x' <<< "$windows")

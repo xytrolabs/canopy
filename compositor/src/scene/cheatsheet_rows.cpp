@@ -19,18 +19,18 @@ extern "C" {
 
 namespace {
 
-  using umbriel::CheatsheetRow;
-  using umbriel::Group;
+  using canopy::CheatsheetRow;
+  using canopy::Group;
 
-  const char* wheelName(umbriel::WheelDirection dir) {
+  const char* wheelName(canopy::WheelDirection dir) {
     switch (dir) {
-    case umbriel::WheelDirection::Up:
+    case canopy::WheelDirection::Up:
       return "WheelUp";
-    case umbriel::WheelDirection::Down:
+    case canopy::WheelDirection::Down:
       return "WheelDown";
-    case umbriel::WheelDirection::Left:
+    case canopy::WheelDirection::Left:
       return "WheelLeft";
-    case umbriel::WheelDirection::Right:
+    case canopy::WheelDirection::Right:
       return "WheelRight";
     default:
       return nullptr;
@@ -75,7 +75,7 @@ namespace {
     return raw;
   }
 
-  std::string buildChordLabel(const umbriel::Keybind& bind) {
+  std::string buildChordLabel(const canopy::Keybind& bind) {
     std::string result;
     auto appendMod = [&](const char* name) {
       if (!result.empty()) {
@@ -105,11 +105,11 @@ namespace {
     if (!result.empty()) {
       result += '+';
     }
-    if (bind.wheel != umbriel::WheelDirection::None) {
+    if (bind.wheel != canopy::WheelDirection::None) {
       const char* name = wheelName(bind.wheel);
       result += name != nullptr ? name : "Wheel?";
     } else if (bind.mouseButton != 0) {
-      const char* name = umbriel::mouseButtonName(bind.mouseButton);
+      const char* name = canopy::mouseButtonName(bind.mouseButton);
       result += name != nullptr ? name : "Mouse?";
     } else {
       char buf[64];
@@ -146,11 +146,11 @@ namespace {
     return {std::move(base), std::string(rest)};
   }
 
-  std::string workspaceReferenceLabel(const umbriel::WorkspaceReference& reference) {
-    if (const auto* index = std::get_if<umbriel::WorkspaceIndex>(&reference)) {
+  std::string workspaceReferenceLabel(const canopy::WorkspaceReference& reference) {
+    if (const auto* index = std::get_if<canopy::WorkspaceIndex>(&reference)) {
       return std::to_string(index->value);
     }
-    const auto* name = std::get_if<umbriel::WorkspaceName>(&reference);
+    const auto* name = std::get_if<canopy::WorkspaceName>(&reference);
     if (name == nullptr) {
       return {};
     }
@@ -172,72 +172,72 @@ namespace {
 
   // Empty unless the bind targets a workspace. Used to collapse the runs of
   // per-digit positional workspace binds into a single row.
-  std::string workspaceSelectorName(const umbriel::Keybind& bind) {
-    const auto* workspace = umbriel::payloadIf<umbriel::WorkspaceArg>(bind);
+  std::string workspaceSelectorName(const canopy::Keybind& bind) {
+    const auto* workspace = canopy::payloadIf<canopy::WorkspaceArg>(bind);
     return workspace != nullptr ? workspaceReferenceLabel(workspace->reference) : std::string{};
   }
 
   // Driven by the spec's argument kind and the bind's payload variant, so the
   // set of parameterized actions lives in exactly one place: the spec table.
-  std::string actionLabel(const umbriel::Keybind& bind) {
-    for (const auto& spec : umbriel::actionSpecs()) {
+  std::string actionLabel(const canopy::Keybind& bind) {
+    for (const auto& spec : canopy::actionSpecs()) {
       if (spec.action != bind.action) {
         continue;
       }
       std::string name(spec.name);
       switch (spec.argKind) {
-      case umbriel::ActionArgKind::None:
+      case canopy::ActionArgKind::None:
         return name;
-      case umbriel::ActionArgKind::Command:
-        if (const auto* spawn = umbriel::payloadIf<umbriel::SpawnArg>(bind)) {
+      case canopy::ActionArgKind::Command:
+        if (const auto* spawn = canopy::payloadIf<canopy::SpawnArg>(bind)) {
           return name + " " + spawn->command;
         }
         return name;
-      case umbriel::ActionArgKind::Submap:
-        if (const auto* submap = umbriel::payloadIf<umbriel::SubmapArg>(bind)) {
+      case canopy::ActionArgKind::Submap:
+        if (const auto* submap = canopy::payloadIf<canopy::SubmapArg>(bind)) {
           return name + " " + (submap->name.empty() ? "unnamed" : submap->name);
         }
         return name;
-      case umbriel::ActionArgKind::Fraction:
-        if (const auto* fraction = umbriel::payloadIf<umbriel::FractionArg>(bind)) {
+      case canopy::ActionArgKind::Fraction:
+        if (const auto* fraction = canopy::payloadIf<canopy::FractionArg>(bind)) {
           return std::format("{} {:.2g}", name, fraction->fraction);
         }
         return name;
-      case umbriel::ActionArgKind::FractionDelta:
-        if (const auto* fraction = umbriel::payloadIf<umbriel::FractionArg>(bind)) {
+      case canopy::ActionArgKind::FractionDelta:
+        if (const auto* fraction = canopy::payloadIf<canopy::FractionArg>(bind)) {
           return std::format("{} {:+.2g}", name, fraction->fraction);
         }
         return name;
-      case umbriel::ActionArgKind::LayoutMode:
-        if (const auto* arg = umbriel::payloadIf<umbriel::LayoutModeArg>(bind)) {
+      case canopy::ActionArgKind::LayoutMode:
+        if (const auto* arg = canopy::payloadIf<canopy::LayoutModeArg>(bind)) {
           if (arg->mode.has_value()) {
-            return name + " " + std::string(umbriel::layoutModeName(*arg->mode));
+            return name + " " + std::string(canopy::layoutModeName(*arg->mode));
           }
           std::string label = name + " toggle";
           for (const auto mode : arg->toggleSequence) {
             label += ' ';
-            label += umbriel::layoutModeName(mode);
+            label += canopy::layoutModeName(mode);
           }
           return label;
         }
         return name;
-      case umbriel::ActionArgKind::WindowRegion:
-        if (const auto* arg = umbriel::payloadIf<umbriel::WindowRegionArg>(bind)) {
-          return name + " " + std::string(umbriel::windowRegionName(arg->region));
+      case canopy::ActionArgKind::WindowRegion:
+        if (const auto* arg = canopy::payloadIf<canopy::WindowRegionArg>(bind)) {
+          return name + " " + std::string(canopy::windowRegionName(arg->region));
         }
         return name;
-      case umbriel::ActionArgKind::ColumnDisplay:
-        if (const auto* arg = umbriel::payloadIf<umbriel::ColumnDisplayArg>(bind)) {
-          return name + (arg->display == umbriel::ColumnDisplay::Tabbed ? " tabbed" : " normal");
+      case canopy::ActionArgKind::ColumnDisplay:
+        if (const auto* arg = canopy::payloadIf<canopy::ColumnDisplayArg>(bind)) {
+          return name + (arg->display == canopy::ColumnDisplay::Tabbed ? " tabbed" : " normal");
         }
         return name;
-      case umbriel::ActionArgKind::TabIndex:
-        if (const auto* arg = umbriel::payloadIf<umbriel::TabIndexArg>(bind)) {
+      case canopy::ActionArgKind::TabIndex:
+        if (const auto* arg = canopy::payloadIf<canopy::TabIndexArg>(bind)) {
           return std::format("{} {}", name, arg->index);
         }
         return name;
-      case umbriel::ActionArgKind::WorkspaceMoveToOutput:
-        if (const auto* arg = umbriel::payloadIf<umbriel::WorkspaceMoveToOutputArg>(bind)) {
+      case canopy::ActionArgKind::WorkspaceMoveToOutput:
+        if (const auto* arg = canopy::payloadIf<canopy::WorkspaceMoveToOutputArg>(bind)) {
           std::string label = name + " " + arg->destination;
           if (arg->workspace) {
             label += " " + workspaceReferenceLabel(arg->workspace->reference);
@@ -246,8 +246,8 @@ namespace {
           return label;
         }
         return name;
-      case umbriel::ActionArgKind::Workspace:
-        if (const auto* workspace = umbriel::payloadIf<umbriel::WorkspaceArg>(bind)) {
+      case canopy::ActionArgKind::Workspace:
+        if (const auto* workspace = canopy::payloadIf<canopy::WorkspaceArg>(bind)) {
           std::string label = name + " " + workspaceReferenceLabel(workspace->reference);
           if (!workspace->output.empty()) {
             label += " --output " + workspace->output;
@@ -255,72 +255,72 @@ namespace {
           return label;
         }
         return name;
-      case umbriel::ActionArgKind::WindowEffectSet:
-      case umbriel::ActionArgKind::WindowEffectCycle:
-        if (const auto* arg = umbriel::payloadIf<umbriel::EffectWindowArg>(bind)) {
+      case canopy::ActionArgKind::WindowEffectSet:
+      case canopy::ActionArgKind::WindowEffectCycle:
+        if (const auto* arg = canopy::payloadIf<canopy::EffectWindowArg>(bind)) {
           std::string value = arg->name;
           appendFlag(value, "window", arg->id);
           return value.empty() ? name : std::format("{} {}", name, value);
         }
         return name;
-      case umbriel::ActionArgKind::ScreenEffectSet:
-      case umbriel::ActionArgKind::ScreenEffectCycle:
-        if (const auto* arg = umbriel::payloadIf<umbriel::EffectScreenArg>(bind)) {
+      case canopy::ActionArgKind::ScreenEffectSet:
+      case canopy::ActionArgKind::ScreenEffectCycle:
+        if (const auto* arg = canopy::payloadIf<canopy::EffectScreenArg>(bind)) {
           std::string value = arg->name;
           appendFlag(value, "output", arg->output);
           return value.empty() ? name : std::format("{} {}", name, value);
         }
         return name;
-      case umbriel::ActionArgKind::CursorEffectSet:
-      case umbriel::ActionArgKind::CursorEffectCycle:
-        if (const auto* arg = umbriel::payloadIf<umbriel::EffectCursorArg>(bind)) {
+      case canopy::ActionArgKind::CursorEffectSet:
+      case canopy::ActionArgKind::CursorEffectCycle:
+        if (const auto* arg = canopy::payloadIf<canopy::EffectCursorArg>(bind)) {
           std::string value = arg->name;
           return value.empty() ? name : std::format("{} {}", name, value);
         }
         return name;
-      case umbriel::ActionArgKind::Output:
-      case umbriel::ActionArgKind::OptionalOutput:
-        if (const auto* output = umbriel::payloadIf<umbriel::OutputArg>(bind);
+      case canopy::ActionArgKind::Output:
+      case canopy::ActionArgKind::OptionalOutput:
+        if (const auto* output = canopy::payloadIf<canopy::OutputArg>(bind);
             output != nullptr && !output->output.empty()) {
           return name + " " + output->output;
         }
         return name;
-      case umbriel::ActionArgKind::OptionalScratchpad:
-        if (const auto* scratchpad = umbriel::payloadIf<umbriel::ScratchpadArg>(bind);
+      case canopy::ActionArgKind::OptionalScratchpad:
+        if (const auto* scratchpad = canopy::payloadIf<canopy::ScratchpadArg>(bind);
             scratchpad != nullptr && !scratchpad->name.empty()) {
           return name + " " + scratchpad->name;
         }
         return name;
-      case umbriel::ActionArgKind::WindowId:
-      case umbriel::ActionArgKind::OptionalWindowId:
-        if (const auto* window = umbriel::payloadIf<umbriel::WindowIdArg>(bind);
+      case canopy::ActionArgKind::WindowId:
+      case canopy::ActionArgKind::OptionalWindowId:
+        if (const auto* window = canopy::payloadIf<canopy::WindowIdArg>(bind);
             window != nullptr && !window->id.empty()) {
           return name + " " + window->id;
         }
         return name;
-      case umbriel::ActionArgKind::SkipConfirmation:
-        if (const auto* quit = umbriel::payloadIf<umbriel::QuitArg>(bind); quit != nullptr && quit->skipConfirmation) {
+      case canopy::ActionArgKind::SkipConfirmation:
+        if (const auto* quit = canopy::payloadIf<canopy::QuitArg>(bind); quit != nullptr && quit->skipConfirmation) {
           return name + " skip-confirmation";
         }
         return name;
-      case umbriel::ActionArgKind::SdrWhite:
-        if (const auto* arg = umbriel::payloadIf<umbriel::SdrWhiteArg>(bind)) {
+      case canopy::ActionArgKind::SdrWhite:
+        if (const auto* arg = canopy::payloadIf<canopy::SdrWhiteArg>(bind)) {
           std::string value = std::format("{:g}", arg->nits);
           appendFlag(value, "output", arg->output);
           return std::format("{} {}", name, value);
         }
         return name;
-      case umbriel::ActionArgKind::WindowMoveTo:
-        if (const auto* moveTo = umbriel::payloadIf<umbriel::WindowMoveToArg>(bind); moveTo != nullptr) {
-          std::string val(umbriel::windowPositionAnchorName(moveTo->position.anchor));
+      case canopy::ActionArgKind::WindowMoveTo:
+        if (const auto* moveTo = canopy::payloadIf<canopy::WindowMoveToArg>(bind); moveTo != nullptr) {
+          std::string val(canopy::windowPositionAnchorName(moveTo->position.anchor));
           val += " " + std::to_string(moveTo->position.x);
           val += " " + std::to_string(moveTo->position.y);
           appendFlag(val, "window", moveTo->id);
           return std::format("{} {}", name, val);
         }
         return name;
-      case umbriel::ActionArgKind::WindowMoveBy:
-        if (const auto* moveBy = umbriel::payloadIf<umbriel::WindowMoveByArg>(bind); moveBy != nullptr) {
+      case canopy::ActionArgKind::WindowMoveBy:
+        if (const auto* moveBy = canopy::payloadIf<canopy::WindowMoveByArg>(bind); moveBy != nullptr) {
           std::string val = std::to_string(moveBy->deltaX);
           val += " " + std::to_string(moveBy->deltaY);
           appendFlag(val, "window", moveBy->id);
@@ -359,8 +359,8 @@ namespace {
     }
   }
 
-  Group groupForActionImpl(umbriel::KeybindAction action) {
-    using A = umbriel::KeybindAction;
+  Group groupForActionImpl(canopy::KeybindAction action) {
+    using A = canopy::KeybindAction;
     switch (action) {
     case A::Spawn:
       return Group::Apps;
@@ -549,7 +549,7 @@ namespace {
   struct MergeKey {
     std::string submap;
     std::string submapAfter;
-    umbriel::KeybindAction action;
+    canopy::KeybindAction action;
     std::string actionLabel;
     uint32_t modifiers;
     bool useMod;
@@ -571,7 +571,7 @@ namespace {
 
 } // namespace
 
-namespace umbriel {
+namespace canopy {
 
   size_t cheatsheetChordColumns(std::string_view chord) {
     size_t columns = 0;
@@ -838,4 +838,4 @@ namespace umbriel {
     return rows;
   }
 
-} // namespace umbriel
+} // namespace canopy

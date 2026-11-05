@@ -15,7 +15,7 @@ permissions:
 
 jobs:
   stale:
-    if: ${{ github.repository == 'noctalia-dev/umbriel' }}
+    if: ${{ github.repository == 'noctalia-dev/canopy' }}
     runs-on: ubuntu-latest
     steps:
       # actions/stale only-labels is an AND list, so each label gets its own pass.

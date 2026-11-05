@@ -257,7 +257,7 @@ namespace {
   bool present(State& state) {
     const int stride = state.width * 4;
     const int size = stride * state.height;
-    const int fd = memfd_create("umbriel-color-feedback", MFD_CLOEXEC);
+    const int fd = memfd_create("canopy-color-feedback", MFD_CLOEXEC);
     if (fd < 0) {
       return false;
     }

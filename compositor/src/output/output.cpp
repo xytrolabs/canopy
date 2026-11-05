@@ -32,7 +32,7 @@
 #include "workspace/workspace.h"
 
 extern "C" {
-#include <umbrielfx/render/effect.h>
+#include <canopyfx/render/effect.h>
 #include <wlr/util/transform.h>
 }
 
@@ -48,7 +48,7 @@ extern "C" {
 #include <set>
 #endif
 
-namespace umbriel {
+namespace canopy {
 
   namespace {
     constexpr Logger kLog("output");
@@ -271,16 +271,16 @@ namespace umbriel {
     fx_effect_shader* cursor = suspended ? nullptr : registry.preset(cursorName, EffectKind::Cursor);
     const EffectPreset* cursorPreset = cursor != nullptr ? registry.presetConfig(cursorName) : nullptr;
     bool advancing = true;
-#ifdef UMBRIEL_HARNESS
+#ifdef CANOPY_HARNESS
     advancing = !m_server->animationClockFrozen();
 #endif
     wlr_scene_output_set_effect_time(m_sceneOutput, m_server->animationClockMsec());
     m_outputEffectsTimed = false;
     // Register demand after the cursor program and motion history have been updated.
     const auto bind = [&](const void* owner, fx_effect_shader* shader, bool visible) {
-      const bool motion = fx_effect_shader_reads(shader, "umbriel_pointer_history")
-          || fx_effect_shader_reads(shader, "umbriel_pointer_path");
-      const bool readsTime = fx_effect_shader_reads(shader, "umbriel_time")
+      const bool motion = fx_effect_shader_reads(shader, "canopy_pointer_history")
+          || fx_effect_shader_reads(shader, "canopy_pointer_path");
+      const bool readsTime = fx_effect_shader_reads(shader, "canopy_time")
           || (motion && wlr_scene_output_cursor_motion_active(m_sceneOutput));
       m_outputEffectsTimed = m_outputEffectsTimed || (readsTime && visible);
       registry.updateInstance(
@@ -328,7 +328,7 @@ namespace umbriel {
   }
 
   bool Output::captureExclusionPending(int captureLocks) const {
-    return captureLocks > 0 && umbrielfx_scene_has_capture_exclusion(m_sceneOutput->scene);
+    return captureLocks > 0 && canopyfx_scene_has_capture_exclusion(m_sceneOutput->scene);
   }
 
   unsigned Output::effectEligible() const { return m_server->effects().ledger().eligible(this); }
@@ -1241,7 +1241,7 @@ namespace umbriel {
     return true;
   }
 
-#ifdef UMBRIEL_HARNESS
+#ifdef CANOPY_HARNESS
   void Output::setSyntheticPlaneCursorForTest(
       double x, double y, bool visible, std::uintptr_t image, int width, int height, int hotspotX, int hotspotY
   ) {
@@ -1277,7 +1277,7 @@ namespace umbriel {
         .hotspot_y = plane != nullptr ? plane->hotspot_y : 0,
         .image = plane != nullptr ? m_output->cursor_front_buffer : nullptr,
     };
-#ifdef UMBRIEL_HARNESS
+#ifdef CANOPY_HARNESS
     if (m_syntheticPlaneCursor.has_value()) {
       now = *m_syntheticPlaneCursor;
     }
@@ -1782,7 +1782,7 @@ namespace umbriel {
   }
 
   void Output::flushDirty() {
-    UMBRIEL_ZONE("Output::flushDirty");
+    CANOPY_ZONE("Output::flushDirty");
     // Server-wide chrome is recorded on the Server and flushed by whichever
     // output frames first; each of these is idempotent and cheap.
     Dirty pending = m_dirty | m_server->takeDirty();
@@ -1833,7 +1833,7 @@ namespace umbriel {
   }
 
   void Output::handleFrame() {
-    UMBRIEL_ZONE("Output::handleFrame");
+    CANOPY_ZONE("Output::handleFrame");
     // A failed DRM commit can immediately queue another frame after logind revokes device access. Stop before that
     // retry loop can keep the final event-loop dispatch alive. A null session belongs to a nested or headless backend
     // and remains renderable.
@@ -1872,7 +1872,7 @@ namespace umbriel {
     const EffectRegistry& effects = m_server->effects();
     bool stampEffectTime =
         effectFrame || (effectEligible() == 0 && (effects.persistentReferenced() || effects.active()));
-#ifdef UMBRIEL_HARNESS
+#ifdef CANOPY_HARNESS
     stampEffectTime = stampEffectTime || m_server->animationClockFrozen();
 #endif
     if (stampEffectTime) {
@@ -1971,7 +1971,7 @@ namespace umbriel {
     // Sample the plane before the needs_frame test below: a cursor-only move
     // damages nothing else, so this frame is the only commit that can carry
     // the damage. wlroots clears needs_frame on commit, so every mutation
-    // since the last commit is diffed here exactly once; the umbrielfx scene's
+    // since the last commit is diffed here exactly once; the canopyfx scene's
     // own needs_frame listener is what scheduled this frame for them.
     paceCursorPlaneTransition();
     const bool sceneChanged = wlr_scene_output_needs_frame(m_sceneOutput);
@@ -2002,7 +2002,7 @@ namespace umbriel {
       if (effectFrame) {
         ++m_effectFrames;
       }
-      UMBRIEL_ZONE("Output::render");
+      CANOPY_ZONE("Output::render");
 
       wlr_output_state state{};
       wlr_output_state_init(&state);
@@ -2021,7 +2021,7 @@ namespace umbriel {
       }
       bool built = false;
       {
-        UMBRIEL_ZONE("Output::buildState");
+        CANOPY_ZONE("Output::buildState");
         built = wlr_scene_output_build_state(m_sceneOutput, &state, &sceneOptions);
       }
       if (!built && sceneOptions.require_animation_success) {
@@ -2067,7 +2067,7 @@ namespace umbriel {
         }
 
         {
-          UMBRIEL_ZONE("Output::commitState");
+          CANOPY_ZONE("Output::commitState");
           SceneCommit observation(*this, state);
           commitOk = wlr_output_commit_state(m_output, &state);
         }
@@ -2255,4 +2255,4 @@ namespace umbriel {
     m_server->removeOutput(this);
   }
 
-} // namespace umbriel
+} // namespace canopy

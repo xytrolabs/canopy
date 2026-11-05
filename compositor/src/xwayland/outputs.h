@@ -16,7 +16,7 @@ struct wl_global;
 struct wlr_output;
 struct wlr_output_layout;
 
-namespace umbriel {
+namespace canopy {
 
   // How one output's part of the layout maps into X coordinates. X coordinates are `scale` times finer than layout
   // coordinates: 1, or the output's scale when X11 clients see outputs at their physical resolution.
@@ -104,4 +104,4 @@ namespace umbriel {
     std::vector<std::unique_ptr<Entry>> m_entries;
   };
 
-} // namespace umbriel
+} // namespace canopy

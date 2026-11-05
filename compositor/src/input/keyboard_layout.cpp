@@ -2,7 +2,7 @@
 
 #include <algorithm>
 
-namespace umbriel {
+namespace canopy {
   std::optional<xkb_layout_index_t> layoutGroupNamed(xkb_keymap* keymap, std::string_view name) {
     if (keymap == nullptr || name.empty()) {
       return std::nullopt;
@@ -50,4 +50,4 @@ namespace umbriel {
     });
   }
 
-} // namespace umbriel
+} // namespace canopy

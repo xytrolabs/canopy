@@ -16,9 +16,9 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
-extern "C" int umbrielCloseRange(unsigned int first, unsigned int last, int flags);
+extern "C" int canopyCloseRange(unsigned int first, unsigned int last, int flags);
 
-namespace umbriel {
+namespace canopy {
 
   namespace {
     void reapChildren(int /*signal*/) {
@@ -121,7 +121,7 @@ namespace umbriel {
 
   bool closeChildFileDescriptors() {
     constexpr int kFirstDescriptor = STDERR_FILENO + 1;
-    if (umbrielCloseRange(kFirstDescriptor, UINT_MAX, 0) == 0) {
+    if (canopyCloseRange(kFirstDescriptor, UINT_MAX, 0) == 0) {
       return true;
     }
 
@@ -169,4 +169,4 @@ namespace umbriel {
     return {};
   }
 
-} // namespace umbriel
+} // namespace canopy

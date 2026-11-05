@@ -4,10 +4,10 @@
 
 #include <cstdint>
 
-using umbriel::cursorPlaneAdvance;
-using umbriel::CursorPlaneDamage;
-using umbriel::cursorPlaneDamageFor;
-using umbriel::CursorPlaneState;
+using canopy::cursorPlaneAdvance;
+using canopy::CursorPlaneDamage;
+using canopy::cursorPlaneDamageFor;
+using canopy::CursorPlaneState;
 
 namespace {
   const void* imageToken(std::uintptr_t value) { return reinterpret_cast<const void*>(value); }
@@ -35,7 +35,7 @@ namespace {
   }
 } // namespace
 
-UMBRIEL_TEST(firstSampleOnlySeedsTheState) {
+CANOPY_TEST(firstSampleOnlySeedsTheState) {
   CursorPlaneState state{};
   CursorPlaneState previous{};
   CHECK(!cursorPlaneAdvance(&state, cursorAt(10.0, 10.0), &previous));
@@ -43,14 +43,14 @@ UMBRIEL_TEST(firstSampleOnlySeedsTheState) {
   CHECK(state.valid);
 }
 
-UMBRIEL_TEST(aStationaryCursorIsNeverDamaged) {
+CANOPY_TEST(aStationaryCursorIsNeverDamaged) {
   CursorPlaneState state{};
   CursorPlaneState previous{};
   CHECK(!cursorPlaneAdvance(&state, cursorAt(10.0, 10.0), &previous));
   CHECK(!cursorPlaneAdvance(&state, cursorAt(10.0, 10.0), &previous));
 }
 
-UMBRIEL_TEST(movingDamagesLeaveAndEnterBoxes) {
+CANOPY_TEST(movingDamagesLeaveAndEnterBoxes) {
   CursorPlaneState state{};
   CursorPlaneState previous{};
   cursorPlaneAdvance(&state, cursorAt(10.0, 10.0), &previous);
@@ -62,7 +62,7 @@ UMBRIEL_TEST(movingDamagesLeaveAndEnterBoxes) {
   CHECK(damage.enter_box.x == 200.0 && damage.enter_box.y == 150.0);
 }
 
-UMBRIEL_TEST(leavingDamagesTheExitedBox) {
+CANOPY_TEST(leavingDamagesTheExitedBox) {
   CursorPlaneState state{};
   CursorPlaneState previous{};
   cursorPlaneAdvance(&state, cursorAt(10.0, 10.0), &previous);
@@ -73,7 +73,7 @@ UMBRIEL_TEST(leavingDamagesTheExitedBox) {
   CHECK(damage.leave_box.x == 10.0 && damage.leave_box.y == 10.0);
 }
 
-UMBRIEL_TEST(anImageSwapAtTheSamePlaceIsATransition) {
+CANOPY_TEST(anImageSwapAtTheSamePlaceIsATransition) {
   CursorPlaneState state{};
   CursorPlaneState previous{};
   cursorPlaneAdvance(&state, cursorAt(10.0, 10.0, 1), &previous);
@@ -82,7 +82,7 @@ UMBRIEL_TEST(anImageSwapAtTheSamePlaceIsATransition) {
   CHECK(damage.has_enter);
 }
 
-UMBRIEL_TEST(aHiddenCursorThatMovesReportsNoBoxes) {
+CANOPY_TEST(aHiddenCursorThatMovesReportsNoBoxes) {
   CursorPlaneState state{};
   CursorPlaneState previous{};
   cursorPlaneAdvance(&state, hiddenCursor(10.0, 10.0), &previous);
@@ -92,7 +92,7 @@ UMBRIEL_TEST(aHiddenCursorThatMovesReportsNoBoxes) {
   CHECK(!damage.has_enter);
 }
 
-UMBRIEL_TEST(advanceHandsBackTheReplacedSample) {
+CANOPY_TEST(advanceHandsBackTheReplacedSample) {
   CursorPlaneState state{};
   CursorPlaneState previous{};
   CHECK(!cursorPlaneAdvance(&state, cursorAt(10.0, 10.0), &previous));

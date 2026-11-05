@@ -13,11 +13,11 @@ extern "C" {
 }
 // clang-format on
 
-using umbriel::DwindleLayout;
-using umbriel::Layout;
-using umbriel::LayoutConstraints;
-using umbriel::ResolvedLayoutConfig;
-using umbriel::View;
+using canopy::DwindleLayout;
+using canopy::Layout;
+using canopy::LayoutConstraints;
+using canopy::ResolvedLayoutConfig;
+using canopy::View;
 
 namespace {
 
@@ -27,7 +27,7 @@ namespace {
 
   ResolvedLayoutConfig dwindleConfig() {
     ResolvedLayoutConfig config;
-    config.mode = umbriel::LayoutMode::Dwindle;
+    config.mode = canopy::LayoutMode::Dwindle;
     config.gap = 8;
     config.totalGap = 12;
     config.edgePad = 10;
@@ -59,7 +59,7 @@ namespace {
 } // namespace
 
 // tree bookkeeping
-UMBRIEL_TEST(firstLeafFillsTheUsableArea) {
+CANOPY_TEST(firstLeafFillsTheUsableArea) {
   Fixture fixture;
   fixture.addLeaves(1);
   fixture.layout.arrange(kUsable);
@@ -71,7 +71,7 @@ UMBRIEL_TEST(firstLeafFillsTheUsableArea) {
   CHECK_EQ(box.height, kUsable.height - 2 * fixture.config.edgePad);
 }
 
-UMBRIEL_TEST(insertBuildsOneLeafPerView) {
+CANOPY_TEST(insertBuildsOneLeafPerView) {
   Fixture fixture;
   fixture.addLeaves(4);
   CHECK_EQ(fixture.layout.columns().size(), size_t{4});
@@ -80,14 +80,14 @@ UMBRIEL_TEST(insertBuildsOneLeafPerView) {
   }
 }
 
-UMBRIEL_TEST(insertIsIdempotentPerView) {
+CANOPY_TEST(insertIsIdempotentPerView) {
   Fixture fixture;
   fixture.addLeaves(1);
   fixture.layout.insertView(stub(0), 0);
   CHECK_EQ(fixture.layout.columns().size(), size_t{1});
 }
 
-UMBRIEL_TEST(batchInsertWithoutArrangeKeepsEveryView) {
+CANOPY_TEST(batchInsertWithoutArrangeKeepsEveryView) {
   // Workspace::applyConfig creates a fresh layout and re-inserts every tiled view in a loop, arranging only afterwards.
   // insertView locates its target leaf through the flat-column cache, so if a structural edit leaves that cache stale,
   // every view after the first is silently dropped.
@@ -104,7 +104,7 @@ UMBRIEL_TEST(batchInsertWithoutArrangeKeepsEveryView) {
   }
 }
 
-UMBRIEL_TEST(swapOperationsRefreshTheColumnMapping) {
+CANOPY_TEST(swapOperationsRefreshTheColumnMapping) {
   // Horizontal consume, expel, vertical movement, and column movement reassign leaf views. The column mapping must be
   // current straight afterwards, without waiting for the next arrange().
   Fixture fixture;
@@ -119,7 +119,7 @@ UMBRIEL_TEST(swapOperationsRefreshTheColumnMapping) {
   CHECK_EQ(fixture.layout.columnOf(stub(1)), first);
 }
 
-UMBRIEL_TEST(horizontalConsumeSwapsWithTheVisualNeighbor) {
+CANOPY_TEST(horizontalConsumeSwapsWithTheVisualNeighbor) {
   Fixture fixture;
   fixture.addLeaves(3);
   fixture.layout.arrange(kUsable);
@@ -134,7 +134,7 @@ UMBRIEL_TEST(horizontalConsumeSwapsWithTheVisualNeighbor) {
   CHECK_EQ(fixture.layout.targetBox(stub(0)).y, bottomRightSlot.y);
 }
 
-UMBRIEL_TEST(consumeFromLeavesDwindleAlone) {
+CANOPY_TEST(consumeFromLeavesDwindleAlone) {
   Fixture fixture;
   fixture.addLeaves(2);
   fixture.layout.arrange(kUsable);
@@ -149,7 +149,7 @@ UMBRIEL_TEST(consumeFromLeavesDwindleAlone) {
   CHECK_EQ(fixture.layout.targetBox(stub(1)).width, second.width);
 }
 
-UMBRIEL_TEST(horizontalExpelDoesNotSwapWithAVerticalNeighbor) {
+CANOPY_TEST(horizontalExpelDoesNotSwapWithAVerticalNeighbor) {
   Fixture fixture;
   fixture.addLeaves(3);
   fixture.layout.arrange(kUsable);
@@ -161,7 +161,7 @@ UMBRIEL_TEST(horizontalExpelDoesNotSwapWithAVerticalNeighbor) {
   CHECK(!fixture.layout.expel(stub(1), 1));
 }
 
-UMBRIEL_TEST(swapViewsAcrossLeavesKeepsGeometryWithTheSlots) {
+CANOPY_TEST(swapViewsAcrossLeavesKeepsGeometryWithTheSlots) {
   Fixture fixture;
   fixture.addLeaves(3);
   fixture.layout.arrange(kUsable);
@@ -181,14 +181,14 @@ UMBRIEL_TEST(swapViewsAcrossLeavesKeepsGeometryWithTheSlots) {
   CHECK_EQ(fixture.layout.targetBox(stub(0)).height, secondSlot.height);
 }
 
-UMBRIEL_TEST(unknownViewHasNoColumn) {
+CANOPY_TEST(unknownViewHasNoColumn) {
   Fixture fixture;
   fixture.addLeaves(2);
   CHECK_EQ(fixture.layout.columnOf(stub(99)), -1);
   CHECK_EQ(fixture.layout.columnOf(nullptr), -1);
 }
 
-UMBRIEL_TEST(everyLeafIsOnRowZero) {
+CANOPY_TEST(everyLeafIsOnRowZero) {
   // Dwindle has no row concept; the whole tree is flattened to columns.
   Fixture fixture;
   fixture.addLeaves(3);
@@ -197,7 +197,7 @@ UMBRIEL_TEST(everyLeafIsOnRowZero) {
   }
 }
 
-UMBRIEL_TEST(removingCollapsesTheSiblingIntoTheParent) {
+CANOPY_TEST(removingCollapsesTheSiblingIntoTheParent) {
   Fixture fixture;
   fixture.addLeaves(2);
   fixture.layout.removeView(stub(1));
@@ -210,7 +210,7 @@ UMBRIEL_TEST(removingCollapsesTheSiblingIntoTheParent) {
   CHECK_EQ(box.height, kUsable.height - 2 * fixture.config.edgePad);
 }
 
-UMBRIEL_TEST(removingEveryViewEmptiesTheTree) {
+CANOPY_TEST(removingEveryViewEmptiesTheTree) {
   Fixture fixture;
   fixture.addLeaves(3);
   for (int i = 0; i < 3; ++i) {
@@ -221,7 +221,7 @@ UMBRIEL_TEST(removingEveryViewEmptiesTheTree) {
   CHECK_EQ(fixture.layout.targetBox(stub(0)).width, 0);
 }
 
-UMBRIEL_TEST(removingAnUnknownViewIsHarmless) {
+CANOPY_TEST(removingAnUnknownViewIsHarmless) {
   Fixture fixture;
   fixture.addLeaves(2);
   fixture.layout.removeView(stub(99));
@@ -230,7 +230,7 @@ UMBRIEL_TEST(removingAnUnknownViewIsHarmless) {
 }
 
 // tiling geometry
-UMBRIEL_TEST(twoLeavesSplitTheAreaWithoutOverlapping) {
+CANOPY_TEST(twoLeavesSplitTheAreaWithoutOverlapping) {
   Fixture fixture;
   fixture.addLeaves(2);
   fixture.layout.arrange(kUsable);
@@ -246,7 +246,7 @@ UMBRIEL_TEST(twoLeavesSplitTheAreaWithoutOverlapping) {
   CHECK_EQ(first.height, second.height);
 }
 
-UMBRIEL_TEST(leavesNeverOverlapOrLeaveTheUsableArea) {
+CANOPY_TEST(leavesNeverOverlapOrLeaveTheUsableArea) {
   Fixture fixture;
   fixture.addLeaves(6);
   fixture.layout.arrange(kUsable);
@@ -273,7 +273,7 @@ UMBRIEL_TEST(leavesNeverOverlapOrLeaveTheUsableArea) {
   }
 }
 
-UMBRIEL_TEST(splitsFollowTheLongerEdgeOnALandscapeArea) {
+CANOPY_TEST(splitsFollowTheLongerEdgeOnALandscapeArea) {
   Fixture fixture;
   fixture.addLeaves(3);
   fixture.layout.arrange(kUsable);
@@ -289,7 +289,7 @@ UMBRIEL_TEST(splitsFollowTheLongerEdgeOnALandscapeArea) {
   CHECK(second.y != third.y);
 }
 
-UMBRIEL_TEST(setHeightFractionResizesAStackedLeaf) {
+CANOPY_TEST(setHeightFractionResizesAStackedLeaf) {
   Fixture fixture;
   fixture.addLeaves(3);
   fixture.layout.arrange(kUsable);
@@ -303,7 +303,7 @@ UMBRIEL_TEST(setHeightFractionResizesAStackedLeaf) {
   CHECK_NEAR(fixture.layout.targetBox(stub(2)).height, expectedHeight, 1);
 }
 
-UMBRIEL_TEST(setHeightFractionRejectsAFullHeightLeaf) {
+CANOPY_TEST(setHeightFractionRejectsAFullHeightLeaf) {
   Fixture fixture;
   fixture.addLeaves(3);
   fixture.layout.arrange(kUsable);
@@ -311,7 +311,7 @@ UMBRIEL_TEST(setHeightFractionRejectsAFullHeightLeaf) {
   CHECK_NEAR(fixture.layout.heightFraction(stub(0)), 1.0, 1e-9);
 }
 
-UMBRIEL_TEST(directionalFocusFollowsScreenGeometry) {
+CANOPY_TEST(directionalFocusFollowsScreenGeometry) {
   Fixture fixture;
   fixture.layout.insertView(stub(0), 0);
   fixture.layout.arrange(kUsable);
@@ -340,7 +340,7 @@ UMBRIEL_TEST(directionalFocusFollowsScreenGeometry) {
   }
 }
 
-UMBRIEL_TEST(directionalMoveRefreshesScreenGeometryImmediately) {
+CANOPY_TEST(directionalMoveRefreshesScreenGeometryImmediately) {
   Fixture fixture;
   fixture.layout.insertView(stub(0), 0);
   fixture.layout.arrange(kUsable);
@@ -365,7 +365,7 @@ UMBRIEL_TEST(directionalMoveRefreshesScreenGeometryImmediately) {
   }
 }
 
-UMBRIEL_TEST(verticalMoveCrossesNestedBranchesWithoutDisplacingTiles) {
+CANOPY_TEST(verticalMoveCrossesNestedBranchesWithoutDisplacingTiles) {
   Fixture fixture;
   for (int i = 0; i < 5; ++i) {
     fixture.layout.insertView(stub(i), i);
@@ -393,7 +393,7 @@ UMBRIEL_TEST(verticalMoveCrossesNestedBranchesWithoutDisplacingTiles) {
   CHECK_EQ(left.height, upperRight.height);
 }
 
-UMBRIEL_TEST(horizontalMoveSplitsTheEnteredTileAlongItsLongerEdge) {
+CANOPY_TEST(horizontalMoveSplitsTheEnteredTileAlongItsLongerEdge) {
   Fixture fixture;
   for (int i = 0; i < 3; ++i) {
     fixture.layout.insertView(stub(i), i);
@@ -415,7 +415,7 @@ UMBRIEL_TEST(horizontalMoveSplitsTheEnteredTileAlongItsLongerEdge) {
   CHECK_EQ(right.height, left.height);
 }
 
-UMBRIEL_TEST(moveTowardALoneSiblingTradesSides) {
+CANOPY_TEST(moveTowardALoneSiblingTradesSides) {
   Fixture fixture;
   fixture.addLeaves(2);
   fixture.layout.arrange(kUsable);
@@ -430,7 +430,7 @@ UMBRIEL_TEST(moveTowardALoneSiblingTradesSides) {
   CHECK_EQ(left.width, right.width);
 }
 
-UMBRIEL_TEST(moveTowardTheContentEdgeIsRefused) {
+CANOPY_TEST(moveTowardTheContentEdgeIsRefused) {
   Fixture fixture;
   fixture.addLeaves(3);
   fixture.layout.arrange(kUsable);
@@ -444,7 +444,7 @@ UMBRIEL_TEST(moveTowardTheContentEdgeIsRefused) {
   CHECK_EQ(fixture.layout.targetBox(stub(0)).width, before.width);
 }
 
-UMBRIEL_TEST(focusPeersSpanTheCrossedSubtree) {
+CANOPY_TEST(focusPeersSpanTheCrossedSubtree) {
   Fixture fixture;
   for (int i = 0; i < 3; ++i) {
     fixture.layout.insertView(stub(i), i);
@@ -461,7 +461,7 @@ UMBRIEL_TEST(focusPeersSpanTheCrossedSubtree) {
   CHECK(std::ranges::find(peers, stub(0)) == peers.end());
 }
 
-UMBRIEL_TEST(focusPeersStayLocalWithinASplit) {
+CANOPY_TEST(focusPeersStayLocalWithinASplit) {
   Fixture fixture;
   for (int i = 0; i < 3; ++i) {
     fixture.layout.insertView(stub(i), i);
@@ -475,7 +475,7 @@ UMBRIEL_TEST(focusPeersStayLocalWithinASplit) {
   CHECK(fixture.layout.focusPeers(stub(0), nullptr).empty());
 }
 
-UMBRIEL_TEST(splitsFollowTheLongerEdgeOnAPortraitArea) {
+CANOPY_TEST(splitsFollowTheLongerEdgeOnAPortraitArea) {
   Fixture fixture;
   fixture.addLeaves(3);
   fixture.layout.arrange(kPortraitUsable);
@@ -492,7 +492,7 @@ UMBRIEL_TEST(splitsFollowTheLongerEdgeOnAPortraitArea) {
   CHECK_EQ(second.y, third.y);
 }
 
-UMBRIEL_TEST(unlockedSplitsReorientWhenAreaChangesShape) {
+CANOPY_TEST(unlockedSplitsReorientWhenAreaChangesShape) {
   Fixture fixture;
   fixture.addLeaves(3);
   fixture.layout.arrange(kUsable);
@@ -507,7 +507,7 @@ UMBRIEL_TEST(unlockedSplitsReorientWhenAreaChangesShape) {
   CHECK_EQ(second.y, third.y);
 }
 
-UMBRIEL_TEST(preserveSplitKeepsResolvedAxisWhenAreaChangesShape) {
+CANOPY_TEST(preserveSplitKeepsResolvedAxisWhenAreaChangesShape) {
   Fixture fixture;
   fixture.config.dwindle.preserveSplit = true;
   fixture.addLeaves(3);
@@ -523,7 +523,7 @@ UMBRIEL_TEST(preserveSplitKeepsResolvedAxisWhenAreaChangesShape) {
   CHECK(second.y != third.y);
 }
 
-UMBRIEL_TEST(removingFullHeightLeafReorientsSurvivingPair) {
+CANOPY_TEST(removingFullHeightLeafReorientsSurvivingPair) {
   Fixture fixture;
   fixture.addLeaves(3);
   fixture.layout.arrange(kUsable);
@@ -536,7 +536,7 @@ UMBRIEL_TEST(removingFullHeightLeafReorientsSurvivingPair) {
   CHECK_EQ(first.y, second.y);
 }
 
-UMBRIEL_TEST(preserveSplitKeepsSurvivingPairStackedAfterRemoval) {
+CANOPY_TEST(preserveSplitKeepsSurvivingPairStackedAfterRemoval) {
   Fixture fixture;
   fixture.config.dwindle.preserveSplit = true;
   fixture.addLeaves(3);
@@ -550,7 +550,7 @@ UMBRIEL_TEST(preserveSplitKeepsSurvivingPairStackedAfterRemoval) {
   CHECK(first.y != second.y);
 }
 
-UMBRIEL_TEST(directionalDropKeepsItsAxisWhenPreserveSplitIsOff) {
+CANOPY_TEST(directionalDropKeepsItsAxisWhenPreserveSplitIsOff) {
   Fixture fixture;
   fixture.layout.insertView(stub(0), 0);
   fixture.layout.arrange(kPortraitUsable);
@@ -566,7 +566,7 @@ UMBRIEL_TEST(directionalDropKeepsItsAxisWhenPreserveSplitIsOff) {
   CHECK(fixture.layout.targetBox(stub(0)).x != fixture.layout.targetBox(stub(1)).x);
 }
 
-UMBRIEL_TEST(toggledSplitSurvivesArrangeWhenPreserveSplitIsOff) {
+CANOPY_TEST(toggledSplitSurvivesArrangeWhenPreserveSplitIsOff) {
   Fixture fixture;
   fixture.addLeaves(2);
   fixture.layout.arrange(kUsable);
@@ -582,7 +582,7 @@ UMBRIEL_TEST(toggledSplitSurvivesArrangeWhenPreserveSplitIsOff) {
   CHECK(first.y != second.y);
 }
 
-UMBRIEL_TEST(insertAtAGapSplitsThePrecedingLeaf) {
+CANOPY_TEST(insertAtAGapSplitsThePrecedingLeaf) {
   Fixture fixture;
   fixture.addLeaves(3);
   fixture.layout.arrange(kUsable);
@@ -602,7 +602,7 @@ UMBRIEL_TEST(insertAtAGapSplitsThePrecedingLeaf) {
   CHECK(inserted.y + inserted.height <= preceding.y + preceding.height);
 }
 
-UMBRIEL_TEST(insertAtGapZeroPlacesViewAtTheFront) {
+CANOPY_TEST(insertAtGapZeroPlacesViewAtTheFront) {
   Fixture fixture;
   fixture.addLeaves(2);
   fixture.layout.insertView(stub(2), 0);
@@ -610,7 +610,7 @@ UMBRIEL_TEST(insertAtGapZeroPlacesViewAtTheFront) {
   CHECK_EQ(fixture.layout.columnOf(stub(0)), 1);
 }
 
-UMBRIEL_TEST(insertTowardAPointTakesTheHalfFacingIt) {
+CANOPY_TEST(insertTowardAPointTakesTheHalfFacingIt) {
   Fixture fixture;
   fixture.addLeaves(1);
   fixture.layout.arrange(kUsable);
@@ -632,7 +632,7 @@ UMBRIEL_TEST(insertTowardAPointTakesTheHalfFacingIt) {
   CHECK(top.y < bottom.y);
 }
 
-UMBRIEL_TEST(gapsSeparateSiblings) {
+CANOPY_TEST(gapsSeparateSiblings) {
   Fixture fixture;
   fixture.addLeaves(2);
   fixture.layout.arrange(kUsable);
@@ -642,7 +642,7 @@ UMBRIEL_TEST(gapsSeparateSiblings) {
   CHECK_EQ(second.x - (first.x + first.width), fixture.config.totalGap);
 }
 
-UMBRIEL_TEST(targetBoxOfAnUnknownViewIsEmpty) {
+CANOPY_TEST(targetBoxOfAnUnknownViewIsEmpty) {
   Fixture fixture;
   fixture.addLeaves(2);
   fixture.layout.arrange(kUsable);
@@ -651,14 +651,14 @@ UMBRIEL_TEST(targetBoxOfAnUnknownViewIsEmpty) {
   CHECK_EQ(box.height, 0);
 }
 
-UMBRIEL_TEST(arrangeOnAnEmptyTreeIsHarmless) {
+CANOPY_TEST(arrangeOnAnEmptyTreeIsHarmless) {
   Fixture fixture;
   fixture.layout.arrange(kUsable);
   CHECK_EQ(fixture.layout.columns().size(), size_t{0});
 }
 
 // initial sizing
-UMBRIEL_TEST(initialSizeFillsTheAreaForTheFirstLeaf) {
+CANOPY_TEST(initialSizeFillsTheAreaForTheFirstLeaf) {
   Fixture fixture;
   const Layout::InitialSize initial = fixture.layout.initialSize(kUsable, false, std::nullopt, std::nullopt, nullptr);
 
@@ -672,7 +672,7 @@ UMBRIEL_TEST(initialSizeFillsTheAreaForTheFirstLeaf) {
   CHECK_EQ(initial.height, arranged.height);
 }
 
-UMBRIEL_TEST(initialSizeShrinksOnceTheTreeIsPopulated) {
+CANOPY_TEST(initialSizeShrinksOnceTheTreeIsPopulated) {
   Fixture fixture;
   const Layout::InitialSize empty = fixture.layout.initialSize(kUsable, false, std::nullopt, std::nullopt, nullptr);
   fixture.addLeaves(1);
@@ -680,7 +680,7 @@ UMBRIEL_TEST(initialSizeShrinksOnceTheTreeIsPopulated) {
   CHECK(populated.width < empty.width);
 }
 
-UMBRIEL_TEST(initialSizeMatchesTheSplitArrangeWillMake) {
+CANOPY_TEST(initialSizeMatchesTheSplitArrangeWillMake) {
   // The size a view is configured with before it joins the layout must equal
   // the size the layout gives it once it has, or the client's first buffer is
   // wrong and the window resizes on first paint.
@@ -696,7 +696,7 @@ UMBRIEL_TEST(initialSizeMatchesTheSplitArrangeWillMake) {
   CHECK_EQ(initial.height, arranged.height);
 }
 
-UMBRIEL_TEST(initialSizeSplitsTheHeightOnAPortraitArea) {
+CANOPY_TEST(initialSizeSplitsTheHeightOnAPortraitArea) {
   // Predicting a half-width column on a portrait output configures every new
   // window against the wrong axis.
   Fixture fixture;
@@ -713,7 +713,7 @@ UMBRIEL_TEST(initialSizeSplitsTheHeightOnAPortraitArea) {
   CHECK(initial.height < initial.width);
 }
 
-UMBRIEL_TEST(initialSizeIgnoresARuleExtentFraction) {
+CANOPY_TEST(initialSizeIgnoresARuleExtentFraction) {
   // A scrolling extent means nothing to a splitting layout, so it must not change the answer.
   Fixture fixture;
   fixture.addLeaves(1);
@@ -722,7 +722,7 @@ UMBRIEL_TEST(initialSizeIgnoresARuleExtentFraction) {
       fixture.layout.initialSize(kUsable, false, std::nullopt, std::nullopt, nullptr).width
   );
 }
-UMBRIEL_TEST(initialSizeMatchesTheFocusedSplitAnchor) {
+CANOPY_TEST(initialSizeMatchesTheFocusedSplitAnchor) {
   Fixture fixture;
   fixture.addLeaves(3);
   fixture.layout.arrange(kUsable);
@@ -737,7 +737,7 @@ UMBRIEL_TEST(initialSizeMatchesTheFocusedSplitAnchor) {
 }
 
 // hit testing
-UMBRIEL_TEST(leafIndexAtFindsTheLeafUnderAPoint) {
+CANOPY_TEST(leafIndexAtFindsTheLeafUnderAPoint) {
   Fixture fixture;
   fixture.addLeaves(2);
   fixture.layout.arrange(kUsable);
@@ -748,7 +748,7 @@ UMBRIEL_TEST(leafIndexAtFindsTheLeafUnderAPoint) {
   CHECK_EQ(fixture.layout.targetBoxByIndex(index).x, first.x);
 }
 
-UMBRIEL_TEST(leafIndexAtMissesOutsideTheArea) {
+CANOPY_TEST(leafIndexAtMissesOutsideTheArea) {
   Fixture fixture;
   fixture.addLeaves(2);
   fixture.layout.arrange(kUsable);
@@ -757,7 +757,7 @@ UMBRIEL_TEST(leafIndexAtMissesOutsideTheArea) {
 }
 
 // resize boundaries
-UMBRIEL_TEST(onlyInternalEdgesAreResizable) {
+CANOPY_TEST(onlyInternalEdgesAreResizable) {
   Fixture fixture;
   fixture.addLeaves(2);
   fixture.layout.arrange(kUsable);
@@ -772,14 +772,14 @@ UMBRIEL_TEST(onlyInternalEdgesAreResizable) {
   CHECK_EQ(secondEdges & WLR_EDGE_RIGHT, uint32_t{0});
 }
 
-UMBRIEL_TEST(aLoneLeafHasNoResizableEdges) {
+CANOPY_TEST(aLoneLeafHasNoResizableEdges) {
   Fixture fixture;
   fixture.addLeaves(1);
   fixture.layout.arrange(kUsable);
   CHECK_EQ(fixture.layout.resizableEdges(stub(0)), uint32_t{0});
 }
 
-UMBRIEL_TEST(setResizeBoundaryMovesTheSharedEdge) {
+CANOPY_TEST(setResizeBoundaryMovesTheSharedEdge) {
   Fixture fixture;
   fixture.addLeaves(2);
   fixture.layout.arrange(kUsable);
@@ -799,7 +799,7 @@ UMBRIEL_TEST(setResizeBoundaryMovesTheSharedEdge) {
   CHECK(!overlaps(fixture.layout.targetBox(stub(0)), fixture.layout.targetBox(stub(1))));
 }
 
-UMBRIEL_TEST(resizeBoundaryRejectsAScreenFacingEdge) {
+CANOPY_TEST(resizeBoundaryRejectsAScreenFacingEdge) {
   Fixture fixture;
   fixture.addLeaves(2);
   fixture.layout.arrange(kUsable);
@@ -809,7 +809,7 @@ UMBRIEL_TEST(resizeBoundaryRejectsAScreenFacingEdge) {
   CHECK(!fixture.layout.setResizeBoundary(stub(0), WLR_EDGE_LEFT, 0.75));
 }
 
-UMBRIEL_TEST(cycleWidthBackWalksThePresetsInReverse) {
+CANOPY_TEST(cycleWidthBackWalksThePresetsInReverse) {
   Fixture fixture;
   fixture.config.extentPresets = {1.0 / 3.0, 0.5, 2.0 / 3.0};
   fixture.addLeaves(2);
@@ -833,7 +833,7 @@ UMBRIEL_TEST(cycleWidthBackWalksThePresetsInReverse) {
   CHECK_NEAR(fixture.layout.targetBox(stub(0)).width, static_cast<int>(span * (2.0 / 3.0)), 2);
 }
 
-UMBRIEL_TEST(cycleWidthWrapsWhenTheNextPresetIsOutOfReach) {
+CANOPY_TEST(cycleWidthWrapsWhenTheNextPresetIsOutOfReach) {
   // A split share tops out at 0.9, short of the 1.0 preset.
   Fixture fixture;
   fixture.config.extentPresets = {0.5, 1.0};
@@ -846,7 +846,7 @@ UMBRIEL_TEST(cycleWidthWrapsWhenTheNextPresetIsOutOfReach) {
   CHECK_NEAR(fixture.layout.widthFraction(0), 0.5, 1e-9);
 }
 
-UMBRIEL_TEST(widePresetsWrapInsteadOfStallingASplitShare) {
+CANOPY_TEST(widePresetsWrapInsteadOfStallingASplitShare) {
   // A preset beyond the split ceiling reaches as far as the layout realizes, then wraps; it never parks.
   Fixture fixture;
   fixture.config.extentPresets = {0.5, 1.5};
@@ -859,7 +859,7 @@ UMBRIEL_TEST(widePresetsWrapInsteadOfStallingASplitShare) {
   CHECK_NEAR(fixture.layout.widthFraction(0), 0.5, 1e-9);
 }
 
-UMBRIEL_TEST(wideFractionsLandAtTheSingleViewportCeiling) {
+CANOPY_TEST(wideFractionsLandAtTheSingleViewportCeiling) {
   Fixture fixture;
   fixture.addLeaves(2);
   fixture.layout.arrange(kUsable);
@@ -868,7 +868,7 @@ UMBRIEL_TEST(wideFractionsLandAtTheSingleViewportCeiling) {
   CHECK(fixture.layout.maxExtentFraction() == 1.0);
 }
 
-UMBRIEL_TEST(resizeEdgesComeFromTileThirds) {
+CANOPY_TEST(resizeEdgesComeFromTileThirds) {
   Fixture fixture;
   fixture.addLeaves(2);
   fixture.layout.arrange(kUsable);
@@ -890,7 +890,7 @@ UMBRIEL_TEST(resizeEdgesComeFromTileThirds) {
   CHECK_EQ(fixture.layout.resizeEdgesAt(stub(0), left.x + left.width / 6.0, left.y + left.height / 2.0), 0U);
 }
 
-UMBRIEL_TEST(cornerNinthGrabsBothInternalBoundaries) {
+CANOPY_TEST(cornerNinthGrabsBothInternalBoundaries) {
   Fixture fixture;
   fixture.addLeaves(3);
   fixture.layout.arrange(kUsable);
@@ -909,7 +909,7 @@ UMBRIEL_TEST(cornerNinthGrabsBothInternalBoundaries) {
   CHECK_EQ(fixture.layout.resizeEdgesAt(stub(1), box.x + 5.0 * box.width / 6.0, box.y + box.height / 6.0), 0U);
 }
 
-UMBRIEL_TEST(snapshotRestoresTreeTopologyAndSplitRatios) {
+CANOPY_TEST(snapshotRestoresTreeTopologyAndSplitRatios) {
   Fixture source;
   source.layout.insertView(stub(0), 0);
   source.layout.insertViewSplitOnView(stub(1), stub(0), WLR_EDGE_RIGHT);
@@ -937,7 +937,7 @@ UMBRIEL_TEST(snapshotRestoresTreeTopologyAndSplitRatios) {
   }
 }
 
-UMBRIEL_TEST(snapshotCollapsesTheParentOfAMissingLeaf) {
+CANOPY_TEST(snapshotCollapsesTheParentOfAMissingLeaf) {
   Fixture source;
   source.addLeaves(3);
   source.layout.arrange(kUsable);
@@ -953,7 +953,7 @@ UMBRIEL_TEST(snapshotCollapsesTheParentOfAMissingLeaf) {
   CHECK_EQ(restored.layout.targetBox(stub(0)).height, restored.layout.targetBox(stub(2)).height);
 }
 
-UMBRIEL_TEST(snapshotUsesMemberIdsInsteadOfCapturedViewPointers) {
+CANOPY_TEST(snapshotUsesMemberIdsInsteadOfCapturedViewPointers) {
   Fixture source;
   source.layout.insertView(stub(0), 0);
   source.layout.insertViewSplitOnView(stub(1), stub(0), WLR_EDGE_RIGHT);

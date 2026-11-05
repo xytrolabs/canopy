@@ -9,7 +9,7 @@ extern "C" {
 #include <wlr/types/wlr_output.h>
 }
 
-namespace umbriel {
+namespace canopy {
 
   struct ColorLuminances {
     float min = 0.2F;
@@ -45,4 +45,4 @@ namespace umbriel {
       const wlr_output_image_description* outputDescription, float effectiveSdrWhite, bool automaticHdrAvailable = false
   );
 
-} // namespace umbriel
+} // namespace canopy

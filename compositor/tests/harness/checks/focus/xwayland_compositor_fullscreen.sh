@@ -4,11 +4,11 @@
 # compositor releases it. Client-owned fullscreen still follows client requests.
 set -euo pipefail
 
-source "$UMBRIEL_HARNESS_LIB"
+source "$CANOPY_HARNESS_LIB"
 
-readonly CLIENT="${UMBRIEL_XWAYLAND_FOCUS_CLIENT:-./build-debug/tests/xwayland-focus-client}"
-readonly CLIENT_LOG="$UMBRIEL_RUNTIME_DIR/xwayland-fullscreen-client.log"
-readonly CONTROL="$UMBRIEL_RUNTIME_DIR/xwayland-fullscreen-control"
+readonly CLIENT="${CANOPY_XWAYLAND_FOCUS_CLIENT:-./build-debug/tests/xwayland-focus-client}"
+readonly CLIENT_LOG="$CANOPY_RUNTIME_DIR/xwayland-fullscreen-client.log"
+readonly CONTROL="$CANOPY_RUNTIME_DIR/xwayland-fullscreen-control"
 readonly TITLE=xwayland-compositor-fullscreen
 
 if [[ ! -x $CLIENT || -z ${DISPLAY:-} ]]; then
@@ -16,19 +16,19 @@ if [[ ! -x $CLIENT || -z ${DISPLAY:-} ]]; then
   exit 1
 fi
 
-cat >> "$UMBRIEL_CONFIG" <<'EOF'
+cat >> "$CANOPY_CONFIG" <<'EOF'
 
 [animation]
 enabled = false
 EOF
-"$UMBRIEL" msg config-reload > /dev/null
+"$CANOPY" msg config-reload > /dev/null
 
 mkfifo "$CONTROL"
 exec {control_fd}<>"$CONTROL"
 "$CLIENT" "$TITLE" <&"$control_fd" > "$CLIENT_LOG" 2>&1 &
 
 window_state() {
-  "$UMBRIEL" tearing --json | jq -r --arg title "$TITLE" '.surfaces[] | select(.title == $title) | .fullscreen'
+  "$CANOPY" tearing --json | jq -r --arg title "$TITLE" '.surfaces[] | select(.title == $title) | .fullscreen'
 }
 
 wait_for_fullscreen() {
@@ -39,7 +39,7 @@ wait_for_fullscreen() {
     fi
     sleep 0.1
   done
-  echo "$label: $($UMBRIEL windows --json)"
+  echo "$label: $($CANOPY windows --json)"
   echo "X11 log: $(tr '\n' '|' < "$CLIENT_LOG")"
   return 1
 }
@@ -47,12 +47,12 @@ wait_for_fullscreen() {
 wait_for_log() {
   local start=$1 pattern=$2 label=$3
   for _ in $(seq 60); do
-    if tail -n +"$start" "$UMBRIEL_LOG" | grep -Fq "$pattern"; then
+    if tail -n +"$start" "$CANOPY_LOG" | grep -Fq "$pattern"; then
       return 0
     fi
     sleep 0.1
   done
-  echo "$label: $(tail -n +"$start" "$UMBRIEL_LOG" | tr '\n' '|')"
+  echo "$label: $(tail -n +"$start" "$CANOPY_LOG" | tr '\n' '|')"
   return 1
 }
 
@@ -61,14 +61,14 @@ for _ in $(seq 60); do
   sleep 0.1
 done
 if [[ -z $(window_state) ]]; then
-  echo "the X11 fullscreen fixture did not map: $($UMBRIEL windows --json)"
+  echo "the X11 fullscreen fixture did not map: $($CANOPY windows --json)"
   exit 1
 fi
 
-"$UMBRIEL" msg window-toggle-fullscreen > /dev/null
+"$CANOPY" msg window-toggle-fullscreen > /dev/null
 wait_for_fullscreen true "the compositor toggle did not enter fullscreen"
 
-readonly LOG_MARK=$(($(wc -l < "$UMBRIEL_LOG") + 1))
+readonly LOG_MARK=$(($(wc -l < "$CANOPY_LOG") + 1))
 printf 'fullscreen false\n' >&"$control_fd"
 for _ in $(seq 60); do
   grep -q '^fullscreen-requested=false$' "$CLIENT_LOG" && break
@@ -82,7 +82,7 @@ wait_for_log "$LOG_MARK" "request_fullscreen denied for compositor-owned X11" \
   "the compositor did not reject the X11 unfullscreen request"
 wait_for_fullscreen true "an X11 request overrode compositor-owned fullscreen"
 
-"$UMBRIEL" msg window-toggle-fullscreen > /dev/null
+"$CANOPY" msg window-toggle-fullscreen > /dev/null
 wait_for_fullscreen false "the compositor could not release its fullscreen state"
 
 printf 'fullscreen true\n' >&"$control_fd"

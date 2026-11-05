@@ -8,8 +8,8 @@ set -euo pipefail
 
 readonly OUTPUT_W=1280
 readonly OUTPUT_H=720
-readonly POINTER="${UMBRIEL_POINTER_CLIENT:-./build-debug/tests/pointer-client}"
-readonly CLIENT="${UMBRIEL_UNMAP_CLIENT:-./build-debug/tests/unmap-client}"
+readonly POINTER="${CANOPY_POINTER_CLIENT:-./build-debug/tests/pointer-client}"
+readonly CLIENT="${CANOPY_UNMAP_CLIENT:-./build-debug/tests/unmap-client}"
 
 pointer() {
   "$POINTER" "$OUTPUT_W" "$OUTPUT_H" "$@"
@@ -17,46 +17,46 @@ pointer() {
 
 spawn_client() {
   local title=$1
-  "$CLIENT" "$title" 1200 700 > "$UMBRIEL_RUNTIME_DIR/$title.log" 2>&1 &
+  "$CLIENT" "$title" 1200 700 > "$CANOPY_RUNTIME_DIR/$title.log" 2>&1 &
 }
 
 wait_for_count() {
   local want=$1
   for _ in $(seq 60); do
-    [[ $("$UMBRIEL" windows --json | jq 'length') -eq $want ]] && return 0
+    [[ $("$CANOPY" windows --json | jq 'length') -eq $want ]] && return 0
     sleep 0.1
   done
-  echo "expected $want windows, got: $("$UMBRIEL" windows --json)"
+  echo "expected $want windows, got: $("$CANOPY" windows --json)"
   return 1
 }
 
 wait_for_focus() {
   local want=$1
   for _ in $(seq 40); do
-    if [[ $("$UMBRIEL" windows --json | jq -r --arg id "$want" \
+    if [[ $("$CANOPY" windows --json | jq -r --arg id "$want" \
       '.[] | select(.id == $id) | (.focused and .active)') == true ]]; then
       return 0
     fi
     sleep 0.1
   done
-  echo "expected $want to hold workspace and keyboard focus: $("$UMBRIEL" windows --json)"
+  echo "expected $want to hold workspace and keyboard focus: $("$CANOPY" windows --json)"
   return 1
 }
 
 wait_for_origin() {
   local id=$1 want_x=$2 want_y=$3
   for _ in $(seq 40); do
-    if [[ $("$UMBRIEL" windows --json | jq -r --arg id "$id" --argjson x "$want_x" --argjson y "$want_y" \
+    if [[ $("$CANOPY" windows --json | jq -r --arg id "$id" --argjson x "$want_x" --argjson y "$want_y" \
       '.[] | select(.id == $id) | (.x == $x and .y == $y)') == true ]]; then
       return 0
     fi
     sleep 0.1
   done
-  echo "expected $id to expand to ($want_x,$want_y): $("$UMBRIEL" windows --json)"
+  echo "expected $id to expand to ($want_x,$want_y): $("$CANOPY" windows --json)"
   return 1
 }
 
-cat >> "$UMBRIEL_CONFIG" <<'EOF'
+cat >> "$CANOPY_CONFIG" <<'EOF'
 
 [layout]
 mode = "dwindle"
@@ -68,7 +68,7 @@ curve = "linear"
 [input.focus]
 follows_mouse = true
 EOF
-"$UMBRIEL" msg config-reload > /dev/null
+"$CANOPY" msg config-reload > /dev/null
 
 # First preserve intentional keyboard focus. Park the pointer over the first leaf, focus the third leaf explicitly,
 # and close it. The second leaf is its layout predecessor and must retain the resulting focus.
@@ -81,7 +81,7 @@ wait_for_count 3
 
 # Let the one-millisecond opening animation settle before using target positions for hit-testing.
 sleep 0.1
-windows=$("$UMBRIEL" windows --json)
+windows=$("$CANOPY" windows --json)
 other_id=$(jq -r '.[] | select(.title == "dwindle-close-pointer") | .id' <<< "$windows")
 predecessor_id=$(jq -r '.[] | select(.title == "dwindle-close-predecessor") | .id' <<< "$windows")
 focused_id=$(jq -r '.[] | select(.title == "dwindle-close-focused") | .id' <<< "$windows")
@@ -98,22 +98,22 @@ fi
 # the newest window without moving the pointer, then close it.
 pointer move "$focused_x" "$focused_y" move "$other_x" "$other_y"
 wait_for_focus "$other_id"
-"$UMBRIEL" msg window-focus "$focused_id" > /dev/null
+"$CANOPY" msg window-focus "$focused_id" > /dev/null
 wait_for_focus "$focused_id"
-"$UMBRIEL" msg window-close "$focused_id" > /dev/null
+"$CANOPY" msg window-close "$focused_id" > /dev/null
 for _ in $(seq 40); do
-  grep -q '^unmapped$' "$UMBRIEL_RUNTIME_DIR/dwindle-close-focused.log" && break
+  grep -q '^unmapped$' "$CANOPY_RUNTIME_DIR/dwindle-close-focused.log" && break
   sleep 0.1
 done
-if ! grep -q '^unmapped$' "$UMBRIEL_RUNTIME_DIR/dwindle-close-focused.log"; then
-  echo "keyboard-focused client did not unmap: $(< "$UMBRIEL_RUNTIME_DIR/dwindle-close-focused.log")"
+if ! grep -q '^unmapped$' "$CANOPY_RUNTIME_DIR/dwindle-close-focused.log"; then
+  echo "keyboard-focused client did not unmap: $(< "$CANOPY_RUNTIME_DIR/dwindle-close-focused.log")"
   exit 1
 fi
 wait_for_count 2
 wait_for_focus "$predecessor_id"
 
 # Use another workspace for the close-under-pointer scenario so its Dwindle tree is independent of the first one.
-"$UMBRIEL" msg workspace-switch 2 > /dev/null
+"$CANOPY" msg workspace-switch 2 > /dev/null
 
 # Repeated insertion builds a nested Dwindle branch. Closing the fourth leaf exposes the fifth, then closing the fifth
 # exposes the sixth. The ordinary layout predecessor remains the third leaf, so both focus policies stay observably
@@ -128,7 +128,7 @@ done
 
 # Let the opening animation settle before reading target positions for hit-testing.
 sleep 0.1
-windows=$("$UMBRIEL" windows --json)
+windows=$("$CANOPY" windows --json)
 closing_id=$(jq -r '.[] | select(.title == "dwindle-close-under-pointer") | .id' <<< "$windows")
 expander_id=$(jq -r '.[] | select(.title == "dwindle-close-expander") | .id' <<< "$windows")
 next_expander_id=$(jq -r '.[] | select(.title == "dwindle-close-next-expander") | .id' <<< "$windows")
@@ -142,16 +142,16 @@ fi
 # Keep one virtual pointer alive and motionless through the close. The offset is well inside the closing leaf, away
 # from its gaps. Waiting for focus proves the initial move landed before the close request is sent.
 "$POINTER" "$OUTPUT_W" "$OUTPUT_H" move "$((closing_x + 50))" "$((closing_y + 50))" pause 10000 \
-  > "$UMBRIEL_RUNTIME_DIR/stationary-pointer.log" 2>&1 &
+  > "$CANOPY_RUNTIME_DIR/stationary-pointer.log" 2>&1 &
 wait_for_focus "$closing_id"
 
-"$UMBRIEL" msg window-close "$closing_id" > /dev/null
+"$CANOPY" msg window-close "$closing_id" > /dev/null
 for _ in $(seq 40); do
-  grep -q '^unmapped$' "$UMBRIEL_RUNTIME_DIR/dwindle-close-under-pointer.log" && break
+  grep -q '^unmapped$' "$CANOPY_RUNTIME_DIR/dwindle-close-under-pointer.log" && break
   sleep 0.1
 done
-if ! grep -q '^unmapped$' "$UMBRIEL_RUNTIME_DIR/dwindle-close-under-pointer.log"; then
-  echo "focused client did not unmap: $(< "$UMBRIEL_RUNTIME_DIR/dwindle-close-under-pointer.log")"
+if ! grep -q '^unmapped$' "$CANOPY_RUNTIME_DIR/dwindle-close-under-pointer.log"; then
+  echo "focused client did not unmap: $(< "$CANOPY_RUNTIME_DIR/dwindle-close-under-pointer.log")"
   exit 1
 fi
 wait_for_count 7
@@ -164,14 +164,14 @@ wait_for_focus "$expander_id"
 # Close the revealed tile too, without moving the pointer. Its predecessor now expands into the same position and must
 # inherit hover focus just like the first survivor did. This catches stale seat pointer focus left by the first unmap.
 # The close decides hover ownership from what is on screen, so the survivor must have been drawn in its new slot.
-"$UMBRIEL" settle
-"$UMBRIEL" msg window-close "$expander_id" > /dev/null
+"$CANOPY" settle
+"$CANOPY" msg window-close "$expander_id" > /dev/null
 for _ in $(seq 40); do
-  grep -q '^unmapped$' "$UMBRIEL_RUNTIME_DIR/dwindle-close-expander.log" && break
+  grep -q '^unmapped$' "$CANOPY_RUNTIME_DIR/dwindle-close-expander.log" && break
   sleep 0.1
 done
-if ! grep -q '^unmapped$' "$UMBRIEL_RUNTIME_DIR/dwindle-close-expander.log"; then
-  echo "first revealed client did not unmap: $(< "$UMBRIEL_RUNTIME_DIR/dwindle-close-expander.log")"
+if ! grep -q '^unmapped$' "$CANOPY_RUNTIME_DIR/dwindle-close-expander.log"; then
+  echo "first revealed client did not unmap: $(< "$CANOPY_RUNTIME_DIR/dwindle-close-expander.log")"
   exit 1
 fi
 wait_for_count 6

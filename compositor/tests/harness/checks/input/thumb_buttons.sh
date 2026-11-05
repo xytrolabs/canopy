@@ -3,20 +3,20 @@
 # binds fire for both pairs.
 set -euo pipefail
 
-readonly POINTER="${UMBRIEL_POINTER_CLIENT:-./build-debug/tests/pointer-client}"
+readonly POINTER="${CANOPY_POINTER_CLIENT:-./build-debug/tests/pointer-client}"
 readonly BTN_SIDE=275
 readonly BTN_EXTRA=276
 readonly BTN_FORWARD=277
 readonly BTN_BACK=278
-readonly MARKS="$UMBRIEL_RUNTIME_DIR/thumb-buttons.log"
+readonly MARKS="$CANOPY_RUNTIME_DIR/thumb-buttons.log"
 
-cat >> "$UMBRIEL_CONFIG" <<EOF
+cat >> "$CANOPY_CONFIG" <<EOF
 
 [keybinds]
 "Mod+MouseBack" = "spawn echo back >> $MARKS"
 "Mod+MouseForward" = "spawn echo forward >> $MARKS"
 EOF
-"$UMBRIEL" msg config-reload > /dev/null
+"$CANOPY" msg config-reload > /dev/null
 
 for button in "$BTN_SIDE" "$BTN_EXTRA" "$BTN_BACK" "$BTN_FORWARD"; do
   "$POINTER" 1280 720 move 640 360 mod logo press "$button" release "$button" mod none

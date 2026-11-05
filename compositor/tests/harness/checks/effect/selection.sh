@@ -2,16 +2,16 @@
 # Stable owner-local pool assignments, first-map inspection and pixels, runtime
 # transitions, focus/title history, mapped lifetimes, and effect-only events.
 set -euo pipefail
-cat > "$UMBRIEL_RUNTIME_DIR/red.glsl" <<'GLSL'
+cat > "$CANOPY_RUNTIME_DIR/red.glsl" <<'GLSL'
 vec4 window(vec2 uv) { return vec4(1.0, 0.0, 0.0, 1.0); }
 GLSL
-cat > "$UMBRIEL_RUNTIME_DIR/green.glsl" <<'GLSL'
+cat > "$CANOPY_RUNTIME_DIR/green.glsl" <<'GLSL'
 vec4 window(vec2 uv) { return vec4(0.0, 1.0, 0.0, 1.0); }
 GLSL
-cat > "$UMBRIEL_RUNTIME_DIR/ring.glsl" <<'GLSL'
+cat > "$CANOPY_RUNTIME_DIR/ring.glsl" <<'GLSL'
 vec4 border(vec2 uv) { return vec4(1.0, 0.0, 0.0, 1.0); }
 GLSL
-cat >> "$UMBRIEL_CONFIG" <<'TOML'
+cat >> "$CANOPY_CONFIG" <<'TOML'
 
 [animation]
 enabled = false
@@ -72,8 +72,8 @@ window_effect = "focused"
 match.title = "^pool-changed$"
 window_effect = "red"
 TOML
-"$UMBRIEL" msg config-reload > /dev/null
-"$UMBRIEL" clock-freeze > /dev/null
+"$CANOPY" msg config-reload > /dev/null
+"$CANOPY" clock-freeze > /dev/null
 
 python3 - <<'PY'
 import json
@@ -82,12 +82,12 @@ import socket
 import subprocess
 import time
 
-umbriel = os.environ["UMBRIEL"]
-image = os.path.join(os.environ["UMBRIEL_RUNTIME_DIR"], "selection.png")
+canopy = os.environ["CANOPY"]
+image = os.path.join(os.environ["CANOPY_RUNTIME_DIR"], "selection.png")
 clients = []
 
 def run(*args):
-    return subprocess.check_output([umbriel, *args], text=True, timeout=10)
+    return subprocess.check_output([canopy, *args], text=True, timeout=10)
 
 def action(name, *words):
     run("msg", name, *words)
@@ -124,14 +124,14 @@ def pixels(label, identifier, color, border=False):
     subprocess.run(["grim", image], check=True, timeout=10)
     x = int(w["x"] + w["w"] / 2)
     y = int(w["y"] + w["h"] + 3 if border else w["y"] + w["h"] - 20)
-    values = subprocess.check_output([os.environ["UMBRIEL_PIXEL_PROBE"], image, "pixel", str(x), str(y)], text=True)
+    values = subprocess.check_output([os.environ["CANOPY_PIXEL_PROBE"], image, "pixel", str(x), str(y)], text=True)
     rgb = tuple(map(int, values.split()))
     target = {"red": (255, 0, 0), "green": (0, 255, 0), "blue": (0, 0, 255)}[color]
     if any(abs(value - wanted) > 20 for value, wanted in zip(rgb, target)):
         raise SystemExit(f"{label}: pixel {rgb}, expected {color}")
 
 sub = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
-sub.connect(os.environ["UMBRIEL_SOCKET"])
+sub.connect(os.environ["CANOPY_SOCKET"])
 sub.sendall(b'{"cmd":"subscribe","events":["windows"]}\n')
 sub.settimeout(10)
 stream = sub.makefile("rb")
@@ -150,8 +150,8 @@ def spawn(title, expected):
     env = dict(os.environ, FILL_COLOR="0xFF0000FF", REMAP_ON_STDIN="1")
     if title == "pool-history":
         env["TITLE_AFTER_MAP"] = "pool-changed"
-    log = open(os.path.join(os.environ["UMBRIEL_RUNTIME_DIR"], title + ".log"), "w")
-    child = subprocess.Popen([os.environ["UMBRIEL_UNMAP_CLIENT"], title, "260", "180"],
+    log = open(os.path.join(os.environ["CANOPY_RUNTIME_DIR"], title + ".log"), "w")
+    child = subprocess.Popen([os.environ["CANOPY_UNMAP_CLIENT"], title, "260", "180"],
                              env=env, stdin=subprocess.PIPE, stdout=log, stderr=log)
     clients.append(child)
     first = event_window(title)
@@ -179,7 +179,7 @@ pixels("first-border-pixels", three, "red", border=True)
 sub.close()
 stream.close()
 sub = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
-sub.connect(os.environ["UMBRIEL_SOCKET"])
+sub.connect(os.environ["CANOPY_SOCKET"])
 sub.sendall(b'{"cmd":"subscribe","events":["windows"]}\n')
 sub.settimeout(10)
 stream = sub.makefile("rb")
@@ -218,7 +218,7 @@ for rejection, (words, message) in enumerate([
     (["effect-window-cycle", "--window", one], "no pool to cycle"),
 ]):
     before = effects()
-    result = subprocess.run([umbriel, "msg", *words], capture_output=True, text=True, timeout=10)
+    result = subprocess.run([canopy, "msg", *words], capture_output=True, text=True, timeout=10)
     if result.returncode == 0 or message not in result.stderr:
         raise SystemExit(f"transaction-error-{rejection}: {' '.join(words)}: {result.returncode}, {result.stderr}")
     expect(f"transaction-state-{rejection}", effects(), before)
@@ -275,7 +275,7 @@ pixels("remap-pixels", one, "red")
 held("remap-holdings", [2, 1])
 # Keep the output physically asleep while layout changes, so no frame can
 # resolve a pending alone rule on behalf of the action or inspection request.
-with open(os.environ["UMBRIEL_CONFIG"], "a") as config:
+with open(os.environ["CANOPY_CONFIG"], "a") as config:
     config.write(r'''
 [effects.pool.inspection_alone]
 kind = "window"
@@ -325,7 +325,7 @@ pixels("shared-after-wake-pixels", inspect_one, "green")
 # Closing an animated overview can restore focus from an output-frame callback.
 # A window first focused there has no remembered pool member: selection must run
 # in its owner-local idle, with settle waiting for that selection and its frame.
-config_path = os.environ["UMBRIEL_CONFIG"]
+config_path = os.environ["CANOPY_CONFIG"]
 with open(config_path) as config:
     text = config.read().replace("[animation]\nenabled = false", "[animation]\nenabled = true", 1)
 with open(config_path, "w") as config:
@@ -360,8 +360,8 @@ action("config-reload")
 action("workspace-switch", "3")
 action("overview-open")
 run("clock-advance", "1000")
-log = open(os.path.join(os.environ["UMBRIEL_RUNTIME_DIR"], "inspect-focus.log"), "w")
-focus_client = subprocess.Popen([os.environ["UMBRIEL_UNMAP_CLIENT"], "inspect-focus", "260", "180"],
+log = open(os.path.join(os.environ["CANOPY_RUNTIME_DIR"], "inspect-focus.log"), "w")
+focus_client = subprocess.Popen([os.environ["CANOPY_UNMAP_CLIENT"], "inspect-focus", "260", "180"],
                                 env=dict(os.environ, FILL_COLOR="0xFF0000FF"), stdout=log, stderr=log)
 clients.append(focus_client)
 first = event_window("inspect-focus")

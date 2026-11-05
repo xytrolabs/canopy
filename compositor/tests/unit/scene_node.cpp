@@ -3,9 +3,9 @@
 
 #include <cstdint>
 
-using umbriel::SceneNode;
-using umbriel::sceneNodeFrom;
-using umbriel::SceneNodeKind;
+using canopy::SceneNode;
+using canopy::sceneNodeFrom;
+using canopy::SceneNodeKind;
 
 namespace {
 
@@ -35,16 +35,16 @@ namespace {
 
 } // namespace
 
-UMBRIEL_TEST(nullDataYieldsNull) { CHECK(sceneNodeFrom(nullptr) == nullptr); }
+CANOPY_TEST(nullDataYieldsNull) { CHECK(sceneNodeFrom(nullptr) == nullptr); }
 
-UMBRIEL_TEST(recoversATaggedNode) {
+CANOPY_TEST(recoversATaggedNode) {
   SceneNode node(SceneNodeKind::View);
   SceneNode* recovered = sceneNodeFrom(&node);
   CHECK(recovered == &node);
   CHECK(recovered != nullptr && recovered->kind == SceneNodeKind::View);
 }
 
-UMBRIEL_TEST(recoversThroughADerivedPointer) {
+CANOPY_TEST(recoversThroughADerivedPointer) {
   // The real call sites store a derived `this` and read it back as SceneNode*.
   TaggedNode layer(SceneNodeKind::LayerSurface);
   void* stored = &layer;
@@ -56,7 +56,7 @@ UMBRIEL_TEST(recoversThroughADerivedPointer) {
   CHECK(static_cast<TaggedNode*>(recovered)->payload == 42);
 }
 
-UMBRIEL_TEST(everyKindRoundTrips) {
+CANOPY_TEST(everyKindRoundTrips) {
   for (SceneNodeKind kind : {SceneNodeKind::View, SceneNodeKind::LayerSurface, SceneNodeKind::LockSurface}) {
     TaggedNode node(kind);
     SceneNode* recovered = sceneNodeFrom(&node);
@@ -65,14 +65,14 @@ UMBRIEL_TEST(everyKindRoundTrips) {
   }
 }
 
-UMBRIEL_TEST(foreignDataYieldsNullInsteadOfBeingReinterpreted) {
+CANOPY_TEST(foreignDataYieldsNullInsteadOfBeingReinterpreted) {
   // A non-SceneNode pointer must be rejected rather than cast to SceneNode*
   // and its `kind` read regardless of what it points at.
   ForeignData foreign;
   CHECK(sceneNodeFrom(&foreign) == nullptr);
 }
 
-UMBRIEL_TEST(magicIsTheFirstMemberSoTheGuardReadsIt) {
+CANOPY_TEST(magicIsTheFirstMemberSoTheGuardReadsIt) {
   // sceneNodeFrom reads `magic` through a possibly-foreign pointer, so it must
   // sit at offset 0 for the check to be meaningful.
   SceneNode node(SceneNodeKind::View);
@@ -80,7 +80,7 @@ UMBRIEL_TEST(magicIsTheFirstMemberSoTheGuardReadsIt) {
   CHECK_EQ(node.magic, SceneNode::kMagic);
 }
 
-UMBRIEL_TEST(sceneNodeDataRoundTripsThroughAPolymorphicDerivedClass) {
+CANOPY_TEST(sceneNodeDataRoundTripsThroughAPolymorphicDerivedClass) {
   // When the SceneNode subobject is not at offset 0 (a polymorphic base precedes it), storing a raw `this` would make
   // sceneNodeFrom read the vptr as `magic` and reject the node, breaking pointer hit-testing.
   TaggedPolymorphicNode node(SceneNodeKind::View);
@@ -88,7 +88,7 @@ UMBRIEL_TEST(sceneNodeDataRoundTripsThroughAPolymorphicDerivedClass) {
   // The premise: the object does not begin with its SceneNode subobject.
   CHECK(static_cast<void*>(&node) != static_cast<void*>(static_cast<SceneNode*>(&node)));
 
-  void* stored = umbriel::sceneNodeData(&node);
+  void* stored = canopy::sceneNodeData(&node);
   SceneNode* recovered = sceneNodeFrom(stored);
   CHECK(recovered != nullptr);
   CHECK(recovered != nullptr && recovered->kind == SceneNodeKind::View);
@@ -96,7 +96,7 @@ UMBRIEL_TEST(sceneNodeDataRoundTripsThroughAPolymorphicDerivedClass) {
   CHECK(static_cast<TaggedPolymorphicNode*>(recovered)->payload == 7);
 }
 
-UMBRIEL_TEST(storingTheRawDerivedPointerIsRejected) {
+CANOPY_TEST(storingTheRawDerivedPointerIsRejected) {
   // Documents why sceneNodeData exists: bypassing it does not round-trip, and
   // the sentinel turns that into a clean null rather than a misread object.
   TaggedPolymorphicNode node(SceneNodeKind::View);
@@ -104,10 +104,10 @@ UMBRIEL_TEST(storingTheRawDerivedPointerIsRejected) {
   CHECK(sceneNodeFrom(raw) == nullptr);
 }
 
-UMBRIEL_TEST(sceneNodeDataIsIdentityForASingleBase) {
+CANOPY_TEST(sceneNodeDataIsIdentityForASingleBase) {
   TaggedNode node(SceneNodeKind::LayerSurface);
-  CHECK(umbriel::sceneNodeData(&node) == static_cast<void*>(&node));
-  CHECK(sceneNodeFrom(umbriel::sceneNodeData(&node)) != nullptr);
+  CHECK(canopy::sceneNodeData(&node) == static_cast<void*>(&node));
+  CHECK(sceneNodeFrom(canopy::sceneNodeData(&node)) != nullptr);
 }
 
 int main() { return RUN_TESTS(); }

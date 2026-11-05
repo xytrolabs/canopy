@@ -9,8 +9,8 @@ set -euo pipefail
 readonly OUTPUT_W=1280
 readonly OUTPUT_H=720
 readonly BTN_LEFT=272
-readonly CLIENT="${UMBRIEL_UNMAP_CLIENT:-./build-debug/tests/unmap-client}"
-readonly POINTER="${UMBRIEL_POINTER_CLIENT:-./build-debug/tests/pointer-client}"
+readonly CLIENT="${CANOPY_UNMAP_CLIENT:-./build-debug/tests/unmap-client}"
+readonly POINTER="${CANOPY_POINTER_CLIENT:-./build-debug/tests/pointer-client}"
 readonly SCRATCHPAD=background
 readonly WS=scratchpad-background-workspace
 readonly SCRATCH=scratchpad-background-foreground
@@ -18,7 +18,7 @@ readonly SCRATCH=scratchpad-background-foreground
 readonly EMPTY_X=1200
 readonly EMPTY_Y=650
 
-cat >> "$UMBRIEL_CONFIG" <<'EOF'
+cat >> "$CANOPY_CONFIG" <<'EOF'
 
 [animation]
 enabled = false
@@ -41,9 +41,9 @@ default_floating = true
 default_floating_size_px = { width = 420, height = 260 }
 default_position = { x = 430, y = 230, anchor = "top_left" }
 EOF
-"$UMBRIEL" msg config-reload > /dev/null
+"$CANOPY" msg config-reload > /dev/null
 
-windows() { "$UMBRIEL" windows --json; }
+windows() { "$CANOPY" windows --json; }
 
 field_of() {
   windows | jq -r --arg title "$1" --arg field "$2" '.[] | select(.title == $title) | .[$field]'
@@ -71,19 +71,19 @@ wait_for_field() {
   return 1
 }
 
-"$CLIENT" "$WS" > "$UMBRIEL_RUNTIME_DIR/$WS.log" 2>&1 &
+"$CLIENT" "$WS" > "$CANOPY_RUNTIME_DIR/$WS.log" 2>&1 &
 wait_for_count 1
 wait_for_field "$WS" active true
 
-"$CLIENT" "$SCRATCH" 420 260 > "$UMBRIEL_RUNTIME_DIR/$SCRATCH.log" 2>&1 &
+"$CLIENT" "$SCRATCH" 420 260 > "$CANOPY_RUNTIME_DIR/$SCRATCH.log" 2>&1 &
 wait_for_count 2
 scratch_id=$(field_of "$SCRATCH" id)
-"$UMBRIEL" msg window-focus "$scratch_id" > /dev/null
-"$UMBRIEL" msg window-move-to-scratchpad "$SCRATCHPAD" > /dev/null
+"$CANOPY" msg window-focus "$scratch_id" > /dev/null
+"$CANOPY" msg window-move-to-scratchpad "$SCRATCHPAD" > /dev/null
 wait_for_field "$SCRATCH" scratchpad "$SCRATCHPAD"
-"$UMBRIEL" msg scratchpad-toggle "$SCRATCHPAD" > /dev/null
+"$CANOPY" msg scratchpad-toggle "$SCRATCHPAD" > /dev/null
 wait_for_field "$SCRATCH" active true
-"$UMBRIEL" msg window-focus "$scratch_id" > /dev/null
+"$CANOPY" msg window-focus "$scratch_id" > /dev/null
 wait_for_field "$SCRATCH" active true
 
 # Precondition for the explicit path: the scratchpad owns focus while the

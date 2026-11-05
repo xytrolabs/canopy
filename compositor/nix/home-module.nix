@@ -5,7 +5,7 @@
   ...
 }:
 let
-  cfg = config.programs.umbriel;
+  cfg = config.programs.canopy;
   tomlFormat = pkgs.formats.toml { };
 
   generateToml =
@@ -21,18 +21,18 @@ in
   imports = [
     (lib.mkRemovedOptionModule [
       "programs"
-      "umbriel"
+      "canopy"
       "validateConfig"
-    ] "Build-time validation was removed. Umbriel reports configuration errors at runtime.")
+    ] "Build-time validation was removed. Canopy reports configuration errors at runtime.")
   ];
 
-  options.programs.umbriel = {
-    enable = lib.mkEnableOption "Umbriel, a Wayland compositor built on wlroots";
+  options.programs.canopy = {
+    enable = lib.mkEnableOption "Canopy, a Wayland compositor built on wlroots";
 
     package = lib.mkOption {
       type = lib.types.nullOr lib.types.package;
       default = null;
-      description = "The umbriel package to install.";
+      description = "The canopy package to install.";
     };
 
     settings = lib.mkOption {
@@ -45,15 +45,15 @@ in
         ]);
       default = null;
       description = ''
-        Configuration written to {file}`$XDG_CONFIG_HOME/umbriel/config.toml`.
-        Leave null to use the configuration packaged with Umbriel.
+        Configuration written to {file}`$XDG_CONFIG_HOME/canopy/config.toml`.
+        Leave null to use the configuration packaged with Canopy.
 
         Can be written as:
           - A Nix attrset (converted to TOML via nixpkgs' tomlFormat)
           - A raw TOML string
           - A path to a `.toml` file
 
-        See {file}`examples/config.toml` in the Umbriel repository for every available option.
+        See {file}`examples/config.toml` in the Canopy repository for every available option.
       '';
       example = lib.literalExpression ''
         {
@@ -74,7 +74,7 @@ in
     home.packages = lib.optional (cfg.package != null) cfg.package;
 
     xdg.configFile = lib.mkIf (cfg.settings != null) {
-      "umbriel/config.toml".source = generateToml "umbriel-config.toml" cfg.settings;
+      "canopy/config.toml".source = generateToml "canopy-config.toml" cfg.settings;
     };
   };
 

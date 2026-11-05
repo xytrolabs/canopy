@@ -4,9 +4,9 @@
 # saved layout state, and obey follow/silent behavior without moving its peers.
 set -euo pipefail
 
-readonly CLIENT="${UMBRIEL_UNMAP_CLIENT:-./build-debug/tests/unmap-client}"
+readonly CLIENT="${CANOPY_UNMAP_CLIENT:-./build-debug/tests/unmap-client}"
 
-cat >> "$UMBRIEL_CONFIG" <<'EOF'
+cat >> "$CANOPY_CONFIG" <<'EOF'
 
 [animation]
 enabled = false
@@ -23,10 +23,10 @@ workspaces = ["ONE", "TWO", "THREE"]
 [output.HEADLESS-2]
 workspaces = ["RIGHT"]
 EOF
-"$UMBRIEL" msg config-reload > /dev/null
+"$CANOPY" msg config-reload > /dev/null
 
 field() {
-  "$UMBRIEL" windows --json | jq -r --arg title "$1" --arg key "$2" '.[] | select(.title == $title) | .[$key]'
+  "$CANOPY" windows --json | jq -r --arg title "$1" --arg key "$2" '.[] | select(.title == $title) | .[$key]'
 }
 
 wait_field() {
@@ -36,15 +36,15 @@ wait_field() {
     [[ $actual == "$3" ]] && return 0
     sleep 0.1
   done
-  echo "expected $1 $2=$3, got $actual: $("$UMBRIEL" windows --json)"
+  echo "expected $1 $2=$3, got $actual: $("$CANOPY" windows --json)"
   return 1
 }
 
 workspace_id() {
-  "$UMBRIEL" workspaces --json | jq -r --arg name "$1" '.[] | select(.name == $name) | .id'
+  "$CANOPY" workspaces --json | jq -r --arg name "$1" '.[] | select(.name == $name) | .id'
 }
 
-accepts() { "$UMBRIEL" msg "$@" > /dev/null; }
+accepts() { "$CANOPY" msg "$@" > /dev/null; }
 
 one=$(workspace_id ONE)
 two=$(workspace_id TWO)
@@ -52,9 +52,9 @@ three=$(workspace_id THREE)
 right=$(workspace_id RIGHT)
 
 accepts workspace-switch ONE --output HEADLESS-1
-"$CLIENT" scratch-move-anchor > "$UMBRIEL_RUNTIME_DIR/anchor.log" 2>&1 &
+"$CLIENT" scratch-move-anchor > "$CANOPY_RUNTIME_DIR/anchor.log" 2>&1 &
 wait_field scratch-move-anchor active true
-"$CLIENT" scratch-move-member > "$UMBRIEL_RUNTIME_DIR/member.log" 2>&1 &
+"$CLIENT" scratch-move-member > "$CANOPY_RUNTIME_DIR/member.log" 2>&1 &
 wait_field scratch-move-member active true
 member=$(field scratch-move-member id)
 
@@ -82,7 +82,7 @@ check_move() {
   wait_field scratch-move-member active "$follow"
   if [[ $follow == false ]]; then
     wait_field scratch-move-anchor active true
-    [[ $("$UMBRIEL" workspaces --json | jq -r '.[] | select(.output == "HEADLESS-1" and .active) | .id') == "$one" ]]
+    [[ $("$CANOPY" workspaces --json | jq -r '.[] | select(.output == "HEADLESS-1" and .active) | .id') == "$one" ]]
   fi
 }
 
@@ -117,12 +117,12 @@ for floating in false true; do
   wait_field scratch-move-member scratchpad ""
   wait_field scratch-move-member floating "$floating"
   wait_field scratch-move-member active false
-  [[ $("$UMBRIEL" workspaces --json | jq -r '.[] | select(.output == "HEADLESS-1" and .active) | .id') == "$three" ]]
+  [[ $("$CANOPY" workspaces --json | jq -r '.[] | select(.output == "HEADLESS-1" and .active) | .id') == "$three" ]]
 done
 
 # A rejected selector must leave scratchpad membership intact.
 prepare false
-if "$UMBRIEL" msg window-move-to-workspace MISSING > "$UMBRIEL_RUNTIME_DIR/rejected.log" 2>&1; then
+if "$CANOPY" msg window-move-to-workspace MISSING > "$CANOPY_RUNTIME_DIR/rejected.log" 2>&1; then
   echo "an unknown workspace was accepted"
   exit 1
 fi
@@ -132,7 +132,7 @@ wait_field scratch-move-member active true
 
 # Returning to the currently active workspace still removes membership. A peer
 # stays in the pad, and later toggles cannot pull the moved member back in.
-"$CLIENT" scratch-move-peer > "$UMBRIEL_RUNTIME_DIR/peer.log" 2>&1 &
+"$CLIENT" scratch-move-peer > "$CANOPY_RUNTIME_DIR/peer.log" 2>&1 &
 wait_field scratch-move-peer active true
 accepts window-move-to-scratchpad
 wait_field scratch-move-peer scratchpad default

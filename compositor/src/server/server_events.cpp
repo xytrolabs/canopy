@@ -45,7 +45,7 @@
 #include <utility>
 #include <vector>
 
-namespace umbriel {
+namespace canopy {
 
   namespace {
     constexpr Logger kLog("server");
@@ -970,7 +970,7 @@ namespace umbriel {
     if (result.success) {
       const bool systemKeymapChanged = refreshSystemKeymap();
       if (result.change.drm) {
-        kLog.warn("DRM configuration changed; restart Umbriel to apply it");
+        kLog.warn("DRM configuration changed; restart Canopy to apply it");
       }
       if (result.change.keybinds) {
         m_bindCooldowns.clear();
@@ -4290,9 +4290,9 @@ namespace umbriel {
     }
 
     if (Output* output = view->currentOutput()) {
-      umbrielfx_scene_capture_source_set_scale(view->m_captureSource, output->wlr()->scale);
+      canopyfx_scene_capture_source_set_scale(view->m_captureSource, output->wlr()->scale);
     }
 
     wlr_ext_foreign_toplevel_image_capture_source_manager_v1_request_accept(request, view->m_captureSource);
   }
-} // namespace umbriel
+} // namespace canopy

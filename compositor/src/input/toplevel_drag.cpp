@@ -13,7 +13,7 @@
 #include <optional>
 #include <stdexcept>
 
-namespace umbriel {
+namespace canopy {
   namespace {
     // wlroots 0.20's wl_data_source resource stores wlr_client_data_source,
     // whose first member is wlr_data_source. Keep this prefix assumption in
@@ -279,4 +279,4 @@ namespace umbriel {
       }
     }
   }
-} // namespace umbriel
+} // namespace canopy

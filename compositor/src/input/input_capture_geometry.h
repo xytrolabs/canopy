@@ -4,7 +4,7 @@
 #include <optional>
 #include <span>
 
-namespace umbriel {
+namespace canopy {
 
   struct InputCaptureZone {
     int32_t x = 0;
@@ -36,4 +36,4 @@ namespace umbriel {
       double dx, double dy
   );
 
-} // namespace umbriel
+} // namespace canopy

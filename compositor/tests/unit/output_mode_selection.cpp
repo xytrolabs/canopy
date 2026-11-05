@@ -12,13 +12,13 @@ extern "C" {
 #undef static
 }
 
-using umbriel::colorChangeNeedsModeset;
-using umbriel::liveModeMatches;
-using umbriel::outputCanAutoEnable;
-using umbriel::outputEnableNeedsStaging;
-using umbriel::OutputMode;
-using umbriel::preferredFallbackMode;
-using umbriel::selectOutputMode;
+using canopy::colorChangeNeedsModeset;
+using canopy::liveModeMatches;
+using canopy::outputCanAutoEnable;
+using canopy::outputEnableNeedsStaging;
+using canopy::OutputMode;
+using canopy::preferredFallbackMode;
+using canopy::selectOutputMode;
 
 namespace {
   wlr_output_mode outputMode(int width, int height, int refresh, bool preferred = false) {
@@ -35,7 +35,7 @@ namespace {
   void addMode(wlr_output& output, wlr_output_mode& mode) { wl_list_insert(output.modes.prev, &mode.link); }
 } // namespace
 
-UMBRIEL_TEST(configuredResolutionSelectsClosestRefresh) {
+CANOPY_TEST(configuredResolutionSelectsClosestRefresh) {
   wlr_output output{};
   wl_list_init(&output.modes);
   wlr_output_mode lower = outputMode(5120, 1440, 119998, true);
@@ -49,7 +49,7 @@ UMBRIEL_TEST(configuredResolutionSelectsClosestRefresh) {
   CHECK_EQ(selected->refresh, 143987);
 }
 
-UMBRIEL_TEST(unidentifiedOutputWithoutPreferredModeNeedsExplicitConfiguration) {
+CANOPY_TEST(unidentifiedOutputWithoutPreferredModeNeedsExplicitConfiguration) {
   wlr_output output{};
   wl_list_init(&output.modes);
   wlr_output_mode stale = outputMode(1920, 1080, 59994);
@@ -58,7 +58,7 @@ UMBRIEL_TEST(unidentifiedOutputWithoutPreferredModeNeedsExplicitConfiguration) {
   CHECK(!outputCanAutoEnable(&output));
 }
 
-UMBRIEL_TEST(preferredModeMakesUnconfiguredOutputSafeToEnable) {
+CANOPY_TEST(preferredModeMakesUnconfiguredOutputSafeToEnable) {
   wlr_output output{};
   wl_list_init(&output.modes);
   wlr_output_mode preferred = outputMode(1920, 1080, 60150, true);
@@ -67,7 +67,7 @@ UMBRIEL_TEST(preferredModeMakesUnconfiguredOutputSafeToEnable) {
   CHECK(outputCanAutoEnable(&output));
 }
 
-UMBRIEL_TEST(edidIdentityMakesUnconfiguredOutputSafeWithoutPreferredMode) {
+CANOPY_TEST(edidIdentityMakesUnconfiguredOutputSafeWithoutPreferredMode) {
   wlr_output output{};
   wl_list_init(&output.modes);
   wlr_output_mode mode = outputMode(1920, 1080, 60000);
@@ -78,14 +78,14 @@ UMBRIEL_TEST(edidIdentityMakesUnconfiguredOutputSafeWithoutPreferredMode) {
   CHECK(outputCanAutoEnable(&output));
 }
 
-UMBRIEL_TEST(backendManagedOutputWithoutModesRemainsAutoEnabled) {
+CANOPY_TEST(backendManagedOutputWithoutModesRemainsAutoEnabled) {
   wlr_output output{};
   wl_list_init(&output.modes);
 
   CHECK(outputCanAutoEnable(&output));
 }
 
-UMBRIEL_TEST(configuredResolutionWithoutRefreshPrefersMarkedMode) {
+CANOPY_TEST(configuredResolutionWithoutRefreshPrefersMarkedMode) {
   wlr_output output{};
   wl_list_init(&output.modes);
   wlr_output_mode fastest = outputMode(2560, 1440, 165000);
@@ -99,7 +99,7 @@ UMBRIEL_TEST(configuredResolutionWithoutRefreshPrefersMarkedMode) {
   CHECK_EQ(selected->refresh, 59951);
 }
 
-UMBRIEL_TEST(configuredResolutionWithoutRefreshUsesHighestUnmarkedMode) {
+CANOPY_TEST(configuredResolutionWithoutRefreshUsesHighestUnmarkedMode) {
   wlr_output output{};
   wl_list_init(&output.modes);
   wlr_output_mode lower = outputMode(2560, 1440, 59951);
@@ -114,7 +114,7 @@ UMBRIEL_TEST(configuredResolutionWithoutRefreshUsesHighestUnmarkedMode) {
 }
 
 // An unadvertised resolution stays a custom mode: the caller only leaves it behind once the commit fails.
-UMBRIEL_TEST(unadvertisedResolutionSelectsNoAdvertisedMode) {
+CANOPY_TEST(unadvertisedResolutionSelectsNoAdvertisedMode) {
   wlr_output output{};
   wl_list_init(&output.modes);
   wlr_output_mode preferred = outputMode(2560, 1440, 119998, true);
@@ -123,14 +123,14 @@ UMBRIEL_TEST(unadvertisedResolutionSelectsNoAdvertisedMode) {
   CHECK(selectOutputMode(&output, OutputMode{5120, 1440, 143987}) == nullptr);
 }
 
-UMBRIEL_TEST(outputWithoutAdvertisedModesSelectsNoAdvertisedMode) {
+CANOPY_TEST(outputWithoutAdvertisedModesSelectsNoAdvertisedMode) {
   wlr_output output{};
   wl_list_init(&output.modes);
 
   CHECK(selectOutputMode(&output, OutputMode{1280, 720, 0}) == nullptr);
 }
 
-UMBRIEL_TEST(failedCustomModeFallsBackToPreferredMode) {
+CANOPY_TEST(failedCustomModeFallsBackToPreferredMode) {
   wlr_output output{};
   wl_list_init(&output.modes);
   wlr_output_mode preferred = outputMode(2560, 1440, 119998, true);
@@ -144,7 +144,7 @@ UMBRIEL_TEST(failedCustomModeFallsBackToPreferredMode) {
   CHECK_EQ(fallback->refresh, 119998);
 }
 
-UMBRIEL_TEST(failedAdvertisedModeFallsBackToPreferredMode) {
+CANOPY_TEST(failedAdvertisedModeFallsBackToPreferredMode) {
   wlr_output output{};
   wl_list_init(&output.modes);
   wlr_output_mode preferred = outputMode(2560, 1440, 119998, true);
@@ -159,7 +159,7 @@ UMBRIEL_TEST(failedAdvertisedModeFallsBackToPreferredMode) {
 }
 
 // Retrying the mode that just failed would only fail again.
-UMBRIEL_TEST(failedPreferredModeHasNoFallback) {
+CANOPY_TEST(failedPreferredModeHasNoFallback) {
   wlr_output output{};
   wl_list_init(&output.modes);
   wlr_output_mode preferred = outputMode(2560, 1440, 119998, true);
@@ -168,14 +168,14 @@ UMBRIEL_TEST(failedPreferredModeHasNoFallback) {
   CHECK(preferredFallbackMode(&output, &preferred) == nullptr);
 }
 
-UMBRIEL_TEST(outputWithoutAdvertisedModesHasNoFallback) {
+CANOPY_TEST(outputWithoutAdvertisedModesHasNoFallback) {
   wlr_output output{};
   wl_list_init(&output.modes);
 
   CHECK(preferredFallbackMode(&output, nullptr) == nullptr);
 }
 
-UMBRIEL_TEST(litOutputKeepsTheLiveModeItWouldStageAgain) {
+CANOPY_TEST(litOutputKeepsTheLiveModeItWouldStageAgain) {
   wlr_output output{};
   wlr_output_mode live = outputMode(2560, 1440, 143987, true);
   output.enabled = true;
@@ -184,7 +184,7 @@ UMBRIEL_TEST(litOutputKeepsTheLiveModeItWouldStageAgain) {
   CHECK(liveModeMatches(output, &live));
 }
 
-UMBRIEL_TEST(litOutputModesetsToAnotherResolution) {
+CANOPY_TEST(litOutputModesetsToAnotherResolution) {
   wlr_output output{};
   wlr_output_mode live = outputMode(1920, 1080, 60000);
   wlr_output_mode wanted = outputMode(2560, 1440, 60000, true);
@@ -194,7 +194,7 @@ UMBRIEL_TEST(litOutputModesetsToAnotherResolution) {
   CHECK(!liveModeMatches(output, &wanted));
 }
 
-UMBRIEL_TEST(litOutputModesetsToAnotherRefreshAtTheSameResolution) {
+CANOPY_TEST(litOutputModesetsToAnotherRefreshAtTheSameResolution) {
   wlr_output output{};
   wlr_output_mode live = outputMode(2560, 1440, 59951);
   wlr_output_mode wanted = outputMode(2560, 1440, 143987, true);
@@ -204,7 +204,7 @@ UMBRIEL_TEST(litOutputModesetsToAnotherRefreshAtTheSameResolution) {
   CHECK(!liveModeMatches(output, &wanted));
 }
 
-UMBRIEL_TEST(unlitOutputModesetsEvenToItsLastMode) {
+CANOPY_TEST(unlitOutputModesetsEvenToItsLastMode) {
   wlr_output output{};
   wlr_output_mode last = outputMode(2560, 1440, 143987, true);
   output.enabled = false;
@@ -213,35 +213,35 @@ UMBRIEL_TEST(unlitOutputModesetsEvenToItsLastMode) {
   CHECK(!liveModeMatches(output, &last));
 }
 
-UMBRIEL_TEST(litOutputThatStaysEnabledIsNotEnabledAgain) {
+CANOPY_TEST(litOutputThatStaysEnabledIsNotEnabledAgain) {
   wlr_output output{};
   output.enabled = true;
 
   CHECK(!outputEnableNeedsStaging(output, true));
 }
 
-UMBRIEL_TEST(unlitOutputIsEnabled) {
+CANOPY_TEST(unlitOutputIsEnabled) {
   wlr_output output{};
   output.enabled = false;
 
   CHECK(outputEnableNeedsStaging(output, true));
 }
 
-UMBRIEL_TEST(litOutputIsDisabled) {
+CANOPY_TEST(litOutputIsDisabled) {
   wlr_output output{};
   output.enabled = true;
 
   CHECK(outputEnableNeedsStaging(output, false));
 }
 
-UMBRIEL_TEST(tenBitFormatOnAnEightBitOutputNeedsAModeset) {
+CANOPY_TEST(tenBitFormatOnAnEightBitOutputNeedsAModeset) {
   wlr_output output{};
   output.render_format = DRM_FORMAT_XRGB8888;
 
   CHECK(colorChangeNeedsModeset(output, DRM_FORMAT_XRGB2101010, false));
 }
 
-UMBRIEL_TEST(enablingHdrAtTheSameFormatNeedsAModeset) {
+CANOPY_TEST(enablingHdrAtTheSameFormatNeedsAModeset) {
   wlr_output output{};
   output.render_format = DRM_FORMAT_XBGR2101010;
   output.image_description = nullptr;
@@ -249,7 +249,7 @@ UMBRIEL_TEST(enablingHdrAtTheSameFormatNeedsAModeset) {
   CHECK(colorChangeNeedsModeset(output, DRM_FORMAT_XBGR2101010, true));
 }
 
-UMBRIEL_TEST(leavingHdrAtTheSameFormatNeedsAModeset) {
+CANOPY_TEST(leavingHdrAtTheSameFormatNeedsAModeset) {
   wlr_output output{};
   wlr_output_image_description hdr{};
   output.render_format = DRM_FORMAT_XBGR2101010;
@@ -258,7 +258,7 @@ UMBRIEL_TEST(leavingHdrAtTheSameFormatNeedsAModeset) {
   CHECK(colorChangeNeedsModeset(output, DRM_FORMAT_XBGR2101010, false));
 }
 
-UMBRIEL_TEST(sdrOutputKeepingItsFormatNeedsNoModeset) {
+CANOPY_TEST(sdrOutputKeepingItsFormatNeedsNoModeset) {
   wlr_output output{};
   output.render_format = DRM_FORMAT_XRGB8888;
   output.image_description = nullptr;
@@ -266,7 +266,7 @@ UMBRIEL_TEST(sdrOutputKeepingItsFormatNeedsNoModeset) {
   CHECK(!colorChangeNeedsModeset(output, DRM_FORMAT_XRGB8888, false));
 }
 
-UMBRIEL_TEST(hdrOutputKeepingHdrAndItsFormatNeedsNoModeset) {
+CANOPY_TEST(hdrOutputKeepingHdrAndItsFormatNeedsNoModeset) {
   wlr_output output{};
   wlr_output_image_description hdr{};
   output.render_format = DRM_FORMAT_XBGR2101010;

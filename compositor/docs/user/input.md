@@ -18,13 +18,13 @@ Edge and corner drag placement is configured with [`layout.stacking.drop_zones`]
 
 Dragging a window out of a region placement or maximize restores its normal size under the pointer, keeping the title bar and content aligned while the application redraws. Placing it on another monitor maps the normal restore position to that monitor. Shared monitor edges require a 150 ms dwell before offering a drop zone, so dragging straight across monitors remains possible. Tiled, pinned, scratchpad, overview, data-device, and toplevel-transfer drags do not use these zones. The explicit `window-set-region <region>` and `window-clear-region` actions work independently of the pointer setting within stacking. See [Actions](actions.md).
 
-`client_window_drag = false` ignores move requests from applications, such as dragging a client-side title bar or the empty tab strip of Chromium, Firefox, or Electron apps. Ordinary window moves then use Mod+drag, keybinds, or an enabled [Umbriel title bar](appearance.md#title-bar). Resizing from client-side borders and tab tear-off operations using `xdg-toplevel-drag-v1` are unaffected.
+`client_window_drag = false` ignores move requests from applications, such as dragging a client-side title bar or the empty tab strip of Chromium, Firefox, or Electron apps. Ordinary window moves then use Mod+drag, keybinds, or an enabled [Canopy title bar](appearance.md#title-bar). Resizing from client-side borders and tab tear-off operations using `xdg-toplevel-drag-v1` are unaffected.
 
-When the title bar is shown by `[appearance.title_bar] mode` or a window rule, dragging empty server-side title bar space moves a window without a modifier. Double-click it to maximize or restore. Floating windows resize by dragging the frame's edges or corners with the left button without a modifier, whether or not the Umbriel title bar is shown. This also works for individually floated windows in tiling layouts. Tiled windows use Mod+right-drag for compositor resizing. Application content and client-side resize controls keep their normal pointer behavior. These compositor-owned interactions work with `client_window_drag = false`.
+When the title bar is shown by `[appearance.title_bar] mode` or a window rule, dragging empty server-side title bar space moves a window without a modifier. Double-click it to maximize or restore. Floating windows resize by dragging the frame's edges or corners with the left button without a modifier, whether or not the Canopy title bar is shown. This also works for individually floated windows in tiling layouts. Tiled windows use Mod+right-drag for compositor resizing. Application content and client-side resize controls keep their normal pointer behavior. These compositor-owned interactions work with `client_window_drag = false`.
 
-Title bar presses keep the normal cursor until the pointer crosses a threshold of 10 logical pixels from its position at the original button press. Umbriel then starts dragging and switches to the grabbing cursor. Movement before an application's move request counts toward that threshold. If the pointer has already crossed it, dragging starts immediately without requiring another motion event or another threshold.
+Title bar presses keep the normal cursor until the pointer crosses a threshold of 10 logical pixels from its position at the original button press. Canopy then starts dragging and switches to the grabbing cursor. Movement before an application's move request counts toward that threshold. If the pointer has already crossed it, dragging starts immediately without requiring another motion event or another threshold.
 
-In tiled layouts, pressing a client-side or Umbriel title bar focuses and reveals the window while keeping it in the layout. It detaches only after the pointer crosses the drag threshold. Holding or releasing a stationary press preserves the spacing between windows, including while applications repaint.
+In tiled layouts, pressing a client-side or Canopy title bar focuses and reveals the window while keeping it in the layout. It detaches only after the pointer crosses the drag threshold. Holding or releasing a stationary press preserves the spacing between windows, including while applications repaint.
 
 Dropping a floating window settles it into the usable area with the move animation: however far out of frame it was dragged, at release it glides back until at least a quarter of the window (10 to 75 logical pixels) is visible. Nothing else moves a floating window that is already inside that margin, including focus changes.
 
@@ -49,11 +49,11 @@ The state changes when the window is dropped. Unsupported transitions, such as p
 
 ### Detached tabs and panels
 
-Umbriel supports `xdg-toplevel-drag-v1` for native Wayland applications that implement it, including Chromium-based browsers. During a pointer drag, a detached window follows the pointer above ordinary windows and stays outside the tiling layout. Windows underneath it can receive the drop, allowing the application to merge a tab or dock a panel. If the application keeps the detached window after the drop, Umbriel places it using normal tiled or floating window-drag behavior. No additional configuration is needed.
+Canopy supports `xdg-toplevel-drag-v1` for native Wayland applications that implement it, including Chromium-based browsers. During a pointer drag, a detached window follows the pointer above ordinary windows and stays outside the tiling layout. Windows underneath it can receive the drop, allowing the application to merge a tab or dock a panel. If the application keeps the detached window after the drop, Canopy places it using normal tiled or floating window-drag behavior. No additional configuration is needed.
 
 ### Input capture
 
-The InputCapture portal supports approved keyboard and pointer sharing through `xdg-desktop-portal-umbriel`. It provides screen-edge activation, keyboard events and modifiers, pointer motion, buttons, and scrolling. Press **Ctrl+Alt+Escape** to restore local control. Applications can request optional remembered approval through restore tokens. Clipboard sharing, touch, tablet, and gesture capture are not supported. See [Input capture](security.md#input-capture) for the complete support table and permission behavior.
+The InputCapture portal supports approved keyboard and pointer sharing through `xdg-desktop-portal-canopy`. It provides screen-edge activation, keyboard events and modifiers, pointer motion, buttons, and scrolling. Press **Ctrl+Alt+Escape** to restore local control. Applications can request optional remembered approval through restore tokens. Clipboard sharing, touch, tablet, and gesture capture are not supported. See [Input capture](security.md#input-capture) for the complete support table and permission behavior.
 
 ### Keyboard
 
@@ -86,9 +86,9 @@ options = "grp:alt_shift_toggle"
 
 `options` accepts XKB options such as `caps:escape` or `compose:ralt`. Invalid layouts, variants, and models are reported in the log and fall back to the system default. Run `xkbcli list` to inspect available values.
 
-When `[input.keyboard]` sets none of `layout`, `variant`, `options`, and `model`, Umbriel uses the X11 keymap configured with `localectl set-x11-keymap`, read from systemd-localed at startup and on every config reload. Run `umbriel msg config-reload` to apply a keymap changed with `localectl`. Without systemd-localed, the `XKB_DEFAULT_*` environment variables apply, then `us`. A `[[input.device]]` rule that sets any of these keys uses only its own and `[input.keyboard]`'s values.
+When `[input.keyboard]` sets none of `layout`, `variant`, `options`, and `model`, Canopy uses the X11 keymap configured with `localectl set-x11-keymap`, read from systemd-localed at startup and on every config reload. Run `canopywc msg config-reload` to apply a keymap changed with `localectl`. Without systemd-localed, the `XKB_DEFAULT_*` environment variables apply, then `us`. A `[[input.device]]` rule that sets any of these keys uses only its own and `[input.keyboard]`'s values.
 
-Run `umbriel keyboard-layouts` to list the configured layouts. The active one is prefixed with `*`.
+Run `canopy keyboard-layouts` to list the configured layouts. The active one is prefixed with `*`.
 
 #### Layout switching
 
@@ -99,9 +99,9 @@ Bind `keyboard-layout-next` to cycle configured physical keyboard layouts:
 "Mod+Shift+K" = "keyboard-layout-next"
 ```
 
-`umbriel msg keyboard-layout-next` provides the same action for scripts. Physical keyboards that provide the selected layout stay synchronized. Virtual keyboards retain their application-provided keymap.
+`canopywc msg keyboard-layout-next` provides the same action for scripts. Physical keyboards that provide the selected layout stay synchronized. Virtual keyboards retain their application-provided keymap.
 
-When an input method removes its virtual keyboard, Umbriel restores the keyboard that supplied the input. Held shortcut modifiers stay active until they are released, even when another connected keyboard is idle.
+When an input method removes its virtual keyboard, Canopy restores the keyboard that supplied the input. Held shortcut modifiers stay active until they are released, even when another connected keyboard is idle.
 
 Physical keyboards share lock state, including uinput keyboards without LED feedback, such as a screen recorder's global-hotkey helper or a mouse's auxiliary keyboard interface. Toggling a lock on one device updates the others before they process further input. Ordinary keys from another device leave NumLock, CapsLock, and ScrollLock unchanged, and their LEDs reflect the shared state.
 
@@ -334,12 +334,12 @@ When a dialog has focus, motion within the parent window beneath the pointer kee
 
 While a client holds a pointer or keyboard grab, such as an open tray menu, hovering a window or crossing outputs preserves that grab and its keyboard focus. An outside click or explicit focus action can still dismiss the menu.
 
-X11 windows that declare `Input=False` without `WM_TAKE_FOCUS`, including Steam's on-screen keyboard, receive pointer input without taking keyboard focus. Hovering or clicking the keyboard leaves typing directed at the previously focused window. These windows are also skipped when Umbriel chooses replacement focus after a window closes.
+X11 windows that declare `Input=False` without `WM_TAKE_FOCUS`, including Steam's on-screen keyboard, receive pointer input without taking keyboard focus. Hovering or clicking the keyboard leaves typing directed at the previously focused window. These windows are also skipped when Canopy chooses replacement focus after a window closes.
 
 X11 windows marked `_NET_WM_WINDOW_TYPE_NOTIFICATION` do not take keyboard focus, regardless of their input hints or override-redirect flag. An existing popup that becomes a notification releases keyboard focus back to the active window.
 
-`follows_mouse_max_scroll` limits how far Umbriel may scroll a layout to reveal that window, measured in viewport widths. `0.0` allows only fully visible windows. Omit the key for no limit.
+`follows_mouse_max_scroll` limits how far Canopy may scroll a layout to reveal that window, measured in viewport widths. `0.0` allows only fully visible windows. Omit the key for no limit.
 
 ### Controller desktop input
 
-Steam's desktop controller mappings can control native Wayland windows through Umbriel's X11 input emulation. Umbriel asks for permission on the first request and remembers the decision for the current session. See [X11 desktop input](security.md#x11-desktop-input) for consent and lock-screen behavior.
+Steam's desktop controller mappings can control native Wayland windows through Canopy's X11 input emulation. Canopy asks for permission on the first request and remembers the decision for the current session. See [X11 desktop input](security.md#x11-desktop-input) for consent and lock-screen behavior.

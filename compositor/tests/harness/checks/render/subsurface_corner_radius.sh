@@ -4,9 +4,9 @@
 # so a pixel just outside the corner arc reports which of the three the compositor drew.
 set -euo pipefail
 
-readonly CLIENT="${UMBRIEL_SUBSURFACE_CLIENT:-./build-debug/tests/subsurface-client}"
-readonly CLIENT_LOG="$UMBRIEL_RUNTIME_DIR/subsurface-client.log"
-readonly SCREENSHOT="$UMBRIEL_RUNTIME_DIR/subsurface-corner-radius.png"
+readonly CLIENT="${CANOPY_SUBSURFACE_CLIENT:-./build-debug/tests/subsurface-client}"
+readonly CLIENT_LOG="$CANOPY_RUNTIME_DIR/subsurface-client.log"
+readonly SCREENSHOT="$CANOPY_RUNTIME_DIR/subsurface-corner-radius.png"
 readonly RADIUS=64
 
 if [[ ! -x $CLIENT ]]; then
@@ -14,7 +14,7 @@ if [[ ! -x $CLIENT ]]; then
   exit 1
 fi
 
-cat >> "$UMBRIEL_CONFIG" <<EOF
+cat >> "$CANOPY_CONFIG" <<EOF
 
 [animation]
 duration_ms = 1
@@ -28,7 +28,7 @@ border_width = 0
 outer_border_width = 0
 corner_radius = $RADIUS
 EOF
-"$UMBRIEL" msg config-reload > /dev/null
+"$CANOPY" msg config-reload > /dev/null
 
 "$CLIENT" "subsurface-radius" > "$CLIENT_LOG" 2>&1 &
 
@@ -43,7 +43,7 @@ fi
 
 # The layout box, not an assumed geometry: whatever else is mapped, the reported box is where this window is drawn.
 window_box() {
-  "$UMBRIEL" windows --json | jq -r '.[] | select(.title == "subsurface-radius") | "\(.x) \(.y) \(.w) \(.h)"'
+  "$CANOPY" windows --json | jq -r '.[] | select(.title == "subsurface-radius") | "\(.x) \(.y) \(.w) \(.h)"'
 }
 box=
 for _ in $(seq 60); do
@@ -56,14 +56,14 @@ if [[ -z $box ]]; then
   exit 1
 fi
 # Sample the box the layout settled on, after the (1 ms) open animation has run.
-"$UMBRIEL" settle
+"$CANOPY" settle
 read -r win_x win_y win_w win_h <<< "$(window_box)"
 grim "$SCREENSHOT"
 
 # One sample reports green and blue at once: green is the compositor backdrop, blue is the client's subsurface.
 sample() {
   local green blue
-  read -r _ green blue < <("$UMBRIEL_PIXEL_PROBE" "$SCREENSHOT" pixel "$1" "$2")
+  read -r _ green blue < <("$CANOPY_PIXEL_PROBE" "$SCREENSHOT" pixel "$1" "$2")
   echo "$green $blue"
 }
 

@@ -30,7 +30,7 @@ namespace {
 
   class PhysicalInput {
   public:
-    explicit PhysicalInput(umbriel::Server& server) : m_server(server) {
+    explicit PhysicalInput(canopy::Server& server) : m_server(server) {
       wlr_keyboard_init(&m_keyboard, &kKeyboardImpl, "capture test physical keyboard");
       wl_signal_emit_mutable(&server.backend()->events.new_input, &m_keyboard.base);
       wlr_pointer_init(&m_pointer, &kPointerImpl, "capture test physical pointer");
@@ -179,7 +179,7 @@ namespace {
     }
     void frame() { wl_signal_emit_mutable(&m_pointer.events.frame, &m_pointer); }
 
-    umbriel::Server& m_server;
+    canopy::Server& m_server;
     wlr_keyboard m_keyboard{};
     wlr_pointer m_pointer{};
     std::string m_pending;
@@ -195,8 +195,8 @@ int main(int argc, char** argv) {
   }
   setvbuf(stdout, nullptr, _IOLBF, 0);
   try {
-    umbriel::loadConfig(argv[1]);
-    umbriel::Server server;
+    canopy::loadConfig(argv[1]);
+    canopy::Server server;
     if (!server.start())
       return 1;
     PhysicalInput input(server);
@@ -208,7 +208,7 @@ int main(int argc, char** argv) {
     );
     if (source == nullptr)
       return 1;
-    std::println("ready display={} socket={}", std::getenv("WAYLAND_DISPLAY"), std::getenv("UMBRIEL_SOCKET"));
+    std::println("ready display={} socket={}", std::getenv("WAYLAND_DISPLAY"), std::getenv("CANOPY_SOCKET"));
     server.run();
     wl_event_source_remove(source);
     return input.failed() ? 1 : 0;

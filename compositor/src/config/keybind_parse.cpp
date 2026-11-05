@@ -20,7 +20,7 @@ extern "C" {
 #include <system_error>
 #include <utility>
 
-namespace umbriel {
+namespace canopy {
 
   namespace {
 
@@ -1188,4 +1188,4 @@ namespace umbriel {
     return keybinds;
   }
 
-} // namespace umbriel
+} // namespace canopy

@@ -17,17 +17,17 @@
 #include <variant>
 #include <vector>
 
-using umbriel::ConfigDiagnostic;
-using umbriel::ConfigStore;
-using umbriel::ContentType;
-using umbriel::HdrMode;
-using umbriel::LayoutMode;
-using umbriel::ModifierKey;
-using umbriel::ModRightDoubleClick;
-using umbriel::SdrTransfer;
-using umbriel::TrackLayout;
-using umbriel::VrrMode;
-using umbriel::WindowDragToggle;
+using canopy::ConfigDiagnostic;
+using canopy::ConfigStore;
+using canopy::ContentType;
+using canopy::HdrMode;
+using canopy::LayoutMode;
+using canopy::ModifierKey;
+using canopy::ModRightDoubleClick;
+using canopy::SdrTransfer;
+using canopy::TrackLayout;
+using canopy::VrrMode;
+using canopy::WindowDragToggle;
 
 namespace {
   bool containsDiagnostic(const ConfigStore& store, const std::string& text) {
@@ -40,7 +40,7 @@ namespace {
   public:
     TempConfig()
         : m_path(
-              std::filesystem::temp_directory_path() / ("umbriel-config-load-" + std::to_string(getpid()) + ".toml")
+              std::filesystem::temp_directory_path() / ("canopy-config-load-" + std::to_string(getpid()) + ".toml")
           ),
           m_includePath(m_path.string() + ".include") {
       std::filesystem::remove(m_includePath);
@@ -74,7 +74,7 @@ namespace {
   class TempConfigTree {
   public:
     TempConfigTree()
-        : m_path(std::filesystem::temp_directory_path() / ("umbriel-config-tree-" + std::to_string(getpid()))) {
+        : m_path(std::filesystem::temp_directory_path() / ("canopy-config-tree-" + std::to_string(getpid()))) {
       std::filesystem::remove_all(m_path);
       std::filesystem::create_directories(m_path);
     }
@@ -115,24 +115,24 @@ namespace {
   };
 } // namespace
 
-UMBRIEL_TEST(defaultConfigLookupPrefersUserThenSystem) {
+CANOPY_TEST(defaultConfigLookupPrefersUserThenSystem) {
   const TempConfigTree tree;
   const std::filesystem::path userHome = tree.path("user");
   const std::filesystem::path systemDir = tree.path("system");
-  const std::filesystem::path systemConfig = systemDir / "umbriel/config.toml";
-  const std::filesystem::path userConfig = userHome / "umbriel/config.toml";
-  tree.write("system/umbriel/config.toml", "[layout]\ngap = 17\n");
+  const std::filesystem::path systemConfig = systemDir / "canopywc/config.toml";
+  const std::filesystem::path userConfig = userHome / "canopywc/config.toml";
+  tree.write("system/canopywc/config.toml", "[layout]\ngap = 17\n");
   const ScopedEnvironment configHome("XDG_CONFIG_HOME", userHome.string());
   const ScopedEnvironment configDirs("XDG_CONFIG_DIRS", systemDir.string());
 
-  ConfigStore& store = umbriel::configStore();
+  ConfigStore& store = canopy::configStore();
   store.load(nullptr);
 
   CHECK_EQ(store.rootPath(), systemConfig);
   CHECK_EQ(store.config().layout.gap, 17);
   CHECK(!store.fileMissing());
 
-  tree.write("user/umbriel/config.toml", "[layout]\ngap = 19\n");
+  tree.write("user/canopywc/config.toml", "[layout]\ngap = 19\n");
   store.load(nullptr);
 
   CHECK_EQ(store.rootPath(), userConfig);
@@ -140,53 +140,53 @@ UMBRIEL_TEST(defaultConfigLookupPrefersUserThenSystem) {
   CHECK(!store.fileMissing());
 }
 
-UMBRIEL_TEST(implicitConfigReloadAdoptsAndReleasesHigherPriorityUserPath) {
+CANOPY_TEST(implicitConfigReloadAdoptsAndReleasesHigherPriorityUserPath) {
   const TempConfigTree tree;
   const std::filesystem::path userHome = tree.path("user");
   const std::filesystem::path systemDir = tree.path("system");
-  const std::filesystem::path systemConfig = systemDir / "umbriel/config.toml";
-  const std::filesystem::path userConfig = userHome / "umbriel/config.toml";
-  tree.write("system/umbriel/config.toml", "[layout]\ngap = 17\n");
+  const std::filesystem::path systemConfig = systemDir / "canopywc/config.toml";
+  const std::filesystem::path userConfig = userHome / "canopywc/config.toml";
+  tree.write("system/canopywc/config.toml", "[layout]\ngap = 17\n");
   const ScopedEnvironment configHome("XDG_CONFIG_HOME", userHome.string());
   const ScopedEnvironment configDirs("XDG_CONFIG_DIRS", systemDir.string());
 
-  ConfigStore& store = umbriel::configStore();
+  ConfigStore& store = canopy::configStore();
   store.load(nullptr);
 
   CHECK_EQ(store.rootPath(), systemConfig);
   CHECK_EQ(store.config().layout.gap, 17);
 
-  tree.write("user/umbriel/config.toml", "[layout]\ngap = 19\n");
-  const umbriel::ConfigReloadResult adopted = store.reload();
+  tree.write("user/canopywc/config.toml", "[layout]\ngap = 19\n");
+  const canopy::ConfigReloadResult adopted = store.reload();
 
   CHECK(adopted.success);
   CHECK_EQ(store.rootPath(), userConfig);
   CHECK_EQ(store.config().layout.gap, 19);
 
   std::filesystem::remove(userConfig);
-  const umbriel::ConfigReloadResult released = store.reload();
+  const canopy::ConfigReloadResult released = store.reload();
 
   CHECK(released.success);
   CHECK_EQ(store.rootPath(), systemConfig);
   CHECK_EQ(store.config().layout.gap, 17);
 }
 
-UMBRIEL_TEST(malformedNewUserConfigKeepsActiveSystemConfigAndRetriesAfterCorrection) {
+CANOPY_TEST(malformedNewUserConfigKeepsActiveSystemConfigAndRetriesAfterCorrection) {
   const TempConfigTree tree;
   const std::filesystem::path userHome = tree.path("user");
   const std::filesystem::path systemDir = tree.path("system");
-  const std::filesystem::path systemConfig = systemDir / "umbriel/config.toml";
-  const std::filesystem::path userConfig = userHome / "umbriel/config.toml";
-  tree.write("system/umbriel/config.toml", "[layout]\ngap = 17\n");
+  const std::filesystem::path systemConfig = systemDir / "canopywc/config.toml";
+  const std::filesystem::path userConfig = userHome / "canopywc/config.toml";
+  tree.write("system/canopywc/config.toml", "[layout]\ngap = 17\n");
   const ScopedEnvironment configHome("XDG_CONFIG_HOME", userHome.string());
   const ScopedEnvironment configDirs("XDG_CONFIG_DIRS", systemDir.string());
 
-  ConfigStore& store = umbriel::configStore();
+  ConfigStore& store = canopy::configStore();
   store.load(nullptr);
   const uint64_t generation = store.generation();
 
-  tree.write("user/umbriel/config.toml", "[layout\n");
-  const umbriel::ConfigReloadResult malformed = store.reload();
+  tree.write("user/canopywc/config.toml", "[layout\n");
+  const canopy::ConfigReloadResult malformed = store.reload();
 
   CHECK(!malformed.success);
   CHECK_EQ(store.rootPath(), systemConfig);
@@ -195,8 +195,8 @@ UMBRIEL_TEST(malformedNewUserConfigKeepsActiveSystemConfigAndRetriesAfterCorrect
   CHECK(std::ranges::find(store.watchPaths(), userConfig) != store.watchPaths().end());
   CHECK(std::ranges::find(store.watchPaths(), systemConfig) != store.watchPaths().end());
 
-  tree.write("user/umbriel/config.toml", "[layout]\ngap = 19\n");
-  const umbriel::ConfigReloadResult corrected = store.reload();
+  tree.write("user/canopywc/config.toml", "[layout]\ngap = 19\n");
+  const canopy::ConfigReloadResult corrected = store.reload();
 
   CHECK(corrected.success);
   CHECK_EQ(store.rootPath(), userConfig);
@@ -204,24 +204,24 @@ UMBRIEL_TEST(malformedNewUserConfigKeepsActiveSystemConfigAndRetriesAfterCorrect
   CHECK_EQ(store.generation(), generation + 1);
 }
 
-UMBRIEL_TEST(implicitConfigReloadKeepsCandidatesCapturedAtInitialLoad) {
+CANOPY_TEST(implicitConfigReloadKeepsCandidatesCapturedAtInitialLoad) {
   const TempConfigTree tree;
   const std::filesystem::path initialUserHome = tree.path("initial-user");
   const std::filesystem::path changedUserHome = tree.path("changed-user");
   const std::filesystem::path systemDir = tree.path("system");
-  const std::filesystem::path systemConfig = systemDir / "umbriel/config.toml";
-  const std::filesystem::path changedUserConfig = changedUserHome / "umbriel/config.toml";
-  tree.write("system/umbriel/config.toml", "[layout]\ngap = 17\n");
+  const std::filesystem::path systemConfig = systemDir / "canopywc/config.toml";
+  const std::filesystem::path changedUserConfig = changedUserHome / "canopywc/config.toml";
+  tree.write("system/canopywc/config.toml", "[layout]\ngap = 17\n");
   const ScopedEnvironment configHome("XDG_CONFIG_HOME", initialUserHome.string());
   const ScopedEnvironment configDirs("XDG_CONFIG_DIRS", systemDir.string());
 
-  ConfigStore& store = umbriel::configStore();
+  ConfigStore& store = canopy::configStore();
   store.load(nullptr);
   const std::vector<std::filesystem::path> initialWatchPaths = store.watchPaths();
 
-  tree.write("changed-user/umbriel/config.toml", "[layout]\ngap = 29\n");
+  tree.write("changed-user/canopy/config.toml", "[layout]\ngap = 29\n");
   const ScopedEnvironment changedConfigHome("XDG_CONFIG_HOME", changedUserHome.string());
-  const umbriel::ConfigReloadResult result = store.reload();
+  const canopy::ConfigReloadResult result = store.reload();
 
   CHECK(result.success);
   CHECK_EQ(store.rootPath(), systemConfig);
@@ -230,32 +230,32 @@ UMBRIEL_TEST(implicitConfigReloadKeepsCandidatesCapturedAtInitialLoad) {
   CHECK(std::ranges::find(store.watchPaths(), changedUserConfig) == store.watchPaths().end());
 }
 
-UMBRIEL_TEST(explicitConfigReloadStaysPinnedWhenUserConfigAppears) {
+CANOPY_TEST(explicitConfigReloadStaysPinnedWhenUserConfigAppears) {
   const TempConfigTree tree;
   const std::filesystem::path userHome = tree.path("user");
   const std::filesystem::path systemDir = tree.path("system");
   const std::filesystem::path explicitConfig = tree.path("chosen.toml");
   tree.write("chosen.toml", "[layout]\ngap = 23\n");
-  tree.write("system/umbriel/config.toml", "[layout]\ngap = 17\n");
+  tree.write("system/canopywc/config.toml", "[layout]\ngap = 17\n");
   const ScopedEnvironment configHome("XDG_CONFIG_HOME", userHome.string());
   const ScopedEnvironment configDirs("XDG_CONFIG_DIRS", systemDir.string());
 
-  ConfigStore& store = umbriel::configStore();
+  ConfigStore& store = canopy::configStore();
   const std::string explicitPath = explicitConfig.string();
   store.load(explicitPath.c_str());
 
   CHECK_EQ(store.rootPath(), explicitConfig);
   CHECK_EQ(store.config().layout.gap, 23);
 
-  tree.write("user/umbriel/config.toml", "[layout]\ngap = 29\n");
-  const umbriel::ConfigReloadResult result = store.reload();
+  tree.write("user/canopywc/config.toml", "[layout]\ngap = 29\n");
+  const canopy::ConfigReloadResult result = store.reload();
 
   CHECK(result.success);
   CHECK_EQ(store.rootPath(), explicitConfig);
   CHECK_EQ(store.config().layout.gap, 23);
 }
 
-UMBRIEL_TEST(sharedLayoutAndNumberReadersPreserveConfigBehavior) {
+CANOPY_TEST(sharedLayoutAndNumberReadersPreserveConfigBehavior) {
   const TempConfig file;
   file.write(R"(
 unknown_root_key = true
@@ -293,9 +293,9 @@ center_underfull_strip = true
 preserve_split = false
 )");
 
-  ConfigStore& store = umbriel::configStore();
+  ConfigStore& store = canopy::configStore();
   store.setRootPath(file.path(), true);
-  const umbriel::ConfigReloadResult result = store.reload();
+  const canopy::ConfigReloadResult result = store.reload();
 
   CHECK(result.success);
   CHECK(store.config().layout.mode == LayoutMode::Dwindle);
@@ -322,23 +322,23 @@ preserve_split = false
   CHECK(containsDiagnostic(store, "unknown key general.prefer_no_csd"));
 }
 
-UMBRIEL_TEST(rejectsRemovedWidthPresetKey) {
+CANOPY_TEST(rejectsRemovedWidthPresetKey) {
   const TempConfig file;
   file.write("[layout]\nwidth_presets = [0.75]\n");
 
-  ConfigStore& store = umbriel::configStore();
+  ConfigStore& store = canopy::configStore();
   store.setRootPath(file.path(), true);
   CHECK(store.reload().success);
   CHECK_EQ(store.config().layout.extentPresets.size(), size_t{3});
   CHECK(containsDiagnostic(store, "unknown key layout.width_presets"));
 }
 
-UMBRIEL_TEST(backgroundDefaultsOpaque) {
-  const umbriel::Config config;
+CANOPY_TEST(backgroundDefaultsOpaque) {
+  const canopy::Config config;
   CHECK_EQ(config.colors.background[3], 1.0F);
 }
 
-UMBRIEL_TEST(scratchpadDefinitionsLoadUniqueNames) {
+CANOPY_TEST(scratchpadDefinitionsLoadUniqueNames) {
   const TempConfig file;
   file.write(R"(
 [[scratchpad]]
@@ -348,9 +348,9 @@ name = "term"
 name = "music"
 )");
 
-  ConfigStore& store = umbriel::configStore();
+  ConfigStore& store = canopy::configStore();
   store.setRootPath(file.path(), true);
-  const umbriel::ConfigReloadResult result = store.reload();
+  const canopy::ConfigReloadResult result = store.reload();
 
   CHECK(result.success);
   CHECK_EQ(store.config().scratchpads.size(), size_t{2});
@@ -359,7 +359,7 @@ name = "music"
   CHECK(!containsDiagnostic(store, "unknown key scratchpad"));
 }
 
-UMBRIEL_TEST(scratchpadDefinitionsLoadSpawnWhenEmpty) {
+CANOPY_TEST(scratchpadDefinitionsLoadSpawnWhenEmpty) {
   const TempConfig file;
   file.write(R"(
 [[scratchpad]]
@@ -374,9 +374,9 @@ name = "todo"
 spawn_when_empty = 7
 )");
 
-  ConfigStore& store = umbriel::configStore();
+  ConfigStore& store = canopy::configStore();
   store.setRootPath(file.path(), true);
-  const umbriel::ConfigReloadResult result = store.reload();
+  const canopy::ConfigReloadResult result = store.reload();
 
   CHECK(result.success);
   CHECK_EQ(store.config().scratchpads.size(), size_t{3});
@@ -386,7 +386,7 @@ spawn_when_empty = 7
   CHECK(containsDiagnostic(store, "ignoring scratchpad[2].spawn_when_empty (expected string)"));
 }
 
-UMBRIEL_TEST(scratchpadProportionalSizeIsAnOptionalBoolean) {
+CANOPY_TEST(scratchpadProportionalSizeIsAnOptionalBoolean) {
   const TempConfig file;
   file.write(R"(
 [[scratchpad]]
@@ -405,7 +405,7 @@ name = "invalid"
 proportional_size = "true"
 )");
 
-  ConfigStore& store = umbriel::configStore();
+  ConfigStore& store = canopy::configStore();
   store.setRootPath(file.path(), true);
   CHECK(store.reload().success);
   CHECK_EQ(store.config().scratchpads.size(), size_t{4});
@@ -416,14 +416,14 @@ proportional_size = "true"
   CHECK(containsDiagnostic(store, "ignoring scratchpad[3].proportional_size (expected boolean)"));
 }
 
-UMBRIEL_TEST(scratchpadDefinitionsRequireValidUniqueNames) {
+CANOPY_TEST(scratchpadDefinitionsRequireValidUniqueNames) {
   const TempConfig file;
   file.write("[[scratchpad]]\nname = \"kept\"\n");
 
-  ConfigStore& store = umbriel::configStore();
+  ConfigStore& store = canopy::configStore();
   store.setRootPath(file.path(), true);
   CHECK(store.reload().success);
-  const umbriel::Config previous = store.config();
+  const canopy::Config previous = store.config();
 
   const std::array invalid{
       std::pair{
@@ -444,14 +444,14 @@ UMBRIEL_TEST(scratchpadDefinitionsRequireValidUniqueNames) {
 
   for (const auto& [contents, expectedDiagnostic] : invalid) {
     file.write(contents);
-    const umbriel::ConfigReloadResult result = store.reload();
+    const canopy::ConfigReloadResult result = store.reload();
     CHECK(!result.success);
     CHECK(store.config() == previous);
     CHECK(containsDiagnostic(store, expectedDiagnostic));
   }
 }
 
-UMBRIEL_TEST(scratchpadDefinitionsReportUnknownKeysWithoutDiscardingTheEntry) {
+CANOPY_TEST(scratchpadDefinitionsReportUnknownKeysWithoutDiscardingTheEntry) {
   const TempConfig file;
   file.write(R"(
 [[scratchpad]]
@@ -459,9 +459,9 @@ name = "term"
 output = "DP-1"
 )");
 
-  ConfigStore& store = umbriel::configStore();
+  ConfigStore& store = canopy::configStore();
   store.setRootPath(file.path(), true);
-  const umbriel::ConfigReloadResult result = store.reload();
+  const canopy::ConfigReloadResult result = store.reload();
 
   CHECK(result.success);
   CHECK_EQ(store.config().scratchpads.size(), size_t{1});
@@ -469,7 +469,7 @@ output = "DP-1"
   CHECK(containsDiagnostic(store, "unknown key scratchpad[0].output"));
 }
 
-UMBRIEL_TEST(implicitScratchpadActionsAcceptOnlyTheDefaultTarget) {
+CANOPY_TEST(implicitScratchpadActionsAcceptOnlyTheDefaultTarget) {
   const TempConfig file;
   file.write(R"(
 [keybinds]
@@ -478,14 +478,14 @@ UMBRIEL_TEST(implicitScratchpadActionsAcceptOnlyTheDefaultTarget) {
 "Mod+3" = "scratchpad-focus-next other"
 )");
 
-  ConfigStore& store = umbriel::configStore();
+  ConfigStore& store = canopy::configStore();
   store.setRootPath(file.path(), true);
-  const umbriel::ConfigReloadResult result = store.reload();
+  const canopy::ConfigReloadResult result = store.reload();
 
   const auto countTarget = [&](std::string_view name) {
     size_t count = 0;
     for (const auto& keybind : store.config().keybinds) {
-      const auto* target = umbriel::payloadIf<umbriel::ScratchpadArg>(keybind);
+      const auto* target = canopy::payloadIf<canopy::ScratchpadArg>(keybind);
       count += target != nullptr && target->name == name ? 1U : 0U;
     }
     return count;
@@ -499,7 +499,7 @@ UMBRIEL_TEST(implicitScratchpadActionsAcceptOnlyTheDefaultTarget) {
   CHECK(containsDiagnostic(store, "ignoring keybind 'Mod+3' (unknown scratchpad 'other')"));
 }
 
-UMBRIEL_TEST(namedScratchpadActionsRequireAConfiguredName) {
+CANOPY_TEST(namedScratchpadActionsRequireAConfiguredName) {
   const TempConfig file;
   file.write(R"(
 [[scratchpad]]
@@ -512,14 +512,14 @@ name = "term"
 "Mod+4" = "window-move-to-scratchpad default"
 )");
 
-  ConfigStore& store = umbriel::configStore();
+  ConfigStore& store = canopy::configStore();
   store.setRootPath(file.path(), true);
-  const umbriel::ConfigReloadResult result = store.reload();
+  const canopy::ConfigReloadResult result = store.reload();
 
   const auto countTarget = [&](std::string_view name) {
     size_t count = 0;
     for (const auto& keybind : store.config().keybinds) {
-      const auto* target = umbriel::payloadIf<umbriel::ScratchpadArg>(keybind);
+      const auto* target = canopy::payloadIf<canopy::ScratchpadArg>(keybind);
       count += target != nullptr && target->name == name ? 1U : 0U;
     }
     return count;
@@ -536,16 +536,16 @@ name = "term"
   CHECK(containsDiagnostic(store, "ignoring keybind 'Mod+4' (unknown scratchpad 'default')"));
 }
 
-UMBRIEL_TEST(dwindlePreserveSplitDefaultsToFalse) {
+CANOPY_TEST(dwindlePreserveSplitDefaultsToFalse) {
   const TempConfig file;
   file.write("[layout]\n");
-  ConfigStore& store = umbriel::configStore();
+  ConfigStore& store = canopy::configStore();
   store.setRootPath(file.path(), true);
   CHECK(store.reload().success);
   CHECK(!store.config().layout.dwindle.preserveSplit);
 }
 
-UMBRIEL_TEST(layoutStrutsLoadGloballyAndPerWorkspace) {
+CANOPY_TEST(layoutStrutsLoadGloballyAndPerWorkspace) {
   const TempConfig file;
   file.write(R"(
 [layout.struts]
@@ -566,9 +566,9 @@ left = 50
 bottom = -8
 )");
 
-  ConfigStore& store = umbriel::configStore();
+  ConfigStore& store = canopy::configStore();
   store.setRootPath(file.path(), true);
-  const umbriel::ConfigReloadResult result = store.reload();
+  const canopy::ConfigReloadResult result = store.reload();
 
   CHECK(result.success);
   CHECK_EQ(store.config().layout.struts.left, -12);
@@ -586,7 +586,7 @@ bottom = -8
   CHECK(containsDiagnostic(store, "unknown key layout.struts.surprise"));
 }
 
-UMBRIEL_TEST(masterLayoutReadersLoadGlobalAndWorkspaceSettings) {
+CANOPY_TEST(masterLayoutReadersLoadGlobalAndWorkspaceSettings) {
   const TempConfig file;
   file.write(R"(
 [layout]
@@ -612,18 +612,18 @@ new_on_top = true
 new_becomes_master = false
 )");
 
-  ConfigStore& store = umbriel::configStore();
+  ConfigStore& store = canopy::configStore();
   store.setRootPath(file.path(), true);
-  const umbriel::ConfigReloadResult result = store.reload();
+  const canopy::ConfigReloadResult result = store.reload();
 
   CHECK(result.success);
   CHECK(store.config().layout.mode == LayoutMode::Master);
-  CHECK(store.config().layout.master.position == umbriel::MasterPosition::Right);
+  CHECK(store.config().layout.master.position == canopy::MasterPosition::Right);
   CHECK_EQ(store.config().layout.master.defaultWidthFraction, 0.1);
   CHECK(!store.config().layout.master.newOnTop);
   CHECK(store.config().layout.master.newBecomesMaster);
   CHECK_EQ(store.config().workspaceRules.size(), size_t{1});
-  CHECK(store.config().workspaceRules[0].layout.master.position == umbriel::MasterPosition::Left);
+  CHECK(store.config().workspaceRules[0].layout.master.position == canopy::MasterPosition::Left);
   CHECK(store.config().workspaceRules[0].layout.master.defaultWidthFraction.has_value());
   CHECK_EQ(*store.config().workspaceRules[0].layout.master.defaultWidthFraction, 0.7);
   CHECK(store.config().workspaceRules[0].layout.master.newOnTop == true);
@@ -633,7 +633,7 @@ new_becomes_master = false
   CHECK(containsDiagnostic(store, "unknown key layout.master.surprise"));
 }
 
-UMBRIEL_TEST(tabReadersLoadLayoutAppearanceColorsAndRules) {
+CANOPY_TEST(tabReadersLoadLayoutAppearanceColorsAndRules) {
   const TempConfig file;
   file.write(R"(
 [layout.tabs]
@@ -674,61 +674,61 @@ match.app_id = "^firefox$"
 default_column_display = "tabbed"
 )");
 
-  ConfigStore& store = umbriel::configStore();
+  ConfigStore& store = canopy::configStore();
   store.setRootPath(file.path(), true);
-  const umbriel::ConfigReloadResult result = store.reload();
+  const canopy::ConfigReloadResult result = store.reload();
 
   CHECK(result.success);
-  const umbriel::Config& config = store.config();
-  CHECK(config.layout.tabs.defaultDisplay == umbriel::ColumnDisplay::Tabbed);
-  CHECK(config.layout.tabs.newTabPosition == umbriel::NewTabPosition::AfterActive);
+  const canopy::Config& config = store.config();
+  CHECK(config.layout.tabs.defaultDisplay == canopy::ColumnDisplay::Tabbed);
+  CHECK(config.layout.tabs.newTabPosition == canopy::NewTabPosition::AfterActive);
   CHECK(!config.layout.tabs.wrapFocus);
   CHECK(!config.layout.tabs.scrollSwitchesTabs);
   CHECK(config.layout.tabs.middleClickCloses);
-  CHECK(config.appearance.tabBar.style == umbriel::TabBarLook::Indicator);
-  CHECK(config.appearance.tabBar.position == umbriel::TabBarPosition::Bottom);
+  CHECK(config.appearance.tabBar.style == canopy::TabBarLook::Indicator);
+  CHECK(config.appearance.tabBar.position == canopy::TabBarPosition::Bottom);
   CHECK_EQ(config.appearance.tabBar.height, 4);
   CHECK_EQ(config.appearance.tabBar.font, std::string{"Inter Bold 9"});
   CHECK_EQ(config.appearance.tabBar.tabGap, 0);
   CHECK_EQ(config.appearance.tabBar.gap, 3);
   CHECK_EQ(config.appearance.tabBar.cornerRadius, 1);
   CHECK_EQ(config.appearance.tabBar.titleFormat, std::string{"{index}: {title}"});
-  CHECK(config.appearance.tabBar.titleAlign == umbriel::TitleAlign::Left);
+  CHECK(config.appearance.tabBar.titleAlign == canopy::TitleAlign::Left);
   CHECK(config.appearance.tabBar.hideWhenSingle);
   CHECK_EQ(config.appearance.tabBar.maxTabs, 5);
-  CHECK(config.appearance.tabBar.overflow == umbriel::TabOverflow::Shrink);
+  CHECK(config.appearance.tabBar.overflow == canopy::TabOverflow::Shrink);
   CHECK_EQ(config.colors.tabBar.urgent[3], 128.0F / 255.0F);
   CHECK_EQ(config.workspaceRules.size(), size_t{1});
-  CHECK(config.workspaceRules[0].layout.tabs.defaultDisplay == umbriel::ColumnDisplay::Normal);
+  CHECK(config.workspaceRules[0].layout.tabs.defaultDisplay == canopy::ColumnDisplay::Normal);
   CHECK_EQ(config.windowRules.size(), size_t{1});
-  CHECK(config.windowRules[0].defaultColumnDisplay == umbriel::ColumnDisplay::Tabbed);
+  CHECK(config.windowRules[0].defaultColumnDisplay == canopy::ColumnDisplay::Tabbed);
 
   // The bar's space is part of the layout, so resolution carries it with the behavior keys.
-  const umbriel::ResolvedLayoutConfig resolved = umbriel::resolveGlobalLayout(config);
-  CHECK(resolved.tabs.defaultDisplay == umbriel::ColumnDisplay::Tabbed);
+  const canopy::ResolvedLayoutConfig resolved = canopy::resolveGlobalLayout(config);
+  CHECK(resolved.tabs.defaultDisplay == canopy::ColumnDisplay::Tabbed);
   CHECK_EQ(resolved.tabs.barHeight, 4);
   CHECK_EQ(resolved.tabs.barGap, 3);
-  CHECK(resolved.tabs.barPosition == umbriel::TabBarPosition::Bottom);
+  CHECK(resolved.tabs.barPosition == canopy::TabBarPosition::Bottom);
   CHECK(resolved.tabs.hideWhenSingle);
 }
 
-UMBRIEL_TEST(masterPositionAcceptsCenterAndRejectsOtherValues) {
+CANOPY_TEST(masterPositionAcceptsCenterAndRejectsOtherValues) {
   const TempConfig file;
-  ConfigStore& store = umbriel::configStore();
+  ConfigStore& store = canopy::configStore();
   store.setRootPath(file.path(), true);
 
   file.write("[layout.master]\nposition = \"center\"\n");
   CHECK(store.reload().success);
-  CHECK(store.config().layout.master.position == umbriel::MasterPosition::Center);
+  CHECK(store.config().layout.master.position == canopy::MasterPosition::Center);
 
   file.write("[layout.master]\nposition = \"middle\"\n");
   CHECK(store.reload().success);
-  CHECK(store.config().layout.master.position == umbriel::MasterPosition::Left);
+  CHECK(store.config().layout.master.position == canopy::MasterPosition::Left);
 }
 
-UMBRIEL_TEST(scrollingDefaultExtentIsOptional) {
+CANOPY_TEST(scrollingDefaultExtentIsOptional) {
   const TempConfig file;
-  ConfigStore& store = umbriel::configStore();
+  ConfigStore& store = canopy::configStore();
   store.setRootPath(file.path(), true);
 
   file.write("[layout.scrolling]\ncenter_underfull_strip = false\n");
@@ -750,9 +750,9 @@ UMBRIEL_TEST(scrollingDefaultExtentIsOptional) {
   CHECK(!store.config().layout.scrolling.defaultExtentFraction.has_value());
 }
 
-UMBRIEL_TEST(outputScrollingDefaultExtentUsesNarrowLayoutScope) {
+CANOPY_TEST(outputScrollingDefaultExtentUsesNarrowLayoutScope) {
   const TempConfig file;
-  ConfigStore& store = umbriel::configStore();
+  ConfigStore& store = canopy::configStore();
   store.setRootPath(file.path(), true);
 
   file.write(R"(
@@ -780,34 +780,34 @@ center_focused = true
   CHECK(!store.config().outputs[0].layout.scrolling.defaultExtentFraction.has_value());
 }
 
-UMBRIEL_TEST(outputWorkspaceAxisAcceptsOnlyItsTwoNames) {
+CANOPY_TEST(outputWorkspaceAxisAcceptsOnlyItsTwoNames) {
   const TempConfig file;
-  ConfigStore& store = umbriel::configStore();
+  ConfigStore& store = canopy::configStore();
   store.setRootPath(file.path(), true);
 
   file.write("[output.DP-1]\nworkspace_axis = \"horizontal\"\n");
   CHECK(store.reload().success);
   CHECK_EQ(store.config().outputs.size(), size_t{1});
-  CHECK(store.config().outputs[0].workspaceAxis == umbriel::WorkspaceAxis::Horizontal);
+  CHECK(store.config().outputs[0].workspaceAxis == canopy::WorkspaceAxis::Horizontal);
   CHECK(!containsDiagnostic(store, "unknown key output.DP-1.workspace_axis"));
 
   file.write("[output.DP-1]\nworkspace_axis = \"sideways\"\n");
   CHECK(store.reload().success);
-  CHECK(store.config().outputs[0].workspaceAxis == umbriel::WorkspaceAxis::Vertical);
+  CHECK(store.config().outputs[0].workspaceAxis == canopy::WorkspaceAxis::Vertical);
 
   file.write("[output.DP-1]\nworkspace_axis = true\n");
   CHECK(store.reload().success);
-  CHECK(store.config().outputs[0].workspaceAxis == umbriel::WorkspaceAxis::Vertical);
+  CHECK(store.config().outputs[0].workspaceAxis == canopy::WorkspaceAxis::Vertical);
 
   file.write("[output.DP-1]\nenabled = true\n");
   CHECK(store.reload().success);
-  CHECK(store.config().outputs[0].workspaceAxis == umbriel::WorkspaceAxis::Vertical);
+  CHECK(store.config().outputs[0].workspaceAxis == canopy::WorkspaceAxis::Vertical);
 }
 
 // The configurable strip direction is gone: both spellings are ordinary unknown keys.
-UMBRIEL_TEST(scrollingDirectionKeysAreUnknown) {
+CANOPY_TEST(scrollingDirectionKeysAreUnknown) {
   const TempConfig file;
-  ConfigStore& store = umbriel::configStore();
+  ConfigStore& store = canopy::configStore();
   store.setRootPath(file.path(), true);
 
   file.write(R"(
@@ -823,9 +823,9 @@ layout.scrolling.direction = "vertical"
   CHECK(containsDiagnostic(store, "unknown key workspace[0].layout.scrolling.direction"));
 }
 
-UMBRIEL_TEST(centerFocusedReadsItsModeVocabulary) {
+CANOPY_TEST(centerFocusedReadsItsModeVocabulary) {
   const TempConfig file;
-  ConfigStore& store = umbriel::configStore();
+  ConfigStore& store = canopy::configStore();
   store.setRootPath(file.path(), true);
 
   file.write(R"(
@@ -837,19 +837,19 @@ index = 1
 layout.scrolling.center_focused = "always"
 )");
   CHECK(store.reload().success);
-  CHECK(store.config().layout.scrolling.centerFocused == umbriel::CenterFocusedColumn::OnOverflow);
+  CHECK(store.config().layout.scrolling.centerFocused == canopy::CenterFocusedColumn::OnOverflow);
   CHECK_EQ(store.config().workspaceRules.size(), size_t{1});
-  CHECK(store.config().workspaceRules[0].layout.scrolling.centerFocused == umbriel::CenterFocusedColumn::Always);
+  CHECK(store.config().workspaceRules[0].layout.scrolling.centerFocused == canopy::CenterFocusedColumn::Always);
 
   file.write("[layout.scrolling]\ncenter_focused = \"sometimes\"\n");
   CHECK(store.reload().success);
-  CHECK(store.config().layout.scrolling.centerFocused == umbriel::CenterFocusedColumn::Never);
+  CHECK(store.config().layout.scrolling.centerFocused == canopy::CenterFocusedColumn::Never);
   CHECK(!containsDiagnostic(store, "unknown key layout.scrolling.center_focused"));
 }
 
-UMBRIEL_TEST(modKeyIsUserConfigurable) {
+CANOPY_TEST(modKeyIsUserConfigurable) {
   const TempConfig file;
-  ConfigStore& store = umbriel::configStore();
+  ConfigStore& store = canopy::configStore();
   store.setRootPath(file.path(), true);
 
   file.write("[general]\nmod_key = \"Ctrl\"\n");
@@ -865,9 +865,9 @@ UMBRIEL_TEST(modKeyIsUserConfigurable) {
   CHECK(!store.config().general.modKey.has_value());
 }
 
-UMBRIEL_TEST(keybindTableLoadsAllowWhenLocked) {
+CANOPY_TEST(keybindTableLoadsAllowWhenLocked) {
   const TempConfig file;
-  ConfigStore& store = umbriel::configStore();
+  ConfigStore& store = canopy::configStore();
   store.setRootPath(file.path(), true);
 
   file.write(
@@ -889,9 +889,9 @@ UMBRIEL_TEST(keybindTableLoadsAllowWhenLocked) {
   CHECK(!containsDiagnostic(store, "allow_when_locked"));
 }
 
-UMBRIEL_TEST(keybindTableLoadsAllowWhenInhibited) {
+CANOPY_TEST(keybindTableLoadsAllowWhenInhibited) {
   const TempConfig file;
-  ConfigStore& store = umbriel::configStore();
+  ConfigStore& store = canopy::configStore();
   store.setRootPath(file.path(), true);
 
   file.write(
@@ -913,9 +913,9 @@ UMBRIEL_TEST(keybindTableLoadsAllowWhenInhibited) {
   CHECK(!containsDiagnostic(store, "allow_when_inhibited"));
 }
 
-UMBRIEL_TEST(keybindTablePreservesWorkspaceReferenceKinds) {
+CANOPY_TEST(keybindTablePreservesWorkspaceReferenceKinds) {
   const TempConfig file;
-  ConfigStore& store = umbriel::configStore();
+  ConfigStore& store = canopy::configStore();
   store.setRootPath(file.path(), true);
 
   file.write(
@@ -929,14 +929,14 @@ UMBRIEL_TEST(keybindTablePreservesWorkspaceReferenceKinds) {
   bool foundPosition = false;
   bool foundNumericName = false;
   for (const auto& bind : store.config().keybinds) {
-    const auto* workspace = umbriel::payloadIf<umbriel::WorkspaceArg>(bind);
+    const auto* workspace = canopy::payloadIf<canopy::WorkspaceArg>(bind);
     if (workspace == nullptr) {
       continue;
     }
-    if (const auto* index = std::get_if<umbriel::WorkspaceIndex>(&workspace->reference)) {
+    if (const auto* index = std::get_if<canopy::WorkspaceIndex>(&workspace->reference)) {
       foundPosition = foundPosition || index->value == 2;
     }
-    if (const auto* name = std::get_if<umbriel::WorkspaceName>(&workspace->reference)) {
+    if (const auto* name = std::get_if<canopy::WorkspaceName>(&workspace->reference)) {
       foundNumericName = foundNumericName || name->value == "2";
     }
   }
@@ -944,9 +944,9 @@ UMBRIEL_TEST(keybindTablePreservesWorkspaceReferenceKinds) {
   CHECK(foundNumericName);
 }
 
-UMBRIEL_TEST(keybindTableLoadsCooldown) {
+CANOPY_TEST(keybindTableLoadsCooldown) {
   const TempConfig file;
-  ConfigStore& store = umbriel::configStore();
+  ConfigStore& store = canopy::configStore();
   store.setRootPath(file.path(), true);
 
   file.write("[keybinds]\n\"Mod+Return\" = { action = \"spawn terminal\", cooldown_ms = 150 }\n");
@@ -960,9 +960,9 @@ UMBRIEL_TEST(keybindTableLoadsCooldown) {
   CHECK(containsDiagnostic(store, "cooldown_ms = 3600001 out of range, clamped to 3600000"));
 }
 
-UMBRIEL_TEST(keybindTableLoadsPostActionSubmaps) {
+CANOPY_TEST(keybindTableLoadsPostActionSubmaps) {
   const TempConfig file;
-  ConfigStore& store = umbriel::configStore();
+  ConfigStore& store = canopy::configStore();
   store.setRootPath(file.path(), true);
 
   file.write(
@@ -982,7 +982,7 @@ UMBRIEL_TEST(keybindTableLoadsPostActionSubmaps) {
       continue;
     }
     CHECK(!bind.repeat);
-    resets = resets || umbriel::isSubmapReset(*bind.submapAfter);
+    resets = resets || canopy::isSubmapReset(*bind.submapAfter);
     entersInner = entersInner || bind.submapAfter->name == "inner";
   }
   CHECK(resets);
@@ -1001,9 +1001,9 @@ UMBRIEL_TEST(keybindTableLoadsPostActionSubmaps) {
   CHECK(std::ranges::none_of(store.config().keybinds, [](const auto& bind) { return bind.submap == "outer"; }));
 }
 
-UMBRIEL_TEST(hotCornersLoadActionsAndValidate) {
+CANOPY_TEST(hotCornersLoadActionsAndValidate) {
   const TempConfig file;
-  ConfigStore& store = umbriel::configStore();
+  ConfigStore& store = canopy::configStore();
   store.setRootPath(file.path(), true);
 
   file.write(
@@ -1016,7 +1016,7 @@ UMBRIEL_TEST(hotCornersLoadActionsAndValidate) {
   CHECK(store.config().hotCorners.corners[0].action.has_value());
   CHECK(
       store.config().hotCorners.corners[0].action
-      && store.config().hotCorners.corners[0].action->action == umbriel::KeybindAction::OverviewOpen
+      && store.config().hotCorners.corners[0].action->action == canopy::KeybindAction::OverviewOpen
   );
   CHECK(!store.config().hotCorners.corners[1].enabled);
   CHECK(!store.config().hotCorners.corners[2].enabled);
@@ -1025,7 +1025,7 @@ UMBRIEL_TEST(hotCornersLoadActionsAndValidate) {
   CHECK(store.config().hotCorners.corners[3].action.has_value());
   CHECK(
       store.config().hotCorners.corners[3].action
-      && store.config().hotCorners.corners[3].action->action == umbriel::KeybindAction::Spawn
+      && store.config().hotCorners.corners[3].action->action == canopy::KeybindAction::Spawn
   );
 
   file.write("[hot_corners.top_right]\nenabled = true\ndelay_ms = -1\naction = \"not-an-action\"\n");
@@ -1036,9 +1036,9 @@ UMBRIEL_TEST(hotCornersLoadActionsAndValidate) {
   CHECK(containsDiagnostic(store, "hot_corners.top_right.delay_ms = -1"));
 }
 
-UMBRIEL_TEST(implicitScratchpadHotCornersAcceptOnlyTheDefaultTarget) {
+CANOPY_TEST(implicitScratchpadHotCornersAcceptOnlyTheDefaultTarget) {
   const TempConfig file;
-  ConfigStore& store = umbriel::configStore();
+  ConfigStore& store = canopy::configStore();
   store.setRootPath(file.path(), true);
 
   file.write(R"(
@@ -1060,9 +1060,9 @@ action = "scratchpad-focus-next missing"
   CHECK(corners[0].action.has_value());
   CHECK(corners[1].action.has_value());
   CHECK(!corners[2].action.has_value());
-  const auto* bare = corners[0].action ? umbriel::payloadIf<umbriel::ScratchpadArg>(*corners[0].action) : nullptr;
+  const auto* bare = corners[0].action ? canopy::payloadIf<canopy::ScratchpadArg>(*corners[0].action) : nullptr;
   const auto* explicitDefault =
-      corners[1].action ? umbriel::payloadIf<umbriel::ScratchpadArg>(*corners[1].action) : nullptr;
+      corners[1].action ? canopy::payloadIf<canopy::ScratchpadArg>(*corners[1].action) : nullptr;
   CHECK(bare != nullptr);
   CHECK(bare != nullptr && bare->name.empty());
   CHECK(explicitDefault != nullptr);
@@ -1070,9 +1070,9 @@ action = "scratchpad-focus-next missing"
   CHECK(containsDiagnostic(store, "ignoring hot_corners.bottom_left.action (unknown scratchpad 'missing')"));
 }
 
-UMBRIEL_TEST(namedScratchpadHotCornersRequireAConfiguredName) {
+CANOPY_TEST(namedScratchpadHotCornersRequireAConfiguredName) {
   const TempConfig file;
-  ConfigStore& store = umbriel::configStore();
+  ConfigStore& store = canopy::configStore();
   store.setRootPath(file.path(), true);
 
   file.write(R"(
@@ -1097,16 +1097,16 @@ action = "window-restore-from-scratchpad missing"
   CHECK(!corners[0].action.has_value());
   CHECK(corners[1].action.has_value());
   CHECK(!corners[2].action.has_value());
-  const auto* configured = corners[1].action ? umbriel::payloadIf<umbriel::ScratchpadArg>(*corners[1].action) : nullptr;
+  const auto* configured = corners[1].action ? canopy::payloadIf<canopy::ScratchpadArg>(*corners[1].action) : nullptr;
   CHECK(configured != nullptr);
   CHECK(configured != nullptr && configured->name == "term");
   CHECK(containsDiagnostic(store, "ignoring hot_corners.top_left.action (scratchpad name required)"));
   CHECK(containsDiagnostic(store, "ignoring hot_corners.bottom_left.action (unknown scratchpad 'missing')"));
 }
 
-UMBRIEL_TEST(overviewBackgroundBlurLoads) {
+CANOPY_TEST(overviewBackgroundBlurLoads) {
   const TempConfig file;
-  ConfigStore& store = umbriel::configStore();
+  ConfigStore& store = canopy::configStore();
   store.setRootPath(file.path(), true);
 
   file.write("[overview]\nbackground_blur = false\n");
@@ -1114,9 +1114,9 @@ UMBRIEL_TEST(overviewBackgroundBlurLoads) {
   CHECK(!store.config().overview.backgroundBlur);
 }
 
-UMBRIEL_TEST(overviewScrollFactorLoadsIndependently) {
+CANOPY_TEST(overviewScrollFactorLoadsIndependently) {
   const TempConfig file;
-  ConfigStore& store = umbriel::configStore();
+  ConfigStore& store = canopy::configStore();
   store.setRootPath(file.path(), true);
   file.write("[overview]\nscroll_factor_horizontal = 0.7\n");
   CHECK(store.reload().success);
@@ -1132,9 +1132,9 @@ UMBRIEL_TEST(overviewScrollFactorLoadsIndependently) {
   CHECK_EQ(store.config().overview.scrollFactorVertical, 1.0);
 }
 
-UMBRIEL_TEST(touchpadScrollFactorLoadsAsScalarOrTable) {
+CANOPY_TEST(touchpadScrollFactorLoadsAsScalarOrTable) {
   const TempConfig file;
-  ConfigStore& store = umbriel::configStore();
+  ConfigStore& store = canopy::configStore();
   store.setRootPath(file.path(), true);
   file.write("[input.touchpad]\nscroll_factor = 1.5\n");
   CHECK(store.reload().success);
@@ -1157,27 +1157,27 @@ UMBRIEL_TEST(touchpadScrollFactorLoadsAsScalarOrTable) {
   CHECK(!store.config().input.touchpad.scrollFactor.has_value());
 }
 
-UMBRIEL_TEST(overviewWorkspaceCurveLoadsAndFallsBackToItsSpring) {
+CANOPY_TEST(overviewWorkspaceCurveLoadsAndFallsBackToItsSpring) {
   const TempConfig file;
-  ConfigStore& store = umbriel::configStore();
+  ConfigStore& store = canopy::configStore();
   store.setRootPath(file.path(), true);
   file.write("[animation.overview]\nworkspace_curve = \"easeout\"\n");
   CHECK(store.reload().success);
-  CHECK(store.config().animation.overview.workspaceCurve.easing == umbriel::Easing::EaseOutCubic);
+  CHECK(store.config().animation.overview.workspaceCurve.easing == canopy::Easing::EaseOutCubic);
   file.write("[animation.overview]\nworkspace_curve = \"spring:0.6,120\"\n");
   CHECK(store.reload().success);
-  CHECK(store.config().animation.overview.workspaceCurve.easing == umbriel::Easing::Spring);
+  CHECK(store.config().animation.overview.workspaceCurve.easing == canopy::Easing::Spring);
   CHECK_EQ(store.config().animation.overview.workspaceCurve.spring.damping, 0.6);
   CHECK_EQ(store.config().animation.overview.workspaceCurve.spring.stiffness, 120.0);
   file.write("[animation.overview]\nduration_ms = 300\n");
   CHECK(store.reload().success);
-  CHECK(store.config().animation.overview.workspaceCurve.easing == umbriel::Easing::Spring);
+  CHECK(store.config().animation.overview.workspaceCurve.easing == canopy::Easing::Spring);
   CHECK_EQ(store.config().animation.overview.workspaceCurve.spring.stiffness, 1000.0);
 }
 
-UMBRIEL_TEST(durationBesideASpringCurveIsReportedAsInert) {
+CANOPY_TEST(durationBesideASpringCurveIsReportedAsInert) {
   const TempConfig file;
-  ConfigStore& store = umbriel::configStore();
+  ConfigStore& store = canopy::configStore();
   store.setRootPath(file.path(), true);
 
   // A spring derives its own length, so the duration next to it reaches nothing and must not look honoured.
@@ -1205,10 +1205,10 @@ UMBRIEL_TEST(durationBesideASpringCurveIsReportedAsInert) {
   CHECK_EQ(store.config().animation.workspaces.durationMs, 200);
 }
 
-UMBRIEL_TEST(workspaceRevealRequiresAnAnimationShader) {
+CANOPY_TEST(workspaceRevealRequiresAnAnimationShader) {
   const TempConfigTree tree;
-  tree.write("wipe.glsl", "vec4 animation(vec2 uv) { return umbriel_sample(uv); }");
-  ConfigStore& store = umbriel::configStore();
+  tree.write("wipe.glsl", "vec4 animation(vec2 uv) { return canopy_sample(uv); }");
+  ConfigStore& store = canopy::configStore();
   store.setRootPath(tree.path("config.toml"), true);
   const std::string preset = "[effects.preset.wipe]\nkind = \"animation\"\nshader = \"wipe.glsl\"\n";
   tree.write("config.toml", preset + "[animation.workspaces]\nstyle = \"reveal\"\neffect = \"wipe\"\n");
@@ -1238,9 +1238,9 @@ UMBRIEL_TEST(workspaceRevealRequiresAnAnimationShader) {
   CHECK_EQ(store.config().animation.workspaces.style, "slide");
 }
 
-UMBRIEL_TEST(overviewWorkspaceWallpaperLoads) {
+CANOPY_TEST(overviewWorkspaceWallpaperLoads) {
   const TempConfig file;
-  ConfigStore& store = umbriel::configStore();
+  ConfigStore& store = canopy::configStore();
   store.setRootPath(file.path(), true);
 
   file.write("[overview]\nzoom = 0.5\n");
@@ -1253,9 +1253,9 @@ UMBRIEL_TEST(overviewWorkspaceWallpaperLoads) {
 }
 
 // Off by default so selecting from the overview keeps honoring layout.scrolling.center_focused.
-UMBRIEL_TEST(centerOnOverviewSelectLoads) {
+CANOPY_TEST(centerOnOverviewSelectLoads) {
   const TempConfig file;
-  ConfigStore& store = umbriel::configStore();
+  ConfigStore& store = canopy::configStore();
   store.setRootPath(file.path(), true);
 
   file.write("[layout.scrolling]\ncenter_focused = \"never\"\n");
@@ -1276,9 +1276,9 @@ center_on_overview_select = false
   CHECK(store.config().workspaceRules[0].layout.scrolling.centerOnOverviewSelect == false);
 }
 
-UMBRIEL_TEST(overviewShortcutConfigurationLoads) {
+CANOPY_TEST(overviewShortcutConfigurationLoads) {
   const TempConfig file;
-  ConfigStore& store = umbriel::configStore();
+  ConfigStore& store = canopy::configStore();
   store.setRootPath(file.path(), true);
 
   file.write("[overview]\nshortcuts = false\nshortcut_keys = \"asdf\"\n");
@@ -1287,9 +1287,9 @@ UMBRIEL_TEST(overviewShortcutConfigurationLoads) {
   CHECK_EQ(store.config().overview.shortcutKeys, std::string{"asdf"});
 }
 
-UMBRIEL_TEST(overviewShortcutKeysRejectInvalidValues) {
+CANOPY_TEST(overviewShortcutKeysRejectInvalidValues) {
   const TempConfig file;
-  ConfigStore& store = umbriel::configStore();
+  ConfigStore& store = canopy::configStore();
   store.setRootPath(file.path(), true);
 
   file.write("[overview]\nshortcut_keys = \"a\"\n");
@@ -1313,9 +1313,9 @@ UMBRIEL_TEST(overviewShortcutKeysRejectInvalidValues) {
   CHECK(containsDiagnostic(store, "expected string"));
 }
 
-UMBRIEL_TEST(colorsSectionOwnsEveryColor) {
+CANOPY_TEST(colorsSectionOwnsEveryColor) {
   const TempConfig file;
-  ConfigStore& store = umbriel::configStore();
+  ConfigStore& store = canopy::configStore();
   store.setRootPath(file.path(), true);
 
   file.write(
@@ -1339,9 +1339,9 @@ UMBRIEL_TEST(colorsSectionOwnsEveryColor) {
 }
 
 // Per-window border colors override the global [colors.border] defaults and are read from window rules.
-UMBRIEL_TEST(windowRuleBorderColorsLoad) {
+CANOPY_TEST(windowRuleBorderColorsLoad) {
   const TempConfig file;
-  ConfigStore& store = umbriel::configStore();
+  ConfigStore& store = canopy::configStore();
   store.setRootPath(file.path(), true);
 
   file.write(
@@ -1376,12 +1376,12 @@ UMBRIEL_TEST(windowRuleBorderColorsLoad) {
 
 // Colors are recognized only inside [colors]; anywhere else they are ordinary
 // unknown keys.
-UMBRIEL_TEST(colorKeysOutsideTheColorsSectionAreUnknown) {
+CANOPY_TEST(colorKeysOutsideTheColorsSectionAreUnknown) {
   const TempConfig file;
-  ConfigStore& store = umbriel::configStore();
+  ConfigStore& store = canopy::configStore();
   store.setRootPath(file.path(), true);
 
-  const umbriel::Config defaults;
+  const canopy::Config defaults;
   file.write("[appearance]\nborder_focused = \"#FFFFFFFF\"\nbackdrop_color = \"#000000FF\"\n");
   CHECK(store.reload().success);
   CHECK_EQ(store.config().colors.border.focused[0], defaults.colors.border.focused[0]);
@@ -1395,11 +1395,11 @@ UMBRIEL_TEST(colorKeysOutsideTheColorsSectionAreUnknown) {
   CHECK(containsDiagnostic(store, "overview.workspace_background"));
 }
 
-UMBRIEL_TEST(colorsRejectInvalidValues) {
+CANOPY_TEST(colorsRejectInvalidValues) {
   const TempConfig file;
-  ConfigStore& store = umbriel::configStore();
+  ConfigStore& store = canopy::configStore();
   store.setRootPath(file.path(), true);
-  const umbriel::Config defaults;
+  const canopy::Config defaults;
 
   file.write("[colors.overview]\nbadge = \"not-a-color\"\n");
   CHECK(store.reload().success);
@@ -1407,9 +1407,9 @@ UMBRIEL_TEST(colorsRejectInvalidValues) {
   CHECK(containsDiagnostic(store, "colors.overview.badge (invalid color"));
 }
 
-UMBRIEL_TEST(cornerRadiusClampsToItsRange) {
+CANOPY_TEST(cornerRadiusClampsToItsRange) {
   const TempConfig file;
-  ConfigStore& store = umbriel::configStore();
+  ConfigStore& store = canopy::configStore();
   store.setRootPath(file.path(), true);
 
   file.write("[appearance]\ncorner_radius = 64\n");
@@ -1423,9 +1423,9 @@ UMBRIEL_TEST(cornerRadiusClampsToItsRange) {
   CHECK(containsDiagnostic(store, "appearance.corner_radius = 500 out of range, clamped to 100"));
 }
 
-UMBRIEL_TEST(middleClickPasteLoadsAndDefaultsEnabled) {
+CANOPY_TEST(middleClickPasteLoadsAndDefaultsEnabled) {
   const TempConfig file;
-  ConfigStore& store = umbriel::configStore();
+  ConfigStore& store = canopy::configStore();
   store.setRootPath(file.path(), true);
 
   file.write("[input]\nmiddle_click_paste = false\n");
@@ -1441,9 +1441,9 @@ UMBRIEL_TEST(middleClickPasteLoadsAndDefaultsEnabled) {
   CHECK(store.config().input.middleClickPaste);
 }
 
-UMBRIEL_TEST(windowDragToggleReadsItsVocabularyAndDefaultsOff) {
+CANOPY_TEST(windowDragToggleReadsItsVocabularyAndDefaultsOff) {
   const TempConfig file;
-  ConfigStore& store = umbriel::configStore();
+  ConfigStore& store = canopy::configStore();
   store.setRootPath(file.path(), true);
 
   file.write("[input]\nwindow_drag_toggle = \"floating\"\n");
@@ -1469,9 +1469,9 @@ UMBRIEL_TEST(windowDragToggleReadsItsVocabularyAndDefaultsOff) {
   CHECK(containsDiagnostic(store, "ignoring input.window_drag_toggle"));
 }
 
-UMBRIEL_TEST(modRightDoubleClickReadsItsVocabularyAndDefaultsOff) {
+CANOPY_TEST(modRightDoubleClickReadsItsVocabularyAndDefaultsOff) {
   const TempConfig file;
-  ConfigStore& store = umbriel::configStore();
+  ConfigStore& store = canopy::configStore();
   store.setRootPath(file.path(), true);
 
   file.write("[input]\nmod_right_double_click = \"maximize\"\n");
@@ -1493,9 +1493,9 @@ UMBRIEL_TEST(modRightDoubleClickReadsItsVocabularyAndDefaultsOff) {
   CHECK(containsDiagnostic(store, "ignoring input.mod_right_double_click"));
 }
 
-UMBRIEL_TEST(hoverRaisesLoadsAndDefaultsEnabled) {
+CANOPY_TEST(hoverRaisesLoadsAndDefaultsEnabled) {
   const TempConfig file;
-  ConfigStore& store = umbriel::configStore();
+  ConfigStore& store = canopy::configStore();
   store.setRootPath(file.path(), true);
 
   file.write("[input.focus]\nhover_raises = false\n");
@@ -1512,7 +1512,7 @@ UMBRIEL_TEST(hoverRaisesLoadsAndDefaultsEnabled) {
   CHECK(store.config().input.focus.hoverRaises);
 }
 
-UMBRIEL_TEST(outputNamesDifferingOnlyByCaseAreRejectedAsDuplicates) {
+CANOPY_TEST(outputNamesDifferingOnlyByCaseAreRejectedAsDuplicates) {
   const TempConfig file;
   file.write(R"(
 [output.DP-1]
@@ -1522,16 +1522,16 @@ scale = 1.5
 scale = 2.0
 )");
 
-  ConfigStore& store = umbriel::configStore();
+  ConfigStore& store = canopy::configStore();
   store.setRootPath(file.path(), true);
   CHECK(store.reload().success);
   CHECK_EQ(store.config().outputs.size(), size_t{1});
   CHECK(containsDiagnostic(store, "duplicate output section"));
 }
 
-UMBRIEL_TEST(outputVrrPolicyLoadsAndDefaultsDisabled) {
+CANOPY_TEST(outputVrrPolicyLoadsAndDefaultsDisabled) {
   const TempConfig file;
-  ConfigStore& store = umbriel::configStore();
+  ConfigStore& store = canopy::configStore();
   store.setRootPath(file.path(), true);
 
   file.write("[output.DP-1]\nvrr = \"fullscreen\"\n");
@@ -1557,9 +1557,9 @@ UMBRIEL_TEST(outputVrrPolicyLoadsAndDefaultsDisabled) {
   CHECK(store.config().outputs[0].vrr == VrrMode::Disabled);
 }
 
-UMBRIEL_TEST(outputTearingPermissionLoadsAndDefaultsDisabled) {
+CANOPY_TEST(outputTearingPermissionLoadsAndDefaultsDisabled) {
   const TempConfig file;
-  ConfigStore& store = umbriel::configStore();
+  ConfigStore& store = canopy::configStore();
   store.setRootPath(file.path(), true);
 
   file.write("[output.DP-1]\ntearing = true\n");
@@ -1581,9 +1581,9 @@ UMBRIEL_TEST(outputTearingPermissionLoadsAndDefaultsDisabled) {
   CHECK(containsDiagnostic(store, "ignoring output.DP-1.tearing (expected boolean)"));
 }
 
-UMBRIEL_TEST(outputDirectScanoutPolicyLoadsAndDefaultsEnabled) {
+CANOPY_TEST(outputDirectScanoutPolicyLoadsAndDefaultsEnabled) {
   const TempConfig file;
-  ConfigStore& store = umbriel::configStore();
+  ConfigStore& store = canopy::configStore();
   store.setRootPath(file.path(), true);
 
   file.write("[output.DP-1]\ndirect_scanout = false\n");
@@ -1605,9 +1605,9 @@ UMBRIEL_TEST(outputDirectScanoutPolicyLoadsAndDefaultsEnabled) {
   CHECK(containsDiagnostic(store, "ignoring output.DP-1.direct_scanout (expected boolean)"));
 }
 
-UMBRIEL_TEST(outputHdrPolicyAndSdrWhiteLoad) {
+CANOPY_TEST(outputHdrPolicyAndSdrWhiteLoad) {
   const TempConfig file;
-  ConfigStore& store = umbriel::configStore();
+  ConfigStore& store = canopy::configStore();
   store.setRootPath(file.path(), true);
 
   file.write("[output.DP-1]\nhdr = \"on\"\nsdr_white = 300\n");
@@ -1637,9 +1637,9 @@ UMBRIEL_TEST(outputHdrPolicyAndSdrWhiteLoad) {
   CHECK(containsDiagnostic(store, "ignoring output.DP-1.hdr"));
 }
 
-UMBRIEL_TEST(outputSdrTransferLoadsAndResetsToGamma22) {
+CANOPY_TEST(outputSdrTransferLoadsAndResetsToGamma22) {
   const TempConfig file;
-  ConfigStore& store = umbriel::configStore();
+  ConfigStore& store = canopy::configStore();
   store.setRootPath(file.path(), true);
 
   file.write("[output.DP-1]\n");
@@ -1675,9 +1675,9 @@ UMBRIEL_TEST(outputSdrTransferLoadsAndResetsToGamma22) {
   CHECK(store.config().outputs[0].sdrTransfer == SdrTransfer::Gamma22);
 }
 
-UMBRIEL_TEST(outputSdrTransferRejectsInvalidValuesWithoutUnknownKeyWarnings) {
+CANOPY_TEST(outputSdrTransferRejectsInvalidValuesWithoutUnknownKeyWarnings) {
   const TempConfig file;
-  ConfigStore& store = umbriel::configStore();
+  ConfigStore& store = canopy::configStore();
   store.setRootPath(file.path(), true);
 
   for (const char* value : {"true", "1", "1.0", "[]", "{}", "\"gamma2.2\"", "\"sRGB\"", "\"linear\""}) {
@@ -1696,9 +1696,9 @@ UMBRIEL_TEST(outputSdrTransferRejectsInvalidValuesWithoutUnknownKeyWarnings) {
   }
 }
 
-UMBRIEL_TEST(outputBitDepthLoadsAndDefaults8) {
+CANOPY_TEST(outputBitDepthLoadsAndDefaults8) {
   const TempConfig file;
-  ConfigStore& store = umbriel::configStore();
+  ConfigStore& store = canopy::configStore();
   store.setRootPath(file.path(), true);
 
   file.write("[output.DP-1]\n");
@@ -1725,9 +1725,9 @@ UMBRIEL_TEST(outputBitDepthLoadsAndDefaults8) {
   CHECK(containsDiagnostic(store, "ignoring output.DP-1.bit_depth"));
 }
 
-UMBRIEL_TEST(windowOutputPoliciesLoadAndRejectInvalidValues) {
+CANOPY_TEST(windowOutputPoliciesLoadAndRejectInvalidValues) {
   const TempConfig file;
-  ConfigStore& store = umbriel::configStore();
+  ConfigStore& store = canopy::configStore();
   store.setRootPath(file.path(), true);
 
   file.write("[[window_rule]]\nmatch.app_id = \"^game$\"\nvrr = \"always\"\n");
@@ -1751,16 +1751,16 @@ UMBRIEL_TEST(windowOutputPoliciesLoadAndRejectInvalidValues) {
   CHECK(!store.config().windowRules[0].hdr);
 }
 
-UMBRIEL_TEST(windowRuleWorkspaceTargetPreservesIntegerAndStringSelectors) {
+CANOPY_TEST(windowRuleWorkspaceTargetPreservesIntegerAndStringSelectors) {
   const TempConfig file;
-  ConfigStore& store = umbriel::configStore();
+  ConfigStore& store = canopy::configStore();
   store.setRootPath(file.path(), true);
 
   file.write("[[window_rule]]\ndefault_workspace = 2\n");
   CHECK(store.reload().success);
   CHECK_EQ(store.config().windowRules.size(), size_t{1});
   const auto& positionTarget = store.config().windowRules[0].defaultWorkspace;
-  const auto* position = positionTarget ? std::get_if<umbriel::WorkspaceIndex>(&*positionTarget) : nullptr;
+  const auto* position = positionTarget ? std::get_if<canopy::WorkspaceIndex>(&*positionTarget) : nullptr;
   CHECK(position != nullptr);
   CHECK(position != nullptr && position->value == 2);
   CHECK(!containsDiagnostic(store, "unknown key window_rule.default_workspace"));
@@ -1769,7 +1769,7 @@ UMBRIEL_TEST(windowRuleWorkspaceTargetPreservesIntegerAndStringSelectors) {
   CHECK(store.reload().success);
   CHECK_EQ(store.config().windowRules.size(), size_t{1});
   const auto& limitTarget = store.config().windowRules[0].defaultWorkspace;
-  const auto* limit = limitTarget ? std::get_if<umbriel::WorkspaceIndex>(&*limitTarget) : nullptr;
+  const auto* limit = limitTarget ? std::get_if<canopy::WorkspaceIndex>(&*limitTarget) : nullptr;
   CHECK(limit != nullptr);
   CHECK(limit != nullptr && limit->value == 64);
 
@@ -1777,7 +1777,7 @@ UMBRIEL_TEST(windowRuleWorkspaceTargetPreservesIntegerAndStringSelectors) {
   CHECK(store.reload().success);
   CHECK_EQ(store.config().windowRules.size(), size_t{1});
   const auto& nameTarget = store.config().windowRules[0].defaultWorkspace;
-  const auto* name = nameTarget ? std::get_if<umbriel::WorkspaceName>(&*nameTarget) : nullptr;
+  const auto* name = nameTarget ? std::get_if<canopy::WorkspaceName>(&*nameTarget) : nullptr;
   CHECK(name != nullptr);
   CHECK(name != nullptr && name->value == "CHAT");
 
@@ -1787,7 +1787,7 @@ UMBRIEL_TEST(windowRuleWorkspaceTargetPreservesIntegerAndStringSelectors) {
   CHECK(store.reload().success);
   CHECK_EQ(store.config().windowRules.size(), size_t{1});
   const auto& numericNameTarget = store.config().windowRules[0].defaultWorkspace;
-  const auto* numericName = numericNameTarget ? std::get_if<umbriel::WorkspaceName>(&*numericNameTarget) : nullptr;
+  const auto* numericName = numericNameTarget ? std::get_if<canopy::WorkspaceName>(&*numericNameTarget) : nullptr;
   CHECK(numericName != nullptr);
   CHECK(numericName != nullptr && numericName->value == "2");
 
@@ -1813,9 +1813,9 @@ UMBRIEL_TEST(windowRuleWorkspaceTargetPreservesIntegerAndStringSelectors) {
   CHECK(!store.config().windowRules[0].defaultWorkspace.has_value());
 }
 
-UMBRIEL_TEST(windowRuleDefaultScratchpadTargetsConfiguredInventory) {
+CANOPY_TEST(windowRuleDefaultScratchpadTargetsConfiguredInventory) {
   const TempConfig file;
-  ConfigStore& store = umbriel::configStore();
+  ConfigStore& store = canopy::configStore();
   store.setRootPath(file.path(), true);
 
   file.write("[[window_rule]]\ndefault_scratchpad = \"terminal\"\n[[scratchpad]]\nname = \"terminal\"\n");
@@ -1860,9 +1860,9 @@ UMBRIEL_TEST(windowRuleDefaultScratchpadTargetsConfiguredInventory) {
   CHECK(!store.config().windowRules[0].defaultScratchpad);
 }
 
-UMBRIEL_TEST(securityContextRulesLoadAndKeepTheManagerBlocked) {
+CANOPY_TEST(securityContextRulesLoadAndKeepTheManagerBlocked) {
   const TempConfig file;
-  ConfigStore& store = umbriel::configStore();
+  ConfigStore& store = canopy::configStore();
   store.setRootPath(file.path(), true);
 
   file.write(
@@ -1927,9 +1927,9 @@ UMBRIEL_TEST(securityContextRulesLoadAndKeepTheManagerBlocked) {
   CHECK(containsDiagnostic(store, "ignoring security_context_rule (allow_globals is empty)"));
 }
 
-UMBRIEL_TEST(windowContentTypeMatcherLoadsFixedVocabulary) {
+CANOPY_TEST(windowContentTypeMatcherLoadsFixedVocabulary) {
   const TempConfig file;
-  ConfigStore& store = umbriel::configStore();
+  ConfigStore& store = canopy::configStore();
   store.setRootPath(file.path(), true);
 
   const auto checkValue = [&](const std::string& value, ContentType expected) {
@@ -1965,9 +1965,9 @@ UMBRIEL_TEST(windowContentTypeMatcherLoadsFixedVocabulary) {
   CHECK(store.config().windowRules.empty());
 }
 
-UMBRIEL_TEST(windowStartupMatcherLoadsBoolean) {
+CANOPY_TEST(windowStartupMatcherLoadsBoolean) {
   const TempConfig file;
-  ConfigStore& store = umbriel::configStore();
+  ConfigStore& store = canopy::configStore();
   store.setRootPath(file.path(), true);
 
   file.write("[[window_rule]]\nmatch.at_startup = true\nopacity = 0.9\n");
@@ -1988,15 +1988,15 @@ UMBRIEL_TEST(windowStartupMatcherLoadsBoolean) {
   CHECK(!containsDiagnostic(store, "unknown key window_rule.opacity"));
 }
 
-UMBRIEL_TEST(layerMatchersLoadLayerAndStartup) {
+CANOPY_TEST(layerMatchersLoadLayerAndStartup) {
   const TempConfig file;
-  ConfigStore& store = umbriel::configStore();
+  ConfigStore& store = canopy::configStore();
   store.setRootPath(file.path(), true);
 
   file.write("[[layer_rule]]\nmatch.layer = \"top\"\nmatch.at_startup = true\nblur = true\n");
   CHECK(store.reload().success);
   CHECK_EQ(store.config().layerRules.size(), size_t{1});
-  CHECK(store.config().layerRules[0].matchLayer == umbriel::LayerShellLayer::Top);
+  CHECK(store.config().layerRules[0].matchLayer == canopy::LayerShellLayer::Top);
   CHECK(store.config().layerRules[0].matchAtStartup == true);
   CHECK(!containsDiagnostic(store, "unknown key layer_rule.match.layer"));
   CHECK(!containsDiagnostic(store, "unknown key layer_rule.match.at_startup"));
@@ -2007,9 +2007,9 @@ UMBRIEL_TEST(layerMatchersLoadLayerAndStartup) {
   CHECK(store.config().layerRules.empty());
 }
 
-UMBRIEL_TEST(windowStateMatchersLoadBooleans) {
+CANOPY_TEST(windowStateMatchersLoadBooleans) {
   const TempConfig file;
-  ConfigStore& store = umbriel::configStore();
+  ConfigStore& store = canopy::configStore();
   store.setRootPath(file.path(), true);
 
   file.write(
@@ -2030,9 +2030,9 @@ UMBRIEL_TEST(windowStateMatchersLoadBooleans) {
   CHECK(!containsDiagnostic(store, "unknown key window_rule.match.is_scratchpad"));
 }
 
-UMBRIEL_TEST(maximizedToEdgesMatcherLoadsStrictBoolean) {
+CANOPY_TEST(maximizedToEdgesMatcherLoadsStrictBoolean) {
   const TempConfig file;
-  ConfigStore& store = umbriel::configStore();
+  ConfigStore& store = canopy::configStore();
   store.setRootPath(file.path(), true);
   file.write("[[window_rule]]\nmatch.is_maximized_to_edges = true\ntitle_bar = \"off\"\n");
   CHECK(store.reload().success);
@@ -2048,15 +2048,15 @@ UMBRIEL_TEST(maximizedToEdgesMatcherLoadsStrictBoolean) {
   CHECK(!containsDiagnostic(store, "unknown key window_rule.match.is_maximized_to_edges"));
 }
 
-UMBRIEL_TEST(windowXdgTagMatcherLoadsRegexAndRejectsInvalidValues) {
+CANOPY_TEST(windowXdgTagMatcherLoadsRegexAndRejectsInvalidValues) {
   const TempConfig file;
-  ConfigStore& store = umbriel::configStore();
+  ConfigStore& store = canopy::configStore();
   store.setRootPath(file.path(), true);
 
   file.write("[[window_rule]]\nmatch.xdg_tag = \"^(game-launcher|game-running)$\"\nopacity = 0.9\n");
   CHECK(store.reload().success);
   CHECK_EQ(store.config().windowRules.size(), size_t{1});
-  const umbriel::RegexPatterns& tag = store.config().windowRules[0].xdgTagPatterns;
+  const canopy::RegexPatterns& tag = store.config().windowRules[0].xdgTagPatterns;
   CHECK(tag.patterns == std::vector<std::string>{"^(game-launcher|game-running)$"});
   CHECK(std::regex_search("game-launcher", tag.regexes[0]));
   CHECK(std::regex_search("game-running", tag.regexes[0]));
@@ -2108,9 +2108,9 @@ UMBRIEL_TEST(windowXdgTagMatcherLoadsRegexAndRejectsInvalidValues) {
   CHECK(containsDiagnostic(store, "ignoring window_rule[0].match.app_id (expected array of strings)"));
 }
 
-UMBRIEL_TEST(windowTearingOverrideLoadsAsAnOptionalBoolean) {
+CANOPY_TEST(windowTearingOverrideLoadsAsAnOptionalBoolean) {
   const TempConfig file;
-  ConfigStore& store = umbriel::configStore();
+  ConfigStore& store = canopy::configStore();
   store.setRootPath(file.path(), true);
 
   file.write("[[window_rule]]\nmatch.app_id = \"^game$\"\ntearing = true\n");
@@ -2131,9 +2131,9 @@ UMBRIEL_TEST(windowTearingOverrideLoadsAsAnOptionalBoolean) {
   CHECK(!store.config().windowRules[0].allowTearing);
 }
 
-UMBRIEL_TEST(windowRuleFloatingSizeTablesLoadIndependentAxesAndClamp) {
+CANOPY_TEST(windowRuleFloatingSizeTablesLoadIndependentAxesAndClamp) {
   const TempConfig file;
-  ConfigStore& store = umbriel::configStore();
+  ConfigStore& store = canopy::configStore();
   store.setRootPath(file.path(), true);
 
   file.write(
@@ -2181,9 +2181,9 @@ UMBRIEL_TEST(windowRuleFloatingSizeTablesLoadIndependentAxesAndClamp) {
   CHECK(!store.config().windowRules[0].defaultScrollingExtent);
 }
 
-UMBRIEL_TEST(outputEnabledFlagParsesAndDefaultsTrue) {
+CANOPY_TEST(outputEnabledFlagParsesAndDefaultsTrue) {
   const TempConfig file;
-  ConfigStore& store = umbriel::configStore();
+  ConfigStore& store = canopy::configStore();
   store.setRootPath(file.path(), true);
 
   file.write("[output.DP-1]\nenabled = false\n");
@@ -2205,9 +2205,9 @@ UMBRIEL_TEST(outputEnabledFlagParsesAndDefaultsTrue) {
   CHECK(containsDiagnostic(store, "ignoring output.DP-1.enabled"));
 }
 
-UMBRIEL_TEST(outputWorkspaceInventoryPreservesCountAndNames) {
+CANOPY_TEST(outputWorkspaceInventoryPreservesCountAndNames) {
   const TempConfig file;
-  ConfigStore& store = umbriel::configStore();
+  ConfigStore& store = canopy::configStore();
   store.setRootPath(file.path(), true);
 
   file.write("[output.DP-1]\nworkspaces = 9\n[output.DP-2]\nworkspaces = [\"3\", \"CHAT\"]\n");
@@ -2226,9 +2226,9 @@ UMBRIEL_TEST(outputWorkspaceInventoryPreservesCountAndNames) {
   }
 }
 
-UMBRIEL_TEST(outputMinWorkspacesLoadsAndRequiresDynamicWorkspaces) {
+CANOPY_TEST(outputMinWorkspacesLoadsAndRequiresDynamicWorkspaces) {
   const TempConfig file;
-  ConfigStore& store = umbriel::configStore();
+  ConfigStore& store = canopy::configStore();
   store.setRootPath(file.path(), true);
 
   file.write("[output.DP-1]\nmin_workspaces = 4\n");
@@ -2257,9 +2257,9 @@ UMBRIEL_TEST(outputMinWorkspacesLoadsAndRequiresDynamicWorkspaces) {
 
 // The wrap switch is an ordinary per-output boolean: it defaults off, survives a
 // reload without the key, and rejects a non-boolean the way its neighbours do.
-UMBRIEL_TEST(outputCyclicWorkspacesLoadsAndDefaultsOff) {
+CANOPY_TEST(outputCyclicWorkspacesLoadsAndDefaultsOff) {
   const TempConfig file;
-  ConfigStore& store = umbriel::configStore();
+  ConfigStore& store = canopy::configStore();
   store.setRootPath(file.path(), true);
 
   file.write("[output.DP-1]\ncyclic_workspaces = true\n");
@@ -2281,9 +2281,9 @@ UMBRIEL_TEST(outputCyclicWorkspacesLoadsAndDefaultsOff) {
   CHECK(containsDiagnostic(store, "ignoring output.DP-1.cyclic_workspaces (expected boolean)"));
 }
 
-UMBRIEL_TEST(nvidiaSyncWorkaroundReloadsAndDefaultsOn) {
+CANOPY_TEST(nvidiaSyncWorkaroundReloadsAndDefaultsOn) {
   const TempConfig file;
-  ConfigStore& store = umbriel::configStore();
+  ConfigStore& store = canopy::configStore();
   store.setRootPath(file.path(), true);
 
   file.write("[general]\n");
@@ -2315,9 +2315,9 @@ UMBRIEL_TEST(nvidiaSyncWorkaroundReloadsAndDefaultsOn) {
   CHECK(!containsDiagnostic(store, "unknown key general.nvidia_sync_workaround"));
 }
 
-UMBRIEL_TEST(xwaylandPrimaryOutputLoadsAndCanBeRemoved) {
+CANOPY_TEST(xwaylandPrimaryOutputLoadsAndCanBeRemoved) {
   const TempConfig file;
-  ConfigStore& store = umbriel::configStore();
+  ConfigStore& store = canopy::configStore();
   store.setRootPath(file.path(), true);
 
   file.write("[general]\nxwayland_primary_output = \"DP-1\"\n");
@@ -2338,9 +2338,9 @@ UMBRIEL_TEST(xwaylandPrimaryOutputLoadsAndCanBeRemoved) {
   CHECK(store.config().general.xwaylandPrimaryOutput.empty());
 }
 
-UMBRIEL_TEST(outputFocusAtStartupLoadsAndDefaultsOff) {
+CANOPY_TEST(outputFocusAtStartupLoadsAndDefaultsOff) {
   const TempConfig file;
-  ConfigStore& store = umbriel::configStore();
+  ConfigStore& store = canopy::configStore();
   store.setRootPath(file.path(), true);
 
   file.write("[output.DP-1]\nfocus_at_startup = true\n");
@@ -2362,9 +2362,9 @@ UMBRIEL_TEST(outputFocusAtStartupLoadsAndDefaultsOff) {
   CHECK(containsDiagnostic(store, "ignoring output.DP-1.focus_at_startup (expected boolean)"));
 }
 
-UMBRIEL_TEST(dynamicNamedWorkspaceDeclarationsReserveEmptySentinelCapacity) {
+CANOPY_TEST(dynamicNamedWorkspaceDeclarationsReserveEmptySentinelCapacity) {
   const TempConfig file;
-  ConfigStore& store = umbriel::configStore();
+  ConfigStore& store = canopy::configStore();
   store.setRootPath(file.path(), true);
 
   const auto declarations = [](size_t count, std::string_view prefix, std::string_view output = {}) {
@@ -2397,7 +2397,7 @@ UMBRIEL_TEST(dynamicNamedWorkspaceDeclarationsReserveEmptySentinelCapacity) {
   CHECK(store.reload().success);
 }
 
-UMBRIEL_TEST(semanticColorsLoadFromTheirOwnSection) {
+CANOPY_TEST(semanticColorsLoadFromTheirOwnSection) {
   const TempConfig file;
   file.write(R"(
 [colors]
@@ -2410,9 +2410,9 @@ warning = "#51525354"
 error = "#61626364"
 )");
 
-  ConfigStore& store = umbriel::configStore();
+  ConfigStore& store = canopy::configStore();
   store.setRootPath(file.path(), true);
-  const umbriel::ConfigReloadResult result = store.reload();
+  const canopy::ConfigReloadResult result = store.reload();
   const auto& colors = store.config().colors;
 
   CHECK(result.success);
@@ -2427,20 +2427,20 @@ error = "#61626364"
   CHECK(!containsDiagnostic(store, "unknown key colors"));
 }
 
-UMBRIEL_TEST(missingIncludesRemainPendingUntilTheyLoad) {
+CANOPY_TEST(missingIncludesRemainPendingUntilTheyLoad) {
   const TempConfig file;
   file.write("[include]\nfiles = [\"" + file.includeName() + "\"]\n");
 
-  ConfigStore& store = umbriel::configStore();
+  ConfigStore& store = canopy::configStore();
   store.setRootPath(file.path(), true);
-  const umbriel::ConfigReloadResult missing = store.reload();
+  const canopy::ConfigReloadResult missing = store.reload();
 
   CHECK(missing.success);
   CHECK(store.missingIncludes());
   CHECK(containsDiagnostic(store, "include not found"));
 
   file.writeInclude("[colors]\naccent_primary = \"#123456FF\"\n");
-  const umbriel::ConfigReloadResult loaded = store.reload();
+  const canopy::ConfigReloadResult loaded = store.reload();
 
   CHECK(loaded.success);
   CHECK(!store.missingIncludes());
@@ -2448,18 +2448,18 @@ UMBRIEL_TEST(missingIncludesRemainPendingUntilTheyLoad) {
   CHECK_EQ(store.config().colors.accentPrimary[0], 18.0F / 255.0F);
 }
 
-UMBRIEL_TEST(unknownIncludeKeysRejectReload) {
+CANOPY_TEST(unknownIncludeKeysRejectReload) {
   // The merge erases `include` before the config readers run, so the merge is the only place that can report a typo in
   // this section. Every file's own `include` table is checked, not just the root's.
   const TempConfig file;
   file.write("[include]\nfiles = [\"" + file.includeName() + "\"]\ndirs = [\"themes\"]\n");
   file.writeInclude("[include]\npaths = []\n");
 
-  ConfigStore& store = umbriel::configStore();
+  ConfigStore& store = canopy::configStore();
   store.setRootPath(file.path(), true);
-  const umbriel::Config previous = store.config();
+  const canopy::Config previous = store.config();
   const uint64_t generation = store.generation();
-  const umbriel::ConfigReloadResult loaded = store.reload();
+  const canopy::ConfigReloadResult loaded = store.reload();
 
   CHECK(!loaded.success);
   CHECK(store.config() == previous);
@@ -2469,14 +2469,14 @@ UMBRIEL_TEST(unknownIncludeKeysRejectReload) {
   CHECK(!containsDiagnostic(store, "unknown key include.files"));
 }
 
-UMBRIEL_TEST(missingOptionalIncludesAreSilentWatchedAndLoadWhenCreated) {
+CANOPY_TEST(missingOptionalIncludesAreSilentWatchedAndLoadWhenCreated) {
   const TempConfigTree tree;
   const std::filesystem::path optional = tree.path("generated/colors.toml");
   tree.write("config.toml", "[include.optional]\nfiles = [\"generated/colors.toml\"]\n");
 
-  ConfigStore& store = umbriel::configStore();
+  ConfigStore& store = canopy::configStore();
   store.setRootPath(tree.path("config.toml"), true);
-  const umbriel::ConfigReloadResult missing = store.reload();
+  const canopy::ConfigReloadResult missing = store.reload();
 
   CHECK(missing.success);
   CHECK(!store.missingIncludes());
@@ -2484,7 +2484,7 @@ UMBRIEL_TEST(missingOptionalIncludesAreSilentWatchedAndLoadWhenCreated) {
   CHECK(std::ranges::find(store.watchPaths(), optional) != store.watchPaths().end());
 
   tree.write("generated/colors.toml", "[colors]\naccent_primary = \"#123456FF\"\n");
-  const umbriel::ConfigReloadResult loaded = store.reload();
+  const canopy::ConfigReloadResult loaded = store.reload();
 
   CHECK(loaded.success);
   CHECK(!store.missingIncludes());
@@ -2492,29 +2492,29 @@ UMBRIEL_TEST(missingOptionalIncludesAreSilentWatchedAndLoadWhenCreated) {
   CHECK_EQ(store.config().colors.accentPrimary[0], 18.0F / 255.0F);
 }
 
-UMBRIEL_TEST(optionalIncludesExpandPathsAndApplyAfterRequiredIncludes) {
+CANOPY_TEST(optionalIncludesExpandPathsAndApplyAfterRequiredIncludes) {
   const TempConfigTree tree;
   const ScopedEnvironment home("HOME", tree.path("home").string());
-  const ScopedEnvironment generated("UMBRIEL_OPTIONAL_INCLUDE", tree.path("generated.toml").string());
+  const ScopedEnvironment generated("CANOPY_OPTIONAL_INCLUDE", tree.path("generated.toml").string());
   tree.write("required.toml", "[layout]\ngap = 11\n");
   tree.write("generated.toml", "[layout]\ngap = 22\n");
   tree.write("home/override.toml", "[layout]\ngap = 33\n");
   tree.write(
       "config.toml",
       "[include]\nfiles = [\"required.toml\"]\n"
-      "[include.optional]\nfiles = [\"$UMBRIEL_OPTIONAL_INCLUDE\", \"~/override.toml\"]\n"
+      "[include.optional]\nfiles = [\"$CANOPY_OPTIONAL_INCLUDE\", \"~/override.toml\"]\n"
   );
 
-  ConfigStore& store = umbriel::configStore();
+  ConfigStore& store = canopy::configStore();
   store.setRootPath(tree.path("config.toml"), true);
-  const umbriel::ConfigReloadResult loaded = store.reload();
+  const canopy::ConfigReloadResult loaded = store.reload();
 
   CHECK(loaded.success);
   CHECK_EQ(store.config().layout.gap, 33);
   CHECK(!containsDiagnostic(store, "unknown key include.optional"));
 }
 
-UMBRIEL_TEST(malformedOptionalIncludeRejectsReload) {
+CANOPY_TEST(malformedOptionalIncludeRejectsReload) {
   const TempConfigTree tree;
   tree.write(
       "config.toml",
@@ -2522,13 +2522,13 @@ UMBRIEL_TEST(malformedOptionalIncludeRejectsReload) {
       "[include.optional]\nfiles = [\"generated.toml\"]\n"
   );
 
-  ConfigStore& store = umbriel::configStore();
+  ConfigStore& store = canopy::configStore();
   store.setRootPath(tree.path("config.toml"), true);
   CHECK(store.reload().success);
   const uint64_t generation = store.generation();
 
   tree.write("generated.toml", "[layout\n");
-  const umbriel::ConfigReloadResult malformed = store.reload();
+  const canopy::ConfigReloadResult malformed = store.reload();
 
   CHECK(!malformed.success);
   CHECK_EQ(store.generation(), generation);
@@ -2536,7 +2536,7 @@ UMBRIEL_TEST(malformedOptionalIncludeRejectsReload) {
   CHECK(!store.diagnostics().empty());
 }
 
-UMBRIEL_TEST(mainFileOverridesIncludedFiles) {
+CANOPY_TEST(mainFileOverridesIncludedFiles) {
   // Noctalia's rendered theme lands in an include file; the user's root config must win on conflicts while still
   // picking up keys the include alone provides. This is what lets users override generated theme colors.
   const TempConfig file;
@@ -2552,16 +2552,16 @@ files = [")"
   );
   file.writeInclude("[colors]\naccent_primary = \"#123456FF\"\nbackground = \"#222222FF\"\n");
 
-  ConfigStore& store = umbriel::configStore();
+  ConfigStore& store = canopy::configStore();
   store.setRootPath(file.path(), true);
-  const umbriel::ConfigReloadResult loaded = store.reload();
+  const canopy::ConfigReloadResult loaded = store.reload();
 
   CHECK(loaded.success);
   CHECK_EQ(store.config().colors.accentPrimary[0], 171.0F / 255.0F);
   CHECK_EQ(store.config().colors.background[0], 34.0F / 255.0F);
 }
 
-UMBRIEL_TEST(ruleCollectionsAccumulateAcrossIncludesWhilePlainArraysReplace) {
+CANOPY_TEST(ruleCollectionsAccumulateAcrossIncludesWhilePlainArraysReplace) {
   // Rules are a collection every file contributes to, so an include and the including file both apply, in merge
   // order. Every other array is one value: appending would grow a fixed-arity array past what its reader accepts and
   // would make an overridden autostart list run the include's commands as well.
@@ -2581,18 +2581,18 @@ UMBRIEL_TEST(ruleCollectionsAccumulateAcrossIncludesWhilePlainArraysReplace) {
       "[[window_rule]]\nmatch.app_id = \"^from-root$\"\n"
   );
 
-  ConfigStore& store = umbriel::configStore();
+  ConfigStore& store = canopy::configStore();
   store.setRootPath(tree.path("config.toml"), true);
-  const umbriel::ConfigReloadResult loaded = store.reload();
+  const canopy::ConfigReloadResult loaded = store.reload();
 
   std::vector<std::string> patterns;
-  for (const umbriel::WindowRule& rule : store.config().windowRules) {
+  for (const canopy::WindowRule& rule : store.config().windowRules) {
     for (const std::string& pattern : rule.appIdPatterns.patterns) {
       patterns.push_back(pattern);
     }
   }
   std::vector<std::string> namespaces;
-  for (const umbriel::LayerRule& rule : store.config().layerRules) {
+  for (const canopy::LayerRule& rule : store.config().layerRules) {
     for (const std::string& pattern : rule.namespacePatterns.patterns) {
       namespaces.push_back(pattern);
     }
@@ -2602,7 +2602,7 @@ UMBRIEL_TEST(ruleCollectionsAccumulateAcrossIncludesWhilePlainArraysReplace) {
   const std::vector<std::string> expectedAutostart{"from-root"};
   const std::array<int, 2> expectedPosition{3072, 0};
   const auto output =
-      std::ranges::find_if(store.config().outputs, [](const umbriel::OutputRule& rule) { return rule.name == "DP-1"; });
+      std::ranges::find_if(store.config().outputs, [](const canopy::OutputRule& rule) { return rule.name == "DP-1"; });
   const bool foundOutput = output != store.config().outputs.end();
 
   CHECK(loaded.success);
@@ -2616,7 +2616,7 @@ UMBRIEL_TEST(ruleCollectionsAccumulateAcrossIncludesWhilePlainArraysReplace) {
 
 // Decoration keys are read from a window rule like every other effect key, so a
 // per-window frame, corner radius, and shadow reach the resolve path.
-UMBRIEL_TEST(windowRuleDecorationKeysAreRead) {
+CANOPY_TEST(windowRuleDecorationKeysAreRead) {
   const TempConfig file;
   file.write(
       "[[window_rule]]\n"
@@ -2627,16 +2627,16 @@ UMBRIEL_TEST(windowRuleDecorationKeysAreRead) {
       "shadow = false\n"
   );
 
-  ConfigStore& store = umbriel::configStore();
+  ConfigStore& store = canopy::configStore();
   store.setRootPath(file.path(), true);
-  const umbriel::ConfigReloadResult loaded = store.reload();
+  const canopy::ConfigReloadResult loaded = store.reload();
 
   CHECK(loaded.success);
   CHECK_EQ(store.config().windowRules.size(), size_t{1});
   if (store.config().windowRules.empty()) {
     return;
   }
-  const umbriel::WindowRule& rule = store.config().windowRules.front();
+  const canopy::WindowRule& rule = store.config().windowRules.front();
   CHECK(rule.borderWidth && *rule.borderWidth == 0);
   CHECK(rule.outerBorderWidth && *rule.outerBorderWidth == 6);
   CHECK(rule.cornerRadius && *rule.cornerRadius == 0);
@@ -2644,8 +2644,8 @@ UMBRIEL_TEST(windowRuleDecorationKeysAreRead) {
   CHECK(store.diagnostics().empty());
 }
 
-UMBRIEL_TEST(windowOpacityAnimationUsesBorderDefaultsAndIndependentTiming) {
-  const umbriel::Config defaults;
+CANOPY_TEST(windowOpacityAnimationUsesBorderDefaultsAndIndependentTiming) {
+  const canopy::Config defaults;
   CHECK(defaults.animation.windowsOpacity.enabled);
   CHECK_EQ(defaults.animation.windowsOpacity.durationMs, defaults.animation.border.durationMs);
   CHECK(defaults.animation.windowsOpacity.curve == defaults.animation.border.curve);
@@ -2654,46 +2654,46 @@ UMBRIEL_TEST(windowOpacityAnimationUsesBorderDefaultsAndIndependentTiming) {
       "[animation]\nduration_ms = 800\ncurve = 'linear'\n"
       "[animation.windows_opacity]\nenabled = false\nduration_ms = 350\ncurve = 'easeinoutsine'\n"
   );
-  ConfigStore& store = umbriel::configStore();
+  ConfigStore& store = canopy::configStore();
   store.setRootPath(file.path(), true);
   CHECK(store.reload().success);
   CHECK(!store.config().animation.windowsOpacity.enabled);
   CHECK_EQ(store.config().animation.windowsOpacity.durationMs, 350);
-  CHECK(store.config().animation.windowsOpacity.curve.easing == umbriel::Easing::EaseInOutSine);
+  CHECK(store.config().animation.windowsOpacity.curve.easing == canopy::Easing::EaseInOutSine);
   CHECK_EQ(store.config().animation.border.durationMs, 800);
-  CHECK(store.config().animation.border.curve.easing == umbriel::Easing::Linear);
+  CHECK(store.config().animation.border.curve.easing == canopy::Easing::Linear);
   CHECK(store.diagnostics().empty());
 
   file.write("[animation]\nduration_ms = 600\ncurve = 'easeinquad'\n");
   CHECK(store.reload().success);
   CHECK(store.config().animation.windowsOpacity.enabled);
   CHECK_EQ(store.config().animation.windowsOpacity.durationMs, 600);
-  CHECK(store.config().animation.windowsOpacity.curve.easing == umbriel::Easing::EaseInQuad);
+  CHECK(store.config().animation.windowsOpacity.curve.easing == canopy::Easing::EaseInQuad);
 
   file.write(
       "[animation.springs]\nsoft = { damping = 0.8, stiffness = 350 }\n"
       "[animation.windows_opacity]\ncurve = 'soft'\n"
   );
   CHECK(store.reload().success);
-  CHECK(store.config().animation.windowsOpacity.curve.easing == umbriel::Easing::Spring);
+  CHECK(store.config().animation.windowsOpacity.curve.easing == canopy::Easing::Spring);
   CHECK_EQ(store.config().animation.windowsOpacity.curve.spring.stiffness, 350.0);
   CHECK(store.diagnostics().empty());
 }
 
-UMBRIEL_TEST(emptyRuleArrayDropsRulesFromIncludes) {
+CANOPY_TEST(emptyRuleArrayDropsRulesFromIncludes) {
   const TempConfig file;
   file.write("window_rule = []\n[include]\nfiles = [\"" + file.includeName() + "\"]\n");
   file.writeInclude("[[window_rule]]\nmatch.app_id = \"^dropped$\"\ndefault_floating = true\n");
 
-  ConfigStore& store = umbriel::configStore();
+  ConfigStore& store = canopy::configStore();
   store.setRootPath(file.path(), true);
-  const umbriel::ConfigReloadResult loaded = store.reload();
+  const canopy::ConfigReloadResult loaded = store.reload();
 
   CHECK(loaded.success);
   CHECK(store.config().windowRules.empty());
 }
 
-UMBRIEL_TEST(duplicateDeviceRuleAcrossIncludesIsRejected) {
+CANOPY_TEST(duplicateDeviceRuleAcrossIncludesIsRejected) {
   // Device rules accumulate like any other collection, so restating one in a later file is the same duplicate the
   // reader already rejects within a single file, and the whole reload is refused rather than silently dropping the
   // include's other rules.
@@ -2705,7 +2705,7 @@ UMBRIEL_TEST(duplicateDeviceRuleAcrossIncludesIsRejected) {
       "[[input.device]]\nname = \"Acme Mouse\"\nsensitivity = -0.5\n"
   );
 
-  ConfigStore& store = umbriel::configStore();
+  ConfigStore& store = canopy::configStore();
   store.setRootPath(tree.path("config.toml"), true);
   CHECK(store.reload().success);
   CHECK_EQ(store.config().input.devices.size(), size_t{2});
@@ -2717,14 +2717,14 @@ UMBRIEL_TEST(duplicateDeviceRuleAcrossIncludesIsRejected) {
       "[include]\nfiles = [\"input.toml\"]\n"
       "[[input.device]]\nname = \"Acme Keyboard\"\nrepeat_rate = 60\n"
   );
-  const umbriel::ConfigReloadResult duplicate = store.reload();
+  const canopy::ConfigReloadResult duplicate = store.reload();
 
   CHECK(!duplicate.success);
   CHECK(containsDiagnostic(store, "duplicates device 'Acme Keyboard'"));
   CHECK_EQ(store.config().input.devices.size(), size_t{2});
 }
 
-UMBRIEL_TEST(activationPolicyLoadsGloballyAndPerWindow) {
+CANOPY_TEST(activationPolicyLoadsGloballyAndPerWindow) {
   const TempConfig file;
   file.write(R"(
 [general]
@@ -2744,9 +2744,9 @@ match.app_id = "^centered$"
 default_position = { x = 0, y = 0 }
 )");
 
-  ConfigStore& store = umbriel::configStore();
+  ConfigStore& store = canopy::configStore();
   store.setRootPath(file.path(), true);
-  const umbriel::ConfigReloadResult result = store.reload();
+  const canopy::ConfigReloadResult result = store.reload();
 
   CHECK(result.success);
   CHECK(store.config().general.focusOnActivate);
@@ -2762,14 +2762,14 @@ default_position = { x = 0, y = 0 }
   CHECK(store.config().windowRules[0].defaultPosition.has_value());
   CHECK_EQ(store.config().windowRules[0].defaultPosition->x, 32);
   CHECK_EQ(store.config().windowRules[0].defaultPosition->y, 48);
-  CHECK(store.config().windowRules[0].defaultPosition->anchor == umbriel::WindowPositionAnchor::BottomLeft);
+  CHECK(store.config().windowRules[0].defaultPosition->anchor == canopy::WindowPositionAnchor::BottomLeft);
   CHECK(store.config().windowRules[1].defaultPosition.has_value());
-  CHECK(store.config().windowRules[1].defaultPosition->anchor == umbriel::WindowPositionAnchor::Center);
+  CHECK(store.config().windowRules[1].defaultPosition->anchor == canopy::WindowPositionAnchor::Center);
 }
 
-UMBRIEL_TEST(restoredMaximizePolicyLoadsAndDefaultsOff) {
+CANOPY_TEST(restoredMaximizePolicyLoadsAndDefaultsOff) {
   const TempConfig file;
-  ConfigStore& store = umbriel::configStore();
+  ConfigStore& store = canopy::configStore();
   store.setRootPath(file.path(), true);
 
   file.write("[general]\nhonor_restored_maximize = true\n");
@@ -2781,9 +2781,9 @@ UMBRIEL_TEST(restoredMaximizePolicyLoadsAndDefaultsOff) {
   CHECK(!store.config().general.honorRestoredMaximize);
 }
 
-UMBRIEL_TEST(modalDialogAttachmentLoadsGloballyAndPerWindow) {
+CANOPY_TEST(modalDialogAttachmentLoadsGloballyAndPerWindow) {
   const TempConfig file;
-  ConfigStore& store = umbriel::configStore();
+  ConfigStore& store = canopy::configStore();
   store.setRootPath(file.path(), true);
 
   file.write("[general]\n");
@@ -2805,27 +2805,27 @@ UMBRIEL_TEST(modalDialogAttachmentLoadsGloballyAndPerWindow) {
   CHECK(store.config().windowRules.empty());
 }
 
-UMBRIEL_TEST(layoutClientMaximizeLoadsGloballyAndPerWorkspace) {
+CANOPY_TEST(layoutClientMaximizeLoadsGloballyAndPerWorkspace) {
   const TempConfig file;
-  ConfigStore& store = umbriel::configStore();
+  ConfigStore& store = canopy::configStore();
   store.setRootPath(file.path(), true);
 
   file.write("[layout]\nclient_maximize = \"edges\"\n");
   CHECK(store.reload().success);
-  CHECK(store.config().layout.clientMaximize == umbriel::ClientMaximize::Edges);
+  CHECK(store.config().layout.clientMaximize == canopy::ClientMaximize::Edges);
 
   file.write("[layout]\n\n[[workspace]]\nname = \"dev\"\nlayout.client_maximize = \"edges\"\n");
   CHECK(store.reload().success);
-  CHECK(store.config().layout.clientMaximize == umbriel::ClientMaximize::Column);
+  CHECK(store.config().layout.clientMaximize == canopy::ClientMaximize::Column);
   CHECK(
       store.config().workspaceRules.size() == 1
-      && store.config().workspaceRules[0].layout.clientMaximize == umbriel::ClientMaximize::Edges
+      && store.config().workspaceRules[0].layout.clientMaximize == canopy::ClientMaximize::Edges
   );
 }
 
-UMBRIEL_TEST(screencastDynamicConfirmationDefaultsOnAndCanBeDisabled) {
+CANOPY_TEST(screencastDynamicConfirmationDefaultsOnAndCanBeDisabled) {
   const TempConfig file;
-  ConfigStore& store = umbriel::configStore();
+  ConfigStore& store = canopy::configStore();
   store.setRootPath(file.path(), true);
 
   file.write("[screencast]\ndisable_dynamic_confirmation = true\n");
@@ -2837,7 +2837,7 @@ UMBRIEL_TEST(screencastDynamicConfirmationDefaultsOnAndCanBeDisabled) {
   CHECK(!store.config().screenCast.disableDynamicConfirmation);
 }
 
-UMBRIEL_TEST(deviceInputOverridesLoadAndMatchExactNames) {
+CANOPY_TEST(deviceInputOverridesLoadAndMatchExactNames) {
   const TempConfig file;
   file.write(R"(
 [input.keyboard]
@@ -2897,14 +2897,14 @@ scroll_button = "MouseBack"
 scroll_button_lock = false
 )");
 
-  ConfigStore& store = umbriel::configStore();
+  ConfigStore& store = canopy::configStore();
   store.setRootPath(file.path(), true);
-  const umbriel::ConfigReloadResult result = store.reload();
+  const canopy::ConfigReloadResult result = store.reload();
   const auto& input = store.config().input;
 
   CHECK(result.success);
   CHECK(input.mouse.accelProfile.has_value());
-  CHECK(input.mouse.accelProfile->kind == umbriel::AccelProfile::Kind::Custom);
+  CHECK(input.mouse.accelProfile->kind == canopy::AccelProfile::Kind::Custom);
   CHECK_EQ(input.mouse.accelProfile->step, 0.2);
   CHECK_EQ(input.mouse.accelProfile->points, std::vector<double>({0.0, 0.5, 1.0, 2.0}));
   CHECK_EQ(input.mouse.sensitivity, 0.25);
@@ -2913,7 +2913,7 @@ scroll_button_lock = false
   CHECK(input.mouse.leftHanded == std::optional<bool>(true));
   CHECK(input.touchpad.accelProfile.has_value());
   if (input.touchpad.accelProfile.has_value()) {
-    CHECK(input.touchpad.accelProfile->kind == umbriel::AccelProfile::Kind::Adaptive);
+    CHECK(input.touchpad.accelProfile->kind == canopy::AccelProfile::Kind::Adaptive);
   }
   CHECK(input.touchpad.sensitivity == std::optional<double>(0.1));
   CHECK(input.touchpad.scrollFactor.has_value());
@@ -2922,10 +2922,10 @@ scroll_button_lock = false
   CHECK(input.touchpad.disableWhileTyping == std::optional<bool>(true));
   CHECK(input.touchpad.disableOnExternalMouse == std::optional<bool>(true));
   CHECK(input.touchpad.tapAndDrag == std::optional<bool>(true));
-  CHECK(input.touchpad.dragLock == std::optional(umbriel::DragLock::Sticky));
-  CHECK(input.touchpad.scrollMethod == std::optional(umbriel::ScrollMethod::Edge));
-  CHECK(input.touchpad.clickMethod == std::optional(umbriel::ClickMethod::ButtonAreas));
-  CHECK(input.touchpad.tapButtonMap == std::optional(umbriel::TapButtonMap::LeftMiddleRight));
+  CHECK(input.touchpad.dragLock == std::optional(canopy::DragLock::Sticky));
+  CHECK(input.touchpad.scrollMethod == std::optional(canopy::ScrollMethod::Edge));
+  CHECK(input.touchpad.clickMethod == std::optional(canopy::ClickMethod::ButtonAreas));
+  CHECK(input.touchpad.tapButtonMap == std::optional(canopy::TapButtonMap::LeftMiddleRight));
   CHECK(input.touchpad.leftHanded == std::optional<bool>(true));
   CHECK(!input.touchpad.enabled);
   CHECK_EQ(input.devices.size(), size_t{3});
@@ -2944,18 +2944,18 @@ scroll_button_lock = false
   if (touchpad != nullptr) {
     CHECK(touchpad->tap == std::optional<bool>(false));
     CHECK(touchpad->tapAndDrag == std::optional<bool>(false));
-    CHECK(touchpad->dragLock == std::optional(umbriel::DragLock::Off));
+    CHECK(touchpad->dragLock == std::optional(canopy::DragLock::Off));
     CHECK(touchpad->naturalScroll == std::optional<bool>(false));
     CHECK(touchpad->leftHanded == std::optional<bool>(false));
     CHECK(touchpad->accelProfile.has_value());
     if (touchpad->accelProfile.has_value()) {
-      CHECK(touchpad->accelProfile->kind == umbriel::AccelProfile::Kind::Flat);
+      CHECK(touchpad->accelProfile->kind == canopy::AccelProfile::Kind::Flat);
     }
     CHECK(touchpad->sensitivity == std::optional<double>(-0.5));
     CHECK(touchpad->disableWhileTyping == std::optional<bool>(false));
-    CHECK(touchpad->scrollMethod == std::optional(umbriel::ScrollMethod::Edge));
-    CHECK(touchpad->clickMethod == std::optional(umbriel::ClickMethod::ClickFinger));
-    CHECK(touchpad->tapButtonMap == std::optional(umbriel::TapButtonMap::LeftRightMiddle));
+    CHECK(touchpad->scrollMethod == std::optional(canopy::ScrollMethod::Edge));
+    CHECK(touchpad->clickMethod == std::optional(canopy::ClickMethod::ClickFinger));
+    CHECK(touchpad->tapButtonMap == std::optional(canopy::TapButtonMap::LeftRightMiddle));
     CHECK(touchpad->enabled == std::optional<bool>(true));
   }
 
@@ -2963,7 +2963,7 @@ scroll_button_lock = false
   CHECK(mouse != nullptr);
   if (mouse != nullptr) {
     CHECK(mouse->accelProfile.has_value());
-    CHECK(mouse->accelProfile->kind == umbriel::AccelProfile::Kind::Flat);
+    CHECK(mouse->accelProfile->kind == canopy::AccelProfile::Kind::Flat);
     CHECK(mouse->sensitivity == std::optional<double>(-0.5));
     CHECK(!mouse->clickMethod.has_value());
     CHECK(mouse->scrollButton == std::optional<uint32_t>(BTN_SIDE));
@@ -2976,30 +2976,30 @@ scroll_button_lock = false
   CHECK(input.findDevice("Acme") == nullptr);
 }
 
-UMBRIEL_TEST(mouseAccelerationPreservesDeviceProfileByDefault) {
-  const umbriel::Config defaults;
+CANOPY_TEST(mouseAccelerationPreservesDeviceProfileByDefault) {
+  const canopy::Config defaults;
   CHECK(!defaults.input.mouse.accelProfile.has_value());
   CHECK_EQ(defaults.input.mouse.sensitivity, 0.0);
 }
 
-UMBRIEL_TEST(mouseScrollButtonDefaultsToUnset) {
-  const umbriel::Config defaults;
+CANOPY_TEST(mouseScrollButtonDefaultsToUnset) {
+  const canopy::Config defaults;
   CHECK(!defaults.input.mouse.scrollButton.has_value());
   CHECK(!defaults.input.mouse.scrollButtonLock.has_value());
 }
 
-UMBRIEL_TEST(touchpadAccelerationDefaultsToUnset) {
-  const umbriel::Config defaults;
+CANOPY_TEST(touchpadAccelerationDefaultsToUnset) {
+  const canopy::Config defaults;
   CHECK(!defaults.input.touchpad.accelProfile.has_value());
   CHECK(!defaults.input.touchpad.sensitivity.has_value());
 }
 
-UMBRIEL_TEST(touchpadScrollMethodDefaultsToUnset) {
-  const umbriel::Config defaults;
+CANOPY_TEST(touchpadScrollMethodDefaultsToUnset) {
+  const canopy::Config defaults;
   CHECK(!defaults.input.touchpad.scrollMethod.has_value());
 }
 
-UMBRIEL_TEST(scrollMethodVariantsLoadWithCaseFolding) {
+CANOPY_TEST(scrollMethodVariantsLoadWithCaseFolding) {
   const TempConfig file;
   file.write(R"(
 [input.touchpad]
@@ -3010,45 +3010,45 @@ name = "Acme Precision Touchpad"
 scroll_method = "None"
 )");
 
-  ConfigStore& store = umbriel::configStore();
+  ConfigStore& store = canopy::configStore();
   store.setRootPath(file.path(), true);
-  const umbriel::ConfigReloadResult result = store.reload();
+  const canopy::ConfigReloadResult result = store.reload();
   CHECK(result.success);
   const auto& input = store.config().input;
-  CHECK(input.touchpad.scrollMethod == std::optional(umbriel::ScrollMethod::TwoFinger));
+  CHECK(input.touchpad.scrollMethod == std::optional(canopy::ScrollMethod::TwoFinger));
   const auto* device = input.findDevice("Acme Precision Touchpad");
   CHECK(device != nullptr);
   if (device != nullptr) {
-    CHECK(device->scrollMethod == std::optional(umbriel::ScrollMethod::None));
+    CHECK(device->scrollMethod == std::optional(canopy::ScrollMethod::None));
   }
 }
 
-UMBRIEL_TEST(touchpadScrollFactorDefaultsToUnset) {
-  const umbriel::Config defaults;
+CANOPY_TEST(touchpadScrollFactorDefaultsToUnset) {
+  const canopy::Config defaults;
   CHECK(!defaults.input.touchpad.scrollFactor.has_value());
 }
 
-UMBRIEL_TEST(touchpadDisableWhileTypingDefaultsToUnset) {
-  const umbriel::Config defaults;
+CANOPY_TEST(touchpadDisableWhileTypingDefaultsToUnset) {
+  const canopy::Config defaults;
   CHECK(!defaults.input.touchpad.disableWhileTyping.has_value());
 }
 
-UMBRIEL_TEST(touchpadDisableOnExternalMouseDefaultsToUnset) {
-  const umbriel::Config defaults;
+CANOPY_TEST(touchpadDisableOnExternalMouseDefaultsToUnset) {
+  const canopy::Config defaults;
   CHECK(!defaults.input.touchpad.disableOnExternalMouse.has_value());
 }
 
-UMBRIEL_TEST(touchpadTapDefaultsToEnabled) {
-  const umbriel::Config defaults;
+CANOPY_TEST(touchpadTapDefaultsToEnabled) {
+  const canopy::Config defaults;
   CHECK(defaults.input.touchpad.tap == std::optional<bool>(true));
 }
 
-UMBRIEL_TEST(cursorFollowsFocusDefaultsToDisabled) {
-  const umbriel::Config defaults;
+CANOPY_TEST(cursorFollowsFocusDefaultsToDisabled) {
+  const canopy::Config defaults;
   CHECK(!defaults.input.cursor.followsFocus);
 }
 
-UMBRIEL_TEST(hardwareCursorCanBeDisabled) {
+CANOPY_TEST(hardwareCursorCanBeDisabled) {
   const TempConfig file;
   file.write(R"(
 [input.cursor]
@@ -3057,9 +3057,9 @@ follows_focus = true
 hide_when_typing = true
 )");
 
-  ConfigStore& store = umbriel::configStore();
+  ConfigStore& store = canopy::configStore();
   store.setRootPath(file.path(), true);
-  const umbriel::ConfigReloadResult result = store.reload();
+  const canopy::ConfigReloadResult result = store.reload();
 
   CHECK(result.success);
   CHECK(!store.config().input.cursor.hardwareCursor);
@@ -3070,16 +3070,16 @@ hide_when_typing = true
   CHECK(!containsDiagnostic(store, "unknown key input.cursor.hide_when_typing"));
 }
 
-UMBRIEL_TEST(cursorHideTimeoutLoads) {
+CANOPY_TEST(cursorHideTimeoutLoads) {
   const TempConfig file;
   file.write(R"(
 [input.cursor]
 hide_timeout_ms = 1500
 )");
 
-  ConfigStore& store = umbriel::configStore();
+  ConfigStore& store = canopy::configStore();
   store.setRootPath(file.path(), true);
-  const umbriel::ConfigReloadResult result = store.reload();
+  const canopy::ConfigReloadResult result = store.reload();
 
   CHECK(result.success);
   CHECK_EQ(store.config().input.cursor.hideTimeoutMs, 1500);
@@ -3091,8 +3091,8 @@ hide_timeout_ms = 1500
   CHECK(containsDiagnostic(store, "unknown key input.cursor.hide_timeout"));
 }
 
-UMBRIEL_TEST(dragEdgeScrollLoads) {
-  const umbriel::Config defaults;
+CANOPY_TEST(dragEdgeScrollLoads) {
+  const canopy::Config defaults;
   CHECK(defaults.input.dragEdgeScroll.enabled);
   CHECK_EQ(defaults.input.dragEdgeScroll.triggerZone, 30);
   CHECK_EQ(defaults.input.dragEdgeScroll.delayMs, 100);
@@ -3107,9 +3107,9 @@ delay_ms = 250
 max_speed = 900.0
 )");
 
-  ConfigStore& store = umbriel::configStore();
+  ConfigStore& store = canopy::configStore();
   store.setRootPath(file.path(), true);
-  const umbriel::ConfigReloadResult result = store.reload();
+  const canopy::ConfigReloadResult result = store.reload();
 
   CHECK(result.success);
   CHECK(!store.config().input.dragEdgeScroll.enabled);
@@ -3124,64 +3124,64 @@ max_speed = 900.0
   CHECK(containsDiagnostic(store, "unknown key input.drag_edge_scroll.trigger"));
 }
 
-UMBRIEL_TEST(invalidCustomAccelerationCurveIsRejected) {
+CANOPY_TEST(invalidCustomAccelerationCurveIsRejected) {
   const TempConfig file;
   file.write(R"(
 [input.mouse]
 accel_profile = "custom 0.2 1.0"
 )");
 
-  ConfigStore& store = umbriel::configStore();
+  ConfigStore& store = canopy::configStore();
   store.setRootPath(file.path(), true);
-  const umbriel::ConfigReloadResult result = store.reload();
+  const canopy::ConfigReloadResult result = store.reload();
 
   CHECK(result.success);
   CHECK(!store.config().input.mouse.accelProfile.has_value());
   CHECK(containsDiagnostic(store, "custom <step> <points...>"));
 }
 
-UMBRIEL_TEST(invalidClickMethodIsRejectedAndStillClaimsTheKey) {
+CANOPY_TEST(invalidClickMethodIsRejectedAndStillClaimsTheKey) {
   const TempConfig file;
   file.write(R"(
 [input.touchpad]
 click_method = "button-areas"
 )");
 
-  ConfigStore& store = umbriel::configStore();
+  ConfigStore& store = canopy::configStore();
   store.setRootPath(file.path(), true);
-  const umbriel::ConfigReloadResult result = store.reload();
+  const canopy::ConfigReloadResult result = store.reload();
 
   CHECK(result.success);
   CHECK(!store.config().input.touchpad.clickMethod.has_value());
   CHECK(!containsDiagnostic(store, "unknown key input.touchpad.click_method"));
 }
 
-UMBRIEL_TEST(invalidTapButtonMapIsRejectedAndStillClaimsTheKey) {
+CANOPY_TEST(invalidTapButtonMapIsRejectedAndStillClaimsTheKey) {
   const TempConfig file;
   file.write(R"(
 [input.touchpad]
 tap_button_map = "lmr"
 )");
 
-  ConfigStore& store = umbriel::configStore();
+  ConfigStore& store = canopy::configStore();
   store.setRootPath(file.path(), true);
-  const umbriel::ConfigReloadResult result = store.reload();
+  const canopy::ConfigReloadResult result = store.reload();
 
   CHECK(result.success);
   CHECK(!store.config().input.touchpad.tapButtonMap.has_value());
   CHECK(!containsDiagnostic(store, "unknown key input.touchpad.tap_button_map"));
 }
 
-UMBRIEL_TEST(scrollButtonRejectsEvdevCodesAndStillClaimsTheKey) {
+CANOPY_TEST(scrollButtonRejectsEvdevCodesAndStillClaimsTheKey) {
   const TempConfig file;
   file.write(R"(
 [input.mouse]
 scroll_button = 275
 )");
 
-  ConfigStore& store = umbriel::configStore();
+  ConfigStore& store = canopy::configStore();
   store.setRootPath(file.path(), true);
-  const umbriel::ConfigReloadResult result = store.reload();
+  const canopy::ConfigReloadResult result = store.reload();
 
   CHECK(result.success);
   CHECK(!store.config().input.mouse.scrollButton.has_value());
@@ -3192,7 +3192,7 @@ scroll_button = 275
   CHECK(!store.config().input.mouse.scrollButton.has_value());
 }
 
-UMBRIEL_TEST(scrollButtonReportsBindsItTakesOver) {
+CANOPY_TEST(scrollButtonReportsBindsItTakesOver) {
   const TempConfig file;
   file.write(R"(
 [input.mouse]
@@ -3203,9 +3203,9 @@ scroll_button = "MouseBack"
 "Mod+MouseForward" = "overview-close"
 )");
 
-  ConfigStore& store = umbriel::configStore();
+  ConfigStore& store = canopy::configStore();
   store.setRootPath(file.path(), true);
-  const umbriel::ConfigReloadResult result = store.reload();
+  const canopy::ConfigReloadResult result = store.reload();
 
   CHECK(result.success);
   CHECK(store.config().input.mouse.scrollButton == std::optional<uint32_t>(BTN_SIDE));
@@ -3222,7 +3222,7 @@ scroll_button = "MouseBack"
   CHECK(!containsDiagnostic(store, "claims MouseBack for scrolling"));
 }
 
-UMBRIEL_TEST(keyboardOptionsLoadGloballyAndPerDevice) {
+CANOPY_TEST(keyboardOptionsLoadGloballyAndPerDevice) {
   const TempConfig file;
   file.write(R"(
 [input.keyboard]
@@ -3235,9 +3235,9 @@ layout = "us,fr"
 options = "grp:win_space_toggle"
 )");
 
-  ConfigStore& store = umbriel::configStore();
+  ConfigStore& store = canopy::configStore();
   store.setRootPath(file.path(), true);
-  const umbriel::ConfigReloadResult result = store.reload();
+  const canopy::ConfigReloadResult result = store.reload();
   const auto& input = store.config().input;
 
   CHECK(result.success);
@@ -3254,11 +3254,11 @@ options = "grp:win_space_toggle"
   }
 }
 
-UMBRIEL_TEST(keyboardTrackLayoutLoadsAndRejectsUnknownValues) {
+CANOPY_TEST(keyboardTrackLayoutLoadsAndRejectsUnknownValues) {
   const TempConfig file;
   file.write("[input.keyboard]\ntrack_layout = \"window\"\n");
 
-  ConfigStore& store = umbriel::configStore();
+  ConfigStore& store = canopy::configStore();
   store.setRootPath(file.path(), true);
   CHECK(store.reload().success);
   CHECK_EQ(store.config().input.keyboard.trackLayout, TrackLayout::Window);
@@ -3269,7 +3269,7 @@ UMBRIEL_TEST(keyboardTrackLayoutLoadsAndRejectsUnknownValues) {
   CHECK_EQ(store.config().input.keyboard.trackLayout, TrackLayout::Global);
 }
 
-UMBRIEL_TEST(tabletConfigLoads) {
+CANOPY_TEST(tabletConfigLoads) {
   const TempConfig file;
   file.write(R"(
 [input.tablet]
@@ -3281,9 +3281,9 @@ left_handed = true
 calibration_matrix = [1.0, 0.0, 0.0, 0.0, 1.0, 0.0]
 )");
 
-  ConfigStore& store = umbriel::configStore();
+  ConfigStore& store = canopy::configStore();
   store.setRootPath(file.path(), true);
-  const umbriel::ConfigReloadResult result = store.reload();
+  const canopy::ConfigReloadResult result = store.reload();
   const auto& tablet = store.config().input.tablet;
 
   CHECK(result.success);
@@ -3298,16 +3298,16 @@ calibration_matrix = [1.0, 0.0, 0.0, 0.0, 1.0, 0.0]
   }
 }
 
-UMBRIEL_TEST(tabletCalibrationMatrixRejectsWrongShape) {
+CANOPY_TEST(tabletCalibrationMatrixRejectsWrongShape) {
   const TempConfig file;
   file.write(R"(
 [input.tablet]
 calibration_matrix = [1.0, 2.0, 3.0, 4.0, 5.0]
 )");
 
-  ConfigStore& store = umbriel::configStore();
+  ConfigStore& store = canopy::configStore();
   store.setRootPath(file.path(), true);
-  const umbriel::ConfigReloadResult result = store.reload();
+  const canopy::ConfigReloadResult result = store.reload();
 
   CHECK(result.success);
   CHECK(!store.config().input.tablet.calibrationMatrix.has_value());
@@ -3320,15 +3320,15 @@ calibration_matrix = [1.0, 2.0, 3.0, "x", 5.0, 6.0]
 )");
 
   store.setRootPath(stringElement.path(), true);
-  const umbriel::ConfigReloadResult second = store.reload();
+  const canopy::ConfigReloadResult second = store.reload();
 
   CHECK(second.success);
   CHECK(!store.config().input.tablet.calibrationMatrix.has_value());
   CHECK(containsDiagnostic(store, "calibration_matrix"));
 }
 
-UMBRIEL_TEST(tabletConfigDefaults) {
-  const umbriel::Config defaults;
+CANOPY_TEST(tabletConfigDefaults) {
+  const canopy::Config defaults;
   const auto& tablet = defaults.input.tablet;
   CHECK(tablet.enabled);
   CHECK_EQ(tablet.mapToOutput, std::string{});
@@ -3338,7 +3338,7 @@ UMBRIEL_TEST(tabletConfigDefaults) {
   CHECK(!tablet.calibrationMatrix.has_value());
 }
 
-UMBRIEL_TEST(animationEffectsResolveIncludedPresetsAcrossAllEventsAndTrackContentChanges) {
+CANOPY_TEST(animationEffectsResolveIncludedPresetsAcrossAllEventsAndTrackContentChanges) {
   const TempConfigTree tree;
   const std::array sections{"windows_in", "windows_out", "windows_move",  "workspaces", "overview",
                             "scratchpad", "border",      "dim_unfocused", "layers"};
@@ -3350,7 +3350,7 @@ UMBRIEL_TEST(animationEffectsResolveIncludedPresetsAcrossAllEventsAndTrackConten
   tree.write("theme/animation.toml", theme);
   tree.write("theme/effect.glsl", "first shader");
   tree.write("effect.glsl", "wrong source directory");
-  ConfigStore& store = umbriel::configStore();
+  ConfigStore& store = canopy::configStore();
   store.setRootPath(tree.path("config.toml"), true);
   CHECK(store.reload().success);
   const auto& animation = store.config().animation;
@@ -3360,7 +3360,7 @@ UMBRIEL_TEST(animationEffectsResolveIncludedPresetsAcrossAllEventsAndTrackConten
   for (const auto* effect : effects) {
     CHECK_EQ(*effect, std::string("reveal"));
   }
-  const umbriel::EffectPreset* reveal = umbriel::findEffectPreset(store.config().effects, "reveal");
+  const canopy::EffectPreset* reveal = canopy::findEffectPreset(store.config().effects, "reveal");
   CHECK(reveal != nullptr);
   if (reveal != nullptr) {
     CHECK_EQ(reveal->shader.code, std::string("first shader"));
@@ -3374,7 +3374,7 @@ UMBRIEL_TEST(animationEffectsResolveIncludedPresetsAcrossAllEventsAndTrackConten
   CHECK(edited.success);
   CHECK(edited.effects.effects);
   CHECK(!edited.effects.animation);
-  reveal = umbriel::findEffectPreset(store.config().effects, "reveal");
+  reveal = canopy::findEffectPreset(store.config().effects, "reveal");
   CHECK(reveal != nullptr && reveal->shader.code == "edited shader");
 
   tree.write("theme/replacement.glsl", "replacement shader");
@@ -3387,13 +3387,13 @@ UMBRIEL_TEST(animationEffectsResolveIncludedPresetsAcrossAllEventsAndTrackConten
   CHECK(std::ranges::find(store.watchPaths(), tree.path("theme/effect.glsl")) == store.watchPaths().end());
   CHECK(store.config().animation.layers.effect.empty());
   CHECK_EQ(store.config().animation.windowsIn.effect, std::string("reveal"));
-  reveal = umbriel::findEffectPreset(store.config().effects, "reveal");
+  reveal = canopy::findEffectPreset(store.config().effects, "reveal");
   CHECK(reveal != nullptr && reveal->shader.code == "replacement shader");
 }
 
-UMBRIEL_TEST(removedAnimationShaderKeyIsUnknown) {
+CANOPY_TEST(removedAnimationShaderKeyIsUnknown) {
   const TempConfig file;
-  ConfigStore& store = umbriel::configStore();
+  ConfigStore& store = canopy::configStore();
   store.setRootPath(file.path(), true);
   file.write("[animation.windows_in]\nshader = \"reveal.glsl\"\n");
   CHECK(store.reload().success);
@@ -3401,7 +3401,7 @@ UMBRIEL_TEST(removedAnimationShaderKeyIsUnknown) {
   CHECK(store.config().animation.windowsIn.effect.empty());
 }
 
-UMBRIEL_TEST(animationUsesCanonicalTopLevelNamespace) {
+CANOPY_TEST(animationUsesCanonicalTopLevelNamespace) {
   const TempConfig file;
   file.write(R"(
 [animation]
@@ -3437,28 +3437,28 @@ dim = 0.4
 blur = true
 )");
 
-  ConfigStore& store = umbriel::configStore();
+  ConfigStore& store = canopy::configStore();
   store.setRootPath(file.path(), true);
-  const umbriel::ConfigReloadResult result = store.reload();
+  const canopy::ConfigReloadResult result = store.reload();
   const auto& animation = store.config().animation;
 
   CHECK(result.success);
   CHECK(!animation.enabled);
   CHECK_EQ(animation.durationMs, 320);
-  CHECK(animation.curve.easing == umbriel::Easing::Linear);
+  CHECK(animation.curve.easing == canopy::Easing::Linear);
   CHECK(!animation.windowsIn.enabled);
   CHECK_EQ(animation.windowsIn.durationMs, 450);
-  CHECK(animation.windowsIn.curve.easing == umbriel::Easing::CustomBezier);
+  CHECK(animation.windowsIn.curve.easing == canopy::Easing::CustomBezier);
   CHECK_EQ(animation.windowsIn.style, std::string{"zoom"});
   CHECK_EQ(animation.windowsIn.scale, 0.7);
-  CHECK(animation.windowsOut.curve.easing == umbriel::Easing::Spring);
+  CHECK(animation.windowsOut.curve.easing == canopy::Easing::Spring);
   CHECK_EQ(animation.windowsOut.style, std::string{"popin"});
   CHECK_EQ(animation.windowsOut.scale, 0.6);
   CHECK(!animation.overview.enabled);
   CHECK_EQ(animation.overview.durationMs, 700);
-  CHECK(animation.overview.curve.easing == umbriel::Easing::CustomBezier);
+  CHECK(animation.overview.curve.easing == canopy::Easing::CustomBezier);
   // The shared curve reaches every duration-based event, but the filmstrip settle keeps its spring until asked.
-  CHECK(animation.overview.workspaceCurve.easing == umbriel::Easing::Spring);
+  CHECK(animation.overview.workspaceCurve.easing == canopy::Easing::Spring);
   CHECK_EQ(animation.overview.workspaceCurve.spring.stiffness, 1000.0);
   CHECK_EQ(animation.windowsMove.durationMs, 320);
   CHECK_EQ(animation.scratchpad.dim, 0.4);
@@ -3482,7 +3482,7 @@ enabled = true
   CHECK(containsDiagnostic(store, "unknown key animation.fade"));
 }
 
-UMBRIEL_TEST(environmentRequiresStringValuesAndPortableNames) {
+CANOPY_TEST(environmentRequiresStringValuesAndPortableNames) {
   const TempConfig file;
   file.write(R"(
 [environment]
@@ -3492,14 +3492,14 @@ _PRIVATE = "kept"
 "HAS-HYPHEN" = "ignored"
 NOT_A_STRING = 1
 WAYLAND_DISPLAY = "wrong"
-LIBEI_SOCKET = "/nonexistent/umbriel-test-eis"
+LIBEI_SOCKET = "/nonexistent/canopy-test-eis"
 WLR_DRM_DEVICES = "/dev/dri/card0"
 WLR_RENDER_DRM_DEVICE = "/dev/dri/renderD128"
 )");
 
-  ConfigStore& store = umbriel::configStore();
+  ConfigStore& store = canopy::configStore();
   store.setRootPath(file.path(), true);
-  const umbriel::ConfigReloadResult result = store.reload();
+  const canopy::ConfigReloadResult result = store.reload();
 
   CHECK(result.success);
   CHECK_EQ(store.config().environment.variables.size(), size_t{4});
@@ -3527,13 +3527,13 @@ WLR_RENDER_DRM_DEVICE = "/dev/dri/renderD128"
   CHECK(containsDiagnostic(store, R"(ignoring environment key "9INVALID" (expected [A-Za-z_][A-Za-z0-9_]*))"));
   CHECK(containsDiagnostic(store, R"(ignoring environment key "HAS-HYPHEN" (expected [A-Za-z_][A-Za-z0-9_]*))"));
   CHECK(containsDiagnostic(store, "ignoring environment.NOT_A_STRING (expected string)"));
-  CHECK(containsDiagnostic(store, "ignoring environment.WAYLAND_DISPLAY (reserved by Umbriel)"));
-  CHECK(containsDiagnostic(store, "ignoring environment.LIBEI_SOCKET (reserved by Umbriel)"));
+  CHECK(containsDiagnostic(store, "ignoring environment.WAYLAND_DISPLAY (reserved by Canopy)"));
+  CHECK(containsDiagnostic(store, "ignoring environment.LIBEI_SOCKET (reserved by Canopy)"));
   CHECK(!containsDiagnostic(store, "unknown key environment.DXVK_HDR"));
   CHECK(!containsDiagnostic(store, "unknown key environment._PRIVATE"));
 }
 
-UMBRIEL_TEST(drmConfigurationLoadsAndNormalizesSelectors) {
+CANOPY_TEST(drmConfigurationLoadsAndNormalizesSelectors) {
   const TempConfig file;
   file.write(R"(
 [drm]
@@ -3544,9 +3544,9 @@ ignored_devices = [
 ignored_pci_addresses = ["0000:01:00.0", "0000:01:00.0"]
 )");
 
-  ConfigStore& store = umbriel::configStore();
+  ConfigStore& store = canopy::configStore();
   store.setRootPath(file.path(), true);
-  const umbriel::ConfigReloadResult result = store.reload();
+  const canopy::ConfigReloadResult result = store.reload();
 
   CHECK(result.success);
   CHECK(store.config().drm.configured());
@@ -3563,42 +3563,42 @@ ignored_pci_addresses = ["0000:AB:0C.7"]
   CHECK_EQ(store.config().drm.ignoredPciAddresses, std::vector<std::string>{"0000:ab:0c.7"});
 }
 
-UMBRIEL_TEST(emptyDrmTableKeepsTheCompatibilityPath) {
+CANOPY_TEST(emptyDrmTableKeepsTheCompatibilityPath) {
   const TempConfig file;
   file.write("[drm]\n");
 
-  ConfigStore& store = umbriel::configStore();
+  ConfigStore& store = canopy::configStore();
   store.setRootPath(file.path(), true);
 
   CHECK(store.reload().success);
   CHECK(!store.config().drm.configured());
 }
 
-UMBRIEL_TEST(drmPathsPreserveSymlinkSensitiveComponents) {
+CANOPY_TEST(drmPathsPreserveSymlinkSensitiveComponents) {
   const TempConfig file;
   file.write(R"(
 [drm]
 ignored_devices = ["/dev/dri/excluded/../card0"]
 )");
 
-  ConfigStore& store = umbriel::configStore();
+  ConfigStore& store = canopy::configStore();
   store.setRootPath(file.path(), true);
 
   CHECK(store.reload().success);
   CHECK_EQ(store.config().drm.ignoredDevices, std::vector<std::string>{"/dev/dri/excluded/../card0"});
 }
 
-UMBRIEL_TEST(drmConfigurationRejectsUnsafeSelectors) {
+CANOPY_TEST(drmConfigurationRejectsUnsafeSelectors) {
   const TempConfig file;
   file.write(R"(
 [drm]
 ignored_pci_addresses = ["0000:01:00.0"]
 )");
 
-  ConfigStore& store = umbriel::configStore();
+  ConfigStore& store = canopy::configStore();
   store.setRootPath(file.path(), true);
   CHECK(store.reload().success);
-  const umbriel::Config previous = store.config();
+  const canopy::Config previous = store.config();
 
   file.write(R"(
 [drm]
@@ -3608,7 +3608,7 @@ render_device = "/dev/dri/renderD128"
 surprise = true
 )");
 
-  const umbriel::ConfigReloadResult result = store.reload();
+  const canopy::ConfigReloadResult result = store.reload();
 
   CHECK(!result.success);
   CHECK(store.config() == previous);
@@ -3619,7 +3619,7 @@ surprise = true
   CHECK(containsDiagnostic(store, "unknown key drm.surprise"));
 }
 
-UMBRIEL_TEST(initialConfigErrorsStartWithDefaults) {
+CANOPY_TEST(initialConfigErrorsStartWithDefaults) {
   struct Case {
     const char* config;
     const char* diagnostic;
@@ -3638,7 +3638,7 @@ UMBRIEL_TEST(initialConfigErrorsStartWithDefaults) {
     const TempConfig file;
     file.write(entry.config);
 
-    ConfigStore& store = umbriel::configStore();
+    ConfigStore& store = canopy::configStore();
     const uint64_t generation = store.generation();
 
     store.load(file.path().c_str());
@@ -3648,12 +3648,12 @@ UMBRIEL_TEST(initialConfigErrorsStartWithDefaults) {
   }
 }
 
-UMBRIEL_TEST(initialIncludedSyntaxErrorsStartWithDefaults) {
+CANOPY_TEST(initialIncludedSyntaxErrorsStartWithDefaults) {
   const TempConfig file;
   file.write("[include]\nfiles = [\"" + file.includeName() + "\"]\n");
   file.writeInclude("[drm]\nignored_pci_addresses = [\"0000:01:00.0\"\n");
 
-  ConfigStore& store = umbriel::configStore();
+  ConfigStore& store = canopy::configStore();
   const uint64_t generation = store.generation();
 
   store.load(file.path().c_str());
@@ -3662,15 +3662,15 @@ UMBRIEL_TEST(initialIncludedSyntaxErrorsStartWithDefaults) {
   CHECK(containsDiagnostic(store, "Error while parsing array"));
 }
 
-UMBRIEL_TEST(invalidIncludeDirectivesKeepPreviousConfigOnReload) {
+CANOPY_TEST(invalidIncludeDirectivesKeepPreviousConfigOnReload) {
   const TempConfigTree tree;
   const std::filesystem::path root = tree.path("config.toml");
   tree.write("hardware.toml", "[drm]\nignored_pci_addresses = [\"0000:01:00.0\"]\n");
   tree.write("config.toml", "[include]\nfiles = [\"hardware.toml\"]\n");
 
-  ConfigStore& store = umbriel::configStore();
+  ConfigStore& store = canopy::configStore();
   store.load(root.c_str());
-  const umbriel::Config previous = store.config();
+  const canopy::Config previous = store.config();
   const uint64_t generation = store.generation();
 
   constexpr std::array invalidIncludes{
@@ -3689,13 +3689,13 @@ UMBRIEL_TEST(invalidIncludeDirectivesKeepPreviousConfigOnReload) {
   }
 }
 
-UMBRIEL_TEST(initialUnreadableConfigStartsWithDefaults) {
+CANOPY_TEST(initialUnreadableConfigStartsWithDefaults) {
   const TempConfig file;
   file.write("[drm]\nignored_devices = [\"/dev/dri/card0\"]\n");
   std::filesystem::permissions(file.path(), std::filesystem::perms::none);
   CHECK(access(file.path().c_str(), R_OK) != 0);
 
-  ConfigStore& store = umbriel::configStore();
+  ConfigStore& store = canopy::configStore();
   const uint64_t generation = store.generation();
 
   store.load(file.path().c_str());
@@ -3704,14 +3704,14 @@ UMBRIEL_TEST(initialUnreadableConfigStartsWithDefaults) {
   CHECK(containsDiagnostic(store, "File could not be opened for reading"));
 }
 
-UMBRIEL_TEST(initialInaccessibleConfigStartsWithDefaults) {
+CANOPY_TEST(initialInaccessibleConfigStartsWithDefaults) {
   const TempConfigTree tree;
   tree.write("restricted/config.toml", "[drm]\nignored_devices = [\"/dev/dri/card0\"]\n");
   const std::filesystem::path restricted = tree.path("restricted");
   const std::filesystem::path configPath = restricted / "config.toml";
   std::filesystem::permissions(restricted, std::filesystem::perms::none);
 
-  ConfigStore& store = umbriel::configStore();
+  ConfigStore& store = canopy::configStore();
   const uint64_t generation = store.generation();
   store.load(configPath.c_str());
   std::filesystem::permissions(restricted, std::filesystem::perms::owner_all);
@@ -3720,18 +3720,18 @@ UMBRIEL_TEST(initialInaccessibleConfigStartsWithDefaults) {
   CHECK(containsDiagnostic(store, "cannot inspect config file"));
 }
 
-UMBRIEL_TEST(defaultConfigLookupDoesNotSkipInaccessibleUserPolicy) {
+CANOPY_TEST(defaultConfigLookupDoesNotSkipInaccessibleUserPolicy) {
   const TempConfigTree tree;
   const std::filesystem::path userHome = tree.path("user");
-  const std::filesystem::path userConfig = userHome / "umbriel/config.toml";
+  const std::filesystem::path userConfig = userHome / "canopywc/config.toml";
   const std::filesystem::path systemDir = tree.path("system");
-  tree.write("user/umbriel/config.toml", "[drm]\nignored_devices = [\"/dev/dri/card0\"]\n");
-  tree.write("system/umbriel/config.toml", "[layout]\ngap = 17\n");
+  tree.write("user/canopywc/config.toml", "[drm]\nignored_devices = [\"/dev/dri/card0\"]\n");
+  tree.write("system/canopywc/config.toml", "[layout]\ngap = 17\n");
   const ScopedEnvironment configHome("XDG_CONFIG_HOME", userHome.string());
   const ScopedEnvironment configDirs("XDG_CONFIG_DIRS", systemDir.string());
   std::filesystem::permissions(userConfig.parent_path(), std::filesystem::perms::none);
 
-  ConfigStore& store = umbriel::configStore();
+  ConfigStore& store = canopy::configStore();
   const uint64_t generation = store.generation();
   store.load(nullptr);
   std::filesystem::permissions(userConfig.parent_path(), std::filesystem::perms::owner_all);
@@ -3741,11 +3741,11 @@ UMBRIEL_TEST(defaultConfigLookupDoesNotSkipInaccessibleUserPolicy) {
   CHECK(containsDiagnostic(store, "cannot inspect config file"));
 }
 
-UMBRIEL_TEST(missingPolicyIncludeRequiresRootDrmIntentMarker) {
+CANOPY_TEST(missingPolicyIncludeRequiresRootDrmIntentMarker) {
   const TempConfig file;
   file.write("[include]\nfiles = [\"" + file.includeName() + "\"]\n\n[drm]\n");
 
-  ConfigStore& store = umbriel::configStore();
+  ConfigStore& store = canopy::configStore();
   const uint64_t generation = store.generation();
 
   store.load(file.path().c_str());
@@ -3755,11 +3755,11 @@ UMBRIEL_TEST(missingPolicyIncludeRequiresRootDrmIntentMarker) {
   CHECK(containsDiagnostic(store, "cannot safely load DRM policy while an include is missing"));
 }
 
-UMBRIEL_TEST(missingOptionalPolicyIncludeRequiresRootDrmIntentMarker) {
+CANOPY_TEST(missingOptionalPolicyIncludeRequiresRootDrmIntentMarker) {
   const TempConfig file;
   file.write("[include.optional]\nfiles = [\"" + file.includeName() + "\"]\n\n[drm]\n");
 
-  ConfigStore& store = umbriel::configStore();
+  ConfigStore& store = canopy::configStore();
   const uint64_t generation = store.generation();
 
   store.load(file.path().c_str());
@@ -3769,14 +3769,14 @@ UMBRIEL_TEST(missingOptionalPolicyIncludeRequiresRootDrmIntentMarker) {
   CHECK(containsDiagnostic(store, "cannot safely load DRM policy while an include is missing"));
 }
 
-UMBRIEL_TEST(inaccessibleIncludeCannotBeTreatedAsMissing) {
+CANOPY_TEST(inaccessibleIncludeCannotBeTreatedAsMissing) {
   const TempConfigTree tree;
   tree.write("config.toml", "[include]\nfiles = [\"restricted/hardware.toml\"]\n");
   tree.write("restricted/hardware.toml", "[drm]\nignored_devices = [\"/dev/dri/card0\"]\n");
   const std::filesystem::path restricted = tree.path("restricted");
   std::filesystem::permissions(restricted, std::filesystem::perms::none);
 
-  ConfigStore& store = umbriel::configStore();
+  ConfigStore& store = canopy::configStore();
   const uint64_t generation = store.generation();
   store.load(tree.path("config.toml").c_str());
   std::filesystem::permissions(restricted, std::filesystem::perms::owner_all);
@@ -3786,11 +3786,11 @@ UMBRIEL_TEST(inaccessibleIncludeCannotBeTreatedAsMissing) {
   CHECK(containsDiagnostic(store, "cannot inspect included config file"));
 }
 
-UMBRIEL_TEST(initialMissingExplicitConfigStartsWithDefaults) {
+CANOPY_TEST(initialMissingExplicitConfigStartsWithDefaults) {
   const TempConfig file;
   std::filesystem::remove(file.path());
 
-  ConfigStore& store = umbriel::configStore();
+  ConfigStore& store = canopy::configStore();
   const uint64_t generation = store.generation();
 
   store.load(file.path().c_str());
@@ -3799,7 +3799,7 @@ UMBRIEL_TEST(initialMissingExplicitConfigStartsWithDefaults) {
   CHECK(containsDiagnostic(store, "config file not found"));
 }
 
-UMBRIEL_TEST(eventsLoadCanonicalLidCommands) {
+CANOPY_TEST(eventsLoadCanonicalLidCommands) {
   const TempConfig file;
   file.write(R"(
 [events]
@@ -3807,9 +3807,9 @@ lid_close = "systemctl suspend"
 lid_open = "notify-send awake"
 )");
 
-  ConfigStore& store = umbriel::configStore();
+  ConfigStore& store = canopy::configStore();
   store.setRootPath(file.path(), true);
-  const umbriel::ConfigReloadResult result = store.reload();
+  const canopy::ConfigReloadResult result = store.reload();
 
   CHECK(result.success);
   CHECK_EQ(store.config().events.lidClose, std::string{"systemctl suspend"});
@@ -3817,19 +3817,19 @@ lid_open = "notify-send awake"
   CHECK(store.diagnostics().empty());
 }
 
-UMBRIEL_TEST(packagedAnimationDefaultsMatchCompiledDefaults) {
-  ConfigStore& store = umbriel::configStore();
-  store.setRootPath(UMBRIEL_EXAMPLE_CONFIG, true);
-  const umbriel::ConfigReloadResult result = store.reload();
+CANOPY_TEST(packagedAnimationDefaultsMatchCompiledDefaults) {
+  ConfigStore& store = canopy::configStore();
+  store.setRootPath(CANOPY_EXAMPLE_CONFIG, true);
+  const canopy::ConfigReloadResult result = store.reload();
 
   CHECK(result.success);
-  CHECK(store.config().animation == umbriel::Config{}.animation);
+  CHECK(store.config().animation == canopy::Config{}.animation);
 }
 
-UMBRIEL_TEST(effectPresetsClaimOnlyTheirKindsKeys) {
+CANOPY_TEST(effectPresetsClaimOnlyTheirKindsKeys) {
   const TempConfigTree tree;
-  tree.write("pulse.glsl", "vec4 border(vec2 uv) { return umbriel_sample(uv); }");
-  tree.write("glow.glsl", "vec4 cursor(vec2 uv) { return umbriel_sample(uv); }");
+  tree.write("pulse.glsl", "vec4 border(vec2 uv) { return canopy_sample(uv); }");
+  tree.write("glow.glsl", "vec4 cursor(vec2 uv) { return canopy_sample(uv); }");
   tree.write(
       "config.toml",
       "[effects]\nmax_fps = 60\nin_capture = true\n"
@@ -3839,17 +3839,17 @@ UMBRIEL_TEST(effectPresetsClaimOnlyTheirKindsKeys) {
       "[effects.preset.pulse.light]\nspread = 40\nintensity = 2\nthreshold = 0.25\n"
       "[effects.preset.glow]\nkind = \"cursor\"\nshader = \"glow.glsl\"\nradius = 96\npadding = 3\n"
   );
-  ConfigStore& store = umbriel::configStore();
+  ConfigStore& store = canopy::configStore();
   store.setRootPath(tree.path("config.toml"), true);
   CHECK(store.reload().success);
   const auto& effects = store.config().effects;
   CHECK_EQ(effects.maxFps, 60);
   CHECK(effects.inCapture);
   CHECK_EQ(effects.presets.size(), size_t{2});
-  const umbriel::EffectPreset* pulse = umbriel::findEffectPreset(effects, "pulse");
+  const canopy::EffectPreset* pulse = canopy::findEffectPreset(effects, "pulse");
   CHECK(pulse != nullptr);
   if (pulse != nullptr) {
-    CHECK(pulse->kind == umbriel::EffectKind::Border);
+    CHECK(pulse->kind == canopy::EffectKind::Border);
     CHECK_EQ(pulse->padding, 12);
     CHECK(pulse->speed == 2.5F);
     CHECK(!pulse->animated);
@@ -3863,7 +3863,7 @@ UMBRIEL_TEST(effectPresetsClaimOnlyTheirKindsKeys) {
     CHECK(pulse->shader.file == tree.path("pulse.glsl"));
     CHECK(!pulse->inert());
   }
-  const umbriel::EffectPreset* glow = umbriel::findEffectPreset(effects, "glow");
+  const canopy::EffectPreset* glow = canopy::findEffectPreset(effects, "glow");
   CHECK(glow != nullptr);
   if (glow != nullptr) {
     CHECK_EQ(glow->radius, 96);
@@ -3873,33 +3873,33 @@ UMBRIEL_TEST(effectPresetsClaimOnlyTheirKindsKeys) {
   CHECK_EQ(std::ranges::count(store.watchPaths(), tree.path("pulse.glsl")), 1);
 }
 
-UMBRIEL_TEST(effectPresetsNeedAKindAndKeepTheirNameWithoutAShader) {
+CANOPY_TEST(effectPresetsNeedAKindAndKeepTheirNameWithoutAShader) {
   const TempConfig file;
-  ConfigStore& store = umbriel::configStore();
+  ConfigStore& store = canopy::configStore();
   store.setRootPath(file.path(), true);
   file.write(
       "[effects.preset.nokind]\nshader = \"x.glsl\"\n[effects.preset.missing]\nkind = \"screen\"\nshader = "
       "\"absent.glsl\"\n[effects.preset.off]\nkind = \"screen\"\n"
   );
   CHECK(store.reload().success);
-  CHECK(umbriel::findEffectPreset(store.config().effects, "nokind") == nullptr);
+  CHECK(canopy::findEffectPreset(store.config().effects, "nokind") == nullptr);
   CHECK(
       containsDiagnostic(store, "ignoring effects.preset.nokind (kind must be animation|border|window|screen|cursor)")
   );
-  const umbriel::EffectPreset* missing = umbriel::findEffectPreset(store.config().effects, "missing");
+  const canopy::EffectPreset* missing = canopy::findEffectPreset(store.config().effects, "missing");
   CHECK(missing != nullptr && missing->inert());
   CHECK(containsDiagnostic(store, "cannot read shader file"));
-  CHECK(umbriel::findEffectPreset(store.config().effects, "off") == nullptr);
+  CHECK(canopy::findEffectPreset(store.config().effects, "off") == nullptr);
   CHECK(containsDiagnostic(store, "ignoring effects.preset.off ('off' is reserved)"));
 }
 
-UMBRIEL_TEST(effectSelectorsLoadAtEveryLevel) {
+CANOPY_TEST(effectSelectorsLoadAtEveryLevel) {
   const TempConfigTree tree;
-  tree.write("a.glsl", "vec4 border(vec2 uv) { return umbriel_sample(uv); }");
-  tree.write("w.glsl", "vec4 window(vec2 uv) { return umbriel_sample(uv); }");
-  tree.write("s.glsl", "vec4 screen(vec2 uv) { return umbriel_sample(uv); }");
-  tree.write("c.glsl", "vec4 cursor(vec2 uv) { return umbriel_sample(uv); }");
-  tree.write("o.glsl", "vec4 animation(vec2 uv) { return umbriel_sample(uv); }");
+  tree.write("a.glsl", "vec4 border(vec2 uv) { return canopy_sample(uv); }");
+  tree.write("w.glsl", "vec4 window(vec2 uv) { return canopy_sample(uv); }");
+  tree.write("s.glsl", "vec4 screen(vec2 uv) { return canopy_sample(uv); }");
+  tree.write("c.glsl", "vec4 cursor(vec2 uv) { return canopy_sample(uv); }");
+  tree.write("o.glsl", "vec4 animation(vec2 uv) { return canopy_sample(uv); }");
   tree.write(
       "config.toml",
       "[effects]\nborder = \"ring\"\nwindow = \"lines\"\nscreen = \"vig\"\ncursor = \"glow\"\n"
@@ -3914,7 +3914,7 @@ UMBRIEL_TEST(effectSelectorsLoadAtEveryLevel) {
       "[animation.windows_drag]\nphysics = true\nstiffness = 48.0\ndamping = 4.5\ncoupling = 120.0\n"
       "pointer_response = 1.5\nmax_displacement_px = 120.0\nsettle_after_pause_s = 0.4\n"
   );
-  ConfigStore& store = umbriel::configStore();
+  ConfigStore& store = canopy::configStore();
   store.setRootPath(tree.path("config.toml"), true);
   CHECK(store.reload().success);
   const auto& config = store.config();
@@ -3936,15 +3936,15 @@ UMBRIEL_TEST(effectSelectorsLoadAtEveryLevel) {
   CHECK_EQ(config.animation.windowsDrag.maxDisplacementPx, 120.0);
   CHECK_EQ(config.animation.windowsDrag.settleAfterPauseS, 0.4);
   CHECK(!containsDiagnostic(store, "unknown key"));
-  const umbriel::EffectPreset* ring = umbriel::findEffectPreset(config.effects, "ring");
+  const canopy::EffectPreset* ring = canopy::findEffectPreset(config.effects, "ring");
   CHECK(ring != nullptr && ring->overlay == "lines");
 }
 
-UMBRIEL_TEST(windowsDragTuningDefaultsAndBounds) {
+CANOPY_TEST(windowsDragTuningDefaultsAndBounds) {
   {
     const TempConfigTree tree;
     tree.write("config.toml", "[animation.windows_drag]\nphysics = true\n");
-    ConfigStore& store = umbriel::configStore();
+    ConfigStore& store = canopy::configStore();
     store.setRootPath(tree.path("config.toml"), true);
     CHECK(store.reload().success);
     // The simulation's shipped values.
@@ -3963,7 +3963,7 @@ UMBRIEL_TEST(windowsDragTuningDefaultsAndBounds) {
         "[animation.windows_drag]\nstiffness = 20000.0\ndamping = -1.0\ncoupling = 20000.0\n"
         "pointer_response = 50.0\nmax_displacement_px = 0.0\nsettle_after_pause_s = 60.0\n"
     );
-    ConfigStore& store = umbriel::configStore();
+    ConfigStore& store = canopy::configStore();
     store.setRootPath(tree.path("config.toml"), true);
     CHECK(store.reload().success);
     const auto& drag = store.config().animation.windowsDrag;
@@ -3982,7 +3982,7 @@ UMBRIEL_TEST(windowsDragTuningDefaultsAndBounds) {
     tree.write(
         "config.toml", "[animation.windows_drag]\nstiffness = 0.0\ndamping = 0.0\nsettle_after_pause_s = 0.01\n"
     );
-    ConfigStore& store = umbriel::configStore();
+    ConfigStore& store = canopy::configStore();
     store.setRootPath(tree.path("config.toml"), true);
     CHECK(store.reload().success);
     const auto& drag = store.config().animation.windowsDrag;
@@ -3995,10 +3995,10 @@ UMBRIEL_TEST(windowsDragTuningDefaultsAndBounds) {
 
 // The cast selector takes screen presets and pools like effects.screen; an output can name its own or opt out with
 // "off", and a selector of the wrong kind is dropped instead of running a border shader over a shared screen.
-UMBRIEL_TEST(screenCastSelectorsLoad) {
+CANOPY_TEST(screenCastSelectorsLoad) {
   const TempConfigTree tree;
-  tree.write("s.glsl", "vec4 screen(vec2 uv) { return umbriel_sample(uv); }");
-  tree.write("b.glsl", "vec4 border(vec2 uv) { return umbriel_sample(uv); }");
+  tree.write("s.glsl", "vec4 screen(vec2 uv) { return canopy_sample(uv); }");
+  tree.write("b.glsl", "vec4 border(vec2 uv) { return canopy_sample(uv); }");
   tree.write(
       "config.toml",
       "[effects]\nscreen_cast = \"casts\"\n"
@@ -4009,7 +4009,7 @@ UMBRIEL_TEST(screenCastSelectorsLoad) {
       "[output.\"HEADLESS-2\"]\nscreen_cast_effect = \"off\"\n"
       "[output.\"HEADLESS-3\"]\nscreen_cast_effect = \"ring\"\n"
   );
-  ConfigStore& store = umbriel::configStore();
+  ConfigStore& store = canopy::configStore();
   store.setRootPath(tree.path("config.toml"), true);
   CHECK(store.reload().success);
   const auto& config = store.config();
@@ -4026,9 +4026,9 @@ UMBRIEL_TEST(screenCastSelectorsLoad) {
   ));
 }
 
-UMBRIEL_TEST(effectReferencesAreValidatedAfterEverySectionIsRead) {
+CANOPY_TEST(effectReferencesAreValidatedAfterEverySectionIsRead) {
   const TempConfigTree tree;
-  tree.write("a.glsl", "vec4 border(vec2 uv) { return umbriel_sample(uv); }");
+  tree.write("a.glsl", "vec4 border(vec2 uv) { return canopy_sample(uv); }");
   tree.write(
       "config.toml",
       // Forward reference: the selector precedes the preset in the file and the preset comes from an include.
@@ -4043,7 +4043,7 @@ UMBRIEL_TEST(effectReferencesAreValidatedAfterEverySectionIsRead) {
       "[effects.preset.ring]\nkind = \"border\"\nshader = \"a.glsl\"\noverlay = \"nope\"\n"
       "[effects.preset.ring2]\nkind = \"border\"\nshader = \"a.glsl\"\noverlay = \"ring\"\n"
   );
-  ConfigStore& store = umbriel::configStore();
+  ConfigStore& store = canopy::configStore();
   store.setRootPath(tree.path("config.toml"), true);
   CHECK(store.reload().success);
   const auto& config = store.config();
@@ -4067,46 +4067,46 @@ UMBRIEL_TEST(effectReferencesAreValidatedAfterEverySectionIsRead) {
   CHECK(containsDiagnostic(
       store, "ignoring animation.windows_out.effect (effect 'ring' is a border preset, not an animation preset)"
   ));
-  const umbriel::EffectPreset* ring = umbriel::findEffectPreset(config.effects, "ring");
+  const canopy::EffectPreset* ring = canopy::findEffectPreset(config.effects, "ring");
   CHECK(ring != nullptr && ring->overlay.empty());
   CHECK(containsDiagnostic(store, "ignoring effects.preset.ring.overlay (unknown effect 'nope')"));
   // An overlay must name a window preset: a border preset is the wrong kind.
-  const umbriel::EffectPreset* ring2 = umbriel::findEffectPreset(config.effects, "ring2");
+  const canopy::EffectPreset* ring2 = canopy::findEffectPreset(config.effects, "ring2");
   CHECK(ring2 != nullptr && ring2->overlay.empty());
   CHECK(containsDiagnostic(
       store, "ignoring effects.preset.ring2.overlay (effect 'ring' is a border preset, not a window preset)"
   ));
 }
 
-UMBRIEL_TEST(effectPaletteFollowsTheColorsSectionOrder) {
-  umbriel::Config config;
+CANOPY_TEST(effectPaletteFollowsTheColorsSectionOrder) {
+  canopy::Config config;
   config.colors.accentPrimary = {1, 0, 0, 1};
   config.colors.accentSecondary = {0, 1, 0, 1};
   config.colors.warning = {0, 0, 1, 1};
   config.colors.error = {1, 1, 0, 1};
-  const auto palette = umbriel::effectPalette(config.colors);
+  const auto palette = canopy::effectPalette(config.colors);
   CHECK(palette[0] == config.colors.accentPrimary);
   CHECK(palette[1] == config.colors.accentSecondary);
   CHECK(palette[2] == config.colors.warning);
   CHECK(palette[3] == config.colors.error);
 }
 
-UMBRIEL_TEST(effectReloadsFlagOnlyEffectDependentState) {
+CANOPY_TEST(effectReloadsFlagOnlyEffectDependentState) {
   const TempConfigTree tree;
-  tree.write("a.glsl", "vec4 border(vec2 uv) { return umbriel_sample(uv); }");
+  tree.write("a.glsl", "vec4 border(vec2 uv) { return canopy_sample(uv); }");
   tree.write(
       "config.toml",
       "[effects.preset.ring]\nkind = \"border\"\nshader = \"a.glsl\"\n[effects]\nborder = \"ring\"\n"
       "[output.\"HEADLESS-1\"]\nenabled = true\n"
   );
-  ConfigStore& store = umbriel::configStore();
+  ConfigStore& store = canopy::configStore();
   store.setRootPath(tree.path("config.toml"), true);
   CHECK(store.reload().success);
   const auto same = store.reload();
   CHECK(same.success);
   CHECK(!same.effects.effects);
   CHECK(!same.effects.any());
-  tree.write("a.glsl", "vec4 border(vec2 uv) { return umbriel_sample(uv) * 0.5; }");
+  tree.write("a.glsl", "vec4 border(vec2 uv) { return canopy_sample(uv) * 0.5; }");
   const auto edited = store.reload();
   CHECK(edited.success);
   CHECK(edited.effects.effects);
@@ -4124,9 +4124,9 @@ UMBRIEL_TEST(effectReloadsFlagOnlyEffectDependentState) {
   CHECK_EQ(output.effects.summary(), std::string("effects"));
 }
 
-UMBRIEL_TEST(effectSelectorNonStringValueWarnsAndLeavesSettingUnset) {
+CANOPY_TEST(effectSelectorNonStringValueWarnsAndLeavesSettingUnset) {
   const TempConfig file;
-  ConfigStore& store = umbriel::configStore();
+  ConfigStore& store = canopy::configStore();
   store.setRootPath(file.path(), true);
   file.write("[[window_rule]]\nmatch.app_id = \"^foot$\"\nborder_effect = 3\n");
   CHECK(store.reload().success);
@@ -4138,9 +4138,9 @@ UMBRIEL_TEST(effectSelectorNonStringValueWarnsAndLeavesSettingUnset) {
   CHECK(!config.windowRules[0].borderEffect);
 }
 
-UMBRIEL_TEST(effectSelectorOnADroppedWindowRuleRecordsNoReference) {
+CANOPY_TEST(effectSelectorOnADroppedWindowRuleRecordsNoReference) {
   const TempConfig file;
-  ConfigStore& store = umbriel::configStore();
+  ConfigStore& store = canopy::configStore();
   store.setRootPath(file.path(), true);
   file.write("[[window_rule]]\nmatch.app_id = \"[\"\nborder_effect = \"off\"\n");
   CHECK(store.reload().success);
@@ -4149,9 +4149,9 @@ UMBRIEL_TEST(effectSelectorOnADroppedWindowRuleRecordsNoReference) {
   CHECK(!containsDiagnostic(store, "border_effect"));
 }
 
-UMBRIEL_TEST(duplicateOutputSectionDoesNotCorruptASurvivingScreenEffectReference) {
+CANOPY_TEST(duplicateOutputSectionDoesNotCorruptASurvivingScreenEffectReference) {
   const TempConfigTree tree;
-  tree.write("vig.glsl", "vec4 screen(vec2 uv) { return umbriel_sample(uv); }");
+  tree.write("vig.glsl", "vec4 screen(vec2 uv) { return canopy_sample(uv); }");
   tree.write(
       "config.toml",
       "[effects.preset.vig]\nkind = \"screen\"\nshader = \"vig.glsl\"\n"
@@ -4159,13 +4159,13 @@ UMBRIEL_TEST(duplicateOutputSectionDoesNotCorruptASurvivingScreenEffectReference
       "[output.\"HDMI-A-1\"]\nscreen_effect = \"vig\"\n"
       "[output.\"dp-1\"]\nenabled = true\n"
   );
-  ConfigStore& store = umbriel::configStore();
+  ConfigStore& store = canopy::configStore();
   store.setRootPath(tree.path("config.toml"), true);
   CHECK(store.reload().success);
   const auto& config = store.config();
   CHECK_EQ(config.outputs.size(), size_t{2});
   const auto hdmi =
-      std::ranges::find_if(config.outputs, [](const umbriel::OutputRule& rule) { return rule.name == "HDMI-A-1"; });
+      std::ranges::find_if(config.outputs, [](const canopy::OutputRule& rule) { return rule.name == "HDMI-A-1"; });
   CHECK(hdmi != config.outputs.end());
   if (hdmi != config.outputs.end()) {
     CHECK(hdmi->screenEffect == "vig");
@@ -4176,16 +4176,16 @@ UMBRIEL_TEST(duplicateOutputSectionDoesNotCorruptASurvivingScreenEffectReference
   CHECK(!containsDiagnostic(store, "screen_effect (unknown effect 'nope')"));
 }
 
-UMBRIEL_TEST(duplicateEffectPresetsAcrossIncludesAreRejected) {
+CANOPY_TEST(duplicateEffectPresetsAcrossIncludesAreRejected) {
   const TempConfigTree tree;
-  tree.write("a.glsl", "vec4 border(vec2 uv) { return umbriel_sample(uv); }");
+  tree.write("a.glsl", "vec4 border(vec2 uv) { return canopy_sample(uv); }");
   tree.write("theme.toml", "[effects.preset.ring]\nkind = \"border\"\nshader = \"a.glsl\"\n");
   tree.write("config.toml", "[include]\nfiles = [\"theme.toml\"]\n[effects]\nborder = \"ring\"\n");
-  ConfigStore& store = umbriel::configStore();
+  ConfigStore& store = canopy::configStore();
   store.setRootPath(tree.path("config.toml"), true);
   CHECK(store.reload().success);
   const uint64_t generation = store.generation();
-  const umbriel::Config previous = store.config();
+  const canopy::Config previous = store.config();
 
   tree.write(
       "config.toml",
@@ -4200,14 +4200,14 @@ UMBRIEL_TEST(duplicateEffectPresetsAcrossIncludesAreRejected) {
   CHECK_EQ(store.generation(), generation);
 }
 
-UMBRIEL_TEST(initialDuplicateEffectPresetsKeepCompatibilityDefaults) {
+CANOPY_TEST(initialDuplicateEffectPresetsKeepCompatibilityDefaults) {
   const TempConfigTree tree;
   const std::string preset = "[effects.preset.ring]\nkind = \"border\"\nshader = \"a.glsl\"\n";
-  tree.write("a.glsl", "vec4 border(vec2 uv) { return umbriel_sample(uv); }");
+  tree.write("a.glsl", "vec4 border(vec2 uv) { return canopy_sample(uv); }");
   tree.write("theme.toml", preset);
   tree.write("config.toml", "[include]\nfiles = [\"theme.toml\"]\n" + preset);
 
-  ConfigStore& store = umbriel::configStore();
+  ConfigStore& store = canopy::configStore();
   const uint64_t generation = store.generation();
 
   store.load(tree.path("config.toml").c_str());
@@ -4219,15 +4219,15 @@ UMBRIEL_TEST(initialDuplicateEffectPresetsKeepCompatibilityDefaults) {
   }));
 }
 
-UMBRIEL_TEST(duplicateEffectPresetsInSiblingIncludesNameTheFirstSibling) {
+CANOPY_TEST(duplicateEffectPresetsInSiblingIncludesNameTheFirstSibling) {
   const TempConfigTree tree;
   const std::string preset = "[effects.preset.ring]\nkind = \"border\"\nshader = \"a.glsl\"\n";
-  tree.write("a.glsl", "vec4 border(vec2 uv) { return umbriel_sample(uv); }");
+  tree.write("a.glsl", "vec4 border(vec2 uv) { return canopy_sample(uv); }");
   tree.write("first.toml", preset);
   tree.write("second.toml", preset);
   tree.write("config.toml", "[include]\nfiles = [\"first.toml\", \"second.toml\"]\n");
 
-  ConfigStore& store = umbriel::configStore();
+  ConfigStore& store = canopy::configStore();
   store.setRootPath(tree.path("config.toml"), true);
   CHECK(!store.reload().success);
   const auto isDuplicate = [](const ConfigDiagnostic& diagnostic) {
@@ -4244,16 +4244,16 @@ UMBRIEL_TEST(duplicateEffectPresetsInSiblingIncludesNameTheFirstSibling) {
   CHECK(duplicate->file.ends_with("second.toml"));
 }
 
-UMBRIEL_TEST(bundledEffectPresetsDefineWithoutSelecting) {
+CANOPY_TEST(bundledEffectPresetsDefineWithoutSelecting) {
   const TempConfigTree tree;
   std::string includes = "[include]\nfiles = [\n";
   for (const char* effect :
        {"animation/reveal", "animation/squash", "border/pulse", "window/scanlines", "screen/vignette", "cursor/glow"}) {
-    includes += std::format("  \"{}/examples/effects/{}/effect.toml\",\n", UMBRIEL_SOURCE_ROOT, effect);
+    includes += std::format("  \"{}/examples/effects/{}/effect.toml\",\n", CANOPY_SOURCE_ROOT, effect);
   }
   includes += "]\n";
   tree.write("config.toml", includes);
-  ConfigStore& store = umbriel::configStore();
+  ConfigStore& store = canopy::configStore();
   store.setRootPath(tree.path("config.toml"), true);
   CHECK(store.reload().success);
   CHECK(!containsDiagnostic(store, "unknown key"));
@@ -4261,13 +4261,13 @@ UMBRIEL_TEST(bundledEffectPresetsDefineWithoutSelecting) {
   const auto& effects = store.config().effects;
   CHECK_EQ(effects.presets.size(), size_t{6});
   CHECK(effects.border.empty() && effects.window.empty() && effects.screen.empty() && effects.cursor.empty());
-  const umbriel::EffectPreset* pulse = umbriel::findEffectPreset(effects, "pulse");
-  CHECK(pulse != nullptr && pulse->kind == umbriel::EffectKind::Border && pulse->light.has_value());
-  const umbriel::EffectPreset* glow = umbriel::findEffectPreset(effects, "glow");
-  CHECK(glow != nullptr && glow->kind == umbriel::EffectKind::Cursor && glow->radius > 0);
+  const canopy::EffectPreset* pulse = canopy::findEffectPreset(effects, "pulse");
+  CHECK(pulse != nullptr && pulse->kind == canopy::EffectKind::Border && pulse->light.has_value());
+  const canopy::EffectPreset* glow = canopy::findEffectPreset(effects, "glow");
+  CHECK(glow != nullptr && glow->kind == canopy::EffectKind::Cursor && glow->radius > 0);
 }
 
-UMBRIEL_TEST(effectPoolsPreserveDeclarationsAcrossNestedIncludesAndValidateMembersSafely) {
+CANOPY_TEST(effectPoolsPreserveDeclarationsAcrossNestedIncludesAndValidateMembersSafely) {
   const TempConfigTree tree;
   tree.write("nested.toml", R"(
 [effects.preset.zulu]
@@ -4316,7 +4316,7 @@ window_effect = 'mpool'
 [animation.windows_in]
 effect = 'zpool'
 )");
-  auto& store = umbriel::configStore();
+  auto& store = canopy::configStore();
   store.setRootPath(tree.path("config.toml"), true);
   CHECK(store.reload().success);
   const auto& effects = store.config().effects;
@@ -4332,16 +4332,16 @@ effect = 'zpool'
     pools.push_back(pool.name);
   }
   CHECK(pools == std::vector<std::string>({"zpool", "apool", "mpool", "rpool"}));
-  const auto* zpool = umbriel::findEffectPool(effects, "zpool");
+  const auto* zpool = canopy::findEffectPool(effects, "zpool");
   CHECK(zpool != nullptr);
   if (zpool) {
     CHECK(zpool->members == std::vector<std::string>({"zulu", "alpha", "root"}));
-    CHECK(zpool->selection == umbriel::EffectSelectionPolicy::RoundRobin);
+    CHECK(zpool->selection == canopy::EffectSelectionPolicy::RoundRobin);
   }
   CHECK_EQ(effects.window, std::string("zpool"));
   CHECK(store.config().windowRules[0].windowEffect == "mpool");
   CHECK(store.config().animation.windowsIn.effect.empty());
-  CHECK(umbriel::findEffectPreset(effects, "border")->overlay.empty());
+  CHECK(canopy::findEffectPreset(effects, "border")->overlay.empty());
   CHECK(containsDiagnostic(store, "duplicate member"));
   CHECK(containsDiagnostic(store, "a preset is required"));
   CHECK(containsDiagnostic(store, "action delimiter; rename"));
@@ -4354,7 +4354,7 @@ effect = 'zpool'
   }));
 }
 
-UMBRIEL_TEST(effectPoolRequiredFieldsAndNamesRejectMalformedDeclarations) {
+CANOPY_TEST(effectPoolRequiredFieldsAndNamesRejectMalformedDeclarations) {
   const TempConfig file;
   file.write(R"(
 [effects.pool.no_kind]
@@ -4403,7 +4403,7 @@ choose = ['missing', 'off', '', false]
 [effects]
 border = 'invalid_members'
 )");
-  auto& store = umbriel::configStore();
+  auto& store = canopy::configStore();
   store.setRootPath(file.path(), true);
   CHECK(store.reload().success);
   const auto& effects = store.config().effects;
@@ -4412,14 +4412,14 @@ border = 'invalid_members'
   CHECK_EQ(effects.border, std::string("invalid_members"));
   for (const auto& pool : effects.pools) {
     CHECK(pool.members.empty());
-    CHECK(pool.selection == umbriel::EffectSelectionPolicy::UnusedFirst);
+    CHECK(pool.selection == canopy::EffectSelectionPolicy::UnusedFirst);
   }
   CHECK(containsDiagnostic(store, "choose is required and must be an array"));
   CHECK(containsDiagnostic(store, "selection must be unused_first|round_robin|random"));
   CHECK(containsDiagnostic(store, "effect names must not be empty"));
 }
 
-UMBRIEL_TEST(effectPoolSelectorsWorkForScreenCursorAndOutputRules) {
+CANOPY_TEST(effectPoolSelectorsWorkForScreenCursorAndOutputRules) {
   const TempConfig file;
   file.write(R"(
 [effects]
@@ -4438,7 +4438,7 @@ choose = ['cursor']
 [output.HEADLESS-1]
 screen_effect = 'screens'
 )");
-  auto& store = umbriel::configStore();
+  auto& store = canopy::configStore();
   store.setRootPath(file.path(), true);
   CHECK(store.reload().success);
   CHECK_EQ(store.config().effects.screen, std::string("screens"));
@@ -4446,11 +4446,11 @@ screen_effect = 'screens'
   CHECK(store.config().outputs[0].screenEffect == "screens");
 }
 
-UMBRIEL_TEST(duplicateEffectPoolsRejectReloadAndNameBothLocations) {
+CANOPY_TEST(duplicateEffectPoolsRejectReloadAndNameBothLocations) {
   const TempConfigTree tree;
   tree.write("theme.toml", "[effects.pool.shared]\nkind = 'border'\nchoose = []\n");
   tree.write("config.toml", "[include]\nfiles = ['theme.toml']\n");
-  auto& store = umbriel::configStore();
+  auto& store = canopy::configStore();
   store.setRootPath(tree.path("config.toml"), true);
   CHECK(store.reload().success);
   const auto previous = store.config();
@@ -4465,7 +4465,7 @@ UMBRIEL_TEST(duplicateEffectPoolsRejectReloadAndNameBothLocations) {
   }));
 }
 
-UMBRIEL_TEST(effectPoolCollisionAcrossIncludesKeepsPresetRegardlessOfDeclarationOrder) {
+CANOPY_TEST(effectPoolCollisionAcrossIncludesKeepsPresetRegardlessOfDeclarationOrder) {
   const TempConfigTree tree;
   for (bool poolFirst : {false, true}) {
     const std::string preset = "[effects.preset.shared]\nkind = 'window'\n";
@@ -4474,17 +4474,17 @@ UMBRIEL_TEST(effectPoolCollisionAcrossIncludesKeepsPresetRegardlessOfDeclaration
     tree.write(
         "config.toml", "[include]\nfiles = ['theme.toml']\n[effects]\nwindow = 'shared'\n" + (poolFirst ? preset : pool)
     );
-    auto& store = umbriel::configStore();
+    auto& store = canopy::configStore();
     store.setRootPath(tree.path("config.toml"), true);
     CHECK(store.reload().success);
-    CHECK(umbriel::findEffectPreset(store.config().effects, "shared") != nullptr);
-    CHECK(umbriel::findEffectPool(store.config().effects, "shared") == nullptr);
+    CHECK(canopy::findEffectPreset(store.config().effects, "shared") != nullptr);
+    CHECK(canopy::findEffectPool(store.config().effects, "shared") == nullptr);
     CHECK_EQ(store.config().effects.window, std::string("shared"));
     CHECK(containsDiagnostic(store, "preset with this name declared at"));
   }
 }
 
-UMBRIEL_TEST(effectActionReferencesValidateKindsPoolsAndDisabledCorners) {
+CANOPY_TEST(effectActionReferencesValidateKindsPoolsAndDisabledCorners) {
   TempConfig file;
   file.write(R"(
 [effects.preset.window]
@@ -4513,7 +4513,7 @@ action = 'effect-screen-set window'
 enabled = true
 action = 'effect-window-cycle windows'
 )");
-  auto& store = umbriel::configStore();
+  auto& store = canopy::configStore();
   store.setRootPath(file.path(), true);
   CHECK(store.reload().success);
   CHECK(containsDiagnostic(store, "ignoring keybind 'Mod+F4'"));
@@ -4525,10 +4525,10 @@ action = 'effect-window-cycle windows'
   CHECK(store.config().hotCorners.corners[1].action.has_value());
   size_t valid = 0;
   for (const auto& bind : store.config().keybinds) {
-    if (bind.action == umbriel::KeybindAction::EffectWindowSet
-        || bind.action == umbriel::KeybindAction::EffectWindowCycle) {
+    if (bind.action == canopy::KeybindAction::EffectWindowSet
+        || bind.action == canopy::KeybindAction::EffectWindowCycle) {
       ++valid;
-      const auto reference = umbriel::effectActionReference(bind);
+      const auto reference = canopy::effectActionReference(bind);
       CHECK(!reference || reference->name == "window" || reference->name == "windows");
     }
   }
@@ -4540,7 +4540,7 @@ action = 'effect-window-cycle windows'
   }));
 }
 
-UMBRIEL_TEST(replacedEffectActionsLeaveNoReferencesOrDiagnostics) {
+CANOPY_TEST(replacedEffectActionsLeaveNoReferencesOrDiagnostics) {
   TempConfig file;
   file.writeInclude(R"(
 [keybinds]
@@ -4557,25 +4557,25 @@ kind = 'window'
 enabled = false
 action = 'effect-window-set window'
 )");
-  auto& store = umbriel::configStore();
+  auto& store = canopy::configStore();
   store.setRootPath(file.path(), true);
   CHECK(store.reload().success);
   CHECK(!containsDiagnostic(store, "missing"));
   CHECK(store.config().hotCorners.corners[0].action.has_value());
-  CHECK(umbriel::effectActionReference(*store.config().hotCorners.corners[0].action)->name == "window");
+  CHECK(canopy::effectActionReference(*store.config().hotCorners.corners[0].action)->name == "window");
 }
 
-UMBRIEL_TEST(replaceAdoptsTheNewFileAndPinsLaterReloadsToIt) {
+CANOPY_TEST(replaceAdoptsTheNewFileAndPinsLaterReloadsToIt) {
   const TempConfigTree tree;
   tree.write("old.toml", "[layout]\ngap = 17\n");
   tree.write("new.toml", "[layout]\ngap = 23\n");
 
-  ConfigStore& store = umbriel::configStore();
+  ConfigStore& store = canopy::configStore();
   store.load(tree.path("old.toml").c_str());
   const uint64_t generation = store.generation();
 
   std::string errors;
-  const umbriel::ConfigReloadResult result = store.replace(tree.path("new.toml"), errors);
+  const canopy::ConfigReloadResult result = store.replace(tree.path("new.toml"), errors);
 
   CHECK(result.success);
   CHECK(errors.empty());
@@ -4592,14 +4592,14 @@ UMBRIEL_TEST(replaceAdoptsTheNewFileAndPinsLaterReloadsToIt) {
   CHECK_EQ(store.config().layout.gap, 31);
 }
 
-UMBRIEL_TEST(replaceMovesTheWatchSetToTheNewFileAndItsIncludes) {
+CANOPY_TEST(replaceMovesTheWatchSetToTheNewFileAndItsIncludes) {
   const TempConfigTree tree;
   tree.write("old_inc.toml", "[layout]\ngap = 5\n");
   tree.write("old_config.toml", "[include]\nfiles = [\"old_inc.toml\"]\n");
   tree.write("new_inc.toml", "[layout]\ngap = 6\n");
   tree.write("new_config.toml", "[include]\nfiles = [\"new_inc.toml\"]\n");
 
-  ConfigStore& store = umbriel::configStore();
+  ConfigStore& store = canopy::configStore();
   store.load(tree.path("old_config.toml").c_str());
   CHECK(std::ranges::find(store.watchPaths(), tree.path("old_config.toml")) != store.watchPaths().end());
   CHECK(std::ranges::find(store.watchPaths(), tree.path("old_inc.toml")) != store.watchPaths().end());
@@ -4614,16 +4614,16 @@ UMBRIEL_TEST(replaceMovesTheWatchSetToTheNewFileAndItsIncludes) {
   CHECK(std::ranges::find(store.watchPaths(), tree.path("old_inc.toml")) == store.watchPaths().end());
 }
 
-UMBRIEL_TEST(replaceAcceptsAFileThatOnlyProducesWarnings) {
+CANOPY_TEST(replaceAcceptsAFileThatOnlyProducesWarnings) {
   const TempConfigTree tree;
   tree.write("live.toml", "[layout]\ngap = 17\n");
   tree.write("warn.toml", "invalid_key = true\n[layout]\ngap = 23\n");
 
-  ConfigStore& store = umbriel::configStore();
+  ConfigStore& store = canopy::configStore();
   store.load(tree.path("live.toml").c_str());
 
   std::string errors;
-  const umbriel::ConfigReloadResult result = store.replace(tree.path("warn.toml"), errors);
+  const canopy::ConfigReloadResult result = store.replace(tree.path("warn.toml"), errors);
 
   CHECK(result.success);
   CHECK(errors.empty());
@@ -4632,17 +4632,17 @@ UMBRIEL_TEST(replaceAcceptsAFileThatOnlyProducesWarnings) {
   CHECK(containsDiagnostic(store, "unknown key invalid_key"));
 }
 
-UMBRIEL_TEST(replaceRejectsAMissingFileAndLeavesTheLiveStateUntouched) {
+CANOPY_TEST(replaceRejectsAMissingFileAndLeavesTheLiveStateUntouched) {
   const TempConfigTree tree;
   tree.write("live.toml", "[layout]\ngap = 17\n");
   const std::filesystem::path missing = tree.path("missing.toml");
 
-  ConfigStore& store = umbriel::configStore();
+  ConfigStore& store = canopy::configStore();
   store.load(tree.path("live.toml").c_str());
   const uint64_t generation = store.generation();
 
   std::string errors;
-  const umbriel::ConfigReloadResult result = store.replace(missing, errors);
+  const canopy::ConfigReloadResult result = store.replace(missing, errors);
 
   CHECK(!result.success);
   CHECK(errors.contains("config file not found: " + missing.string()));
@@ -4659,17 +4659,17 @@ UMBRIEL_TEST(replaceRejectsAMissingFileAndLeavesTheLiveStateUntouched) {
   CHECK_EQ(store.config().layout.gap, 19);
 }
 
-UMBRIEL_TEST(replaceRejectsABrokenFileAndLeavesTheLiveStateUntouched) {
+CANOPY_TEST(replaceRejectsABrokenFileAndLeavesTheLiveStateUntouched) {
   const TempConfigTree tree;
   tree.write("live.toml", "[layout]\ngap = 17\n");
   tree.write("broken.toml", "[layout\n");
 
-  ConfigStore& store = umbriel::configStore();
+  ConfigStore& store = canopy::configStore();
   store.load(tree.path("live.toml").c_str());
   const uint64_t generation = store.generation();
 
   std::string errors;
-  const umbriel::ConfigReloadResult malformed = store.replace(tree.path("broken.toml"), errors);
+  const canopy::ConfigReloadResult malformed = store.replace(tree.path("broken.toml"), errors);
 
   CHECK(!malformed.success);
   CHECK(!errors.empty());
@@ -4682,13 +4682,13 @@ UMBRIEL_TEST(replaceRejectsABrokenFileAndLeavesTheLiveStateUntouched) {
   CHECK(std::ranges::find(store.watchPaths(), tree.path("broken.toml")) == store.watchPaths().end());
 }
 
-UMBRIEL_TEST(replaceRejectsSemanticErrorsAndPreservesTheLiveState) {
+CANOPY_TEST(replaceRejectsSemanticErrorsAndPreservesTheLiveState) {
   const TempConfigTree tree;
   tree.write("live.toml", "unknown_key = true\n[include]\nfiles = [\"pending.toml\"]\n[layout]\ngap = 17\n");
   tree.write("rejected_inc.toml", "[layout]\ngap = 80\n");
   tree.write("invalid.toml", "[include]\nfiles = [\"rejected_inc.toml\"]\n[[workspace]]\nname = \"chat\"\nindex = 3\n");
 
-  ConfigStore& store = umbriel::configStore();
+  ConfigStore& store = canopy::configStore();
   store.load(tree.path("live.toml").c_str());
   CHECK(store.missingIncludes());
   const auto previousConfig = store.config();
@@ -4697,7 +4697,7 @@ UMBRIEL_TEST(replaceRejectsSemanticErrorsAndPreservesTheLiveState) {
   const uint64_t generation = store.generation();
 
   std::string errors;
-  const umbriel::ConfigReloadResult result = store.replace(tree.path("invalid.toml"), errors);
+  const canopy::ConfigReloadResult result = store.replace(tree.path("invalid.toml"), errors);
 
   CHECK(!result.success);
   CHECK(errors.contains(tree.path("invalid.toml").string()));
@@ -4726,11 +4726,11 @@ UMBRIEL_TEST(replaceRejectsSemanticErrorsAndPreservesTheLiveState) {
   CHECK_EQ(store.config().layout.gap, 19);
 }
 
-UMBRIEL_TEST(replaceRejectionRestoresPendingMissingIncludes) {
+CANOPY_TEST(replaceRejectionRestoresPendingMissingIncludes) {
   const TempConfig file;
   file.write("[include]\nfiles = [\"" + file.includeName() + "\"]\n");
 
-  ConfigStore& store = umbriel::configStore();
+  ConfigStore& store = canopy::configStore();
   store.setRootPath(file.path(), true);
   store.load(file.path().c_str());
   const uint64_t generation = store.generation();
@@ -4745,15 +4745,15 @@ UMBRIEL_TEST(replaceRejectionRestoresPendingMissingIncludes) {
   CHECK_EQ(store.fileMissing(), false);
 }
 
-UMBRIEL_TEST(replaceRejectionDoesNotDisturbAnImplicitStore) {
+CANOPY_TEST(replaceRejectionDoesNotDisturbAnImplicitStore) {
   const TempConfigTree tree;
   const std::filesystem::path userHome = tree.path("user");
   const std::filesystem::path systemDir = tree.path("system");
-  tree.write("system/umbriel/config.toml", "[layout]\ngap = 17\n");
+  tree.write("system/canopywc/config.toml", "[layout]\ngap = 17\n");
   const ScopedEnvironment configHome("XDG_CONFIG_HOME", userHome.string());
   const ScopedEnvironment configDirs("XDG_CONFIG_DIRS", systemDir.string());
 
-  ConfigStore& store = umbriel::configStore();
+  ConfigStore& store = canopy::configStore();
   store.load(nullptr);
   const uint64_t generation = store.generation();
 
@@ -4763,15 +4763,15 @@ UMBRIEL_TEST(replaceRejectionDoesNotDisturbAnImplicitStore) {
   CHECK_EQ(store.generation(), generation);
   CHECK_EQ(store.missingIncludes(), false);
   CHECK_EQ(store.fileMissing(), false);
-  CHECK_EQ(store.rootPath(), tree.path("system/umbriel/config.toml"));
+  CHECK_EQ(store.rootPath(), tree.path("system/canopywc/config.toml"));
 
-  tree.write("user/umbriel/config.toml", "[layout]\ngap = 19\n");
+  tree.write("user/canopywc/config.toml", "[layout]\ngap = 19\n");
   CHECK(store.reload().success);
-  CHECK_EQ(store.rootPath(), userHome / "umbriel/config.toml");
+  CHECK_EQ(store.rootPath(), userHome / "canopywc/config.toml");
   CHECK_EQ(store.config().layout.gap, 19);
 }
 
-UMBRIEL_TEST(titleBarConfigurationUsesTheDocumentedKeys) {
+CANOPY_TEST(titleBarConfigurationUsesTheDocumentedKeys) {
   const TempConfig file;
   file.write(R"(
 [appearance.title_bar]
@@ -4796,17 +4796,17 @@ maximize_glyph_hover = "#FF00FFFF"
 minimize_glyph = "#FFFF00FF"
 minimize_glyph_hover = "#00FFFFFF"
 )");
-  auto& store = umbriel::configStore();
+  auto& store = canopy::configStore();
   store.setRootPath(file.path(), true);
   CHECK(store.reload().success);
   CHECK(store.diagnostics().empty());
   const auto& bar = store.config().appearance.titleBar;
-  CHECK_EQ(bar.mode, umbriel::TitleBarMode::Forced);
+  CHECK_EQ(bar.mode, canopy::TitleBarMode::Forced);
   CHECK_EQ(bar.height, 42);
   CHECK_EQ(bar.font, std::string("sans 12"));
-  CHECK_EQ(bar.buttonPosition, umbriel::TitleBarButtonSide::Left);
+  CHECK_EQ(bar.buttonPosition, canopy::TitleBarButtonSide::Left);
   CHECK_EQ(bar.buttonCornerRadius, 4);
-  CHECK_EQ(bar.buttonGlyph, umbriel::TitleBarButtonGlyph::Never);
+  CHECK_EQ(bar.buttonGlyph, canopy::TitleBarButtonGlyph::Never);
   CHECK_EQ(bar.buttonBackground, false);
   const auto& colors = store.config().colors.titleBar;
   CHECK_EQ(colors.background[0], 1.0F);
@@ -4824,7 +4824,7 @@ minimize_glyph_hover = "#00FFFFFF"
   CHECK_EQ(colors.minimizeGlyphHover[2], 1.0F);
 }
 
-UMBRIEL_TEST(titleBarInvalidValuesAreClaimedAndDiagnosed) {
+CANOPY_TEST(titleBarInvalidValuesAreClaimedAndDiagnosed) {
   const TempConfig file;
   file.write(R"(
 [appearance.title_bar]
@@ -4843,14 +4843,14 @@ maximize_glyph_hover = false
 minimize_glyph = []
 minimize_glyph_hover = {}
 )");
-  auto& store = umbriel::configStore();
+  auto& store = canopy::configStore();
   store.setRootPath(file.path(), true);
   CHECK(store.reload().success);
-  CHECK_EQ(store.config().appearance.titleBar.mode, umbriel::TitleBarMode::Off);
+  CHECK_EQ(store.config().appearance.titleBar.mode, canopy::TitleBarMode::Off);
   CHECK_EQ(store.config().appearance.titleBar.height, 128);
-  CHECK_EQ(store.config().appearance.titleBar.buttonPosition, umbriel::TitleBarButtonSide::Right);
+  CHECK_EQ(store.config().appearance.titleBar.buttonPosition, canopy::TitleBarButtonSide::Right);
   CHECK_EQ(store.config().appearance.titleBar.buttonCornerRadius, 100);
-  CHECK_EQ(store.config().appearance.titleBar.buttonGlyph, umbriel::TitleBarButtonGlyph::Hover);
+  CHECK_EQ(store.config().appearance.titleBar.buttonGlyph, canopy::TitleBarButtonGlyph::Hover);
   CHECK_EQ(store.config().appearance.titleBar.buttonBackground, true);
   CHECK(containsDiagnostic(store, "appearance.title_bar.height = 500 out of range, clamped to 128"));
   CHECK(containsDiagnostic(store, "appearance.title_bar.button_position"));
@@ -4867,9 +4867,9 @@ minimize_glyph_hover = {}
   CHECK(!containsDiagnostic(store, "unknown key"));
 }
 
-UMBRIEL_TEST(titleBarButtonRadiusHasValidatedBounds) {
+CANOPY_TEST(titleBarButtonRadiusHasValidatedBounds) {
   const TempConfig file;
-  auto& store = umbriel::configStore();
+  auto& store = canopy::configStore();
   store.setRootPath(file.path(), true);
   file.write("[appearance.title_bar]\n");
   CHECK(store.reload().success);
@@ -4894,16 +4894,16 @@ UMBRIEL_TEST(titleBarButtonRadiusHasValidatedBounds) {
   }
 }
 
-UMBRIEL_TEST(titleBarModesUseStrictVocabulary) {
+CANOPY_TEST(titleBarModesUseStrictVocabulary) {
   const TempConfig file;
-  auto& store = umbriel::configStore();
+  auto& store = canopy::configStore();
   store.setRootPath(file.path(), true);
   file.write("");
   CHECK(store.reload().success);
-  CHECK_EQ(store.config().appearance.titleBar.mode, umbriel::TitleBarMode::Off);
+  CHECK_EQ(store.config().appearance.titleBar.mode, canopy::TitleBarMode::Off);
   for (const auto& [name, mode] :
-       {std::pair{"forced", umbriel::TitleBarMode::Forced}, std::pair{"on", umbriel::TitleBarMode::On},
-        std::pair{"off", umbriel::TitleBarMode::Off}, std::pair{"negotiated", umbriel::TitleBarMode::Negotiated}}) {
+       {std::pair{"forced", canopy::TitleBarMode::Forced}, std::pair{"on", canopy::TitleBarMode::On},
+        std::pair{"off", canopy::TitleBarMode::Off}, std::pair{"negotiated", canopy::TitleBarMode::Negotiated}}) {
     file.write(std::string("[appearance.title_bar]\nmode = \"") + name + "\"\n");
     CHECK(store.reload().success);
     CHECK(store.diagnostics().empty());
@@ -4912,22 +4912,22 @@ UMBRIEL_TEST(titleBarModesUseStrictVocabulary) {
   for (const auto* const name : {"auto", "force", "on-demand"}) {
     file.write(std::string("[appearance.title_bar]\nmode = \"") + name + "\"\n");
     CHECK(store.reload().success);
-    CHECK_EQ(store.config().appearance.titleBar.mode, umbriel::TitleBarMode::Off);
+    CHECK_EQ(store.config().appearance.titleBar.mode, canopy::TitleBarMode::Off);
     CHECK(containsDiagnostic(store, "appearance.title_bar.mode"));
     CHECK(!containsDiagnostic(store, "unknown key"));
   }
   file.write("[appearance.title_bar]\nmode = true\n");
   CHECK(store.reload().success);
-  CHECK_EQ(store.config().appearance.titleBar.mode, umbriel::TitleBarMode::Off);
+  CHECK_EQ(store.config().appearance.titleBar.mode, canopy::TitleBarMode::Off);
   CHECK(containsDiagnostic(store, "appearance.title_bar.mode"));
   CHECK(!containsDiagnostic(store, "unknown key"));
   file.write("[appearance.title_bar]\nenabled = true\n");
   CHECK(store.reload().success);
-  CHECK_EQ(store.config().appearance.titleBar.mode, umbriel::TitleBarMode::Off);
+  CHECK_EQ(store.config().appearance.titleBar.mode, canopy::TitleBarMode::Off);
   CHECK(containsDiagnostic(store, "unknown key appearance.title_bar.enabled"));
 }
 
-UMBRIEL_TEST(titleBarRuleChoicesAreStrict) {
+CANOPY_TEST(titleBarRuleChoicesAreStrict) {
   const TempConfig file;
   file.write(R"(
 [[window_rule]]
@@ -4939,15 +4939,15 @@ title_bar = "on"
 [[window_rule]]
 title_bar = "negotiated"
 )");
-  auto& store = umbriel::configStore();
+  auto& store = canopy::configStore();
   store.setRootPath(file.path(), true);
   CHECK(store.reload().success);
   CHECK(store.diagnostics().empty());
   CHECK_EQ(store.config().windowRules.size(), size_t{4});
-  CHECK_EQ(store.config().windowRules[0].titleBar, umbriel::TitleBarMode::Forced);
-  CHECK_EQ(store.config().windowRules[1].titleBar, umbriel::TitleBarMode::Off);
-  CHECK_EQ(store.config().windowRules[2].titleBar, umbriel::TitleBarMode::On);
-  CHECK_EQ(store.config().windowRules[3].titleBar, umbriel::TitleBarMode::Negotiated);
+  CHECK_EQ(store.config().windowRules[0].titleBar, canopy::TitleBarMode::Forced);
+  CHECK_EQ(store.config().windowRules[1].titleBar, canopy::TitleBarMode::Off);
+  CHECK_EQ(store.config().windowRules[2].titleBar, canopy::TitleBarMode::On);
+  CHECK_EQ(store.config().windowRules[3].titleBar, canopy::TitleBarMode::Negotiated);
   file.write(R"(
 [[window_rule]]
 title_bar = true
@@ -4970,14 +4970,14 @@ title_bar = "force"
   CHECK(!containsDiagnostic(store, "unknown key"));
 }
 
-UMBRIEL_TEST(titleBarButtonsKeepOrderAndSkipBadEntries) {
-  using umbriel::TitleBarButton;
+CANOPY_TEST(titleBarButtonsKeepOrderAndSkipBadEntries) {
+  using canopy::TitleBarButton;
   using Buttons = std::vector<TitleBarButton>;
   const Buttons defaults{TitleBarButton::Minimize, TitleBarButton::Maximize, TitleBarButton::Close};
   const Buttons reordered{TitleBarButton::Close, TitleBarButton::Minimize};
   const Buttons cleaned{TitleBarButton::Maximize, TitleBarButton::Close};
   const TempConfig file;
-  auto& store = umbriel::configStore();
+  auto& store = canopy::configStore();
   store.setRootPath(file.path(), true);
   file.write("");
   CHECK(store.reload().success);
@@ -5002,8 +5002,8 @@ UMBRIEL_TEST(titleBarButtonsKeepOrderAndSkipBadEntries) {
   CHECK(!containsDiagnostic(store, "unknown key"));
 }
 
-UMBRIEL_TEST(titleBarButtonsRuleOverridesOnlyWhenSet) {
-  using umbriel::TitleBarButton;
+CANOPY_TEST(titleBarButtonsRuleOverridesOnlyWhenSet) {
+  using canopy::TitleBarButton;
   using Buttons = std::vector<TitleBarButton>;
   const Buttons none;
   const Buttons closeOnly{TitleBarButton::Close};
@@ -5019,12 +5019,12 @@ title_bar = "forced"
 match.app_id = "^dialog$"
 title_bar_buttons = ["close"]
 )");
-  auto& store = umbriel::configStore();
+  auto& store = canopy::configStore();
   store.setRootPath(file.path(), true);
   CHECK(store.reload().success);
   CHECK(store.diagnostics().empty());
   const auto resolve = [&](const char* appId) {
-    return umbriel::resolveWindowRules(store.config(), appId, "title", std::nullopt, umbriel::ContentType::None, {}, 0);
+    return canopy::resolveWindowRules(store.config(), appId, "title", std::nullopt, canopy::ContentType::None, {}, 0);
   };
   // A later rule without the key leaves the earlier override in place.
   CHECK(resolve("bare").titleBarButtons == none);
@@ -5032,7 +5032,7 @@ title_bar_buttons = ["close"]
   CHECK(!resolve("other").titleBarButtons.has_value());
 }
 
-UMBRIEL_TEST(stackingLayoutLoadsGloballyAndPerWorkspace) {
+CANOPY_TEST(stackingLayoutLoadsGloballyAndPerWorkspace) {
   const TempConfig file;
   file.write(R"(
 [layout]
@@ -5041,7 +5041,7 @@ mode = "stacking"
 name = "desk"
 layout.mode = "stacking"
 )");
-  ConfigStore& store = umbriel::configStore();
+  ConfigStore& store = canopy::configStore();
   store.setRootPath(file.path(), true);
   CHECK(store.reload().success);
   CHECK(store.config().layout.mode == LayoutMode::Stacking);
@@ -5049,21 +5049,21 @@ layout.mode = "stacking"
   CHECK(store.config().workspaceRules[0].layout.mode == LayoutMode::Stacking);
 }
 
-UMBRIEL_TEST(stackingDropZonesDefaultOnAndRejectNonBooleans) {
+CANOPY_TEST(stackingDropZonesDefaultOnAndRejectNonBooleans) {
   const TempConfig file;
   file.write("[layout.stacking]\n");
-  ConfigStore& store = umbriel::configStore();
+  ConfigStore& store = canopy::configStore();
   store.setRootPath(file.path(), true);
   CHECK(store.reload().success);
   CHECK(store.config().layout.stacking.dropZones);
-  CHECK(umbriel::resolveGlobalLayout(store.config()).stacking.dropZones);
+  CHECK(canopy::resolveGlobalLayout(store.config()).stacking.dropZones);
   file.write("[layout.stacking]\ndrop_zones = false\n");
   const auto disabled = store.reload();
   CHECK(disabled.success);
   CHECK(disabled.change.layout);
   CHECK(disabled.effects.workspaceLayout);
   CHECK(!store.config().layout.stacking.dropZones);
-  CHECK(!umbriel::resolveGlobalLayout(store.config()).stacking.dropZones);
+  CHECK(!canopy::resolveGlobalLayout(store.config()).stacking.dropZones);
   file.write("[layout.stacking]\ndrop_zones = 1\n");
   CHECK(store.reload().success);
   CHECK(store.config().layout.stacking.dropZones);
@@ -5071,7 +5071,7 @@ UMBRIEL_TEST(stackingDropZonesDefaultOnAndRejectNonBooleans) {
   CHECK(!containsDiagnostic(store, "unknown key layout.stacking.drop_zones"));
 }
 
-UMBRIEL_TEST(stackingDropZonesResolveWorkspaceOverridesAndReloadInheritance) {
+CANOPY_TEST(stackingDropZonesResolveWorkspaceOverridesAndReloadInheritance) {
   const TempConfig file;
   const auto write = [&file](bool dropZones) {
     file.write(std::string{"[layout.stacking]\ndrop_zones = "} + (dropZones ? "true\n" : "false\n") + R"(
@@ -5087,11 +5087,11 @@ layout.stacking.drop_zones = false
 )");
   };
   write(false);
-  ConfigStore& store = umbriel::configStore();
+  ConfigStore& store = canopy::configStore();
   store.setRootPath(file.path(), true);
   CHECK(store.reload().success);
   const auto resolve = [&store](std::string_view name) {
-    return umbriel::resolveWorkspaceLayout(
+    return canopy::resolveWorkspaceLayout(
         store.config(), {.connector = "DP-1", .make = {}, .model = {}, .serial = {}}, name, 0
     );
   };
@@ -5109,7 +5109,7 @@ layout.stacking.drop_zones = false
   CHECK(!resolve("disabled").stacking.dropZones);
 }
 
-UMBRIEL_TEST(stackingConfigRejectsRemovedNamesWithoutChangingFloatingWindowVocabulary) {
+CANOPY_TEST(stackingConfigRejectsRemovedNamesWithoutChangingFloatingWindowVocabulary) {
   const TempConfig file;
   file.write(R"(
 [layout]
@@ -5127,11 +5127,11 @@ layout.mode = "floating"
 match.is_floating = true
 default_floating = true
 )");
-  ConfigStore& store = umbriel::configStore();
+  ConfigStore& store = canopy::configStore();
   store.setRootPath(file.path(), true);
   CHECK(store.reload().success);
-  CHECK(store.config().layout.mode == LayoutMode::Scrolling);
-  CHECK(store.config().layout.newExitsFullscreen == umbriel::FullscreenExitScope::Floating);
+  CHECK(store.config().layout.mode == LayoutMode::Stacking);
+  CHECK(store.config().layout.newExitsFullscreen == canopy::FullscreenExitScope::Floating);
   CHECK(!store.config().layout.stacking.dropZones);
   CHECK(store.config().input.windowDragToggle == WindowDragToggle::Floating);
   CHECK_EQ(store.config().workspaceRules.size(), size_t{1});
@@ -5144,9 +5144,9 @@ default_floating = true
   CHECK(!containsDiagnostic(store, "unknown key layout.stacking"));
 }
 
-UMBRIEL_TEST(wideScrollingExtentsLoadUpToTheWideCeiling) {
+CANOPY_TEST(wideScrollingExtentsLoadUpToTheWideCeiling) {
   const TempConfig file;
-  ConfigStore& store = umbriel::configStore();
+  ConfigStore& store = canopy::configStore();
   store.setRootPath(file.path(), true);
 
   // Presets above 1.0 load unclamped: scrolling columns may span several viewports.

@@ -2,7 +2,7 @@
 # Opaque cards fade during an overview drag. Client transparency composes with
 # the drag multiplier instead of bypassing the compositor-owned opacity.
 set -euo pipefail
-source "$UMBRIEL_HARNESS_LIB"
+source "$CANOPY_HARNESS_LIB"
 
 readonly BTN_LEFT=272
 readonly OUTPUT_W=1280
@@ -12,49 +12,49 @@ client_pid=
 
 measure_drag_green() {
   local alpha=$1 title=$2
-  local screenshot="$UMBRIEL_RUNTIME_DIR/$title.png"
+  local screenshot="$CANOPY_RUNTIME_DIR/$title.png"
   foot --config=/dev/null --override=colors-dark.background=000000 --override="colors-dark.alpha=$alpha" \
     --title="$title" sh -c 'sleep 120' > /dev/null 2>&1 &
   client_pid=$!
   for _ in $(seq 60); do
-    [[ $("$UMBRIEL" windows --json | jq 'length') -eq 1 ]] && break
+    [[ $("$CANOPY" windows --json | jq 'length') -eq 1 ]] && break
     sleep 0.25
   done
-  if [[ $("$UMBRIEL" windows --json | jq 'length') -ne 1 ]]; then
+  if [[ $("$CANOPY" windows --json | jq 'length') -ne 1 ]]; then
     echo "timed out waiting for $title" >&2
     return 1
   fi
 
-  "$UMBRIEL" msg overview-open > /dev/null
-  "$UMBRIEL" settle
+  "$CANOPY" msg overview-open > /dev/null
+  "$CANOPY" settle
   # The single card is centered at (640, 360). Move it right and hold the button so the compositor retains the grab.
   # Animation time only moves by clock-advance while the drag is sampled.
-  "$UMBRIEL" clock-freeze > /dev/null
+  "$CANOPY" clock-freeze > /dev/null
   pointer_hold "$OUTPUT_W" "$OUTPUT_H" move 640 360 press "$BTN_LEFT" move 740 360 -- release "$BTN_LEFT" >&2
-  "$UMBRIEL" clock-advance 500 > /dev/null
+  "$CANOPY" clock-advance 500 > /dev/null
   grim "$screenshot"
 
   local green
   # An opaque card at the configured 0.5 drag opacity over pure green leaves 255 * 0.5 = 128 in the encoded pixel.
-  read -r _ green _ < <("$UMBRIEL_PIXEL_PROBE" "$screenshot" mean 40x40+680+430)
+  read -r _ green _ < <("$CANOPY_PIXEL_PROBE" "$screenshot" mean 40x40+680+430)
   pointer_release >&2
-  "$UMBRIEL" clock-resume > /dev/null
+  "$CANOPY" clock-resume > /dev/null
   printf '%s\n' "$green"
 }
 
 # Both measurements share one compositor instance, so the card from the first scenario has to be gone before the
 # second one opens the overview on a single card again.
 remove_card() {
-  "$UMBRIEL" msg overview-close > /dev/null
+  "$CANOPY" msg overview-close > /dev/null
   kill -KILL "$client_pid" 2>/dev/null || true
   wait "$client_pid" 2>/dev/null || true
   for _ in $(seq 40); do
-    [[ $("$UMBRIEL" windows --json | jq 'length') -eq 0 ]] && break
+    [[ $("$CANOPY" windows --json | jq 'length') -eq 0 ]] && break
     sleep 0.1
   done
 }
 
-cat >> "$UMBRIEL_CONFIG" <<'EOF'
+cat >> "$CANOPY_CONFIG" <<'EOF'
 
 [colors]
 insert_hint = "#FF0000FF"
@@ -66,10 +66,10 @@ workspace_background = "#00FF00FF"
 [appearance]
 drag_opacity = 0.5
 EOF
-"$UMBRIEL" msg config-reload > /dev/null
+"$CANOPY" msg config-reload > /dev/null
 
-measure_drag_green 1 drag-opaque > "$UMBRIEL_RUNTIME_DIR/opaque-green"
-opaque_green=$(< "$UMBRIEL_RUNTIME_DIR/opaque-green")
+measure_drag_green 1 drag-opaque > "$CANOPY_RUNTIME_DIR/opaque-green"
+opaque_green=$(< "$CANOPY_RUNTIME_DIR/opaque-green")
 if (( opaque_green < 110 || opaque_green > 145 )); then
   echo "opaque dragged card did not use configured opacity: mean green=$opaque_green"
   exit 1

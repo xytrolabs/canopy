@@ -13,7 +13,7 @@ Configure bindings under `[keybinds]`. See [Actions](actions.md) for the complet
 
 ## Default keybinds
 
-The packaged starting configuration ([`examples/config.toml`](https://github.com/noctalia-dev/umbriel/blob/main/examples/config.toml)) binds these, among others. `Mod` is Super on a native session and Alt when Umbriel runs nested in another desktop (see [Modifiers](#modifiers)).
+The packaged starting configuration ([`examples/config.toml`](https://github.com/xytrolabs/canopy/blob/main/examples/config.toml)) binds these, among others. `Mod` is Super on a native session and Alt when Canopy runs nested in another desktop (see [Modifiers](#modifiers)).
 
 | Shortcut               | Action                                      |
 | ---------------------- | ------------------------------------------- |
@@ -92,7 +92,7 @@ Use this only for actions that are safe without an unlocked session.
 
 ## Keyboard shortcuts inhibition
 
-Games and remote desktop clients can ask Umbriel to pass keyboard shortcuts through. You can also enable passthrough manually with `shortcuts-inhibit-toggle`, even when the focused client has not requested it. Keys that would trigger ordinary bindings then reach the client. Pointer and wheel binds are unaffected.
+Games and remote desktop clients can ask Canopy to pass keyboard shortcuts through. You can also enable passthrough manually with `shortcuts-inhibit-toggle`, even when the focused client has not requested it. Keys that would trigger ordinary bindings then reach the client. Pointer and wheel binds are unaffected.
 
 Keep one escape binding available:
 
@@ -134,11 +134,11 @@ Prefix bindings inside a submap with `submap[name],`:
 
 The optional `submap` field applies a transition after the action. Use `submap = "reset"` for one-shot commands. A default-context `"Escape" = "submap reset"` always matches, even outside a submap, so use it only when bare Escape should be consumed globally.
 
-Run `umbriel submap` to print the active layer, or subscribe to `submap` events for a panel or script.
+Run `canopy submap` to print the active layer, or subscribe to `submap` events for a panel or script.
 
 ## Keyboard layouts
 
-Bindings normally match the symbol produced by the active layout. When several layouts are configured, Umbriel also checks the same physical key for a printable ASCII symbol in the other layouts. This keeps binds such as `Mod+T` working after switching to a non-Latin layout.
+Bindings normally match the symbol produced by the active layout. When several layouts are configured, Canopy also checks the same physical key for a printable ASCII symbol in the other layouts. This keeps binds such as `Mod+T` working after switching to a non-Latin layout.
 
 A keyboard configured with only a non-Latin layout has no ASCII fallback. Add an alternate layout or bind the active XKB keysym name.
 
@@ -169,7 +169,7 @@ Hot corners are also inactive while an exclusive-keyboard layer surface, such as
 
 ## Cheatsheet
 
-The cheatsheet lists active keybinds. It opens at startup when `general.show_cheatsheet` is enabled. Use `cheatsheet-toggle`, `cheatsheet-open`, or `cheatsheet-close` from a bind or `umbriel msg`.
+The cheatsheet lists active keybinds. It opens at startup when `general.show_cheatsheet` is enabled. Use `cheatsheet-toggle`, `cheatsheet-open`, or `cheatsheet-close` from a bind or `canopywc msg`.
 
 Any non-modifier key or mouse button closes it. Normal bound actions still run.
 

@@ -3,7 +3,7 @@
 #include "config/fields.h"
 #include "config/keybind_parse.h"
 #include "core/log.h"
-#include "umbriel_data_dir.h"
+#include "canopy_data_dir.h"
 
 #include <algorithm>
 #include <cstdlib>
@@ -16,7 +16,7 @@
 #include <utility>
 #include <vector>
 
-namespace umbriel {
+namespace canopy {
 
   namespace {
 
@@ -25,12 +25,12 @@ namespace umbriel {
     std::filesystem::path userConfigPath() {
       if (const char* xdgConfigHome = std::getenv("XDG_CONFIG_HOME");
           xdgConfigHome != nullptr && xdgConfigHome[0] != '\0') {
-        return std::filesystem::path(xdgConfigHome) / "umbriel/config.toml";
+        return std::filesystem::path(xdgConfigHome) / "canopywc/config.toml";
       }
       if (const char* home = std::getenv("HOME"); home != nullptr && home[0] != '\0') {
-        return std::filesystem::path(home) / ".config/umbriel/config.toml";
+        return std::filesystem::path(home) / ".config/canopywc/config.toml";
       }
-      return std::filesystem::path(".config/umbriel/config.toml");
+      return std::filesystem::path(".config/canopywc/config.toml");
     }
 
     enum class ConfigPathKind {
@@ -73,7 +73,7 @@ namespace umbriel {
         const size_t separator = configDirs.find(':', offset);
         const std::string_view directory = configDirs.substr(offset, separator - offset);
         if (!directory.empty()) {
-          candidates.push_back(std::filesystem::path(directory) / "umbriel/config.toml");
+          candidates.push_back(std::filesystem::path(directory) / "canopywc/config.toml");
         }
         if (separator == std::string_view::npos) {
           break;
@@ -81,7 +81,7 @@ namespace umbriel {
         offset = separator + 1;
       }
 
-      candidates.push_back(std::filesystem::path(kDataDir) / "umbriel/config.toml");
+      candidates.push_back(std::filesystem::path(kDataDir) / "canopywc/config.toml");
       return candidates;
     }
 
@@ -250,7 +250,7 @@ namespace umbriel {
       const auto& diags = configDiagnostics();
 
       for (const auto& d : diags) {
-        if (d.severity == umbriel::ConfigDiagnostic::Severity::Error) {
+        if (d.severity == canopy::ConfigDiagnostic::Severity::Error) {
           const std::string loc = d.location();
           errors += loc.empty() ? d.message : loc + ": " + d.message + "\n";
         }
@@ -308,4 +308,4 @@ namespace umbriel {
 
   const std::vector<std::filesystem::path>& configWatchPaths() { return configStore().watchPaths(); }
 
-} // namespace umbriel
+} // namespace canopy

@@ -5,20 +5,20 @@
 # default_maximize reflows them on that same clock.
 set -euo pipefail
 
-readonly IMAGE="$UMBRIEL_RUNTIME_DIR/tiled-open-reflow.png"
+readonly IMAGE="$CANOPY_RUNTIME_DIR/tiled-open-reflow.png"
 
 # Keep most of the opener transparent during windows_in so the established tile stays observable behind it. A blue
 # strip near the bottom exposes the opener's own progress before the fully blue client replaces it at completion.
-cat > "$UMBRIEL_RUNTIME_DIR/open-marker.glsl" <<'GLSL'
+cat > "$CANOPY_RUNTIME_DIR/open-marker.glsl" <<'GLSL'
 vec4 animation(vec2 uv) {
     if (uv.y < 0.8) {
         return vec4(0.0);
     }
-    return vec4(0.0, 0.0, umbriel_clamped_progress, 1.0);
+    return vec4(0.0, 0.0, canopy_clamped_progress, 1.0);
 }
 GLSL
 
-cat >> "$UMBRIEL_CONFIG" <<'EOF'
+cat >> "$CANOPY_CONFIG" <<'EOF'
 
 [colors]
 backdrop = "#000000FF"
@@ -61,13 +61,13 @@ curve = "linear"
 match.title = "^tiled-maximized-opener$"
 default_maximize = true
 EOF
-"$UMBRIEL" msg config-reload > /dev/null
+"$CANOPY" msg config-reload > /dev/null
 
 spawn() {
   local title=$1 color=$2
-  FILL_COLOR="$color" "$UMBRIEL_UNMAP_CLIENT" "$title" 1200 700 > "$UMBRIEL_RUNTIME_DIR/$title.log" 2>&1 &
+  FILL_COLOR="$color" "$CANOPY_UNMAP_CLIENT" "$title" 1200 700 > "$CANOPY_RUNTIME_DIR/$title.log" 2>&1 &
   for _ in $(seq 80); do
-    window=$("$UMBRIEL" windows --json | jq -c --arg title "$title" '.[] | select(.title == $title)')
+    window=$("$CANOPY" windows --json | jq -c --arg title "$title" '.[] | select(.title == $title)')
     [[ -n $window ]] && return 0
     sleep 0.025
   done
@@ -80,22 +80,22 @@ spawn() {
 red_width() {
   grim "$IMAGE"
   local pixels
-  pixels=$("$UMBRIEL_PIXEL_PROBE" "$IMAGE" count 'r > 0.8 && g < 0.1 && b < 0.1' 1280x8+0+356)
+  pixels=$("$CANOPY_PIXEL_PROBE" "$IMAGE" count 'r > 0.8 && g < 0.1 && b < 0.1' 1280x8+0+356)
   echo $(((pixels + 4) / 8))
 }
 
 blue_at() {
   local x=$1 y=$2
   grim "$IMAGE"
-  "$UMBRIEL_PIXEL_PROBE" "$IMAGE" mean "8x8+$((x - 4))+$((y - 4))" | awk '{ print $3 }'
+  "$CANOPY_PIXEL_PROBE" "$IMAGE" mean "8x8+$((x - 4))+$((y - 4))" | awk '{ print $3 }'
 }
 
 # Animation time only moves by clock-advance: samples land at 300 ms (mid-reflow) and 900 ms (reflow done, windows_in
 # at 0.56), and advancing 1600 ms finishes every timeline.
-"$UMBRIEL" clock-freeze
+"$CANOPY" clock-freeze
 spawn tiled-open-survivor 0xFFFF0000
-"$UMBRIEL" clock-advance 1600
-"$UMBRIEL" settle
+"$CANOPY" clock-advance 1600
+"$CANOPY" settle
 before=$(red_width)
 
 spawn tiled-opener 0xFF0000FF
@@ -104,16 +104,16 @@ opener=$window
 # the output's right edge, so derive a point well inside its final slot from that edge.
 opener_x=$(jq -r '.x + ((1280 - .x) / 2 | floor)' <<< "$opener")
 opener_y=$(jq -r '.y + (((720 - .y) * 7 / 8) | floor)' <<< "$opener")
-"$UMBRIEL" clock-advance 300
+"$CANOPY" clock-advance 300
 early=$(red_width)
 early_blue=$(blue_at "$opener_x" "$opener_y")
 
-"$UMBRIEL" clock-advance 600
+"$CANOPY" clock-advance 600
 mid=$(red_width)
 mid_blue=$(blue_at "$opener_x" "$opener_y")
 
-"$UMBRIEL" clock-advance 1600
-"$UMBRIEL" settle
+"$CANOPY" clock-advance 1600
+"$CANOPY" settle
 final=$(red_width)
 final_blue=$(blue_at "$opener_x" "$opener_y")
 
@@ -140,10 +140,10 @@ fi
 
 settled=$(red_width)
 spawn tiled-maximized-opener 0xFF00FF00
-"$UMBRIEL" clock-advance 300
+"$CANOPY" clock-advance 300
 maximized_early=$(red_width)
-"$UMBRIEL" clock-advance 1600
-"$UMBRIEL" settle
+"$CANOPY" clock-advance 1600
+"$CANOPY" settle
 maximized_final=$(red_width)
 
 if ((settled - maximized_final < 200)); then

@@ -6,7 +6,7 @@
 #include <random>
 #include <span>
 
-namespace umbriel {
+namespace canopy {
 
   enum class EffectSelectorSource : std::uint8_t { Default, Rule, Runtime };
   std::string_view effectSelectorSourceName(EffectSelectorSource source);
@@ -86,4 +86,4 @@ namespace umbriel {
     std::mt19937_64 m_random;
   };
 
-} // namespace umbriel
+} // namespace canopy

@@ -8,7 +8,7 @@
 
 struct wlr_box;
 
-namespace umbriel {
+namespace canopy {
 
   class View;
 
@@ -189,4 +189,4 @@ namespace umbriel {
     int m_lastAvailableCross = 0;
   };
 
-} // namespace umbriel
+} // namespace canopy

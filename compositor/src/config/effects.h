@@ -10,7 +10,7 @@
 #include <string_view>
 #include <vector>
 
-namespace umbriel {
+namespace canopy {
 
   class Section;
 
@@ -120,4 +120,4 @@ namespace umbriel {
       EffectReferenceConstraint constraint = EffectReferenceConstraint::PresetOnly
   );
 
-} // namespace umbriel
+} // namespace canopy

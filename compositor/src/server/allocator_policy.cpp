@@ -1,6 +1,6 @@
 #include "server/allocator_policy.h"
 
-namespace umbriel {
+namespace canopy {
 
   namespace {
     constexpr int rowAlignment = 64;
@@ -25,4 +25,4 @@ namespace umbriel {
     return backendDrmFd < 0 && rendererDrmFd < 0;
   }
 
-} // namespace umbriel
+} // namespace canopy

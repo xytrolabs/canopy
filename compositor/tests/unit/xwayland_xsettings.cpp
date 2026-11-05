@@ -13,8 +13,8 @@
 
 namespace {
 
-  using umbriel::encodeXsettings;
-  using umbriel::xsettingsFor;
+  using canopy::encodeXsettings;
+  using canopy::xsettingsFor;
   using Value = std::variant<int32_t, std::string>;
 
   struct Decoded {
@@ -105,7 +105,7 @@ namespace {
 } // namespace
 
 // Integer scales reach GTK whole, with fonts at 96 DPI before scaling.
-UMBRIEL_TEST(integerScaleIsWholeWindowScale) {
+CANOPY_TEST(integerScaleIsWholeWindowScale) {
   const auto values = xsettingsFor(3.0, "", 24);
   CHECK_EQ(values.windowScalingFactor, 3);
   CHECK_EQ(values.unscaledDpi, 96 * 1024);
@@ -114,7 +114,7 @@ UMBRIEL_TEST(integerScaleIsWholeWindowScale) {
 
 // A fractional scale keeps the integer window scale and carries the rest in the unscaled DPI, so text, like Xft/DPI,
 // lands at 2.5x.
-UMBRIEL_TEST(fractionalScaleCarriesRemainderInDpi) {
+CANOPY_TEST(fractionalScaleCarriesRemainderInDpi) {
   const auto values = xsettingsFor(2.5, "", 24);
   CHECK_EQ(values.windowScalingFactor, 2);
   CHECK_EQ(values.unscaledDpi, 120 * 1024);
@@ -126,7 +126,7 @@ UMBRIEL_TEST(fractionalScaleCarriesRemainderInDpi) {
 }
 
 // X clients cannot scale below 1; outputs under scale 1 announce the defaults.
-UMBRIEL_TEST(scaleBelowOneAnnouncesDefaults) {
+CANOPY_TEST(scaleBelowOneAnnouncesDefaults) {
   const auto values = xsettingsFor(0.5, "", 24);
   CHECK_EQ(values.windowScalingFactor, 1);
   CHECK_EQ(values.unscaledDpi, 96 * 1024);
@@ -135,12 +135,12 @@ UMBRIEL_TEST(scaleBelowOneAnnouncesDefaults) {
 }
 
 // The cursor size is in X pixels, so it grows with the scale X clients draw at.
-UMBRIEL_TEST(cursorSizeFollowsScale) {
+CANOPY_TEST(cursorSizeFollowsScale) {
   CHECK_EQ(xsettingsFor(2.5, "breeze", 36).cursorSize, 90);
   CHECK_EQ(xsettingsFor(1.0, "breeze", 36).cursorSize, 36);
 }
 
-UMBRIEL_TEST(encodedPropertyParses) {
+CANOPY_TEST(encodedPropertyParses) {
   const auto decoded = decode(encodeXsettings(7, xsettingsFor(2.5, "Adwaita", 24)));
   CHECK(decoded.has_value());
   if (!decoded) {
@@ -158,7 +158,7 @@ UMBRIEL_TEST(encodedPropertyParses) {
 }
 
 // Without a configured theme, clients keep their own default rather than an empty name.
-UMBRIEL_TEST(unsetCursorThemeIsOmitted) {
+CANOPY_TEST(unsetCursorThemeIsOmitted) {
   const auto decoded = decode(encodeXsettings(1, xsettingsFor(1.0, "", 24)));
   CHECK(decoded.has_value());
   if (decoded) {

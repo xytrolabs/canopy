@@ -18,7 +18,7 @@
 
 namespace {
 
-  std::string captureHumanOutput(const umbriel::IpcCommandSpec& spec, const nlohmann::json& ok) {
+  std::string captureHumanOutput(const canopy::IpcCommandSpec& spec, const nlohmann::json& ok) {
     FILE* output = std::tmpfile();
     CHECK(output != nullptr);
     if (output == nullptr) {
@@ -86,8 +86,8 @@ namespace {
 
 } // namespace
 
-UMBRIEL_TEST(keyboardLayoutsHumanOutputListsAndMarksCurrentLayout) {
-  const umbriel::IpcCommandSpec* spec = umbriel::findIpcCommand("keyboard-layouts");
+CANOPY_TEST(keyboardLayoutsHumanOutputListsAndMarksCurrentLayout) {
+  const canopy::IpcCommandSpec* spec = canopy::findIpcCommand("keyboard-layouts");
   CHECK(spec != nullptr);
   if (spec == nullptr) {
     return;
@@ -105,8 +105,8 @@ UMBRIEL_TEST(keyboardLayoutsHumanOutputListsAndMarksCurrentLayout) {
   CHECK_EQ(captureHumanOutput(*spec, layouts), "  English (US)\n* German\n");
 }
 
-UMBRIEL_TEST(colorHumanDisabledOutputHasNoActiveDepth) {
-  const umbriel::IpcCommandSpec* spec = umbriel::findIpcCommand("color");
+CANOPY_TEST(colorHumanDisabledOutputHasNoActiveDepth) {
+  const canopy::IpcCommandSpec* spec = canopy::findIpcCommand("color");
   CHECK(spec != nullptr && spec->printHuman != nullptr);
   if (spec == nullptr || spec->printHuman == nullptr) {
     return;
@@ -118,8 +118,8 @@ UMBRIEL_TEST(colorHumanDisabledOutputHasNoActiveDepth) {
   CHECK(out.contains("bit depth: none (configured 10)"));
 }
 
-UMBRIEL_TEST(colorHumanSdr10LineUsesCommittedFormatForDepth) {
-  const umbriel::IpcCommandSpec* spec = umbriel::findIpcCommand("color");
+CANOPY_TEST(colorHumanSdr10LineUsesCommittedFormatForDepth) {
+  const canopy::IpcCommandSpec* spec = canopy::findIpcCommand("color");
   CHECK(spec != nullptr && spec->printHuman != nullptr);
   if (spec == nullptr || spec->printHuman == nullptr) {
     return;
@@ -137,8 +137,8 @@ UMBRIEL_TEST(colorHumanSdr10LineUsesCommittedFormatForDepth) {
   CHECK(out.contains("bit depth: 10 (configured 10)"));
 }
 
-UMBRIEL_TEST(colorHumanSdr10FallbackShowsReason) {
-  const umbriel::IpcCommandSpec* spec = umbriel::findIpcCommand("color");
+CANOPY_TEST(colorHumanSdr10FallbackShowsReason) {
+  const canopy::IpcCommandSpec* spec = canopy::findIpcCommand("color");
   CHECK(spec != nullptr && spec->printHuman != nullptr);
   if (spec == nullptr || spec->printHuman == nullptr) {
     return;
@@ -156,8 +156,8 @@ UMBRIEL_TEST(colorHumanSdr10FallbackShowsReason) {
   CHECK(out.contains("bit depth: 8 (configured 10)"));
 }
 
-UMBRIEL_TEST(colorHumanDepthIgnoresActivityFlags) {
-  const umbriel::IpcCommandSpec* spec = umbriel::findIpcCommand("color");
+CANOPY_TEST(colorHumanDepthIgnoresActivityFlags) {
+  const canopy::IpcCommandSpec* spec = canopy::findIpcCommand("color");
   CHECK(spec != nullptr && spec->printHuman != nullptr);
   if (spec == nullptr || spec->printHuman == nullptr) {
     return;
@@ -169,8 +169,8 @@ UMBRIEL_TEST(colorHumanDepthIgnoresActivityFlags) {
   CHECK(out.contains("bit depth: 8 (configured 8)"));
 }
 
-UMBRIEL_TEST(colorHumanShowsCommittedHdrOutputMetadata) {
-  const umbriel::IpcCommandSpec* spec = umbriel::findIpcCommand("color");
+CANOPY_TEST(colorHumanShowsCommittedHdrOutputMetadata) {
+  const canopy::IpcCommandSpec* spec = canopy::findIpcCommand("color");
   CHECK(spec != nullptr && spec->printHuman != nullptr);
   if (spec == nullptr || spec->printHuman == nullptr) {
     return;
@@ -191,16 +191,16 @@ UMBRIEL_TEST(colorHumanShowsCommittedHdrOutputMetadata) {
 namespace {
 
   bool parseOutputCreate(
-      std::vector<std::string> args, std::string& name, std::optional<umbriel::OutputMode>& mode, std::string& error
+      std::vector<std::string> args, std::string& name, std::optional<canopy::OutputMode>& mode, std::string& error
   ) {
-    return umbriel::parseOutputCreateArgs(args, name, mode, error);
+    return canopy::parseOutputCreateArgs(args, name, mode, error);
   }
 
 } // namespace
 
-UMBRIEL_TEST(parsesOutputCreateNameOnly) {
+CANOPY_TEST(parsesOutputCreateNameOnly) {
   std::string name;
-  std::optional<umbriel::OutputMode> mode;
+  std::optional<canopy::OutputMode> mode;
   std::string error;
   CHECK(parseOutputCreate({"stream"}, name, mode, error));
   CHECK_EQ(name, "stream");
@@ -208,9 +208,9 @@ UMBRIEL_TEST(parsesOutputCreateNameOnly) {
   CHECK(error.empty());
 }
 
-UMBRIEL_TEST(parsesOutputCreateMode) {
+CANOPY_TEST(parsesOutputCreateMode) {
   std::string name;
-  std::optional<umbriel::OutputMode> mode;
+  std::optional<canopy::OutputMode> mode;
   std::string error;
   CHECK(parseOutputCreate({"stream", "2560x1440@120"}, name, mode, error));
   CHECK_EQ(name, "stream");
@@ -223,9 +223,9 @@ UMBRIEL_TEST(parsesOutputCreateMode) {
   CHECK(error.empty());
 }
 
-UMBRIEL_TEST(parsesOutputCreateModeWithoutRefresh) {
+CANOPY_TEST(parsesOutputCreateModeWithoutRefresh) {
   std::string name;
-  std::optional<umbriel::OutputMode> mode;
+  std::optional<canopy::OutputMode> mode;
   std::string error;
   CHECK(parseOutputCreate({"stream", "400x300"}, name, mode, error));
   CHECK(mode.has_value());
@@ -236,18 +236,18 @@ UMBRIEL_TEST(parsesOutputCreateModeWithoutRefresh) {
   }
 }
 
-UMBRIEL_TEST(rejectsOutputCreateInvalidMode) {
+CANOPY_TEST(rejectsOutputCreateInvalidMode) {
   std::string name;
-  std::optional<umbriel::OutputMode> mode;
+  std::optional<canopy::OutputMode> mode;
   std::string error;
   CHECK(!parseOutputCreate({"stream", "1920x1080p"}, name, mode, error));
   CHECK(!error.empty());
   CHECK(!mode.has_value());
 }
 
-UMBRIEL_TEST(rejectsOutputCreateExtraArguments) {
+CANOPY_TEST(rejectsOutputCreateExtraArguments) {
   std::string name;
-  std::optional<umbriel::OutputMode> mode;
+  std::optional<canopy::OutputMode> mode;
   std::string error;
   CHECK(!parseOutputCreate({"stream", "1920x1080", "extra"}, name, mode, error));
   CHECK(!error.empty());
@@ -261,9 +261,9 @@ UMBRIEL_TEST(rejectsOutputCreateExtraArguments) {
   CHECK(!error.empty());
 }
 
-UMBRIEL_TEST(effectsCommandReportsStatesSuppressionAndDeclarationOrder) {
-  const auto* spec = umbriel::findIpcCommand("effects");
-  CHECK(spec != nullptr && spec->printHuman != nullptr && spec->handle == &umbriel::IpcCommands::effects);
+CANOPY_TEST(effectsCommandReportsStatesSuppressionAndDeclarationOrder) {
+  const auto* spec = canopy::findIpcCommand("effects");
+  CHECK(spec != nullptr && spec->printHuman != nullptr && spec->handle == &canopy::IpcCommands::effects);
   if (spec == nullptr || spec->printHuman == nullptr) {
     return;
   }
@@ -303,8 +303,8 @@ UMBRIEL_TEST(effectsCommandReportsStatesSuppressionAndDeclarationOrder) {
   CHECK_EQ(captureHumanOutput(*spec, payload), output);
 }
 
-UMBRIEL_TEST(audioRequestsAcceptOnlyTheCompleteBoundedSpectrumContract) {
-  using umbriel::IpcCommands;
+CANOPY_TEST(audioRequestsAcceptOnlyTheCompleteBoundedSpectrumContract) {
+  using canopy::IpcCommands;
   auto bands = nlohmann::json::array();
   for (int i = 0; i < FX_AUDIO_BANDS; ++i) {
     bands.push_back(static_cast<double>(i) / (FX_AUDIO_BANDS - 1));
@@ -348,8 +348,8 @@ UMBRIEL_TEST(audioRequestsAcceptOnlyTheCompleteBoundedSpectrumContract) {
 namespace {
 
   // Word-grammar samples for every argument kind, with optional fields both set and left out.
-  std::vector<std::string> actionSamples(umbriel::ActionArgKind kind) {
-    using umbriel::ActionArgKind;
+  std::vector<std::string> actionSamples(canopy::ActionArgKind kind) {
+    using canopy::ActionArgKind;
     switch (kind) {
     case ActionArgKind::None:
       return {""};
@@ -409,21 +409,21 @@ namespace {
     return {};
   }
 
-  std::optional<umbriel::Keybind> decode(std::string_view text, std::string& error) {
-    return umbriel::actionFromRequest(nlohmann::json::parse(text), error);
+  std::optional<canopy::Keybind> decode(std::string_view text, std::string& error) {
+    return canopy::actionFromRequest(nlohmann::json::parse(text), error);
   }
 
 } // namespace
 
 // The CLI parses words and sends the structured request, so every payload the word grammar produces must survive the
 // trip through the request unchanged.
-UMBRIEL_TEST(everyWordFormRoundTripsThroughTheActionRequest) {
-  for (const auto& spec : umbriel::actionSpecs()) {
+CANOPY_TEST(everyWordFormRoundTripsThroughTheActionRequest) {
+  for (const auto& spec : canopy::actionSpecs()) {
     for (const auto& sample : actionSamples(spec.argKind)) {
-      umbriel::Keybind words;
-      CHECK(umbriel::parseAction(std::string(spec.name) + sample, words));
+      canopy::Keybind words;
+      CHECK(canopy::parseAction(std::string(spec.name) + sample, words));
       std::string error;
-      const auto decoded = umbriel::actionFromRequest(umbriel::actionRequest(words), error);
+      const auto decoded = canopy::actionFromRequest(canopy::actionRequest(words), error);
       CHECK(decoded.has_value());
       CHECK(error.empty());
       if (decoded) {
@@ -434,24 +434,24 @@ UMBRIEL_TEST(everyWordFormRoundTripsThroughTheActionRequest) {
   }
 }
 
-UMBRIEL_TEST(actionRequestWorkspaceTypeSelectsPositionOrName) {
+CANOPY_TEST(actionRequestWorkspaceTypeSelectsPositionOrName) {
   std::string error;
   const auto position = decode(R"({"cmd":"action","action":"workspace-switch","workspace":2})", error);
   const auto* index = position
-      ? std::get_if<umbriel::WorkspaceIndex>(&std::get<umbriel::WorkspaceArg>(position->payload).reference)
+      ? std::get_if<canopy::WorkspaceIndex>(&std::get<canopy::WorkspaceArg>(position->payload).reference)
       : nullptr;
   CHECK(index != nullptr && index->value == 2);
   const auto named = decode(R"({"cmd":"action","action":"workspace-switch","workspace":"2","output":"DP-1"})", error);
   CHECK(named.has_value());
   if (named) {
-    const auto& workspace = std::get<umbriel::WorkspaceArg>(named->payload);
-    const auto* name = std::get_if<umbriel::WorkspaceName>(&workspace.reference);
+    const auto& workspace = std::get<canopy::WorkspaceArg>(named->payload);
+    const auto* name = std::get_if<canopy::WorkspaceName>(&workspace.reference);
     CHECK(name != nullptr && name->value == "2");
     CHECK_EQ(workspace.output, std::string{"DP-1"});
   }
 }
 
-UMBRIEL_TEST(actionRequestsRejectMalformedFieldsWithTheReason) {
+CANOPY_TEST(actionRequestsRejectMalformedFieldsWithTheReason) {
   const std::pair<std::string_view, std::string_view> cases[] = {
       {R"({"cmd":"action"})", R"(missing "action")"},
       {R"({"cmd":"action","action":"nope"})", "unknown action: nope"},
@@ -487,7 +487,7 @@ UMBRIEL_TEST(actionRequestsRejectMalformedFieldsWithTheReason) {
   }
 }
 
-UMBRIEL_TEST(workspaceOutputRequestRejectsMalformedFields) {
+CANOPY_TEST(workspaceOutputRequestRejectsMalformedFields) {
   std::string error;
   for (const auto& invalid :
        {nlohmann::json::object(), nlohmann::json{{"destination", 2}}, nlohmann::json{{"destination", ""}},
@@ -499,7 +499,7 @@ UMBRIEL_TEST(workspaceOutputRequestRejectsMalformedFields) {
     auto bad = invalid;
     bad["cmd"] = "action";
     bad["action"] = "workspace-move-to-output";
-    CHECK(!umbriel::actionFromRequest(bad, error));
+    CHECK(!canopy::actionFromRequest(bad, error));
   }
 }
 

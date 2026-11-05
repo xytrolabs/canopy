@@ -31,12 +31,12 @@ extern "C" {
 #include <wlr/interfaces/wlr_pointer.h>
 }
 
-namespace umbriel {
+namespace canopy {
 
   namespace {
     constexpr Logger kLog("eis");
-    constexpr wlr_pointer_impl kPointerImpl{.name = "umbriel-eis"};
-    constexpr wlr_keyboard_impl kKeyboardImpl{.name = "umbriel-eis", .led_update = nullptr};
+    constexpr wlr_pointer_impl kPointerImpl{.name = "canopy-eis"};
+    constexpr wlr_keyboard_impl kKeyboardImpl{.name = "canopy-eis", .led_update = nullptr};
     constexpr std::array kCapabilities{
         EIS_DEVICE_CAP_POINTER, EIS_DEVICE_CAP_POINTER_ABSOLUTE, EIS_DEVICE_CAP_KEYBOARD,
         EIS_DEVICE_CAP_SCROLL,  EIS_DEVICE_CAP_BUTTON,
@@ -283,7 +283,7 @@ namespace umbriel {
       }
       client.approved = true;
       eis_client_connect(client.handle);
-      client.seat = eis_client_new_seat(client.handle, "Umbriel desktop");
+      client.seat = eis_client_new_seat(client.handle, "Canopy desktop");
       eis_seat_set_user_data(client.seat, &client);
       for (const auto capability : kCapabilities) {
         eis_seat_configure_capability(client.seat, capability);
@@ -292,7 +292,7 @@ namespace umbriel {
     }
 
     bool configureKeyboard(Device& device) {
-      wlr_keyboard_init(&device.keyboard, &kKeyboardImpl, "Umbriel emulated keyboard");
+      wlr_keyboard_init(&device.keyboard, &kKeyboardImpl, "Canopy emulated keyboard");
       device.keyboardInitialized = true;
       wlr_keyboard* source = owner.sourceKeyboard();
       if (source != nullptr && source->keymap != nullptr) {
@@ -342,14 +342,14 @@ namespace umbriel {
       eis_device_configure_type(device->handle, EIS_DEVICE_TYPE_VIRTUAL);
       eis_device_configure_capability(device->handle, capability);
       if (capability == EIS_DEVICE_CAP_KEYBOARD) {
-        eis_device_configure_name(device->handle, "Umbriel keyboard");
+        eis_device_configure_name(device->handle, "Canopy keyboard");
         if (!configureKeyboard(*device)) {
           kLog.error("failed to configure input emulation keyboard");
           return;
         }
       } else {
         device->absolute = capability == EIS_DEVICE_CAP_POINTER_ABSOLUTE;
-        eis_device_configure_name(device->handle, device->absolute ? "Umbriel absolute pointer" : "Umbriel pointer");
+        eis_device_configure_name(device->handle, device->absolute ? "Canopy absolute pointer" : "Canopy pointer");
         for (const auto extra : {EIS_DEVICE_CAP_BUTTON, EIS_DEVICE_CAP_SCROLL}) {
           if ((client.capabilities & extra) != 0) {
             eis_device_configure_capability(device->handle, extra);
@@ -385,7 +385,7 @@ namespace umbriel {
             eis_region_unref(region);
           }
         }
-        wlr_pointer_init(&device->pointer, &kPointerImpl, "Umbriel emulated pointer");
+        wlr_pointer_init(&device->pointer, &kPointerImpl, "Canopy emulated pointer");
         device->pointerInitialized = true;
         owner.addPointer(&device->pointer.base);
       }
@@ -681,4 +681,4 @@ namespace umbriel {
     return source != nullptr ? source->wlr() : nullptr;
   }
 
-} // namespace umbriel
+} // namespace canopy

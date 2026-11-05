@@ -3,11 +3,11 @@
 # A process that knows the private socket path and claims an approved X11 application name still cannot connect as
 # Xwayland. The real libei handshake must reject it before an input seat or a new consent prompt is exposed.
 set -euo pipefail
-source "$UMBRIEL_REPO/tests/harness/eis_lib.sh"
+source "$CANOPY_REPO/tests/harness/eis_lib.sh"
 
-readonly APP=umbriel-xtest-peer
-readonly WINDOW_LOG="$UMBRIEL_RUNTIME_DIR/eis-peer-window.log"
-readonly PEER_LOG="$UMBRIEL_RUNTIME_DIR/eis-peer-client.log"
+readonly APP=canopy-xtest-peer
+readonly WINDOW_LOG="$CANOPY_RUNTIME_DIR/eis-peer-window.log"
+readonly PEER_LOG="$CANOPY_RUNTIME_DIR/eis-peer-client.log"
 
 "$NATIVE_CLIENT" eis-peer-window > "$WINDOW_LOG" 2>&1 &
 eis_wait_window eis-peer-window
@@ -22,8 +22,8 @@ if ! "$EI_PEER_CLIENT" "$socket" "$APP" > "$PEER_LOG" 2>&1; then
   exit 1
 fi
 await_events "$PEER_LOG" rejected 1 "the non-Xwayland peer claiming an approved name"
-if [[ $(events "$UMBRIEL_LOG" ".*input permission requested .*app='$APP'") -ne 1 ]]; then
-  echo "the untrusted EI peer reached the consent UI: $(cat "$UMBRIEL_LOG")"
+if [[ $(events "$CANOPY_LOG" ".*input permission requested .*app='$APP'") -ne 1 ]]; then
+  echo "the untrusted EI peer reached the consent UI: $(cat "$CANOPY_LOG")"
   exit 1
 fi
 

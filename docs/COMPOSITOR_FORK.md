@@ -1,6 +1,7 @@
-# Forking Umbriel as Canopy's compositor
+# Canopy's own compositor
 
-Status: **vendored and building.** `compositor/` is upstream Umbriel, unmodified.
+Status: **rebranded, building, and running the shell headless.** The fork lives
+at `compositor/`, is called `canopywc`, and defaults to a stacking desktop.
 
 ## Why this is the right move
 
@@ -39,24 +40,60 @@ So the fork is not a research project; it compiles today.
 ### In the tree
 
 It is vendored at `compositor/` (a squashed subtree of upstream `b6c4b7d`,
-12 MB) and builds from there with no changes:
+12 MB) and builds from there:
 
 ```sh
-sh scripts/build-compositor.sh            # configure + compile into build-compositor/
-sh scripts/canopy-session --compositor umbriel
+sh scripts/build-compositor.sh                     # -> build-compositor/canopywc
+sh scripts/canopy-session --compositor canopywc     # a session with it
 ```
 
-`canopy-session` finds `canopywc` or `umbriel` on `PATH`, or a build via
-`CANOPY_COMPOSITOR_BUILD`. It seeds `~/.config/umbriel/config.toml` on first
-use and makes sure `autostart = ["canopy"]` is in `[general]`, so the shell
-comes up exactly as it does under labwc.
+`canopy-session --list-compositors` shows it next to labwc and MangoWC.
 
-Keeping up with upstream:
+### What the rebrand changed
+
+The whole tree now speaks Canopy — 970 files, no `umbriel` left outside the
+upstream copyright in `LICENSE`:
+
+| Was | Is |
+| --- | --- |
+| binary `umbriel`, `start-umbriel` | `canopywc`, `start-canopywc` |
+| `~/.config/canopy/config.toml` | `~/.config/canopywc/config.toml` |
+| `UMBRIEL_SOCKET` | `CANOPY_SOCKET` |
+| `$XDG_RUNTIME_DIR/umbriel-<display>.sock` | `canopywc-<display>.sock` |
+| `umbriel.service`, `umbriel-session.target` | `canopywc.service`, `canopywc-session.target` |
+| `umbrielfx` (the scene graph) | `canopyfx` |
+| C++ namespace `umbriel::` | `canopy::` |
+| desktop entry *Umbriel* | *Canopy*, `DesktopNames=Canopy` |
+
+The compositor config deliberately does **not** live in `~/.config/canopy/`:
+the shell merges every `*.toml` in that directory as shell configuration, so a
+`compositor.toml` there was parsed as a shell config and warned about every
+key. It gets its own directory, named after the binary.
+
+The ported documentation, effect presets and keybind reference all point at
+Canopy paths and the in-tree `compositor/docs/user/` reference.
+
+### Stacking, not tiling
+
+Canopy is a traditional desktop, so `layout.mode` defaults to `stacking` in the
+source (`Config::Layout::mode`), not only in the shipped config: a fresh
+session with no config file behaves the same way. Windows keep their size,
+edge and corner drop zones fill halves and quarters, and the tiling layouts
+stay available per workspace.
+
+### Keeping up with upstream
 
 ```sh
 git fetch umbriel main
 git subtree pull --prefix=compositor umbriel <commit> --squash
 ```
+
+The first pull after this rebrand will conflict: upstream edits `umbriel`
+identifiers, this tree renamed them. Resolve by taking upstream's behaviour
+and re-applying the rename (`sed -e 's/UMBRIEL/CANOPY/g' -e 's/Umbriel/Canopy/g'
+-e 's/umbriel/canopy/g'`), or cherry-pick the upstream commit instead of
+merging. `LICENSE` keeps the upstream copyright notice, which the MIT terms
+require.
 
 ### Smoke test
 

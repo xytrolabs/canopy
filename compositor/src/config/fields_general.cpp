@@ -14,12 +14,12 @@
 #include <utility>
 #include <vector>
 
-namespace umbriel {
+namespace canopy {
 
   namespace {
 
     constexpr std::array<std::string_view, 8> kReservedEnvironmentNames{
-        "WAYLAND_DISPLAY",     "WAYLAND_SOCKET",      "DISPLAY",          "UMBRIEL_SOCKET", "LIBEI_SOCKET",
+        "WAYLAND_DISPLAY",     "WAYLAND_SOCKET",      "DISPLAY",          "CANOPY_SOCKET", "LIBEI_SOCKET",
         "XDG_CURRENT_DESKTOP", "XDG_SESSION_DESKTOP", "XDG_SESSION_TYPE",
     };
 
@@ -362,7 +362,7 @@ namespace umbriel {
           continue;
         }
         if (std::ranges::find(kReservedEnvironmentNames, key.str()) != kReservedEnvironmentNames.end()) {
-          warnAt(key.source(), "ignoring environment.{} (reserved by Umbriel)", key.str());
+          warnAt(key.source(), "ignoring environment.{} (reserved by Canopy)", key.str());
           continue;
         }
         if (entry->contains('\0')) {
@@ -462,4 +462,4 @@ namespace umbriel {
     return registry::table("screencast", &Config::screenCast, screenCastFields());
   }
 
-} // namespace umbriel
+} // namespace canopy

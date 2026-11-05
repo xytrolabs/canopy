@@ -20,7 +20,7 @@ struct wlr_scene_buffer;
 struct wlr_scene_rect;
 struct wlr_scene_tree;
 
-namespace umbriel {
+namespace canopy {
 
   class TabLabelCache;
 
@@ -130,4 +130,4 @@ namespace umbriel {
     float m_alpha = 1.0F;
   };
 
-} // namespace umbriel
+} // namespace canopy

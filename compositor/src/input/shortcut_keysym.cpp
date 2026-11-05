@@ -2,7 +2,7 @@
 
 #include <cstdint>
 
-namespace umbriel {
+namespace canopy {
 
   namespace {
 
@@ -44,4 +44,4 @@ namespace umbriel {
     return active;
   }
 
-} // namespace umbriel
+} // namespace canopy

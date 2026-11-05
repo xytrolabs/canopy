@@ -2,22 +2,22 @@
 # A hidden scratchpad view remains rendered while its opacity falls, then leaves the scene when the fade completes.
 set -euo pipefail
 
-readonly CLIENT="${UMBRIEL_POPUP_CLIENT:-./build-debug/tests/popup-client}"
-readonly POINTER="${UMBRIEL_POINTER_CLIENT:-./build-debug/tests/pointer-client}"
-readonly CLIENT_LOG="$UMBRIEL_RUNTIME_DIR/scratchpad-hide-fade-client.log"
-readonly BEFORE="$UMBRIEL_RUNTIME_DIR/scratchpad-hide-before.png"
-readonly DURING="$UMBRIEL_RUNTIME_DIR/scratchpad-hide-during.png"
-readonly AFTER="$UMBRIEL_RUNTIME_DIR/scratchpad-hide-after.png"
+readonly CLIENT="${CANOPY_POPUP_CLIENT:-./build-debug/tests/popup-client}"
+readonly POINTER="${CANOPY_POINTER_CLIENT:-./build-debug/tests/pointer-client}"
+readonly CLIENT_LOG="$CANOPY_RUNTIME_DIR/scratchpad-hide-fade-client.log"
+readonly BEFORE="$CANOPY_RUNTIME_DIR/scratchpad-hide-before.png"
+readonly DURING="$CANOPY_RUNTIME_DIR/scratchpad-hide-during.png"
+readonly AFTER="$CANOPY_RUNTIME_DIR/scratchpad-hide-after.png"
 
 sample_blue() {
-  "$UMBRIEL_PIXEL_PROBE" "$1" mean 20x20+630+350 | awk '{ print $3 }'
+  "$CANOPY_PIXEL_PROBE" "$1" mean 20x20+630+350 | awk '{ print $3 }'
 }
 
 pointer() {
   "$POINTER" 1280 720 "$@"
 }
 
-cat >> "$UMBRIEL_CONFIG" <<'EOF'
+cat >> "$CANOPY_CONFIG" <<'EOF'
 
 [animation]
 duration_ms = 2000
@@ -40,7 +40,7 @@ border_width = 0
 outer_border_width = 0
 corner_radius = 0
 EOF
-"$UMBRIEL" msg config-reload > /dev/null
+"$CANOPY" msg config-reload > /dev/null
 
 pointer move 0 0
 "$CLIENT" > "$CLIENT_LOG" 2>&1 &
@@ -55,11 +55,11 @@ fi
 
 # Animation time only moves by clock-advance: 2000 ms finishes any scratchpad fade, and the mid-fade sample lands at
 # 300 ms of the hide.
-"$UMBRIEL" clock-freeze
-"$UMBRIEL" msg window-move-to-scratchpad > /dev/null
-"$UMBRIEL" clock-advance 2000
-"$UMBRIEL" msg scratchpad-toggle > /dev/null
-"$UMBRIEL" clock-advance 2000
+"$CANOPY" clock-freeze
+"$CANOPY" msg window-move-to-scratchpad > /dev/null
+"$CANOPY" clock-advance 2000
+"$CANOPY" msg scratchpad-toggle > /dev/null
+"$CANOPY" clock-advance 2000
 grim "$BEFORE"
 before_blue=$(sample_blue "$BEFORE")
 if (( before_blue < 80 )); then
@@ -80,8 +80,8 @@ fi
 enters_before_hide=$(grep -c '^pointer-enter$' "$CLIENT_LOG")
 pointer move 0 0
 
-"$UMBRIEL" msg scratchpad-toggle > /dev/null
-"$UMBRIEL" clock-advance 300
+"$CANOPY" msg scratchpad-toggle > /dev/null
+"$CANOPY" clock-advance 300
 pointer move 630 350
 sleep 0.1
 enters_during_fade=$(grep -c '^pointer-enter$' "$CLIENT_LOG")
@@ -96,7 +96,7 @@ if (( during_blue < 40 )); then
   exit 1
 fi
 
-"$UMBRIEL" clock-advance 2000
+"$CANOPY" clock-advance 2000
 grim "$AFTER"
 after_blue=$(sample_blue "$AFTER")
 if (( after_blue > 10 )); then

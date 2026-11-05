@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # Client moves count motion before the request, and an already crossed threshold promotes without another event.
 set -euo pipefail
-source "$(dirname "$UMBRIEL_HARNESS_LIB")/title_bar.sh"
-cat >>"$UMBRIEL_CONFIG" <<'CONFIG'
+source "$(dirname "$CANOPY_HARNESS_LIB")/title_bar.sh"
+cat >>"$CANOPY_CONFIG" <<'CONFIG'
 [animation]
 enabled = false
 [appearance]
@@ -20,38 +20,38 @@ CONFIG
 
 # Captures the cursor's neighbourhood as its own image, so captures at different pointer positions compare whole.
 cursor_shot() {
-  local image=$UMBRIEL_RUNTIME_DIR/$1.png
+  local image=$CANOPY_RUNTIME_DIR/$1.png
   grim -c -g "$((pointer_x - 12)),$((pointer_y - 12)) 48x32" "$image"
   echo "$image"
 }
 
 same_shot() {
   local changed
-  read -r _ changed < <("$UMBRIEL_PIXEL_PROBE" "$1" diff "$2")
+  read -r _ changed < <("$CANOPY_PIXEL_PROBE" "$1" diff "$2")
   ((changed == 0))
 }
 
 content_box() {
-  local image=$UMBRIEL_RUNTIME_DIR/$1.png
+  local image=$CANOPY_RUNTIME_DIR/$1.png
   grim "$image"
-  "$UMBRIEL_PIXEL_PROBE" "$image" bbox 'b > 0.7 && r < 0.3 && g > 0.4'
+  "$CANOPY_PIXEL_PROBE" "$image" bbox 'b > 0.7 && r < 0.3 && g > 0.4'
 }
 
 for scale in 1 2; do
-  sed -i "s/^scale = .*/scale = $scale/" "$UMBRIEL_CONFIG"
-  "$UMBRIEL" msg config-reload >/dev/null
-  output=$("$UMBRIEL" outputs --json | jq -c '.[0].logical_size')
+  sed -i "s/^scale = .*/scale = $scale/" "$CANOPY_CONFIG"
+  "$CANOPY" msg config-reload >/dev/null
+  output=$("$CANOPY" outputs --json | jq -c '.[0].logical_size')
   width=$(jq -r '.width' <<<"$output")
   height=$(jq -r '.height' <<<"$output")
   for layout in scrolling stacking; do
-    "$UMBRIEL" msg workspace-set-layout "$layout" >/dev/null
+    "$CANOPY" msg workspace-set-layout "$layout" >/dev/null
     for timing in partial crossed; do
       title=press-origin-$scale-$layout-$timing
-      log=$UMBRIEL_RUNTIME_DIR/$title.log
-      "$UMBRIEL_SEAT_LOG_CLIENT" "$title" move-on-motion >"$log" 2>&1 &
+      log=$CANOPY_RUNTIME_DIR/$title.log
+      "$CANOPY_SEAT_LOG_CLIENT" "$title" move-on-motion >"$log" 2>&1 &
       client=$!
       title_bar_wait_field "$title" title_bar false
-      "$UMBRIEL" settle >/dev/null
+      "$CANOPY" settle >/dev/null
       window=$(title_bar_window "$title")
       pointer_x=$(jq -r '.x + 200' <<<"$window")
       pointer_y=$(jq -r '.y + 60' <<<"$window")
@@ -100,7 +100,7 @@ for scale in 1 2; do
         exit 1
       }
       pointer_release
-      "$UMBRIEL" settle >/dev/null
+      "$CANOPY" settle >/dev/null
       kill "$client"
       wait "$client" 2>/dev/null || true
       title_bar_wait_absent "$title"

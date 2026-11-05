@@ -6,7 +6,7 @@
 #include <format>
 #include <string>
 
-namespace umbriel {
+namespace canopy {
 
   struct ConfigDiagnostic {
     enum class Severity { Warning, Error };
@@ -39,4 +39,4 @@ namespace umbriel {
     return diagnostic;
   }
 
-} // namespace umbriel
+} // namespace canopy

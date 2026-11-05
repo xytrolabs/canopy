@@ -6,7 +6,7 @@
 #include <string>
 #include <vector>
 
-namespace umbriel {
+namespace canopy {
 
   namespace {
 
@@ -607,4 +607,4 @@ namespace umbriel {
     return result;
   }
 
-} // namespace umbriel
+} // namespace canopy

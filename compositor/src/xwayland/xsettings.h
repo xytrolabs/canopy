@@ -5,9 +5,9 @@
 #include <string_view>
 #include <vector>
 
-namespace umbriel {
+namespace canopy {
 
-  // What Umbriel announces to X11 clients through the XSETTINGS protocol. DPI values are in 1/1024 dots per inch.
+  // What Canopy announces to X11 clients through the XSETTINGS protocol. DPI values are in 1/1024 dots per inch.
   struct XsettingsValues {
     // Integer interface scale (Gdk/WindowScalingFactor).
     int32_t windowScalingFactor = 1;
@@ -30,4 +30,4 @@ namespace umbriel {
   // The _XSETTINGS_SETTINGS property contents, little endian, with every setting stamped with `serial`.
   std::vector<uint8_t> encodeXsettings(uint32_t serial, const XsettingsValues& values);
 
-} // namespace umbriel
+} // namespace canopy

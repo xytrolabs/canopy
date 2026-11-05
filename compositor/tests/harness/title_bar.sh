@@ -1,8 +1,8 @@
 # Shared fixture for the SSD title bar checks, using real decoration negotiation.
-source "$UMBRIEL_HARNESS_LIB"
+source "$CANOPY_HARNESS_LIB"
 
 title_bar_config() {
-  cat >> "$UMBRIEL_CONFIG" <<'EOF'
+  cat >> "$CANOPY_CONFIG" <<'EOF'
 [animation]
 enabled = false
 [appearance]
@@ -24,11 +24,11 @@ default_floating = true
 default_floating_size_px = { width = 480, height = 300 }
 default_position = { x = 173, y = 109, anchor = "top_left" }
 EOF
-  "$UMBRIEL" msg config-reload > /dev/null
+  "$CANOPY" msg config-reload > /dev/null
 }
 
 title_bar_window() {
-  "$UMBRIEL" windows --json | jq -c --arg title "$1" '.[] | select(.title == $title)'
+  "$CANOPY" windows --json | jq -c --arg title "$1" '.[] | select(.title == $title)'
 }
 
 title_bar_wait_box() {

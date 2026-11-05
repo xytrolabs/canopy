@@ -4,7 +4,7 @@
 # keeps one monotonic movement toward its unchanged target instead of restarting or waiting for both durations.
 set -euo pipefail
 
-readonly SHOTS="$UMBRIEL_RUNTIME_DIR/tiled-repeated-close"
+readonly SHOTS="$CANOPY_RUNTIME_DIR/tiled-repeated-close"
 readonly OUT_MS=1370
 readonly MOVE_MS=830
 readonly SECOND_CLOSE_MS=450
@@ -15,14 +15,14 @@ mkdir -p "$SHOTS"
 
 # The close snapshot holds its captured column for its whole lifecycle, so it paints only a top band and leaves the
 # rest transparent. The survivor growing underneath stays measurable while each close keeps its own phase colours.
-cat > "$UMBRIEL_RUNTIME_DIR/repeated-close-phases.glsl" <<'GLSL'
+cat > "$CANOPY_RUNTIME_DIR/repeated-close-phases.glsl" <<'GLSL'
 vec4 animation(vec2 uv) {
     if (uv.y > 0.08) {
         return vec4(0.0);
     }
-    vec4 source = umbriel_sample(uv);
+    vec4 source = canopy_sample(uv);
     bool green = source.g > source.b;
-    float progress = umbriel_clamped_progress;
+    float progress = canopy_clamped_progress;
     if (progress < 0.3) {
         return green ? vec4(0.12, 1.0, 0.0, 1.0) : vec4(0.12, 0.0, 1.0, 1.0);
     }
@@ -32,14 +32,14 @@ vec4 animation(vec2 uv) {
     return green ? vec4(0.0, 1.0, 1.0, 1.0) : vec4(1.0, 0.0, 1.0, 1.0);
 }
 GLSL
-cat > "$UMBRIEL_RUNTIME_DIR/repeated-move-marker.glsl" <<'GLSL'
+cat > "$CANOPY_RUNTIME_DIR/repeated-move-marker.glsl" <<'GLSL'
 vec4 animation(vec2 uv) {
-    vec4 source = umbriel_sample(uv);
+    vec4 source = canopy_sample(uv);
     return vec4(source.r, max(source.g, source.a * 0.35), source.b, source.a);
 }
 GLSL
 
-cat >> "$UMBRIEL_CONFIG" <<EOF
+cat >> "$CANOPY_CONFIG" <<EOF
 
 [colors]
 backdrop = "#000000FF"
@@ -85,14 +85,14 @@ effect = "windows_move_repeated_move_marker"
 [animation.workspaces]
 enabled = false
 EOF
-"$UMBRIEL" msg config-reload > /dev/null
+"$CANOPY" msg config-reload > /dev/null
 
 spawn() {
   local title=$1 color=$2
-  FILL_COLOR="$color" "$UMBRIEL_UNMAP_CLIENT" "$title" 1280 720 \
-    > "$UMBRIEL_RUNTIME_DIR/$title.log" 2>&1 &
+  FILL_COLOR="$color" "$CANOPY_UNMAP_CLIENT" "$title" 1280 720 \
+    > "$CANOPY_RUNTIME_DIR/$title.log" 2>&1 &
   for _ in $(seq 100); do
-    window=$("$UMBRIEL" windows --json | jq -c --arg title "$title" '.[] | select(.title == $title)')
+    window=$("$CANOPY" windows --json | jq -c --arg title "$title" '.[] | select(.title == $title)')
     [[ -n $window ]] && return 0
     sleep 0.025
   done
@@ -101,16 +101,16 @@ spawn() {
 }
 
 window_id() {
-  "$UMBRIEL" windows --json | jq -r --arg title "$1" '.[] | select(.title == $title) | .id'
+  "$CANOPY" windows --json | jq -r --arg title "$1" '.[] | select(.title == $title) | .id'
 }
 
 red_bounds() {
-  "$UMBRIEL_PIXEL_PROBE" "$1" bbox 'r > 0.7 && b < 0.2'
+  "$CANOPY_PIXEL_PROBE" "$1" bbox 'r > 0.7 && b < 0.2'
 }
 
 # One probe emits the move marker and all three phases for both independently coloured close snapshots.
 frame_markers() {
-  "$UMBRIEL_PIXEL_PROBE" "$1" count \
+  "$CANOPY_PIXEL_PROBE" "$1" count \
     'r > 0.7 && g > 0.2 && b < 0.2' \
     'b > 0.7 && r > 0.05 && r < 0.25 && g < 0.2' \
     'b > 0.7 && r > 0.25 && r < 0.7 && g < 0.2' \
@@ -132,9 +132,9 @@ analyze_frame() {
 
 close_window() {
   local id=$1
-  "$UMBRIEL" msg window-close "$id" > /dev/null
+  "$CANOPY" msg window-close "$id" > /dev/null
   for _ in $(seq 100); do
-    "$UMBRIEL" windows --json | jq -e --arg id "$id" 'any(.[]; .id == $id)' > /dev/null || return 0
+    "$CANOPY" windows --json | jq -e --arg id "$id" 'any(.[]; .id == $id)' > /dev/null || return 0
     sleep 0.02
   done
   echo "window $id never left the compositor window list"
@@ -192,13 +192,13 @@ assert_phase_timeline() {
 }
 
 # Animation time only moves by clock-advance. Advancing past MOVE_MS finishes each opening reflow.
-"$UMBRIEL" clock-freeze
+"$CANOPY" clock-freeze
 spawn repeated-survivor 0xFFFF0000
-"$UMBRIEL" clock-advance "$((MOVE_MS + 100))"
+"$CANOPY" clock-advance "$((MOVE_MS + 100))"
 spawn repeated-second-close 0xFF00FF00
-"$UMBRIEL" clock-advance "$((MOVE_MS + 100))"
+"$CANOPY" clock-advance "$((MOVE_MS + 100))"
 spawn repeated-first-close 0xFF0000FF
-"$UMBRIEL" clock-advance "$((MOVE_MS + 100))"
+"$CANOPY" clock-advance "$((MOVE_MS + 100))"
 
 readonly SECOND_ID=$(window_id repeated-second-close)
 readonly FIRST_ID=$(window_id repeated-first-close)
@@ -223,13 +223,13 @@ frame_count=0
 elapsed_ms=1
 deadline_ms=$((SECOND_CLOSE_MS + OUT_MS + 400))
 declare -a sample_times=()
-"$UMBRIEL" clock-advance 1
+"$CANOPY" clock-advance 1
 while ((elapsed_ms <= deadline_ms)); do
   if ((second_request_ms == 0 && elapsed_ms >= SECOND_CLOSE_MS)); then
     close_window "$SECOND_ID"
     second_request_ms=$elapsed_ms
     deadline_ms=$((second_request_ms + OUT_MS + 400))
-    "$UMBRIEL" clock-advance 1
+    "$CANOPY" clock-advance 1
     elapsed_ms=$((elapsed_ms + 1))
   fi
   grim "$SHOTS/frame-$frame_count.png"
@@ -239,7 +239,7 @@ while ((elapsed_ms <= deadline_ms)); do
   if ((second_request_ms == 0 && elapsed_ms < SECOND_CLOSE_MS && elapsed_ms + step_ms > SECOND_CLOSE_MS)); then
     step_ms=$((SECOND_CLOSE_MS - elapsed_ms))
   fi
-  "$UMBRIEL" clock-advance "$step_ms"
+  "$CANOPY" clock-advance "$step_ms"
   elapsed_ms=$((elapsed_ms + step_ms))
 done
 # Frames are analysed in parallel. The subshell's only children are the analyses, so each wait -n reaps one and fails
@@ -258,11 +258,11 @@ if ((second_request_ms == 0)); then
   exit 1
 fi
 for title in repeated-first-close repeated-second-close; do
-  if ! grep -q '^unmapped$' "$UMBRIEL_RUNTIME_DIR/$title.log"; then
+  if ! grep -q '^unmapped$' "$CANOPY_RUNTIME_DIR/$title.log"; then
     echo "$title did not unmap"
     exit 1
   fi
-  if "$UMBRIEL" windows --json | jq -e --arg title "$title" 'any(.[]; .title == $title)' > /dev/null; then
+  if "$CANOPY" windows --json | jq -e --arg title "$title" 'any(.[]; .title == $title)' > /dev/null; then
     echo "$title remained in the compositor window list"
     exit 1
   fi

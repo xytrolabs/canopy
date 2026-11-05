@@ -30,10 +30,10 @@
 // clang-format on
 
 extern "C" {
-#include <umbrielfx/render/effect.h>
+#include <canopyfx/render/effect.h>
 }
 
-namespace umbriel {
+namespace canopy {
 
   namespace {
     constexpr Logger kLog("workspace");
@@ -3304,7 +3304,7 @@ namespace umbriel {
           auto& registry = effectRegistry();
           registry.fillTimeUniforms(parameters, registry.clockSeconds(), *m_slide.revealPreset, m_slide.reveal);
         }
-        if (auto* direction = fx_parameters_add_uniform(&parameters, "umbriel_workspace_axis", FX_UNIFORM_VEC2, 1)) {
+        if (auto* direction = fx_parameters_add_uniform(&parameters, "canopy_workspace_axis", FX_UNIFORM_VEC2, 1)) {
           direction->floats[0] = m_workspaceAxis == WorkspaceAxis::Horizontal ? axis : 0.0F;
           direction->floats[1] = m_workspaceAxis == WorkspaceAxis::Vertical ? axis : 0.0F;
         }
@@ -3758,4 +3758,4 @@ namespace umbriel {
     return result;
   }
 
-} // namespace umbriel
+} // namespace canopy

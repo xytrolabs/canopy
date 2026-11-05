@@ -11,7 +11,7 @@
 #include <cmath>
 #include <utility>
 
-namespace umbriel {
+namespace canopy {
   namespace {
     bool rejectInput(wlr_scene_buffer*, double*, double*) { return false; }
   } // namespace
@@ -401,4 +401,4 @@ namespace umbriel {
       frame->reloadConfig();
     }
   }
-} // namespace umbriel
+} // namespace canopy

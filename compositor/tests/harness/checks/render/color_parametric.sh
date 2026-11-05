@@ -2,9 +2,9 @@
 # Real captures distinguish raw primaries and custom luminances on committed
 # surface state, including synchronized children and color-object destruction.
 set -euo pipefail
-source "$UMBRIEL_HARNESS_LIB"
+source "$CANOPY_HARNESS_LIB"
 
-cat >> "$UMBRIEL_CONFIG" <<'CONFIG'
+cat >> "$CANOPY_CONFIG" <<'CONFIG'
 [animation]
 enabled = false
 [appearance.blur]
@@ -14,21 +14,21 @@ background_blur = false
 [output.HEADLESS-1]
 hdr = "auto"
 CONFIG
-"$UMBRIEL" msg config-reload > /dev/null
+"$CANOPY" msg config-reload > /dev/null
 
-readonly OUTPUT_IMAGE="$UMBRIEL_RUNTIME_DIR/parametric-output.png"
-readonly WINDOW_IMAGE="$UMBRIEL_RUNTIME_DIR/parametric-window.png"
+readonly OUTPUT_IMAGE="$CANOPY_RUNTIME_DIR/parametric-output.png"
+readonly WINDOW_IMAGE="$CANOPY_RUNTIME_DIR/parametric-window.png"
 request() {
   local command=$1 previous
   previous=$(events "$CLIENT_LOG" "{\"event\":\"snapshot\",\"label\":\"$command\"")
   printf '%s\n' "$command" >&"$CLIENT_FD"
   await_lines "$CLIENT_LOG" "{\"event\":\"snapshot\",\"label\":\"$command\"" "$((previous + 1))"
-  "$UMBRIEL" settle > /dev/null
+  "$CANOPY" settle > /dev/null
 }
 expect_pixel() {
   local image=$1 expected_red=$2 expected_green=$3 expected_blue=$4 description=$5
   local red green blue
-  read -r red green blue < <("$UMBRIEL_PIXEL_PROBE" "$image" pixel 640 360)
+  read -r red green blue < <("$CANOPY_PIXEL_PROBE" "$image" pixel 640 360)
   if ((red < expected_red - 2 || red > expected_red + 2
        || green < expected_green - 2 || green > expected_green + 2
        || blue < expected_blue - 2 || blue > expected_blue + 2)); then
@@ -39,7 +39,7 @@ expect_pixel() {
 expect_hdr() {
   local requested=$1 description=$2 state
   for _ in $(seq 60); do
-    state=$("$UMBRIEL" color --json)
+    state=$("$CANOPY" color --json)
     if jq -e --argjson requested "$requested" '
       .outputs[0].hdr_mode == "auto" and .outputs[0].hdr_requested == $requested
       and .outputs[0].hdr_active == false
@@ -62,17 +62,17 @@ expect_pixels() {
 }
 
 for mode in toplevel subsurface subsurface-desync; do
-  CLIENT_LOG="$UMBRIEL_RUNTIME_DIR/parametric-$mode.log"
-  fifo="$UMBRIEL_RUNTIME_DIR/parametric-$mode.fifo"
+  CLIENT_LOG="$CANOPY_RUNTIME_DIR/parametric-$mode.log"
+  fifo="$CANOPY_RUNTIME_DIR/parametric-$mode.fifo"
   mkfifo "$fifo"
   args=(custom)
   [[ $mode == toplevel ]] || args+=("$mode")
-  "$UMBRIEL_COLOR_FEEDBACK_CLIENT" "${args[@]}" < "$fifo" > "$CLIENT_LOG" 2>&1 &
+  "$CANOPY_COLOR_FEEDBACK_CLIENT" "${args[@]}" < "$fifo" > "$CLIENT_LOG" 2>&1 &
   client_pid=$!
   exec {CLIENT_FD}> "$fifo"
   await_lines "$CLIENT_LOG" '{"event":"mapped"}' 1
-  "$UMBRIEL" settle > /dev/null
-  window_id=$("$UMBRIEL" windows --json | jq -r '.[] | select(.app_id == "color-feedback-client") | .id')
+  "$CANOPY" settle > /dev/null
+  window_id=$("$CANOPY" windows --json | jq -r '.[] | select(.app_id == "color-feedback-client") | .id')
 
   # Input is RGB 128/112/96. Gamma22 decoding, the standard BT.2020 to
   # sRGB matrix and piecewise sRGB output encoding produce 139/110/93.
@@ -100,8 +100,8 @@ for mode in toplevel subsurface subsurface-desync; do
 
   # Overview mirrors into separate scene buffers. Updating only the color
   # description must update the visible preview rather than retain old values.
-  "$UMBRIEL" msg overview-open > /dev/null
-  "$UMBRIEL" settle > /dev/null
+  "$CANOPY" msg overview-open > /dev/null
+  "$CANOPY" settle > /dev/null
   grim -o HEADLESS-1 "$OUTPUT_IMAGE"
   expect_pixel "$OUTPUT_IMAGE" 177 155 133 'custom luminances in the overview preview'
   request 'custom 4'
@@ -111,8 +111,8 @@ for mode in toplevel subsurface subsurface-desync; do
   grim -o HEADLESS-1 "$OUTPUT_IMAGE"
   expect_pixel "$OUTPUT_IMAGE" 139 110 93 'raw BT.2020 primaries in the overview preview'
   request 'custom 3'
-  "$UMBRIEL" msg overview-close > /dev/null
-  "$UMBRIEL" settle > /dev/null
+  "$CANOPY" msg overview-close > /dev/null
+  "$CANOPY" settle > /dev/null
   expect_pixels 177 155 133 'custom state restored after overview' true
 
   if [[ $mode == subsurface ]]; then
@@ -127,7 +127,7 @@ for mode in toplevel subsurface subsurface-desync; do
   kill -TERM "$client_pid"
   wait "$client_pid" || true
   exec {CLIENT_FD}>&-
-  "$UMBRIEL" settle > /dev/null
+  "$CANOPY" settle > /dev/null
   expect_hdr false 'client teardown'
 done
 

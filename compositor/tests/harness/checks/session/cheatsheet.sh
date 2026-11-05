@@ -5,32 +5,32 @@ set -euo pipefail
 readonly BTN_LEFT=272 # evdev BTN_LEFT
 readonly OUTPUT_W=1280
 readonly OUTPUT_H=720
-readonly POINTER="${UMBRIEL_POINTER_CLIENT:-./build-debug/tests/pointer-client}"
+readonly POINTER="${CANOPY_POINTER_CLIENT:-./build-debug/tests/pointer-client}"
 
-printf '\n[layout.scrolling]\ndefault_extent_fraction = 0.5\n' >> "$UMBRIEL_CONFIG"
-"$UMBRIEL" msg config-reload > /dev/null
+printf '\n[layout.scrolling]\ndefault_extent_fraction = 0.5\n' >> "$CANOPY_CONFIG"
+"$CANOPY" msg config-reload > /dev/null
 
 alive() {
-  if ! "$UMBRIEL" windows --json > /dev/null 2>&1; then
+  if ! "$CANOPY" windows --json > /dev/null 2>&1; then
     echo "compositor stopped answering after $1"
     return 1
   fi
 }
 
-"$UMBRIEL" msg cheatsheet-open > /dev/null
+"$CANOPY" msg cheatsheet-open > /dev/null
 alive "cheatsheet-open"
 
-"$UMBRIEL" msg cheatsheet-close > /dev/null
+"$CANOPY" msg cheatsheet-close > /dev/null
 alive "cheatsheet-close"
 
 # Toggling repeatedly exercises the destroy-and-rebuild path, which is how the
 # overlay is re-rendered on every relayout.
 for _ in 1 2 3; do
-  "$UMBRIEL" msg cheatsheet-toggle > /dev/null
+  "$CANOPY" msg cheatsheet-toggle > /dev/null
 done
 alive "cheatsheet-toggle"
 
-"$UMBRIEL" msg cheatsheet-close > /dev/null
+"$CANOPY" msg cheatsheet-close > /dev/null
 alive "final close"
 
 echo "open, close, and repeated toggle all survive"
@@ -52,7 +52,7 @@ pointer() {
 
 wait_for_count() {
   for _ in $(seq 60); do
-    [[ $("$UMBRIEL" windows --json | jq 'length') -eq $1 ]] && return 0
+    [[ $("$CANOPY" windows --json | jq 'length') -eq $1 ]] && return 0
     sleep 0.25
   done
   echo "timed out waiting for $1 window(s)"
@@ -60,7 +60,7 @@ wait_for_count() {
 }
 
 # x of the focused window, or "none".
-focused_x() { "$UMBRIEL" windows --json | jq -r '[.[] | select(.focused) | .x] | if length == 1 then .[0] else "none" end'; }
+focused_x() { "$CANOPY" windows --json | jq -r '[.[] | select(.focused) | .x] | if length == 1 then .[0] else "none" end'; }
 
 wait_for_focus_at() {
   local want=$1
@@ -69,7 +69,7 @@ wait_for_focus_at() {
     sleep 0.25
   done
   echo "expected the window at x=$want to be focused, focus is at $(focused_x)"
-  echo "  windows: $("$UMBRIEL" windows --json | jq -c '[.[] | {x, focused}]')"
+  echo "  windows: $("$CANOPY" windows --json | jq -c '[.[] | {x, focused}]')"
   return 1
 }
 
@@ -86,12 +86,12 @@ readonly MID_Y=360
 pointer move "$LEFT_X" "$MID_Y" click "$BTN_LEFT"
 wait_for_focus_at 10
 
-"$UMBRIEL" msg cheatsheet-open > /dev/null
+"$CANOPY" msg cheatsheet-open > /dev/null
 
 # The dismissing press is consumed, so focus stays on the left window even
 # though the cursor is over the right one.
 pointer move "$RIGHT_X" "$MID_Y" click "$BTN_LEFT"
-"$UMBRIEL" settle
+"$CANOPY" settle
 if [[ $(focused_x) != "10" ]]; then
   echo "the dismissing click reached the window under the cursor: focus moved to $(focused_x)"
   exit 1

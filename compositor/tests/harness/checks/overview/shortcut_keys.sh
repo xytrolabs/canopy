@@ -6,13 +6,13 @@ set -euo pipefail
 readonly BTN_LEFT=272
 readonly OUTPUT_W=1280
 readonly OUTPUT_H=720
-readonly POINTER="${UMBRIEL_POINTER_CLIENT:-./build-debug/tests/pointer-client}"
-readonly CLIENT="${UMBRIEL_UNMAP_CLIENT:-./build-debug/tests/unmap-client}"
-readonly FIRST_LOG="$UMBRIEL_RUNTIME_DIR/shortcut-first.log"
-readonly SECOND_LOG="$UMBRIEL_RUNTIME_DIR/shortcut-second.log"
-readonly THIRD_LOG="$UMBRIEL_RUNTIME_DIR/shortcut-third.log"
-readonly FOURTH_LOG="$UMBRIEL_RUNTIME_DIR/shortcut-fourth.log"
-BASELINE=$(< "$UMBRIEL_CONFIG")
+readonly POINTER="${CANOPY_POINTER_CLIENT:-./build-debug/tests/pointer-client}"
+readonly CLIENT="${CANOPY_UNMAP_CLIENT:-./build-debug/tests/unmap-client}"
+readonly FIRST_LOG="$CANOPY_RUNTIME_DIR/shortcut-first.log"
+readonly SECOND_LOG="$CANOPY_RUNTIME_DIR/shortcut-second.log"
+readonly THIRD_LOG="$CANOPY_RUNTIME_DIR/shortcut-third.log"
+readonly FOURTH_LOG="$CANOPY_RUNTIME_DIR/shortcut-fourth.log"
+BASELINE=$(< "$CANOPY_CONFIG")
 
 pointer() {
   "$POINTER" "$OUTPUT_W" "$OUTPUT_H" "$@"
@@ -21,29 +21,29 @@ pointer() {
 wait_for_count() {
   local want=$1
   for _ in $(seq 60); do
-    [[ $("$UMBRIEL" windows --json | jq 'length') -eq $want ]] && return 0
+    [[ $("$CANOPY" windows --json | jq 'length') -eq $want ]] && return 0
     sleep 0.1
   done
-  echo "expected $want windows, got: $("$UMBRIEL" windows --json)"
+  echo "expected $want windows, got: $("$CANOPY" windows --json)"
   return 1
 }
 
 focused_title() {
-  "$UMBRIEL" windows --json | jq -r '[.[] | select(.focused) | .title] | if length == 1 then .[0] else "none" end'
+  "$CANOPY" windows --json | jq -r '[.[] | select(.focused) | .title] | if length == 1 then .[0] else "none" end'
 }
 
 active_title() {
-  "$UMBRIEL" windows --json | jq -r '[.[] | select(.active) | .title] | if length == 1 then .[0] else "none" end'
+  "$CANOPY" windows --json | jq -r '[.[] | select(.active) | .title] | if length == 1 then .[0] else "none" end'
 }
 
 focus_title() {
   local title=$1 id
-  id=$("$UMBRIEL" windows --json | jq -r --arg title "$title" '.[] | select(.title == $title) | .id')
+  id=$("$CANOPY" windows --json | jq -r --arg title "$title" '.[] | select(.title == $title) | .id')
   if [[ -z $id ]]; then
-    echo "could not resolve window '$title': $("$UMBRIEL" windows --json)"
+    echo "could not resolve window '$title': $("$CANOPY" windows --json)"
     return 1
   fi
-  "$UMBRIEL" msg window-focus "$id" > /dev/null
+  "$CANOPY" msg window-focus "$id" > /dev/null
 }
 
 write_config() {
@@ -53,17 +53,17 @@ write_config() {
     if [[ $# -gt 0 ]]; then
       printf '\n[overview]\n%s\n' "$1"
     fi
-  } > "$UMBRIEL_CONFIG"
-  "$UMBRIEL" msg config-reload > /dev/null
+  } > "$CANOPY_CONFIG"
+  "$CANOPY" msg config-reload > /dev/null
   finish
 }
 
 # Animation time only moves by clock-advance; 2000 ms finishes any animation in this check.
 finish() {
-  "$UMBRIEL" clock-advance 2000
+  "$CANOPY" clock-advance 2000
 }
 
-"$UMBRIEL" clock-freeze
+"$CANOPY" clock-freeze
 "$CLIENT" shortcut-first 1200 700 > "$FIRST_LOG" 2>&1 &
 wait_for_count 1
 "$CLIENT" shortcut-second 1200 700 > "$SECOND_LOG" 2>&1 &
@@ -74,7 +74,7 @@ focus_title shortcut-first
 finish
 
 write_config
-"$UMBRIEL" msg overview-open > /dev/null
+"$CANOPY" msg overview-open > /dev/null
 finish
 # One virtual keyboard sends both keys, so the key after the overview closes reaches the client it focused. The pause
 # only has to outlast the clock-advance that finishes the close.
@@ -85,7 +85,7 @@ for _ in $(seq 40); do
   sleep 0.025
 done
 if [[ $(focused_title) != shortcut-third ]]; then
-  echo "single-key shortcut did not focus the third card: $("$UMBRIEL" windows --json)"
+  echo "single-key shortcut did not focus the third card: $("$CANOPY" windows --json)"
   exit 1
 fi
 finish
@@ -108,34 +108,34 @@ if grep -q '^key 30 1$' "$FIRST_LOG" "$SECOND_LOG" 2>/dev/null; then
 fi
 
 write_config 'shortcut_keys = "12"'
-"$UMBRIEL" msg overview-open > /dev/null
+"$CANOPY" msg overview-open > /dev/null
 finish
 pointer tap 3 tap 2
 finish
 if [[ $(focused_title) != shortcut-second ]]; then
-  echo "multi-key shortcut 21 did not focus the second card: $("$UMBRIEL" windows --json)"
+  echo "multi-key shortcut 21 did not focus the second card: $("$CANOPY" windows --json)"
   exit 1
 fi
 
 write_config 'shortcuts = false'
-"$UMBRIEL" msg overview-open > /dev/null
+"$CANOPY" msg overview-open > /dev/null
 finish
 pointer tap 2
 finish
 if [[ $(focused_title) != shortcut-second ]]; then
-  echo "disabled overview shortcuts changed focus: $("$UMBRIEL" windows --json)"
+  echo "disabled overview shortcuts changed focus: $("$CANOPY" windows --json)"
   exit 1
 fi
 if grep -q '^key 2 1$' "$FIRST_LOG" "$SECOND_LOG" "$THIRD_LOG" 2>/dev/null; then
   echo "disabled overview shortcut input leaked to a client"
   exit 1
 fi
-"$UMBRIEL" msg overview-close > /dev/null
+"$CANOPY" msg overview-close > /dev/null
 
 write_config
-"$UMBRIEL" msg workspace-switch 2 > /dev/null
+"$CANOPY" msg workspace-switch 2 > /dev/null
 finish
-"$UMBRIEL" msg overview-open > /dev/null
+"$CANOPY" msg overview-open > /dev/null
 finish
 "$CLIENT" shortcut-fourth 1200 700 > "$FOURTH_LOG" 2>&1 &
 wait_for_count 4
@@ -143,14 +143,14 @@ finish
 pointer tap 5
 finish
 if [[ $(active_title) != shortcut-fourth ]]; then
-  echo "a new window stole an existing badge instead of receiving shortcut 4: $("$UMBRIEL" windows --json)"
+  echo "a new window stole an existing badge instead of receiving shortcut 4: $("$CANOPY" windows --json)"
   exit 1
 fi
 
 write_config
 focus_title shortcut-first
 finish
-"$UMBRIEL" msg overview-open > /dev/null
+"$CANOPY" msg overview-open > /dev/null
 finish
 pointer move 620 360 press "$BTN_LEFT" move 760 360 release "$BTN_LEFT"
 focus_title shortcut-second
@@ -158,7 +158,7 @@ finish
 pointer tap 2
 finish
 if [[ $(active_title) != shortcut-first ]]; then
-  echo "the dragged card lost its shortcut badge after drop: $("$UMBRIEL" windows --json)"
+  echo "the dragged card lost its shortcut badge after drop: $("$CANOPY" windows --json)"
   exit 1
 fi
 

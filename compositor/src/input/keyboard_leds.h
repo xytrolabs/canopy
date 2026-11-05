@@ -9,7 +9,7 @@
 struct wlr_keyboard;
 struct xkb_state;
 
-namespace umbriel {
+namespace canopy {
 
   // Share named locks across backend keyboards and publish consistent indicators,
   // including input from LED-less proxies. Virtual keyboards retain their own state.
@@ -61,4 +61,4 @@ namespace umbriel {
     bool m_syncing = false;
   };
 
-} // namespace umbriel
+} // namespace canopy

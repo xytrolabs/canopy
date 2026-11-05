@@ -16,10 +16,10 @@ extern "C" {
 #include <utility>
 #include <vector>
 
-using umbriel::buildCheatsheetRows;
-using umbriel::CheatsheetRow;
-using umbriel::Keybind;
-using umbriel::KeybindAction;
+using canopy::buildCheatsheetRows;
+using canopy::CheatsheetRow;
+using canopy::Keybind;
+using canopy::KeybindAction;
 
 namespace {
 
@@ -34,7 +34,7 @@ namespace {
 
   Keybind spawnBind(uint32_t keysym, const std::string& command) {
     Keybind result = bind(KeybindAction::Spawn, keysym);
-    umbriel::SpawnArg spawn;
+    canopy::SpawnArg spawn;
     spawn.command = command;
     result.payload = std::move(spawn);
     return result;
@@ -42,23 +42,23 @@ namespace {
 
   Keybind workspaceIndexBind(uint32_t keysym, size_t index, uint32_t modifiers = 0) {
     Keybind result = bind(KeybindAction::WorkspaceSwitch, keysym, modifiers);
-    umbriel::WorkspaceArg workspace;
-    workspace.reference = umbriel::WorkspaceIndex{index};
+    canopy::WorkspaceArg workspace;
+    workspace.reference = canopy::WorkspaceIndex{index};
     result.payload = std::move(workspace);
     return result;
   }
 
   Keybind workspaceNameBind(uint32_t keysym, const std::string& name, uint32_t modifiers = 0) {
     Keybind result = bind(KeybindAction::WorkspaceSwitch, keysym, modifiers);
-    umbriel::WorkspaceArg workspace;
-    workspace.reference = umbriel::WorkspaceName{name};
+    canopy::WorkspaceArg workspace;
+    workspace.reference = canopy::WorkspaceName{name};
     result.payload = std::move(workspace);
     return result;
   }
 
-  Keybind layoutBind(uint32_t keysym, umbriel::LayoutMode mode) {
+  Keybind layoutBind(uint32_t keysym, canopy::LayoutMode mode) {
     Keybind result = bind(KeybindAction::WorkspaceSetLayout, keysym);
-    result.payload = umbriel::LayoutModeArg{.mode = mode, .toggleSequence = {}};
+    result.payload = canopy::LayoutModeArg{.mode = mode, .toggleSequence = {}};
     return result;
   }
 
@@ -73,20 +73,20 @@ namespace {
 
 } // namespace
 
-UMBRIEL_TEST(anEmptyBindListProducesNoRows) { CHECK(buildCheatsheetRows({}).empty()); }
+CANOPY_TEST(anEmptyBindListProducesNoRows) { CHECK(buildCheatsheetRows({}).empty()); }
 
-UMBRIEL_TEST(utf8ArrowOccupiesOneCheatsheetColumn) {
-  CHECK_EQ(umbriel::cheatsheetChordColumns("Mod+\xe2\x86\x93"), size_t{5});
-  CHECK_EQ(umbriel::cheatsheetChordColumns("Mod+WheelDown"), size_t{13});
+CANOPY_TEST(utf8ArrowOccupiesOneCheatsheetColumn) {
+  CHECK_EQ(canopy::cheatsheetChordColumns("Mod+\xe2\x86\x93"), size_t{5});
+  CHECK_EQ(canopy::cheatsheetChordColumns("Mod+WheelDown"), size_t{13});
 }
 
-UMBRIEL_TEST(bindsWithNoActionAreSkipped) {
+CANOPY_TEST(bindsWithNoActionAreSkipped) {
   const std::vector<Keybind> binds = {Keybind{}, bind(KeybindAction::WindowClose, XKB_KEY_q)};
   const auto rows = buildCheatsheetRows(binds);
   CHECK_EQ(rows.size(), size_t{1});
   CHECK(rows[0].actionType == KeybindAction::WindowClose);
 }
-UMBRIEL_TEST(modifierOnlyBindHasNoTrailingKeysym) {
+CANOPY_TEST(modifierOnlyBindHasNoTrailingKeysym) {
   Keybind modifier;
   modifier.useMod = true;
   modifier.modifierOnly = true;
@@ -97,7 +97,7 @@ UMBRIEL_TEST(modifierOnlyBindHasNoTrailingKeysym) {
   CHECK_EQ(rows[0].chord, std::string{"Mod"});
 }
 
-UMBRIEL_TEST(oneRowPerBindWhenActionsDiffer) {
+CANOPY_TEST(oneRowPerBindWhenActionsDiffer) {
   const std::vector<Keybind> binds = {
       bind(KeybindAction::WindowClose, XKB_KEY_q),
       bind(KeybindAction::ToggleFloating, XKB_KEY_t),
@@ -111,22 +111,22 @@ UMBRIEL_TEST(oneRowPerBindWhenActionsDiffer) {
   }
 }
 
-UMBRIEL_TEST(masterLayoutModeIsNamedInTheActionLabel) {
-  const std::vector<Keybind> binds = {layoutBind(XKB_KEY_m, umbriel::LayoutMode::Master)};
+CANOPY_TEST(masterLayoutModeIsNamedInTheActionLabel) {
+  const std::vector<Keybind> binds = {layoutBind(XKB_KEY_m, canopy::LayoutMode::Master)};
   const auto rows = buildCheatsheetRows(binds);
   CHECK_EQ(rows.size(), size_t{1});
   CHECK(rows[0].action.contains("master"));
 }
 
-UMBRIEL_TEST(unnamedSubmapIsNamedInTheActionLabel) {
+CANOPY_TEST(unnamedSubmapIsNamedInTheActionLabel) {
   Keybind unnamed = bind(KeybindAction::Submap, XKB_KEY_s);
-  unnamed.payload = umbriel::SubmapArg{};
+  unnamed.payload = canopy::SubmapArg{};
   const auto rows = buildCheatsheetRows(std::vector<Keybind>{unnamed});
   CHECK_EQ(rows.size(), size_t{1});
   CHECK_EQ(rows[0].action, std::string{"submap unnamed"});
 }
 
-UMBRIEL_TEST(bindsSharingAnActionMergeWithADitto) {
+CANOPY_TEST(bindsSharingAnActionMergeWithADitto) {
   // Mod+H and Mod+Left both focus left; the second row shows the chord and a
   // ditto rather than repeating the label.
   const std::vector<Keybind> binds = {
@@ -141,7 +141,7 @@ UMBRIEL_TEST(bindsSharingAnActionMergeWithADitto) {
   CHECK(rows[0].chord != rows[1].chord);
 }
 
-UMBRIEL_TEST(differentModifiersDoNotMerge) {
+CANOPY_TEST(differentModifiersDoNotMerge) {
   // Same action, different modifier: these are distinct entries, not a repeat.
   const std::vector<Keybind> binds = {
       bind(KeybindAction::WindowFocusLeft, XKB_KEY_h),
@@ -153,7 +153,7 @@ UMBRIEL_TEST(differentModifiersDoNotMerge) {
   CHECK(rows[1].action != kDitto);
 }
 
-UMBRIEL_TEST(spawnIsSplitIntoBinaryAndArguments) {
+CANOPY_TEST(spawnIsSplitIntoBinaryAndArguments) {
   const std::vector<Keybind> binds = {spawnBind(XKB_KEY_Return, "/usr/bin/foot -e htop")};
   const auto rows = buildCheatsheetRows(binds);
   CHECK_EQ(rows.size(), size_t{1});
@@ -163,7 +163,7 @@ UMBRIEL_TEST(spawnIsSplitIntoBinaryAndArguments) {
   CHECK_EQ(rows[0].spawnArgs, std::string{"-e htop"});
 }
 
-UMBRIEL_TEST(spawnWithNoArgumentsFallsBackToTheBinary) {
+CANOPY_TEST(spawnWithNoArgumentsFallsBackToTheBinary) {
   const std::vector<Keybind> binds = {spawnBind(XKB_KEY_Return, "foot")};
   const auto rows = buildCheatsheetRows(binds);
   CHECK_EQ(rows.size(), size_t{1});
@@ -172,7 +172,7 @@ UMBRIEL_TEST(spawnWithNoArgumentsFallsBackToTheBinary) {
   CHECK_EQ(rows[0].action, std::string{"foot"});
 }
 
-UMBRIEL_TEST(spawnsWithDifferentCommandsDoNotMerge) {
+CANOPY_TEST(spawnsWithDifferentCommandsDoNotMerge) {
   const std::vector<Keybind> binds = {
       spawnBind(XKB_KEY_Return, "foot"),
       spawnBind(XKB_KEY_b, "firefox"),
@@ -180,7 +180,7 @@ UMBRIEL_TEST(spawnsWithDifferentCommandsDoNotMerge) {
   CHECK_EQ(buildCheatsheetRows(binds).size(), size_t{2});
 }
 
-UMBRIEL_TEST(perDigitWorkspaceBindsCollapseToOneRow) {
+CANOPY_TEST(perDigitWorkspaceBindsCollapseToOneRow) {
   // The defaults bind workspaces 1-9 on both the number row and the keypad. Eighteen rows of near-identical text would
   // swamp the sheet, so they collapse to a single "1…9" row.
   std::vector<Keybind> binds;
@@ -200,7 +200,7 @@ UMBRIEL_TEST(perDigitWorkspaceBindsCollapseToOneRow) {
   }
 }
 
-UMBRIEL_TEST(numericWorkspaceNamesStayDistinctFromPositionalBinds) {
+CANOPY_TEST(numericWorkspaceNamesStayDistinctFromPositionalBinds) {
   const std::vector<Keybind> binds = {
       workspaceIndexBind(XKB_KEY_1, 2),
       workspaceNameBind(XKB_KEY_2, "2"),
@@ -211,7 +211,7 @@ UMBRIEL_TEST(numericWorkspaceNamesStayDistinctFromPositionalBinds) {
   CHECK(std::ranges::any_of(rows, [](const CheatsheetRow& row) { return row.action == "workspace-switch --name 2"; }));
 }
 
-UMBRIEL_TEST(numericNamedWorkspaceBindsDoNotCollapseAsAPositionalRun) {
+CANOPY_TEST(numericNamedWorkspaceBindsDoNotCollapseAsAPositionalRun) {
   std::vector<Keybind> binds;
   binds.reserve(9);
   for (int i = 0; i < 9; ++i) {
@@ -220,7 +220,7 @@ UMBRIEL_TEST(numericNamedWorkspaceBindsDoNotCollapseAsAPositionalRun) {
   CHECK_EQ(buildCheatsheetRows(binds).size(), size_t{9});
 }
 
-UMBRIEL_TEST(anIncompleteWorkspaceRunIsLeftAlone) {
+CANOPY_TEST(anIncompleteWorkspaceRunIsLeftAlone) {
   // Only three digits bound: collapsing would misreport the range, so the rows
   // stay as they are.
   std::vector<Keybind> binds;
@@ -232,11 +232,11 @@ UMBRIEL_TEST(anIncompleteWorkspaceRunIsLeftAlone) {
   CHECK_EQ(countRows(rows, KeybindAction::WorkspaceSwitch), size_t{3});
 }
 
-UMBRIEL_TEST(workspaceRunsKeepPostActionSubmapTransitions) {
+CANOPY_TEST(workspaceRunsKeepPostActionSubmapTransitions) {
   std::vector<Keybind> binds;
   for (int i = 0; i < 9; ++i) {
     Keybind workspace = workspaceIndexBind(static_cast<uint32_t>(XKB_KEY_1 + i), static_cast<size_t>(i + 1));
-    workspace.submapAfter = umbriel::SubmapArg{.name = "inner"};
+    workspace.submapAfter = canopy::SubmapArg{.name = "inner"};
     binds.push_back(std::move(workspace));
   }
 
@@ -245,7 +245,7 @@ UMBRIEL_TEST(workspaceRunsKeepPostActionSubmapTransitions) {
   CHECK(rows[0].action.contains("inner"));
 }
 
-UMBRIEL_TEST(submapBindsCarryTheirSubmap) {
+CANOPY_TEST(submapBindsCarryTheirSubmap) {
   Keybind inSubmap = bind(KeybindAction::WindowFocusLeft, XKB_KEY_h);
   inSubmap.submap = "resize";
   const std::vector<Keybind> binds = {bind(KeybindAction::WindowFocusLeft, XKB_KEY_h), inSubmap};
@@ -259,11 +259,11 @@ UMBRIEL_TEST(submapBindsCarryTheirSubmap) {
   CHECK(haveSubmap);
 }
 
-UMBRIEL_TEST(postActionSubmapsRemainDistinctAndVisible) {
+CANOPY_TEST(postActionSubmapsRemainDistinctAndVisible) {
   Keybind resets = bind(KeybindAction::WindowFocusLeft, XKB_KEY_h);
-  resets.submapAfter = umbriel::SubmapArg{.name = "reset"};
+  resets.submapAfter = canopy::SubmapArg{.name = "reset"};
   Keybind enters = bind(KeybindAction::WindowFocusLeft, XKB_KEY_Left);
-  enters.submapAfter = umbriel::SubmapArg{.name = "inner"};
+  enters.submapAfter = canopy::SubmapArg{.name = "inner"};
 
   const std::vector<CheatsheetRow> rows = buildCheatsheetRows(std::vector<Keybind>{resets, enters});
   CHECK_EQ(rows.size(), size_t{2});
@@ -271,11 +271,11 @@ UMBRIEL_TEST(postActionSubmapsRemainDistinctAndVisible) {
   CHECK(rows[0].action.contains("reset") || rows[1].action.contains("reset"));
 }
 
-UMBRIEL_TEST(groupTitlesArePlainTextNotMarkup) {
+CANOPY_TEST(groupTitlesArePlainTextNotMarkup) {
   // This layer is content; escaping belongs to whatever draws it. A title carrying its own entities gets escaped a
   // second time and the reader sees the entity: "Move &amp; size" was rendered exactly like that.
   for (int i = 0; i < 32; ++i) {
-    const char* title = umbriel::groupTitle(static_cast<umbriel::Group>(i));
+    const char* title = canopy::groupTitle(static_cast<canopy::Group>(i));
     if (title == nullptr) {
       continue;
     }
@@ -286,105 +286,105 @@ UMBRIEL_TEST(groupTitlesArePlainTextNotMarkup) {
   }
 }
 
-UMBRIEL_TEST(crossWorkspaceDirectionalActionsUseExpectedGroups) {
-  CHECK(umbriel::groupForAction(KeybindAction::WindowFocusOrWorkspaceUp) == umbriel::Group::Focus);
-  CHECK(umbriel::groupForAction(KeybindAction::WindowFocusOrWorkspaceDown) == umbriel::Group::Focus);
-  CHECK(umbriel::groupForAction(KeybindAction::WindowMoveOrWorkspaceUp) == umbriel::Group::MoveSize);
-  CHECK(umbriel::groupForAction(KeybindAction::WindowMoveOrWorkspaceDown) == umbriel::Group::MoveSize);
+CANOPY_TEST(crossWorkspaceDirectionalActionsUseExpectedGroups) {
+  CHECK(canopy::groupForAction(KeybindAction::WindowFocusOrWorkspaceUp) == canopy::Group::Focus);
+  CHECK(canopy::groupForAction(KeybindAction::WindowFocusOrWorkspaceDown) == canopy::Group::Focus);
+  CHECK(canopy::groupForAction(KeybindAction::WindowMoveOrWorkspaceUp) == canopy::Group::MoveSize);
+  CHECK(canopy::groupForAction(KeybindAction::WindowMoveOrWorkspaceDown) == canopy::Group::MoveSize);
 }
 
-UMBRIEL_TEST(everyActionMapsToAGroupWithATitle) {
+CANOPY_TEST(everyActionMapsToAGroupWithATitle) {
   // groupForAction has no default arm to fall through to, so a new action that
   // is never grouped would show up here.
-  for (const auto& spec : umbriel::actionSpecs()) {
-    const umbriel::Group group = umbriel::groupForAction(spec.action);
-    const char* title = umbriel::groupTitle(group);
+  for (const auto& spec : canopy::actionSpecs()) {
+    const canopy::Group group = canopy::groupForAction(spec.action);
+    const char* title = canopy::groupTitle(group);
     CHECK(title != nullptr);
     CHECK(title != nullptr && title[0] != '\0');
   }
 }
 
-UMBRIEL_TEST(everyActionsGroupIsInTheFixedDisplayOrder) {
-  // The overlay, `umbriel msg --help`, and the action reference all walk fixedGroupOrder(). A group that exists but is
+CANOPY_TEST(everyActionsGroupIsInTheFixedDisplayOrder) {
+  // The overlay, `canopy msg --help`, and the action reference all walk fixedGroupOrder(). A group that exists but is
   // not listed there drops every action it owns from all three at once.
-  const auto order = umbriel::fixedGroupOrder();
-  for (const auto& spec : umbriel::actionSpecs()) {
-    const umbriel::Group group = umbriel::groupForAction(spec.action);
+  const auto order = canopy::fixedGroupOrder();
+  for (const auto& spec : canopy::actionSpecs()) {
+    const canopy::Group group = canopy::groupForAction(spec.action);
     CHECK(std::ranges::find(order, group) != order.end());
   }
 }
 
-UMBRIEL_TEST(scratchpadActionsHaveTheirOwnGroup) {
-  CHECK(umbriel::groupForAction(KeybindAction::WindowMoveToScratchpad) == umbriel::Group::Scratchpad);
-  CHECK(umbriel::groupForAction(KeybindAction::ScratchpadToggle) == umbriel::Group::Scratchpad);
-  CHECK(umbriel::groupForAction(KeybindAction::WindowToggleScratchpad) == umbriel::Group::Scratchpad);
-  CHECK(umbriel::groupForAction(KeybindAction::WindowRestoreFromScratchpad) == umbriel::Group::Scratchpad);
-  CHECK(umbriel::groupForAction(KeybindAction::ScratchpadFocusNext) == umbriel::Group::Scratchpad);
+CANOPY_TEST(scratchpadActionsHaveTheirOwnGroup) {
+  CHECK(canopy::groupForAction(KeybindAction::WindowMoveToScratchpad) == canopy::Group::Scratchpad);
+  CHECK(canopy::groupForAction(KeybindAction::ScratchpadToggle) == canopy::Group::Scratchpad);
+  CHECK(canopy::groupForAction(KeybindAction::WindowToggleScratchpad) == canopy::Group::Scratchpad);
+  CHECK(canopy::groupForAction(KeybindAction::WindowRestoreFromScratchpad) == canopy::Group::Scratchpad);
+  CHECK(canopy::groupForAction(KeybindAction::ScratchpadFocusNext) == canopy::Group::Scratchpad);
 }
 
-UMBRIEL_TEST(scrollAndPinActionsGroupWithTheirPeers) {
-  CHECK(umbriel::groupForAction(KeybindAction::LayoutScrollUp) == umbriel::Group::MoveSize);
-  CHECK(umbriel::groupForAction(KeybindAction::LayoutScrollDown) == umbriel::Group::MoveSize);
-  CHECK(umbriel::groupForAction(KeybindAction::LayoutScrollDrag) == umbriel::Group::MoveSize);
-  CHECK(umbriel::groupForAction(KeybindAction::TogglePinned) == umbriel::Group::Windows);
+CANOPY_TEST(scrollAndPinActionsGroupWithTheirPeers) {
+  CHECK(canopy::groupForAction(KeybindAction::LayoutScrollUp) == canopy::Group::MoveSize);
+  CHECK(canopy::groupForAction(KeybindAction::LayoutScrollDown) == canopy::Group::MoveSize);
+  CHECK(canopy::groupForAction(KeybindAction::LayoutScrollDrag) == canopy::Group::MoveSize);
+  CHECK(canopy::groupForAction(KeybindAction::TogglePinned) == canopy::Group::Windows);
 }
 
 // column packing: Groups are indivisible, so the panel is as tall as the tallest column and the only lever is where the
 // breaks fall. These pin that the split is the best one available rather than a plausible one.
 
-UMBRIEL_TEST(oneColumnHoldsEverything) {
+CANOPY_TEST(oneColumnHoldsEverything) {
   const std::vector<int> blocks{4, 9, 2};
-  CHECK_EQ(umbriel::balancedColumnHeight(blocks, 1), 15);
+  CHECK_EQ(canopy::balancedColumnHeight(blocks, 1), 15);
 }
 
-UMBRIEL_TEST(anEvenSplitIsFound) {
+CANOPY_TEST(anEvenSplitIsFound) {
   const std::vector<int> blocks{5, 5, 5, 5};
-  CHECK_EQ(umbriel::balancedColumnHeight(blocks, 2), 10);
+  CHECK_EQ(canopy::balancedColumnHeight(blocks, 2), 10);
 }
 
-UMBRIEL_TEST(noColumnIsShorterThanItsLargestGroup) {
+CANOPY_TEST(noColumnIsShorterThanItsLargestGroup) {
   // 20 cannot be split, so no number of columns gets the tallest below it.
   const std::vector<int> blocks{2, 20, 2};
-  CHECK_EQ(umbriel::balancedColumnHeight(blocks, 3), 20);
-  CHECK_EQ(umbriel::balancedColumnHeight(blocks, 99), 20);
+  CHECK_EQ(canopy::balancedColumnHeight(blocks, 3), 20);
+  CHECK_EQ(canopy::balancedColumnHeight(blocks, 99), 20);
 }
 
-UMBRIEL_TEST(aShortGroupLetsItsNeighbourShareTheColumn) {
+CANOPY_TEST(aShortGroupLetsItsNeighbourShareTheColumn) {
   // The naive lineCount/numCols target is 22/2 = 11, and snapping back to a group boundary would cut the first column
   // at 10 and leave 12 in the second. Packing 10 + 2 together is better, and is what this must find.
   const std::vector<int> blocks{10, 2, 10};
-  CHECK_EQ(umbriel::balancedColumnHeight(blocks, 2), 12);
+  CHECK_EQ(canopy::balancedColumnHeight(blocks, 2), 12);
 }
 
-UMBRIEL_TEST(moreColumnsAreNeverTaller) {
+CANOPY_TEST(moreColumnsAreNeverTaller) {
   const std::vector<int> blocks{3, 7, 2, 8, 4, 6, 1};
-  int previous = umbriel::balancedColumnHeight(blocks, 1);
+  int previous = canopy::balancedColumnHeight(blocks, 1);
   for (int columns = 2; columns <= 8; ++columns) {
-    const int height = umbriel::balancedColumnHeight(blocks, columns);
+    const int height = canopy::balancedColumnHeight(blocks, columns);
     CHECK(height <= previous);
     previous = height;
   }
 }
 
-UMBRIEL_TEST(theAnswerIsActuallyAchievable) {
+CANOPY_TEST(theAnswerIsActuallyAchievable) {
   // A height nobody can pack into is not an answer: the optimum must be
   // reachable, and one line less must not be.
   const std::vector<int> blocks{3, 7, 2, 8, 4, 6, 1};
-  const int height = umbriel::balancedColumnHeight(blocks, 3);
-  CHECK(umbriel::columnsNeededFor(blocks, height) <= 3);
-  CHECK(umbriel::columnsNeededFor(blocks, height - 1) > 3);
+  const int height = canopy::balancedColumnHeight(blocks, 3);
+  CHECK(canopy::columnsNeededFor(blocks, height) <= 3);
+  CHECK(canopy::columnsNeededFor(blocks, height - 1) > 3);
 }
 
-UMBRIEL_TEST(degenerateInputsAreSafe) {
+CANOPY_TEST(degenerateInputsAreSafe) {
   const std::vector<int> empty;
-  CHECK_EQ(umbriel::balancedColumnHeight(empty, 3), 0);
+  CHECK_EQ(canopy::balancedColumnHeight(empty, 3), 0);
   const std::vector<int> blocks{5, 5};
   // Nonsense column counts fall back to one column rather than dividing by it.
-  CHECK_EQ(umbriel::balancedColumnHeight(blocks, 0), 10);
-  CHECK_EQ(umbriel::balancedColumnHeight(blocks, -3), 10);
+  CHECK_EQ(canopy::balancedColumnHeight(blocks, 0), 10);
+  CHECK_EQ(canopy::balancedColumnHeight(blocks, -3), 10);
 }
 
-UMBRIEL_TEST(effectActionLabelsPreserveSelectorsAndTargets) {
+CANOPY_TEST(effectActionLabelsPreserveSelectorsAndTargets) {
   for (const auto& [action, label] : std::vector<std::pair<std::string, std::string>>{
            {"effect-window-cycle --window window-1", "effect-window-cycle --window win…"},
            {"effect-border-set border --window window-1", "effect-border-set border --windo…"},
@@ -393,24 +393,24 @@ UMBRIEL_TEST(effectActionLabelsPreserveSelectorsAndTargets) {
            {"effect-cursor-cycle", "effect-cursor-cycle"}
        }) {
     Keybind binding;
-    CHECK(umbriel::parseChord("Mod+e", binding));
-    CHECK(umbriel::parseAction(action, binding));
+    CHECK(canopy::parseChord("Mod+e", binding));
+    CHECK(canopy::parseAction(action, binding));
     const auto rows = buildCheatsheetRows(std::vector{binding});
     CHECK_EQ(rows.size(), size_t{1});
     CHECK_EQ(rows.front().action, label);
   }
 }
 
-UMBRIEL_TEST(stackingLayoutModeIsNamedInTheActionLabel) {
-  const std::vector<Keybind> binds = {layoutBind(XKB_KEY_f, umbriel::LayoutMode::Stacking)};
+CANOPY_TEST(stackingLayoutModeIsNamedInTheActionLabel) {
+  const std::vector<Keybind> binds = {layoutBind(XKB_KEY_f, canopy::LayoutMode::Stacking)};
   const auto rows = buildCheatsheetRows(binds);
   CHECK_EQ(rows.size(), size_t{1});
   CHECK_EQ(rows[0].action, std::string{"workspace-set-layout stacking"});
 }
 
-UMBRIEL_TEST(regionActionLabelsNameTheRegion) {
+CANOPY_TEST(regionActionLabelsNameTheRegion) {
   Keybind binding = bind(KeybindAction::WindowSetRegion, XKB_KEY_h);
-  binding.payload = umbriel::WindowRegionArg{.region = umbriel::WindowRegion::BottomLeft};
+  binding.payload = canopy::WindowRegionArg{.region = canopy::WindowRegion::BottomLeft};
   const auto rows = buildCheatsheetRows(std::vector<Keybind>{binding});
   CHECK_EQ(rows.size(), size_t{1});
   CHECK_EQ(rows[0].action, std::string{"window-set-region bottom_left"});

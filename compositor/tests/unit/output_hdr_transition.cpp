@@ -8,9 +8,9 @@ extern "C" {
 #include <wlr/interfaces/wlr_buffer.h>
 }
 
-using umbriel::commitRenderedState;
-using umbriel::HdrTransition;
-using umbriel::RenderedStateCommitResult;
+using canopy::commitRenderedState;
+using canopy::HdrTransition;
+using canopy::RenderedStateCommitResult;
 
 namespace {
 
@@ -26,7 +26,7 @@ namespace {
 
 } // namespace
 
-UMBRIEL_TEST(changedRequestStaysPendingUntilCommitted) {
+CANOPY_TEST(changedRequestStaysPendingUntilCommitted) {
   HdrTransition transition;
 
   CHECK(transition.pending(true, true));
@@ -38,7 +38,7 @@ UMBRIEL_TEST(changedRequestStaysPendingUntilCommitted) {
   CHECK(transition.committedRequest());
 }
 
-UMBRIEL_TEST(failedAttemptRemainsPendingForRetry) {
+CANOPY_TEST(failedAttemptRemainsPendingForRetry) {
   HdrTransition transition;
 
   CHECK(transition.pending(true, true));
@@ -48,21 +48,21 @@ UMBRIEL_TEST(failedAttemptRemainsPendingForRetry) {
   CHECK(!transition.committedRequest());
 }
 
-UMBRIEL_TEST(requestReturningToCommittedStateCancelsTransition) {
+CANOPY_TEST(requestReturningToCommittedStateCancelsTransition) {
   HdrTransition transition;
 
   CHECK(transition.pending(true, true));
   CHECK(!transition.pending(true, false));
 }
 
-UMBRIEL_TEST(disabledOutputDefersTransitionUntilEnabled) {
+CANOPY_TEST(disabledOutputDefersTransitionUntilEnabled) {
   HdrTransition transition;
 
   CHECK(!transition.pending(false, true));
   CHECK(transition.pending(true, true));
 }
 
-UMBRIEL_TEST(disabledCommitDoesNotAdvanceTransition) {
+CANOPY_TEST(disabledCommitDoesNotAdvanceTransition) {
   HdrTransition transition;
 
   transition.recordCommit(false, true, true);
@@ -71,7 +71,7 @@ UMBRIEL_TEST(disabledCommitDoesNotAdvanceTransition) {
   CHECK(!transition.committedRequest());
 }
 
-UMBRIEL_TEST(renderedStateBuildsBeforeCommitAndCarriesBuffer) {
+CANOPY_TEST(renderedStateBuildsBeforeCommitAndCarriesBuffer) {
   wlr_output_state state{};
   wlr_output_state_init(&state);
   wlr_buffer buffer{};
@@ -103,7 +103,7 @@ UMBRIEL_TEST(renderedStateBuildsBeforeCommitAndCarriesBuffer) {
   wlr_buffer_drop(&buffer);
 }
 
-UMBRIEL_TEST(renderedStateRefusesCommitWithoutSceneBuffer) {
+CANOPY_TEST(renderedStateRefusesCommitWithoutSceneBuffer) {
   wlr_output_state state{};
   wlr_output_state_init(&state);
   bool commitCalled = false;
@@ -121,7 +121,7 @@ UMBRIEL_TEST(renderedStateRefusesCommitWithoutSceneBuffer) {
   wlr_output_state_finish(&state);
 }
 
-UMBRIEL_TEST(renderedStateRefusesNullBufferBehindCommittedFlag) {
+CANOPY_TEST(renderedStateRefusesNullBufferBehindCommittedFlag) {
   wlr_output_state state{};
   wlr_output_state_init(&state);
   bool commitCalled = false;

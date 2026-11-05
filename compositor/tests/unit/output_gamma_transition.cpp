@@ -5,10 +5,10 @@
 #include <cmath>
 #include <vector>
 
-using umbriel::GammaOutputMode;
-using umbriel::GammaTransitionOps;
-using umbriel::hdrWhitePointFromGamma;
-using umbriel::stageGammaForOutputMode;
+using canopy::GammaOutputMode;
+using canopy::GammaTransitionOps;
+using canopy::hdrWhitePointFromGamma;
+using canopy::stageGammaForOutputMode;
 
 namespace {
 
@@ -47,7 +47,7 @@ namespace {
 
 } // namespace
 
-UMBRIEL_TEST(hdrClearsGammaWithoutApplyingIt) {
+CANOPY_TEST(hdrClearsGammaWithoutApplyingIt) {
   Recorder recorder;
 
   CHECK(stageGammaForOutputMode(GammaOutputMode::Hdr, recorder.ops()));
@@ -55,7 +55,7 @@ UMBRIEL_TEST(hdrClearsGammaWithoutApplyingIt) {
   CHECK_EQ(recorder.applies, 0);
 }
 
-UMBRIEL_TEST(sdrAppliesLatestGammaWithoutClearingIt) {
+CANOPY_TEST(sdrAppliesLatestGammaWithoutClearingIt) {
   Recorder recorder;
 
   CHECK(stageGammaForOutputMode(GammaOutputMode::Sdr, recorder.ops()));
@@ -63,7 +63,7 @@ UMBRIEL_TEST(sdrAppliesLatestGammaWithoutClearingIt) {
   CHECK_EQ(recorder.applies, 1);
 }
 
-UMBRIEL_TEST(sdrClearsGammaWhenPreparingTheTableFails) {
+CANOPY_TEST(sdrClearsGammaWhenPreparingTheTableFails) {
   Recorder recorder;
   recorder.applyResult = false;
 
@@ -72,18 +72,18 @@ UMBRIEL_TEST(sdrClearsGammaWhenPreparingTheTableFails) {
   CHECK_EQ(recorder.applies, 1);
 }
 
-UMBRIEL_TEST(hdrWhitePointDefaultsToNeutralWithoutATable) {
+CANOPY_TEST(hdrWhitePointDefaultsToNeutralWithoutATable) {
   checkWhitePoint(hdrWhitePointFromGamma(nullptr, 256), {1.0F, 1.0F, 1.0F});
   const std::array<uint16_t, 3> table{0, 0, 0};
   checkWhitePoint(hdrWhitePointFromGamma(table.data(), 0), {1.0F, 1.0F, 1.0F});
 }
 
-UMBRIEL_TEST(hdrWhitePointRecognizesInclusiveIdentity) {
+CANOPY_TEST(hdrWhitePointRecognizesInclusiveIdentity) {
   const auto table = gammaTable(256, {65535, 65535, 65535});
   checkWhitePoint(hdrWhitePointFromGamma(table.data(), 256), {1.0F, 1.0F, 1.0F});
 }
 
-UMBRIEL_TEST(hdrWhitePointRecognizesSteppedIdentityAcrossAllChannels) {
+CANOPY_TEST(hdrWhitePointRecognizesSteppedIdentityAcrossAllChannels) {
   constexpr size_t size = 257;
   std::vector<uint16_t> table(size * 3);
   for (size_t channel = 0; channel < 3; ++channel) {
@@ -94,7 +94,7 @@ UMBRIEL_TEST(hdrWhitePointRecognizesSteppedIdentityAcrossAllChannels) {
   checkWhitePoint(hdrWhitePointFromGamma(table.data(), size), {1.0F, 1.0F, 1.0F});
 }
 
-UMBRIEL_TEST(hdrWhitePointAllowsSingleUnitIdentityRoundingPerChannel) {
+CANOPY_TEST(hdrWhitePointAllowsSingleUnitIdentityRoundingPerChannel) {
   constexpr size_t size = 256;
   auto table = gammaTable(size, {65535, 65535, 40000});
   for (size_t i = 0; i < size; ++i) {
@@ -107,7 +107,7 @@ UMBRIEL_TEST(hdrWhitePointAllowsSingleUnitIdentityRoundingPerChannel) {
   checkWhitePoint(hdrWhitePointFromGamma(table.data(), size), {1.0F, 1.0F, 40000.0F / 65535.0F});
 }
 
-UMBRIEL_TEST(hdrWhitePointRejectsIdentityWhenOneInteriorEntryChanges) {
+CANOPY_TEST(hdrWhitePointRejectsIdentityWhenOneInteriorEntryChanges) {
   constexpr size_t size = 256;
   std::vector<uint16_t> table(size * 3);
   for (size_t channel = 0; channel < 3; ++channel) {
@@ -119,23 +119,23 @@ UMBRIEL_TEST(hdrWhitePointRejectsIdentityWhenOneInteriorEntryChanges) {
   checkWhitePoint(hdrWhitePointFromGamma(table.data(), size), {1.0F, 65280.0F / 65535.0F, 1.0F});
 }
 
-UMBRIEL_TEST(hdrWhitePointKeepsEncodedWarmChannelEndpoints) {
+CANOPY_TEST(hdrWhitePointKeepsEncodedWarmChannelEndpoints) {
   const auto table = gammaTable(256, {65535, 50000, 30000});
   checkWhitePoint(hdrWhitePointFromGamma(table.data(), 256), {1.0F, 50000.0F / 65535.0F, 30000.0F / 65535.0F});
 }
 
-UMBRIEL_TEST(hdrWhitePointPreservesNeutralDimming) {
+CANOPY_TEST(hdrWhitePointPreservesNeutralDimming) {
   const auto table = gammaTable(256, {32768, 32768, 32768});
   const float endpoint = 32768.0F / 65535.0F;
   checkWhitePoint(hdrWhitePointFromGamma(table.data(), 256), {endpoint, endpoint, endpoint});
 }
 
-UMBRIEL_TEST(hdrWhitePointPreservesBlack) {
+CANOPY_TEST(hdrWhitePointPreservesBlack) {
   const auto table = gammaTable(256, {0, 0, 0});
   checkWhitePoint(hdrWhitePointFromGamma(table.data(), 256), {0.0F, 0.0F, 0.0F});
 }
 
-UMBRIEL_TEST(hdrWhitePointIgnoresCurvatureWithoutSnappingACustomEndpoint) {
+CANOPY_TEST(hdrWhitePointIgnoresCurvatureWithoutSnappingACustomEndpoint) {
   constexpr size_t size = 256;
   std::vector<uint16_t> table(size * 3);
   for (size_t channel = 0; channel < 3; ++channel) {
@@ -147,7 +147,7 @@ UMBRIEL_TEST(hdrWhitePointIgnoresCurvatureWithoutSnappingACustomEndpoint) {
   checkWhitePoint(hdrWhitePointFromGamma(table.data(), size), {endpoint, endpoint, endpoint});
 }
 
-UMBRIEL_TEST(hdrWhitePointUsesSingleEntryDirectly) {
+CANOPY_TEST(hdrWhitePointUsesSingleEntryDirectly) {
   const std::array<uint16_t, 3> table{65535, 32768, 0};
   checkWhitePoint(hdrWhitePointFromGamma(table.data(), 1), {1.0F, 32768.0F / 65535.0F, 0.0F});
 }

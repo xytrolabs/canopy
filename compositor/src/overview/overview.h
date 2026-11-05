@@ -29,7 +29,7 @@ struct wlr_scene_tree;
 struct wlr_surface;
 struct wlr_pointer;
 
-namespace umbriel {
+namespace canopy {
 
   enum class KeybindAction;
   class LayerSurface;
@@ -480,4 +480,4 @@ namespace umbriel {
     size_t m_dropWorkspaceIndex = 0;
   };
 
-} // namespace umbriel
+} // namespace canopy

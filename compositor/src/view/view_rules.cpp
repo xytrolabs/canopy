@@ -21,7 +21,7 @@
 #include "workspace/workspace.h"
 #include "xwayland/xwayland.h"
 
-namespace umbriel {
+namespace canopy {
   namespace {
     constexpr Logger kLog("view");
 
@@ -738,4 +738,4 @@ namespace umbriel {
       m_server->refreshOutputPolicies();
     }
   }
-} // namespace umbriel
+} // namespace canopy

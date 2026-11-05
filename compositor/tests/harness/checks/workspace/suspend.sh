@@ -5,11 +5,11 @@
 # told it is suspended keeps the slow keepalive, so a loop gated on frame callbacks does not stall.
 set -euo pipefail
 
-readonly CLIENT="${UMBRIEL_UNMAP_CLIENT:-./build-debug/tests/unmap-client}"
-readonly LOG="$UMBRIEL_RUNTIME_DIR/hidden.log"
-readonly LEGACY_LOG="$UMBRIEL_RUNTIME_DIR/legacy.log"
-readonly FIFO="$UMBRIEL_RUNTIME_DIR/hidden.fifo"
-readonly LEGACY_FIFO="$UMBRIEL_RUNTIME_DIR/legacy.fifo"
+readonly CLIENT="${CANOPY_UNMAP_CLIENT:-./build-debug/tests/unmap-client}"
+readonly LOG="$CANOPY_RUNTIME_DIR/hidden.log"
+readonly LEGACY_LOG="$CANOPY_RUNTIME_DIR/legacy.log"
+readonly FIFO="$CANOPY_RUNTIME_DIR/hidden.fifo"
+readonly LEGACY_FIFO="$CANOPY_RUNTIME_DIR/legacy.fifo"
 
 mkfifo "$FIFO" "$LEGACY_FIFO"
 # LOG_SUSPENDED binds xdg-shell version 6; without it the client binds version 1, which has no suspended state.
@@ -19,10 +19,10 @@ REPAINT_ON_STDIN=1 "$CLIENT" legacy 400 300 < "$LEGACY_FIFO" > "$LEGACY_LOG" 2>&
 exec 4> "$LEGACY_FIFO"
 
 for _ in $(seq 60); do
-  [[ $("$UMBRIEL" windows --json | jq 'length') == 2 ]] && break
+  [[ $("$CANOPY" windows --json | jq 'length') == 2 ]] && break
   sleep 0.1
 done
-"$UMBRIEL" settle
+"$CANOPY" settle
 
 # The last suspended-state line the client printed, or "resumed" before it printed any.
 last_state() {
@@ -69,8 +69,8 @@ if (($(transitions) != 0)); then
 fi
 
 count=$(transitions)
-"$UMBRIEL" msg workspace-switch 2 > /dev/null
-"$UMBRIEL" settle
+"$CANOPY" msg workspace-switch 2 > /dev/null
+"$CANOPY" settle
 wait_for_transition suspended "$count" "leaving its workspace"
 
 # Both hidden clients ask for a frame callback. Only the one that cannot be suspended gets the keepalive.
@@ -86,20 +86,20 @@ if (($(repaints "$LOG") > hidden_repaints)); then
 fi
 
 count=$(transitions)
-"$UMBRIEL" msg overview-open > /dev/null
-"$UMBRIEL" settle
+"$CANOPY" msg overview-open > /dev/null
+"$CANOPY" settle
 wait_for_transition resumed "$count" "the overview drew its card"
 # The card's buffer paces the client, so its pending callback is answered.
 wait_for_repaint "$LOG" "$hidden_repaints" "the client the overview drew"
 
 count=$(transitions)
-"$UMBRIEL" msg overview-close > /dev/null
-"$UMBRIEL" settle
+"$CANOPY" msg overview-close > /dev/null
+"$CANOPY" settle
 wait_for_transition suspended "$count" "the overview closed"
 
 count=$(transitions)
-"$UMBRIEL" msg workspace-switch 1 > /dev/null
-"$UMBRIEL" settle
+"$CANOPY" msg workspace-switch 1 > /dev/null
+"$CANOPY" settle
 wait_for_transition resumed "$count" "returning to its workspace"
 
 echo "a hidden window was suspended without keepalive callbacks, resumed for the overview, and resumed on return," \

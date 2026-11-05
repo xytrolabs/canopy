@@ -17,7 +17,7 @@
 
 #include <algorithm>
 
-namespace umbriel {
+namespace canopy {
 
   namespace {
     constexpr Logger kLog("focus");
@@ -576,4 +576,4 @@ namespace umbriel {
     return workspace != nullptr ? workspace->focusedView() : nullptr;
   }
 
-} // namespace umbriel
+} // namespace canopy

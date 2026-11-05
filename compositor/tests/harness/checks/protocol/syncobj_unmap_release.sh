@@ -4,10 +4,10 @@
 # Chromium waits for that release before it draws again, so a pending point leaves its re-shown window unmapped.
 set -euo pipefail
 
-readonly CLIENT="${UMBRIEL_SYNCOBJ_CLIENT:-./build-debug/tests/syncobj-client}"
+readonly CLIENT="${CANOPY_SYNCOBJ_CLIENT:-./build-debug/tests/syncobj-client}"
 
 for mode in role-destroy unmap; do
-  log="$UMBRIEL_RUNTIME_DIR/syncobj-$mode.log"
+  log="$CANOPY_RUNTIME_DIR/syncobj-$mode.log"
   if ! "$CLIENT" "$mode" > "$log" 2>&1; then
     echo "$mode: $(cat "$log")"
     exit 1

@@ -25,7 +25,7 @@ struct wlr_tablet_tool;
 struct wlr_tablet_v2_tablet_tool;
 struct wlr_xcursor_manager;
 
-namespace umbriel {
+namespace canopy {
 
   class LayerSurface;
   class Layout;
@@ -244,7 +244,7 @@ namespace umbriel {
     // (overview drag). nullptr restores the client cursor.
     void overrideCursor(const char* name) { setCompositorCursor(name); }
     bool compositorOwnsCursor() const { return m_compositorOwnsCursor; }
-#ifdef UMBRIEL_HARNESS
+#ifdef CANOPY_HARNESS
     struct RenderedCursorStateForTest {
       uint32_t textureWidth = 0;
       uint32_t textureHeight = 0;
@@ -534,4 +534,4 @@ namespace umbriel {
     wl_listener m_clientCursorCommit{};
   };
 
-} // namespace umbriel
+} // namespace canopy

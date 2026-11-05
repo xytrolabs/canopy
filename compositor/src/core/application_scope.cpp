@@ -9,7 +9,7 @@
 #include <string>
 #include <unistd.h>
 
-namespace umbriel {
+namespace canopy {
 
   bool isDirectSystemdService(pid_t currentPid, const char* systemdExecPid) {
     if (currentPid <= 0 || systemdExecPid == nullptr || systemdExecPid[0] == '\0') {
@@ -121,7 +121,7 @@ namespace umbriel {
     append("--collect");
     append("--expand-environment=no");
     append("--slice=app.slice");
-    append("--description=Umbriel application");
+    append("--description=Canopy application");
     append(unitArgument);
     append(partOfProperty);
     append(bindsToProperty);
@@ -139,4 +139,4 @@ namespace umbriel {
     _exit(1);
   }
 
-} // namespace umbriel
+} // namespace canopy

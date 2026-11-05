@@ -4,7 +4,7 @@
 
 #include <algorithm>
 
-namespace umbriel {
+namespace canopy {
 
   struct SizeHints {
     int minWidth = 1;
@@ -85,4 +85,4 @@ namespace umbriel {
     return std::max(1, height);
   }
 
-} // namespace umbriel
+} // namespace canopy

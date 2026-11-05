@@ -102,7 +102,7 @@ namespace {
           static_cast<uint32_t>(window.name.size()), window.name.data()
       );
     }
-    constexpr char wmClass[] = "umbriel-xwayland-dialog\0UmbrielXwaylandDialog\0";
+    constexpr char wmClass[] = "canopy-xwayland-dialog\0CanopyXwaylandDialog\0";
     xcb_change_property(
         state.connection, XCB_PROP_MODE_REPLACE, window.id, XCB_ATOM_WM_CLASS, XCB_ATOM_STRING, 8, sizeof(wmClass) - 1,
         wmClass

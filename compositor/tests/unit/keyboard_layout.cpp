@@ -2,7 +2,7 @@
 
 #include "check.h"
 
-using umbriel::matchingLayoutGroup;
+using canopy::matchingLayoutGroup;
 
 namespace {
 
@@ -42,7 +42,7 @@ namespace {
 
 } // namespace
 
-UMBRIEL_TEST(matchesLayoutByNameAcrossDifferentOrders) {
+CANOPY_TEST(matchesLayoutByNameAcrossDifferentOrders) {
   Keymap source("us,de");
   Keymap target("de,us");
   CHECK(source.get() != nullptr);
@@ -55,7 +55,7 @@ UMBRIEL_TEST(matchesLayoutByNameAcrossDifferentOrders) {
   }
 }
 
-UMBRIEL_TEST(leavesADeviceWithoutTheNamedLayoutUnchanged) {
+CANOPY_TEST(leavesADeviceWithoutTheNamedLayoutUnchanged) {
   Keymap source("us,de");
   Keymap target("us,fr");
   CHECK(source.get() != nullptr);
@@ -63,7 +63,7 @@ UMBRIEL_TEST(leavesADeviceWithoutTheNamedLayoutUnchanged) {
   CHECK(!matchingLayoutGroup(target.get(), source.get(), 1).has_value());
 }
 
-UMBRIEL_TEST(rejectsAnInvalidSourceGroup) {
+CANOPY_TEST(rejectsAnInvalidSourceGroup) {
   Keymap source("us,de");
   Keymap target("us,de");
   CHECK(source.get() != nullptr);
@@ -72,43 +72,43 @@ UMBRIEL_TEST(rejectsAnInvalidSourceGroup) {
 }
 
 namespace {
-  const umbriel::XkbNames kSystem{
+  const canopy::XkbNames kSystem{
       .layout = "us", .variant = "intl", .options = "terminate:ctrl_alt_bksp", .model = "pc105"
   };
 } // namespace
 
-UMBRIEL_TEST(systemKeymapAppliesWhenConfigSetsNoXkbNames) {
-  const umbriel::Config::Input input;
-  CHECK(umbriel::usesSystemXkbNames(input));
-  CHECK(umbriel::resolveXkbNames(input.keyboard, nullptr, kSystem) == kSystem);
+CANOPY_TEST(systemKeymapAppliesWhenConfigSetsNoXkbNames) {
+  const canopy::Config::Input input;
+  CHECK(canopy::usesSystemXkbNames(input));
+  CHECK(canopy::resolveXkbNames(input.keyboard, nullptr, kSystem) == kSystem);
 }
 
-UMBRIEL_TEST(anyConfiguredXkbNameReplacesTheWholeSystemKeymap) {
-  umbriel::Config::Input input;
+CANOPY_TEST(anyConfiguredXkbNameReplacesTheWholeSystemKeymap) {
+  canopy::Config::Input input;
   input.keyboard.options = "caps:escape";
-  CHECK(!umbriel::usesSystemXkbNames(input));
-  const umbriel::XkbNames expected{.layout = "", .variant = "", .options = "caps:escape", .model = ""};
-  CHECK(umbriel::resolveXkbNames(input.keyboard, nullptr, kSystem) == expected);
+  CHECK(!canopy::usesSystemXkbNames(input));
+  const canopy::XkbNames expected{.layout = "", .variant = "", .options = "caps:escape", .model = ""};
+  CHECK(canopy::resolveXkbNames(input.keyboard, nullptr, kSystem) == expected);
 }
 
-UMBRIEL_TEST(deviceXkbNamesReplaceTheSystemKeymap) {
-  const umbriel::Config::Input input;
-  umbriel::Config::Input::Device device;
+CANOPY_TEST(deviceXkbNamesReplaceTheSystemKeymap) {
+  const canopy::Config::Input input;
+  canopy::Config::Input::Device device;
   device.name = "kbd";
   device.layout = "de";
-  const umbriel::XkbNames expected{.layout = "de", .variant = "", .options = "", .model = ""};
-  CHECK(umbriel::resolveXkbNames(input.keyboard, &device, kSystem) == expected);
+  const canopy::XkbNames expected{.layout = "de", .variant = "", .options = "", .model = ""};
+  CHECK(canopy::resolveXkbNames(input.keyboard, &device, kSystem) == expected);
 }
 
-UMBRIEL_TEST(deviceClearingEveryXkbNameFallsBackToTheSystemKeymap) {
-  umbriel::Config::Input input;
+CANOPY_TEST(deviceClearingEveryXkbNameFallsBackToTheSystemKeymap) {
+  canopy::Config::Input input;
   input.keyboard.layout = "fr";
-  umbriel::Config::Input::Device device;
+  canopy::Config::Input::Device device;
   device.name = "kbd";
   device.layout = "";
   input.devices.push_back(device);
-  CHECK(umbriel::usesSystemXkbNames(input));
-  CHECK(umbriel::resolveXkbNames(input.keyboard, input.devices.data(), kSystem) == kSystem);
+  CHECK(canopy::usesSystemXkbNames(input));
+  CHECK(canopy::resolveXkbNames(input.keyboard, input.devices.data(), kSystem) == kSystem);
 }
 
 int main() { return RUN_TESTS(); }

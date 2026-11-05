@@ -5,12 +5,12 @@
 # publish the configured primary again.
 set -euo pipefail
 
-readonly QUERY="$UMBRIEL_XWAYLAND_OUTPUT_CLIENT"
-readonly HOLDER="$UMBRIEL_XWAYLAND_FOCUS_CLIENT"
-mkfifo "$UMBRIEL_RUNTIME_DIR/primary-control"
-exec {control_fd}<>"$UMBRIEL_RUNTIME_DIR/primary-control"
+readonly QUERY="$CANOPY_XWAYLAND_OUTPUT_CLIENT"
+readonly HOLDER="$CANOPY_XWAYLAND_FOCUS_CLIENT"
+mkfifo "$CANOPY_RUNTIME_DIR/primary-control"
+exec {control_fd}<>"$CANOPY_RUNTIME_DIR/primary-control"
 
-cat >> "$UMBRIEL_CONFIG" <<'CONFIG'
+cat >> "$CANOPY_CONFIG" <<'CONFIG'
 
 [animation]
 enabled = false
@@ -32,14 +32,14 @@ transform = "90"
 match.title = "^primary-holder$"
 default_output = "HEADLESS-1"
 CONFIG
-sed -i '/^\[general\]$/a xwayland_primary_output = "HEADLESS-1"' "$UMBRIEL_CONFIG"
-"$UMBRIEL" msg config-reload > /dev/null
+sed -i '/^\[general\]$/a xwayland_primary_output = "HEADLESS-1"' "$CANOPY_CONFIG"
+"$CANOPY" msg config-reload > /dev/null
 
 start_holder() {
-  "$HOLDER" primary-holder <&"$control_fd" > "$UMBRIEL_RUNTIME_DIR/primary-holder.log" 2>&1 &
+  "$HOLDER" primary-holder <&"$control_fd" > "$CANOPY_RUNTIME_DIR/primary-holder.log" 2>&1 &
   holder_pid=$!
   for _ in $(seq 100); do
-    if "$UMBRIEL" windows --json | jq -e 'any(.[]; .title == "primary-holder")' > /dev/null; then
+    if "$CANOPY" windows --json | jq -e 'any(.[]; .title == "primary-holder")' > /dev/null; then
       return
     fi
     sleep 0.02

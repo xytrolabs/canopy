@@ -13,10 +13,10 @@ namespace {
 
 } // namespace
 
-UMBRIEL_TEST(manualInhibitionIsIndependentPerSurface) {
+CANOPY_TEST(manualInhibitionIsIndependentPerSurface) {
   TestSurface first;
   TestSurface second;
-  umbriel::ManualShortcutsInhibit inhibition;
+  canopy::ManualShortcutsInhibit inhibition;
 
   CHECK(!inhibition.enabled(&first.surface));
   inhibition.enable(&first.surface);
@@ -29,10 +29,10 @@ UMBRIEL_TEST(manualInhibitionIsIndependentPerSurface) {
   CHECK(inhibition.enabled(&second.surface));
 }
 
-UMBRIEL_TEST(surfaceDestructionClearsManualInhibition) {
+CANOPY_TEST(surfaceDestructionClearsManualInhibition) {
   TestSurface first;
   TestSurface second;
-  umbriel::ManualShortcutsInhibit inhibition;
+  canopy::ManualShortcutsInhibit inhibition;
   inhibition.enable(&first.surface);
   inhibition.enable(&second.surface);
   CHECK(inhibition.enabled(&first.surface));
@@ -44,10 +44,10 @@ UMBRIEL_TEST(surfaceDestructionClearsManualInhibition) {
   CHECK(wl_list_empty(&first.surface.events.destroy.listener_list));
 }
 
-UMBRIEL_TEST(manualInhibitionUnlinksListenersOnClearAndShutdown) {
+CANOPY_TEST(manualInhibitionUnlinksListenersOnClearAndShutdown) {
   TestSurface surface;
   {
-    umbriel::ManualShortcutsInhibit inhibition;
+    canopy::ManualShortcutsInhibit inhibition;
     inhibition.enable(&surface.surface);
     inhibition.enable(&surface.surface);
     CHECK_EQ(wl_list_length(&surface.surface.events.destroy.listener_list), 1);

@@ -13,7 +13,7 @@ extern "C" {
 #include <wlr/util/edges.h>
 }
 
-namespace umbriel {
+namespace canopy {
 
   namespace {
 
@@ -477,7 +477,7 @@ namespace umbriel {
     if ((direction != -1 && direction != 1) || node == nullptr) {
       return false;
     }
-    Node* destination = findNode(umbriel::directionalNeighbor(m_targets, view, true, direction));
+    Node* destination = findNode(canopy::directionalNeighbor(m_targets, view, true, direction));
     return swapLeafViews(node, destination);
   }
 
@@ -653,11 +653,11 @@ namespace umbriel {
   }
 
   std::optional<View*> DwindleLayout::focusHorizontalLeaf(const View* view, int direction) const {
-    return umbriel::directionalNeighbor(m_targets, view, true, direction);
+    return canopy::directionalNeighbor(m_targets, view, true, direction);
   }
 
   std::optional<View*> DwindleLayout::focusVerticalLeaf(const View* view, int direction) const {
-    return umbriel::directionalNeighbor(m_targets, view, false, direction);
+    return canopy::directionalNeighbor(m_targets, view, false, direction);
   }
 
   std::vector<View*> DwindleLayout::focusPeers(const View* from, const View* target) const {
@@ -954,4 +954,4 @@ namespace umbriel {
     );
   }
 
-} // namespace umbriel
+} // namespace canopy

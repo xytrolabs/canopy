@@ -18,7 +18,7 @@ A dynamic output keeps an empty workspace at the end and creates another when th
 
 Closing the last window keeps the current workspace active. Cleanup runs after you leave it and the workspace transition finishes. A client that keeps its closed toplevel alive does not prevent normal empty-workspace cleanup.
 
-An empty anonymous workspace reserved for an application that is still starting disappears from the visible list after you leave it. Umbriel retains its destination privately and restores the workspace when the application's toplevel claims it. An unused startup token does not leave a selectable empty workspace behind.
+An empty anonymous workspace reserved for an application that is still starting disappears from the visible list after you leave it. Canopy retains its destination privately and restores the workspace when the application's toplevel claims it. An unused startup token does not leave a selectable empty workspace behind.
 
 Set `empty_above = true` under the global [`[workspaces]`](#global-workspace-settings) section to keep an additional empty workspace at the beginning.
 
@@ -57,7 +57,7 @@ A count creates anonymous positions. A string list creates exact names, so posit
 
 ### Change workspaces on reload
 
-Workspace changes apply on a valid configuration reload. Umbriel preserves matching names and positions where possible. Windows from a removed workspace move to the nearest remaining workspace.
+Workspace changes apply on a valid configuration reload. Canopy preserves matching names and positions where possible. Windows from a removed workspace move to the nearest remaining workspace.
 
 Changing to a dynamic model keeps active and populated workspaces, then restores the required empty workspace.
 
@@ -106,10 +106,10 @@ Evacuated named workspaces keep their names even when appended at different posi
 `workspace-move-to-output <destination> [<workspace>] [--output <output>]` selects the destination by connector or monitor identity, or uses `current` for the pointer-preferred output. Omit the workspace to move the active one. A supplied workspace uses the same position/name selection as `workspace-switch`; `--output` qualifies the source, and `--name` selects an explicit name, including numeric names.
 
 ```sh
-umbriel msg workspace-move-to-output DP-2
-umbriel msg workspace-move-to-output DP-2 WEB --output DP-1
-umbriel msg workspace-move-to-output current WEB --output DP-1
-umbriel msg workspace-move-to-output DP-2 --name 3 --output DP-1
+canopywc msg workspace-move-to-output DP-2
+canopywc msg workspace-move-to-output DP-2 WEB --output DP-1
+canopywc msg workspace-move-to-output current WEB --output DP-1
+canopywc msg workspace-move-to-output DP-2 --name 3 --output DP-1
 ```
 
 Moving an inactive workspace leaves its source output's active workspace selected. Moving a workspace to its existing output succeeds without changing selection or order. Unknown, disabled, or ambiguous destination outputs are rejected.
@@ -122,7 +122,7 @@ The transferred workspace retains its layout settings until a relevant configura
 
 ## Inspect workspace state
 
-Run `umbriel workspaces` to list workspaces and their effective layout:
+Run `canopy workspaces` to list workspaces and their effective layout:
 
 ```text
 * DP-1: 1 [scrolling] (focused)
@@ -130,7 +130,7 @@ Run `umbriel workspaces` to list workspaces and their effective layout:
 * DP-2: WEB [master]
 ```
 
-Use `umbriel workspaces --json` for scripts. Each entry includes its stable `id`, display `name`, one-based `index`, `output`, active and focused states, and effective `layout`.
+Use `canopy workspaces --json` for scripts. Each entry includes its stable `id`, display `name`, one-based `index`, `output`, active and focused states, and effective `layout`.
 
 ## Global workspace settings
 

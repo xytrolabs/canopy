@@ -7,12 +7,12 @@
 # channels past 1, and the overview's output-wide background blur at partial strength and alpha while it opens.
 set -euo pipefail
 
-source "$UMBRIEL_HARNESS_LIB"
+source "$CANOPY_HARNESS_LIB"
 
-readonly FUSED="$UMBRIEL_RUNTIME_DIR/blur-fused.png"
-readonly SPLIT="$UMBRIEL_RUNTIME_DIR/blur-split.png"
+readonly FUSED="$CANOPY_RUNTIME_DIR/blur-fused.png"
+readonly SPLIT="$CANOPY_RUNTIME_DIR/blur-split.png"
 
-cat >> "$UMBRIEL_CONFIG" <<'EOF'
+cat >> "$CANOPY_CONFIG" <<'EOF'
 
 [appearance]
 border_width = 0
@@ -79,64 +79,64 @@ default_floating = true
 default_floating_size_px = { width = 300, height = 200 }
 default_position = { x = 50, y = 50, anchor = "top_left" }
 EOF
-"$UMBRIEL" msg config-reload > /dev/null
+"$CANOPY" msg config-reload > /dev/null
 
 # A full-screen wallpaper with the layer client's 200x200 green square over its top-left corner.
-"$UMBRIEL_LAYER_CLIENT" HEADLESS-1 0 > "$UMBRIEL_RUNTIME_DIR/wallpaper.log" 2>&1 &
-await_lines "$UMBRIEL_RUNTIME_DIR/wallpaper.log" ready 1
-"$UMBRIEL_LAYER_CLIENT" HEADLESS-1 0 bottom-layer > "$UMBRIEL_RUNTIME_DIR/square.log" 2>&1 &
-await_lines "$UMBRIEL_RUNTIME_DIR/square.log" ready 1
+"$CANOPY_LAYER_CLIENT" HEADLESS-1 0 > "$CANOPY_RUNTIME_DIR/wallpaper.log" 2>&1 &
+await_lines "$CANOPY_RUNTIME_DIR/wallpaper.log" ready 1
+"$CANOPY_LAYER_CLIENT" HEADLESS-1 0 bottom-layer > "$CANOPY_RUNTIME_DIR/square.log" 2>&1 &
+await_lines "$CANOPY_RUNTIME_DIR/square.log" ready 1
 
 spawn() {
   local title=$1 color=$2 width=$3 height=$4
-  FILL_COLOR="$color" "$UMBRIEL_UNMAP_CLIENT" "$title" "$width" "$height" > "$UMBRIEL_RUNTIME_DIR/$title.log" 2>&1 &
-  await_lines "$UMBRIEL_RUNTIME_DIR/$title.log" mapped 1
+  FILL_COLOR="$color" "$CANOPY_UNMAP_CLIENT" "$title" "$width" "$height" > "$CANOPY_RUNTIME_DIR/$title.log" 2>&1 &
+  await_lines "$CANOPY_RUNTIME_DIR/$title.log" mapped 1
 }
 
 # Both screenshots come from a full redraw, so they share the same damage.
 compare() {
   local state=$1 largest differing
-  "$UMBRIEL" blur-composite-split off > /dev/null
+  "$CANOPY" blur-composite-split off > /dev/null
   grim "$FUSED"
-  "$UMBRIEL" blur-composite-split on > /dev/null
+  "$CANOPY" blur-composite-split on > /dev/null
   grim "$SPLIT"
-  "$UMBRIEL" blur-composite-split off > /dev/null
-  read -r largest differing < <("$UMBRIEL_PIXEL_PROBE" "$FUSED" diff "$SPLIT")
+  "$CANOPY" blur-composite-split off > /dev/null
+  read -r largest differing < <("$CANOPY_PIXEL_PROBE" "$FUSED" diff "$SPLIT")
   if ((largest > 1)); then
     echo "$state: direct blur composite differs from the stored one by up to $largest in $differing pixels"
     exit 1
   fi
 }
 
-"$UMBRIEL" clock-freeze
+"$CANOPY" clock-freeze
 spawn blur-clear 0x00000000 500 300
 spawn blur-tinted 0x80402010 300 200
 spawn blur-masked 0x40102030 300 200
-"$UMBRIEL" clock-advance 2350
+"$CANOPY" clock-advance 2350
 # Halfway through the fade, the clear window's blur shows the square's edge as a gradient at half strength.
 grim "$FUSED"
-read -r _ green _ < <("$UMBRIEL_PIXEL_PROBE" "$FUSED" pixel 202 150)
+read -r _ green _ < <("$CANOPY_PIXEL_PROBE" "$FUSED" pixel 202 150)
 if ((green < 125 || green > 150)); then
   echo "half-faded blur did not blend the square's edge: green=$green"
   exit 1
 fi
 compare "half-faded blur"
-"$UMBRIEL" clock-advance 5000
+"$CANOPY" clock-advance 5000
 compare "settled blur"
 
 sed -i 's/^brightness = 1.0$/brightness = 1.6/; s/^contrast = 1.0$/contrast = 1.3/; s/^saturation = 1.0$/saturation = 0.5/' \
-  "$UMBRIEL_CONFIG"
-"$UMBRIEL" msg config-reload > /dev/null
+  "$CANOPY_CONFIG"
+"$CANOPY" msg config-reload > /dev/null
 spawn blur-bright 0x00000000 300 200
-"$UMBRIEL" clock-advance 2350
+"$CANOPY" clock-advance 2350
 compare "half-faded blur with blur controls"
-"$UMBRIEL" clock-advance 5000
+"$CANOPY" clock-advance 5000
 compare "settled blur with blur controls"
 
-"$UMBRIEL" msg overview-open > /dev/null
-"$UMBRIEL" clock-advance 2000
+"$CANOPY" msg overview-open > /dev/null
+"$CANOPY" clock-advance 2000
 compare "opening overview"
-"$UMBRIEL" clock-advance 5000
+"$CANOPY" clock-advance 5000
 compare "open overview"
 
 echo "direct blur composite matches the stored composite through fades, blur controls, and the overview"

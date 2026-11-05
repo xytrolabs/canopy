@@ -2,8 +2,8 @@
 # harness: outputs=2
 # Destination policy controls a cross-output drag, and stacking policy windows become tiled in a tiling destination.
 set -euo pipefail
-source "$(dirname "$UMBRIEL_HARNESS_LIB")/title_bar.sh"
-cat >>"$UMBRIEL_CONFIG" <<'CONFIG'
+source "$(dirname "$CANOPY_HARNESS_LIB")/title_bar.sh"
+cat >>"$CANOPY_CONFIG" <<'CONFIG'
 [layout]
 mode = "stacking"
 [layout.stacking]
@@ -34,13 +34,13 @@ default_position = { x = 173, y = 109, anchor = "top_left" }
 match.title = "^destination-policy$"
 default_output = "HEADLESS-1"
 CONFIG
-"$UMBRIEL" msg config-reload >/dev/null
-"$UMBRIEL_FRACTIONAL_CLIENT" destination-independent 480 300 >"$UMBRIEL_RUNTIME_DIR/independent.log" 2>&1 &
+"$CANOPY" msg config-reload >/dev/null
+"$CANOPY_FRACTIONAL_CLIENT" destination-independent 480 300 >"$CANOPY_RUNTIME_DIR/independent.log" 2>&1 &
 title_bar_wait_box destination-independent 480x300+173+109
 pointer_hold 2560 720 move 400 240 mod logo press 272 move 2559 360 -- release 272 mod none
-"$UMBRIEL" settle >/dev/null
-grim -o HEADLESS-2 "$UMBRIEL_RUNTIME_DIR/destination.png"
-hint=$("$UMBRIEL_PIXEL_PROBE" "$UMBRIEL_RUNTIME_DIR/destination.png" bbox 'r < 0.1 && g > 0.9 && b > 0.9')
+"$CANOPY" settle >/dev/null
+grim -o HEADLESS-2 "$CANOPY_RUNTIME_DIR/destination.png"
+hint=$("$CANOPY_PIXEL_PROBE" "$CANOPY_RUNTIME_DIR/destination.png" bbox 'r < 0.1 && g > 0.9 && b > 0.9')
 [[ $hint == '0 0 0 0' ]] || {
   echo "disabled destination received a drop-zone preview: $hint"
   exit 1
@@ -50,18 +50,18 @@ title_bar_wait_field destination-independent workspace HEADLESS-2:1
 title_bar_wait_field destination-independent region null
 title_bar_wait_field destination-independent w 480
 title_bar_wait_field destination-independent h 300
-"$UMBRIEL" msg window-set-region right >/dev/null
+"$CANOPY" msg window-set-region right >/dev/null
 title_bar_wait_field destination-independent region right
 title_bar_wait_box destination-independent 628x704+1924+8
-"$UMBRIEL" msg window-clear-region >/dev/null
+"$CANOPY" msg window-clear-region >/dev/null
 title_bar_wait_field destination-independent region null
 
-"$UMBRIEL" msg workspace-set-layout scrolling >/dev/null
-"$UMBRIEL_FRACTIONAL_CLIENT" destination-policy 480 300 >"$UMBRIEL_RUNTIME_DIR/policy.log" 2>&1 &
+"$CANOPY" msg workspace-set-layout scrolling >/dev/null
+"$CANOPY_FRACTIONAL_CLIENT" destination-policy 480 300 >"$CANOPY_RUNTIME_DIR/policy.log" 2>&1 &
 title_bar_wait_field destination-policy workspace HEADLESS-1:1
 title_bar_wait_field destination-policy floating true
 read -r x y < <(title_bar_window destination-policy | jq -r '"\(.x + .w / 2 | floor) \(.y + .h / 2 | floor)"')
-"$UMBRIEL_POINTER_CLIENT" 2560 720 move "$x" "$y" mod logo press 272 move 1920 360 release 272 mod none
+"$CANOPY_POINTER_CLIENT" 2560 720 move "$x" "$y" mod logo press 272 move 1920 360 release 272 mod none
 title_bar_wait_field destination-policy workspace HEADLESS-2:1
 title_bar_wait_field destination-policy floating false
 title_bar_wait_field destination-policy region null

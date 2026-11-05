@@ -17,25 +17,25 @@ extern "C" {
 }
 // clang-format on
 
-using umbriel::Column;
-using umbriel::ColumnDisplay;
-using umbriel::ColumnTabs;
-using umbriel::MasterStackLayout;
-using umbriel::NewTabPosition;
-using umbriel::ResolvedLayoutConfig;
-using umbriel::ScrollingDirection;
-using umbriel::ScrollingLayout;
-using umbriel::TabBarPosition;
-using umbriel::TabGroup;
-using umbriel::TabState;
-using umbriel::View;
+using canopy::Column;
+using canopy::ColumnDisplay;
+using canopy::ColumnTabs;
+using canopy::MasterStackLayout;
+using canopy::NewTabPosition;
+using canopy::ResolvedLayoutConfig;
+using canopy::ScrollingDirection;
+using canopy::ScrollingLayout;
+using canopy::TabBarPosition;
+using canopy::TabGroup;
+using canopy::TabState;
+using canopy::View;
 
 namespace {
 
   View* stub(int id) { return reinterpret_cast<View*>(static_cast<uintptr_t>(0x5000 + (id * 0x10))); }
 
   // totalGap = gap + 2 * border = 12, edgePad = gap + border = 10, so a tab bar reserves 24 + 8 = 32.
-  ResolvedLayoutConfig tabConfig(umbriel::LayoutMode mode) {
+  ResolvedLayoutConfig tabConfig(canopy::LayoutMode mode) {
     ResolvedLayoutConfig config;
     config.mode = mode;
     config.gap = 8;
@@ -51,7 +51,7 @@ namespace {
   constexpr int kReserve = 32;
 
   struct ScrollingFixture {
-    ResolvedLayoutConfig config = tabConfig(umbriel::LayoutMode::Scrolling);
+    ResolvedLayoutConfig config = tabConfig(canopy::LayoutMode::Scrolling);
     ScrollingLayout layout;
 
     explicit ScrollingFixture(ScrollingDirection direction = ScrollingDirection::Horizontal) {
@@ -72,7 +72,7 @@ namespace {
   };
 
   struct MasterFixture {
-    ResolvedLayoutConfig config = tabConfig(umbriel::LayoutMode::Master);
+    ResolvedLayoutConfig config = tabConfig(canopy::LayoutMode::Master);
     MasterStackLayout layout;
 
     MasterFixture() { layout.setConfig(&config); }
@@ -98,13 +98,13 @@ namespace {
 } // namespace
 
 // tab selection bookkeeping
-UMBRIEL_TEST(firstRowOfAnEmptyColumnIsSelected) {
+CANOPY_TEST(firstRowOfAnEmptyColumnIsSelected) {
   TabState tabs;
   tabs.rowInserted(0, 1);
   CHECK_EQ(tabs.active(), size_t{0});
 }
 
-UMBRIEL_TEST(insertingAtOrBeforeTheSelectionKeepsItsView) {
+CANOPY_TEST(insertingAtOrBeforeTheSelectionKeepsItsView) {
   TabState tabs;
   tabs.select(1, 3);
   tabs.rowInserted(1, 4);
@@ -115,7 +115,7 @@ UMBRIEL_TEST(insertingAtOrBeforeTheSelectionKeepsItsView) {
   CHECK_EQ(tabs.active(), size_t{3});
 }
 
-UMBRIEL_TEST(erasingTheSelectionSelectsItsPredecessor) {
+CANOPY_TEST(erasingTheSelectionSelectsItsPredecessor) {
   TabState tabs;
   tabs.select(2, 4);
   tabs.rowErased(2, 3);
@@ -126,7 +126,7 @@ UMBRIEL_TEST(erasingTheSelectionSelectsItsPredecessor) {
   CHECK_EQ(tabs.active(), size_t{0});
 }
 
-UMBRIEL_TEST(erasingAroundTheSelectionKeepsItsView) {
+CANOPY_TEST(erasingAroundTheSelectionKeepsItsView) {
   TabState tabs;
   tabs.select(2, 4);
   tabs.rowErased(0, 3);
@@ -139,7 +139,7 @@ UMBRIEL_TEST(erasingAroundTheSelectionKeepsItsView) {
   CHECK_EQ(tabs.active(), size_t{0});
 }
 
-UMBRIEL_TEST(swapsCarryTheSelectionWithItsView) {
+CANOPY_TEST(swapsCarryTheSelectionWithItsView) {
   TabState tabs;
   tabs.select(1, 3);
   tabs.rowsSwapped(1, 2);
@@ -150,7 +150,7 @@ UMBRIEL_TEST(swapsCarryTheSelectionWithItsView) {
   CHECK_EQ(tabs.active(), size_t{0});
 }
 
-UMBRIEL_TEST(displayChangesReportAndClampTheSelection) {
+CANOPY_TEST(displayChangesReportAndClampTheSelection) {
   TabState tabs;
   CHECK(tabs.select(7, 3));
   CHECK_EQ(tabs.active(), size_t{2});
@@ -162,15 +162,15 @@ UMBRIEL_TEST(displayChangesReportAndClampTheSelection) {
 }
 
 // tab bar geometry
-UMBRIEL_TEST(slotsAndGapsTileTheBarExactly) {
+CANOPY_TEST(slotsAndGapsTileTheBarExactly) {
   for (const int width : {100, 101, 103, 640}) {
     for (const size_t count : {size_t{1}, size_t{3}, size_t{7}}) {
       int covered = 0;
       for (size_t index = 0; index < count; ++index) {
-        const umbriel::TabSlot slot = umbriel::tabSlot(width, count, index, 2);
+        const canopy::TabSlot slot = canopy::tabSlot(width, count, index, 2);
         covered += slot.width;
         if (index + 1 < count) {
-          CHECK_EQ(umbriel::tabSlot(width, count, index + 1, 2).x, slot.x + slot.width + 2);
+          CHECK_EQ(canopy::tabSlot(width, count, index + 1, 2).x, slot.x + slot.width + 2);
         } else {
           CHECK_EQ(slot.x + slot.width, width);
         }
@@ -180,95 +180,95 @@ UMBRIEL_TEST(slotsAndGapsTileTheBarExactly) {
   }
 }
 
-UMBRIEL_TEST(aBarTooNarrowForItsGapsDropsThem) {
-  const umbriel::TabSlot last = umbriel::tabSlot(4, 4, 3, 2);
+CANOPY_TEST(aBarTooNarrowForItsGapsDropsThem) {
+  const canopy::TabSlot last = canopy::tabSlot(4, 4, 3, 2);
   CHECK_EQ(last.x, 3);
   CHECK_EQ(last.width, 1);
 }
 
-UMBRIEL_TEST(hitTestingGivesAGapToTheTabBeforeIt) {
+CANOPY_TEST(hitTestingGivesAGapToTheTabBeforeIt) {
   // Slots of 32 at 0, 34, and 68 across 100 pixels.
-  CHECK_EQ(umbriel::tabIndexAt(100, 3, 0.0, 2), 0);
-  CHECK_EQ(umbriel::tabIndexAt(100, 3, 33.5, 2), 0);
-  CHECK_EQ(umbriel::tabIndexAt(100, 3, 34.0, 2), 1);
-  CHECK_EQ(umbriel::tabIndexAt(100, 3, 99.9, 2), 2);
-  CHECK_EQ(umbriel::tabIndexAt(100, 3, -0.1, 2), -1);
-  CHECK_EQ(umbriel::tabIndexAt(100, 3, 100.0, 2), -1);
-  CHECK_EQ(umbriel::tabIndexAt(100, 0, 10.0, 2), -1);
+  CHECK_EQ(canopy::tabIndexAt(100, 3, 0.0, 2), 0);
+  CHECK_EQ(canopy::tabIndexAt(100, 3, 33.5, 2), 0);
+  CHECK_EQ(canopy::tabIndexAt(100, 3, 34.0, 2), 1);
+  CHECK_EQ(canopy::tabIndexAt(100, 3, 99.9, 2), 2);
+  CHECK_EQ(canopy::tabIndexAt(100, 3, -0.1, 2), -1);
+  CHECK_EQ(canopy::tabIndexAt(100, 3, 100.0, 2), -1);
+  CHECK_EQ(canopy::tabIndexAt(100, 0, 10.0, 2), -1);
 }
 
-UMBRIEL_TEST(aDropLandsBesideTheTabUnderIt) {
-  CHECK_EQ(umbriel::tabInsertionAt(100, 3, 5.0, 2), size_t{0});
-  CHECK_EQ(umbriel::tabInsertionAt(100, 3, 20.0, 2), size_t{1});
-  CHECK_EQ(umbriel::tabInsertionAt(100, 3, 40.0, 2), size_t{1});
-  CHECK_EQ(umbriel::tabInsertionAt(100, 3, 95.0, 2), size_t{3});
-  CHECK_EQ(umbriel::tabInsertionAt(100, 3, 500.0, 2), size_t{3});
+CANOPY_TEST(aDropLandsBesideTheTabUnderIt) {
+  CHECK_EQ(canopy::tabInsertionAt(100, 3, 5.0, 2), size_t{0});
+  CHECK_EQ(canopy::tabInsertionAt(100, 3, 20.0, 2), size_t{1});
+  CHECK_EQ(canopy::tabInsertionAt(100, 3, 40.0, 2), size_t{1});
+  CHECK_EQ(canopy::tabInsertionAt(100, 3, 95.0, 2), size_t{3});
+  CHECK_EQ(canopy::tabInsertionAt(100, 3, 500.0, 2), size_t{3});
 }
 
-UMBRIEL_TEST(aStripWithinItsLimitShowsEveryTab) {
-  CHECK(umbriel::tabStrip(4, 3, 0, 2) == (umbriel::TabStrip{.first = 0, .count = 4}));
-  CHECK(umbriel::tabStrip(4, 3, 4, 2) == (umbriel::TabStrip{.first = 0, .count = 4}));
-  CHECK(umbriel::tabStrip(0, 0, 3, 0) == (umbriel::TabStrip{.first = 0, .count = 0}));
+CANOPY_TEST(aStripWithinItsLimitShowsEveryTab) {
+  CHECK(canopy::tabStrip(4, 3, 0, 2) == (canopy::TabStrip{.first = 0, .count = 4}));
+  CHECK(canopy::tabStrip(4, 3, 4, 2) == (canopy::TabStrip{.first = 0, .count = 4}));
+  CHECK(canopy::tabStrip(0, 0, 3, 0) == (canopy::TabStrip{.first = 0, .count = 0}));
 }
 
-UMBRIEL_TEST(aScrollingStripMovesOnlyAsFarAsTheActiveTabNeeds) {
+CANOPY_TEST(aScrollingStripMovesOnlyAsFarAsTheActiveTabNeeds) {
   // Eight tabs, five slots: stepping right inside the strip leaves it where it is.
-  CHECK(umbriel::tabStrip(8, 4, 5, 0) == (umbriel::TabStrip{.first = 0, .count = 5}));
+  CHECK(canopy::tabStrip(8, 4, 5, 0) == (canopy::TabStrip{.first = 0, .count = 5}));
   // One past its end moves it by one, not by a page.
-  CHECK(umbriel::tabStrip(8, 5, 5, 0) == (umbriel::TabStrip{.first = 1, .count = 5}));
+  CHECK(canopy::tabStrip(8, 5, 5, 0) == (canopy::TabStrip{.first = 1, .count = 5}));
   // Back to its start pulls it back just enough.
-  CHECK(umbriel::tabStrip(8, 1, 5, 3) == (umbriel::TabStrip{.first = 1, .count = 5}));
+  CHECK(canopy::tabStrip(8, 1, 5, 3) == (canopy::TabStrip{.first = 1, .count = 5}));
   // Inside it again, it stays.
-  CHECK(umbriel::tabStrip(8, 4, 5, 3) == (umbriel::TabStrip{.first = 3, .count = 5}));
+  CHECK(canopy::tabStrip(8, 4, 5, 3) == (canopy::TabStrip{.first = 3, .count = 5}));
 }
 
-UMBRIEL_TEST(aScrollingStripStaysWithinItsTabs) {
+CANOPY_TEST(aScrollingStripStaysWithinItsTabs) {
   // A strip left past the end by closed tabs is pulled back to show a full run.
-  CHECK(umbriel::tabStrip(6, 5, 4, 9) == (umbriel::TabStrip{.first = 2, .count = 4}));
+  CHECK(canopy::tabStrip(6, 5, 4, 9) == (canopy::TabStrip{.first = 2, .count = 4}));
   // An active index past the end is treated as the last tab.
-  CHECK(umbriel::tabStrip(6, 40, 4, 0) == (umbriel::TabStrip{.first = 2, .count = 4}));
+  CHECK(canopy::tabStrip(6, 40, 4, 0) == (canopy::TabStrip{.first = 2, .count = 4}));
 }
 
-UMBRIEL_TEST(aScrollingBarPutsAButtonAtEachEnd) {
+CANOPY_TEST(aScrollingBarPutsAButtonAtEachEnd) {
   // 400 wide, 24 tall, gap 2: square 24-pixel buttons, the slots between them.
   CHECK(
-      umbriel::tabBarParts(400, 24, 2, true)
-      == (umbriel::TabBarParts{.buttonWidth = 24, .slotsX = 26, .slotsWidth = 348})
+      canopy::tabBarParts(400, 24, 2, true)
+      == (canopy::TabBarParts{.buttonWidth = 24, .slotsX = 26, .slotsWidth = 348})
   );
   // A bar showing every tab has no buttons.
   CHECK(
-      umbriel::tabBarParts(400, 24, 2, false)
-      == (umbriel::TabBarParts{.buttonWidth = 0, .slotsX = 0, .slotsWidth = 400})
+      canopy::tabBarParts(400, 24, 2, false)
+      == (canopy::TabBarParts{.buttonWidth = 0, .slotsX = 0, .slotsWidth = 400})
   );
   // A wide side bar keeps its buttons short.
-  CHECK_EQ(umbriel::tabBarParts(600, 160, 0, true).buttonWidth, umbriel::kTabCycleButtonMaxWidth);
+  CHECK_EQ(canopy::tabBarParts(600, 160, 0, true).buttonWidth, canopy::kTabCycleButtonMaxWidth);
   // A thin indicator still gets buttons wide enough to hit.
-  CHECK_EQ(umbriel::tabBarParts(400, 4, 0, true).buttonWidth, umbriel::kTabCycleButtonMinWidth);
+  CHECK_EQ(canopy::tabBarParts(400, 4, 0, true).buttonWidth, canopy::kTabCycleButtonMinWidth);
 }
 
-UMBRIEL_TEST(pointsOnAScrollingBarFindItsButtonsAndShownTabs) {
+CANOPY_TEST(pointsOnAScrollingBarFindItsButtonsAndShownTabs) {
   // Tabs 2 and 3 of 6 show in two 173-pixel slots between 24-pixel buttons.
-  const umbriel::TabStrip strip{.first = 2, .count = 2};
-  const auto at = [&](double x) { return umbriel::tabBarPointAt(400, 24, 2, strip, 6, x); };
-  CHECK(at(10.0) == (umbriel::TabBarPoint{.part = umbriel::TabBarPart::PreviousTab, .index = 0}));
-  CHECK(at(390.0) == (umbriel::TabBarPoint{.part = umbriel::TabBarPart::NextTab, .index = 0}));
-  CHECK(at(30.0) == (umbriel::TabBarPoint{.part = umbriel::TabBarPart::Tab, .index = 2}));
-  CHECK(at(370.0) == (umbriel::TabBarPoint{.part = umbriel::TabBarPart::Tab, .index = 3}));
+  const canopy::TabStrip strip{.first = 2, .count = 2};
+  const auto at = [&](double x) { return canopy::tabBarPointAt(400, 24, 2, strip, 6, x); };
+  CHECK(at(10.0) == (canopy::TabBarPoint{.part = canopy::TabBarPart::PreviousTab, .index = 0}));
+  CHECK(at(390.0) == (canopy::TabBarPoint{.part = canopy::TabBarPart::NextTab, .index = 0}));
+  CHECK(at(30.0) == (canopy::TabBarPoint{.part = canopy::TabBarPart::Tab, .index = 2}));
+  CHECK(at(370.0) == (canopy::TabBarPoint{.part = canopy::TabBarPart::Tab, .index = 3}));
   // The gap between a button and the slots is nothing.
-  CHECK(at(25.0) == umbriel::TabBarPoint{});
-  CHECK(at(-1.0) == umbriel::TabBarPoint{});
+  CHECK(at(25.0) == canopy::TabBarPoint{});
+  CHECK(at(-1.0) == canopy::TabBarPoint{});
 }
 
-UMBRIEL_TEST(dropsOnAScrollingBarLandAmongItsShownTabs) {
-  const umbriel::TabStrip strip{.first = 2, .count = 2};
+CANOPY_TEST(dropsOnAScrollingBarLandAmongItsShownTabs) {
+  const canopy::TabStrip strip{.first = 2, .count = 2};
   // The leading half of the first shown slot inserts before tab 2, the trailing half of the last after tab 3.
-  CHECK_EQ(umbriel::tabBarDropAt(400, 24, 2, strip, 6, 40.0).row, size_t{2});
-  CHECK_EQ(umbriel::tabBarDropAt(400, 24, 2, strip, 6, 360.0).row, size_t{4});
-  CHECK_EQ(umbriel::tabBarDropAt(400, 24, 2, strip, 6, 40.0).boundary, 26);
+  CHECK_EQ(canopy::tabBarDropAt(400, 24, 2, strip, 6, 40.0).row, size_t{2});
+  CHECK_EQ(canopy::tabBarDropAt(400, 24, 2, strip, 6, 360.0).row, size_t{4});
+  CHECK_EQ(canopy::tabBarDropAt(400, 24, 2, strip, 6, 40.0).boundary, 26);
 }
 
 // tab groups
-UMBRIEL_TEST(groupsFollowRowsInsertedAndErasedAroundThem) {
+CANOPY_TEST(groupsFollowRowsInsertedAndErasedAroundThem) {
   ColumnTabs tabs;
   CHECK(tabs.form(1, 2, 2));
   // Before the group pushes it along, keeping the tab it shows.
@@ -291,7 +291,7 @@ UMBRIEL_TEST(groupsFollowRowsInsertedAndErasedAroundThem) {
   CHECK(tabs.empty());
 }
 
-UMBRIEL_TEST(groupsCountAsOneUnit) {
+CANOPY_TEST(groupsCountAsOneUnit) {
   ColumnTabs tabs;
   CHECK(tabs.form(1, 3, 1));
   CHECK_EQ(tabs.unitCount(5), size_t{3});
@@ -306,7 +306,7 @@ UMBRIEL_TEST(groupsCountAsOneUnit) {
   CHECK(!tabs.form(3, 2, 3));
 }
 
-UMBRIEL_TEST(tabsLeaveAndJoinAtTheirGroupsEnds) {
+CANOPY_TEST(tabsLeaveAndJoinAtTheirGroupsEnds) {
   ColumnTabs tabs;
   CHECK(tabs.form(1, 3, 3));
   CHECK(!tabs.leave(2));
@@ -319,7 +319,7 @@ UMBRIEL_TEST(tabsLeaveAndJoinAtTheirGroupsEnds) {
   CHECK_EQ(tabs.groups().front().count, size_t{4});
 }
 
-UMBRIEL_TEST(swappedUnitsCarryTheirGroups) {
+CANOPY_TEST(swappedUnitsCarryTheirGroups) {
   ColumnTabs tabs;
   CHECK(tabs.form(0, 2, 1));
   // The group at rows 0-1 trades places with the row at 2.
@@ -328,7 +328,7 @@ UMBRIEL_TEST(swappedUnitsCarryTheirGroups) {
 }
 
 // scrolling
-UMBRIEL_TEST(tabsShareTheColumnBelowTheirBar) {
+CANOPY_TEST(tabsShareTheColumnBelowTheirBar) {
   ScrollingFixture fixture;
   fixture.stack(3);
   CHECK(fixture.layout.setTabbed(stub(0), true));
@@ -340,7 +340,7 @@ UMBRIEL_TEST(tabsShareTheColumnBelowTheirBar) {
   CHECK(sameBox(fixture.layout.targetBox(stub(2)), first));
 }
 
-UMBRIEL_TEST(aBottomBarReservesBelowTheTabs) {
+CANOPY_TEST(aBottomBarReservesBelowTheTabs) {
   ScrollingFixture fixture;
   fixture.config.tabs.barPosition = TabBarPosition::Bottom;
   fixture.stack(2);
@@ -351,7 +351,7 @@ UMBRIEL_TEST(aBottomBarReservesBelowTheTabs) {
   CHECK_EQ(box.height, 700 - kReserve);
 }
 
-UMBRIEL_TEST(sideBarsReserveBesideTheTabs) {
+CANOPY_TEST(sideBarsReserveBesideTheTabs) {
   ScrollingFixture untabbed;
   untabbed.stack(2);
   untabbed.layout.arrange(kUsable);
@@ -378,7 +378,7 @@ UMBRIEL_TEST(sideBarsReserveBesideTheTabs) {
   CHECK_EQ(rightBox.width, column.width - kReserve);
 }
 
-UMBRIEL_TEST(resizingATabbedColumnStartsFromTheColumnNotItsTabs) {
+CANOPY_TEST(resizingATabbedColumnStartsFromTheColumnNotItsTabs) {
   // A side bar makes the tabs narrower than their column; a resize that started from a tab would shrink the column
   // by the bar the moment the pointer moved.
   ScrollingFixture fixture;
@@ -388,7 +388,7 @@ UMBRIEL_TEST(resizingATabbedColumnStartsFromTheColumnNotItsTabs) {
   fixture.layout.setTabbed(stub(0), true);
   fixture.layout.arrange(kUsable);
   const double before = fixture.layout.widthFraction(0);
-  std::unique_ptr<umbriel::ResizeGrab> grab = fixture.layout.beginResize(stub(0), WLR_EDGE_RIGHT, kUsable);
+  std::unique_ptr<canopy::ResizeGrab> grab = fixture.layout.beginResize(stub(0), WLR_EDGE_RIGHT, kUsable);
   CHECK(grab != nullptr);
   if (grab != nullptr) {
     grab->applyDelta(0.0, 0.0, kUsable);
@@ -396,7 +396,7 @@ UMBRIEL_TEST(resizingATabbedColumnStartsFromTheColumnNotItsTabs) {
   CHECK_NEAR(fixture.layout.widthFraction(0), before, 0.001);
 }
 
-UMBRIEL_TEST(aLoneTabGivesUpAHiddenBarsSpace) {
+CANOPY_TEST(aLoneTabGivesUpAHiddenBarsSpace) {
   ScrollingFixture fixture;
   fixture.config.tabs.hideWhenSingle = true;
   fixture.stack(1);
@@ -409,7 +409,7 @@ UMBRIEL_TEST(aLoneTabGivesUpAHiddenBarsSpace) {
   CHECK_EQ(fixture.layout.targetBox(stub(0)).height, 700 - kReserve);
 }
 
-UMBRIEL_TEST(aHiddenBarGivesItsSpaceToTheTabs) {
+CANOPY_TEST(aHiddenBarGivesItsSpaceToTheTabs) {
   ScrollingFixture fixture;
   fixture.stack(2);
   fixture.layout.setTabbed(stub(0), true);
@@ -430,7 +430,7 @@ UMBRIEL_TEST(aHiddenBarGivesItsSpaceToTheTabs) {
   CHECK(!hidden.layout.setTabBar(stub(5), true));
 }
 
-UMBRIEL_TEST(untabbingRestoresTheStackedRows) {
+CANOPY_TEST(untabbingRestoresTheStackedRows) {
   ScrollingFixture fixture;
   fixture.stack(2);
   fixture.layout.arrange(kUsable);
@@ -442,7 +442,7 @@ UMBRIEL_TEST(untabbingRestoresTheStackedRows) {
   CHECK(sameBox(fixture.layout.targetBox(stub(1)), stacked));
 }
 
-UMBRIEL_TEST(aVerticalStripTabsALaneAcrossItsTop) {
+CANOPY_TEST(aVerticalStripTabsALaneAcrossItsTop) {
   ScrollingFixture fixture(ScrollingDirection::Vertical);
   fixture.stack(2);
   fixture.layout.setTabbed(stub(0), true);
@@ -453,7 +453,7 @@ UMBRIEL_TEST(aVerticalStripTabsALaneAcrossItsTop) {
   CHECK(sameBox(fixture.layout.targetBox(stub(1)), box));
 }
 
-UMBRIEL_TEST(selectingReportsOnlyAChangeOfTheShownTab) {
+CANOPY_TEST(selectingReportsOnlyAChangeOfTheShownTab) {
   ScrollingFixture fixture;
   fixture.stack(3);
   // A window outside every group has nothing to show it in.
@@ -463,11 +463,11 @@ UMBRIEL_TEST(selectingReportsOnlyAChangeOfTheShownTab) {
   CHECK_EQ(shownTab(fixture.column()), stub(1));
   CHECK(!fixture.layout.selectTab(stub(1)));
   CHECK(fixture.layout.selectTab(stub(2)));
-  CHECK(umbriel::hiddenTab(fixture.column(), stub(1)));
-  CHECK(!umbriel::hiddenTab(fixture.column(), stub(2)));
+  CHECK(canopy::hiddenTab(fixture.column(), stub(1)));
+  CHECK(!canopy::hiddenTab(fixture.column(), stub(2)));
 }
 
-UMBRIEL_TEST(closingTheShownTabShowsItsPredecessor) {
+CANOPY_TEST(closingTheShownTabShowsItsPredecessor) {
   ScrollingFixture fixture;
   fixture.stack(3);
   fixture.layout.setTabbed(stub(0), true);
@@ -478,7 +478,7 @@ UMBRIEL_TEST(closingTheShownTabShowsItsPredecessor) {
   CHECK_EQ(shownTab(fixture.column()), stub(1));
 }
 
-UMBRIEL_TEST(consumeJoinsTabsWhereNewTabsGo) {
+CANOPY_TEST(consumeJoinsTabsWhereNewTabsGo) {
   ScrollingFixture fixture;
   fixture.config.tabs.newTabPosition = NewTabPosition::AfterActive;
   fixture.stack(3);
@@ -486,23 +486,23 @@ UMBRIEL_TEST(consumeJoinsTabsWhereNewTabsGo) {
   fixture.layout.insertView(stub(3), 1);
   CHECK(fixture.layout.consume(stub(3), -1));
   CHECK_EQ(fixture.layout.rowOf(stub(3)), 1);
-  CHECK(umbriel::tabGroupOf(fixture.column(), stub(3)) != nullptr);
+  CHECK(canopy::tabGroupOf(fixture.column(), stub(3)) != nullptr);
   CHECK_EQ(shownTab(fixture.column()), stub(0));
 }
 
-UMBRIEL_TEST(consumeBelowAStandaloneRowStandsAlone) {
+CANOPY_TEST(consumeBelowAStandaloneRowStandsAlone) {
   ScrollingFixture fixture;
   fixture.stack(3);
   fixture.layout.setTabbed(stub(0), true);
   CHECK(fixture.layout.moveViewVertical(stub(2), 1));
   fixture.layout.insertView(stub(3), 1);
   CHECK(fixture.layout.consume(stub(3), -1));
-  CHECK(umbriel::tabGroupOf(fixture.column(), stub(3)) == nullptr);
+  CHECK(canopy::tabGroupOf(fixture.column(), stub(3)) == nullptr);
   CHECK_EQ(fixture.column().tabs.unitCount(fixture.column().views.size()), size_t{3});
 }
 
 // consume-from: the neighboring column's window joins the focused row, and focus stays where it was
-UMBRIEL_TEST(consumeFromPullsTheNextColumnBelowTheFocusedRow) {
+CANOPY_TEST(consumeFromPullsTheNextColumnBelowTheFocusedRow) {
   ScrollingFixture fixture;
   fixture.layout.insertView(stub(0), 0);
   fixture.layout.insertView(stub(1), 1);
@@ -523,7 +523,7 @@ UMBRIEL_TEST(consumeFromPullsTheNextColumnBelowTheFocusedRow) {
   CHECK(!fixture.layout.consumeFrom(stub(0), -1));
 }
 
-UMBRIEL_TEST(consumeFromTheLeftPullsTheColumnInFront) {
+CANOPY_TEST(consumeFromTheLeftPullsTheColumnInFront) {
   ScrollingFixture fixture;
   fixture.layout.insertView(stub(0), 0);
   fixture.layout.insertView(stub(1), 1);
@@ -538,7 +538,7 @@ UMBRIEL_TEST(consumeFromTheLeftPullsTheColumnInFront) {
   CHECK_EQ(fixture.layout.columnOf(stub(0)), 0);
 }
 
-UMBRIEL_TEST(consumeFromLeavesTheSourceColumnStandingWhileItKeepsRows) {
+CANOPY_TEST(consumeFromLeavesTheSourceColumnStandingWhileItKeepsRows) {
   ScrollingFixture fixture;
   fixture.stack(2);
   fixture.layout.insertView(stub(2), 1);
@@ -551,7 +551,7 @@ UMBRIEL_TEST(consumeFromLeavesTheSourceColumnStandingWhileItKeepsRows) {
   CHECK_EQ(fixture.layout.columns()[1].views.back(), stub(0));
 }
 
-UMBRIEL_TEST(consumeFromPullsTheShownTabOfATabbedColumn) {
+CANOPY_TEST(consumeFromPullsTheShownTabOfATabbedColumn) {
   ScrollingFixture fixture;
   fixture.layout.insertView(stub(0), 0);
   fixture.layout.insertView(stub(1), 1);
@@ -559,7 +559,7 @@ UMBRIEL_TEST(consumeFromPullsTheShownTabOfATabbedColumn) {
   CHECK(fixture.layout.consume(stub(2), -1));
   CHECK(fixture.layout.setTabbed(stub(2), true));
   // The source column shows its second tab, so that is the window that comes over; the hidden one stays.
-  CHECK_EQ(umbriel::columnEntry(fixture.layout.columns()[1]), stub(2));
+  CHECK_EQ(canopy::columnEntry(fixture.layout.columns()[1]), stub(2));
   CHECK(fixture.layout.consumeFrom(stub(0), 1));
   CHECK_EQ(fixture.layout.columnOf(stub(2)), 0);
   CHECK_EQ(fixture.layout.rowOf(stub(2)), 1);
@@ -568,7 +568,7 @@ UMBRIEL_TEST(consumeFromPullsTheShownTabOfATabbedColumn) {
   CHECK_EQ(shownTab(fixture.layout.columns()[1]), stub(1));
 }
 
-UMBRIEL_TEST(consumeFromAddsATabToTheFocusedGroup) {
+CANOPY_TEST(consumeFromAddsATabToTheFocusedGroup) {
   ScrollingFixture fixture;
   fixture.config.tabs.newTabPosition = NewTabPosition::AfterActive;
   fixture.stack(2);
@@ -584,55 +584,55 @@ UMBRIEL_TEST(consumeFromAddsATabToTheFocusedGroup) {
   CHECK_EQ(shownTab(fixture.column()), stub(0));
 }
 
-UMBRIEL_TEST(consumeFromAppendsATabAtTheGroupsEndByDefault) {
+CANOPY_TEST(consumeFromAppendsATabAtTheGroupsEndByDefault) {
   ScrollingFixture fixture;
   fixture.stack(2);
   fixture.layout.insertView(stub(2), 1);
   CHECK(fixture.layout.setTabbed(stub(0), true));
   CHECK(fixture.layout.consumeFrom(stub(0), 1));
   // The pulled window is one more tab of the focused group, last, and the focused window keeps showing.
-  CHECK(umbriel::tabGroupOf(fixture.column(), stub(2)) != nullptr);
+  CHECK(canopy::tabGroupOf(fixture.column(), stub(2)) != nullptr);
   CHECK_EQ(fixture.column().tabs.groups().front().count, size_t{3});
   CHECK_EQ(fixture.layout.rowOf(stub(2)), 2);
   CHECK_EQ(shownTab(fixture.column()), stub(0));
 }
 
-UMBRIEL_TEST(consumeFromBelowAStandaloneRowStandsBeforeTheGroup) {
+CANOPY_TEST(consumeFromBelowAStandaloneRowStandsBeforeTheGroup) {
   ScrollingFixture fixture;
   fixture.stack(3);
   CHECK(fixture.layout.setTabbed(stub(1), true));
   // The last tab steps out ahead of the group and stands alone at the top.
   CHECK(fixture.layout.moveViewVertical(stub(2), -1));
-  CHECK(umbriel::tabGroupOf(fixture.column(), stub(2)) == nullptr);
+  CHECK(canopy::tabGroupOf(fixture.column(), stub(2)) == nullptr);
   CHECK_EQ(fixture.layout.rowOf(stub(2)), 0);
   fixture.layout.insertView(stub(3), 1);
   CHECK(fixture.layout.consumeFrom(stub(2), 1));
   // The pulled window takes the row below it and stays out of the group it meets.
-  CHECK(umbriel::tabGroupOf(fixture.column(), stub(3)) == nullptr);
+  CHECK(canopy::tabGroupOf(fixture.column(), stub(3)) == nullptr);
   CHECK_EQ(fixture.layout.rowOf(stub(3)), 1);
   CHECK_EQ(fixture.column().tabs.unitCount(fixture.column().views.size()), size_t{3});
   CHECK_EQ(shownTab(fixture.column()), stub(0));
 }
 
-UMBRIEL_TEST(movingATabStepsOutOfItsGroup) {
+CANOPY_TEST(movingATabStepsOutOfItsGroup) {
   ScrollingFixture fixture;
   fixture.stack(3);
   fixture.layout.setTabbed(stub(1), true);
   // Down from the middle: the tab leaves for the row below the group, which keeps its other tabs in order.
   CHECK(fixture.layout.moveViewVertical(stub(1), 1));
   CHECK_EQ(fixture.layout.rowOf(stub(1)), 2);
-  CHECK(umbriel::tabGroupOf(fixture.column(), stub(1)) == nullptr);
+  CHECK(canopy::tabGroupOf(fixture.column(), stub(1)) == nullptr);
   CHECK_EQ(fixture.column().views[0], stub(0));
   CHECK_EQ(fixture.column().views[1], stub(2));
   CHECK_EQ(fixture.column().tabs.groups().front().count, size_t{2});
   // Back up: it meets the group and joins it as its last tab, on show.
   CHECK(fixture.layout.moveViewVertical(stub(1), -1));
-  CHECK(umbriel::tabGroupOf(fixture.column(), stub(1)) != nullptr);
+  CHECK(canopy::tabGroupOf(fixture.column(), stub(1)) != nullptr);
   CHECK_EQ(shownTab(fixture.column()), stub(1));
   CHECK_EQ(fixture.layout.rowOf(stub(1)), 2);
 }
 
-UMBRIEL_TEST(aTabSteppingOutBelowTheColumnFillsItsFreeSpace) {
+CANOPY_TEST(aTabSteppingOutBelowTheColumnFillsItsFreeSpace) {
   ScrollingFixture fixture;
   fixture.stack(2);
   CHECK(fixture.layout.setTabbed(stub(0), true));
@@ -650,7 +650,7 @@ UMBRIEL_TEST(aTabSteppingOutBelowTheColumnFillsItsFreeSpace) {
   CHECK_NEAR(fixture.layout.bottomGapWeight(0), 0.0, 1e-9);
 }
 
-UMBRIEL_TEST(aTabSteppingOutAboveTheColumnFillsItsFreeSpace) {
+CANOPY_TEST(aTabSteppingOutAboveTheColumnFillsItsFreeSpace) {
   ScrollingFixture fixture;
   fixture.stack(2);
   CHECK(fixture.layout.setTabbed(stub(0), true));
@@ -667,7 +667,7 @@ UMBRIEL_TEST(aTabSteppingOutAboveTheColumnFillsItsFreeSpace) {
   CHECK_NEAR(fixture.layout.topGapWeight(0), 0.0, 1e-9);
 }
 
-UMBRIEL_TEST(aOneTabGroupTradesPlacesAsAUnit) {
+CANOPY_TEST(aOneTabGroupTradesPlacesAsAUnit) {
   ScrollingFixture fixture;
   fixture.stack(2);
   fixture.layout.setTabbed(stub(0), true);
@@ -679,7 +679,7 @@ UMBRIEL_TEST(aOneTabGroupTradesPlacesAsAUnit) {
   CHECK(!fixture.layout.moveViewVertical(stub(0), 1));
 }
 
-UMBRIEL_TEST(tabsReorderWithinTheirGroup) {
+CANOPY_TEST(tabsReorderWithinTheirGroup) {
   ScrollingFixture fixture;
   fixture.stack(3);
   fixture.layout.setTabbed(stub(1), true);
@@ -691,7 +691,7 @@ UMBRIEL_TEST(tabsReorderWithinTheirGroup) {
   CHECK_EQ(shownTab(fixture.column()), stub(1));
 }
 
-UMBRIEL_TEST(aTabGroupResizesAsOneRow) {
+CANOPY_TEST(aTabGroupResizesAsOneRow) {
   ScrollingFixture fixture;
   fixture.stack(3);
   fixture.layout.setTabbed(stub(0), true);
@@ -709,13 +709,13 @@ UMBRIEL_TEST(aTabGroupResizesAsOneRow) {
   CHECK_EQ(edges, static_cast<uint32_t>(WLR_EDGE_TOP | WLR_EDGE_BOTTOM));
 }
 
-UMBRIEL_TEST(draggingTheBoundaryBelowAGroupResizesIt) {
+CANOPY_TEST(draggingTheBoundaryBelowAGroupResizesIt) {
   ScrollingFixture fixture;
   fixture.stack(3);
   fixture.layout.setTabbed(stub(0), true);
   CHECK(fixture.layout.moveViewVertical(stub(2), 1));
   fixture.layout.arrange(kUsable);
-  std::unique_ptr<umbriel::ResizeGrab> grab = fixture.layout.beginResize(stub(1), WLR_EDGE_BOTTOM, kUsable);
+  std::unique_ptr<canopy::ResizeGrab> grab = fixture.layout.beginResize(stub(1), WLR_EDGE_BOTTOM, kUsable);
   CHECK(grab != nullptr);
   if (grab != nullptr) {
     grab->applyDelta(0.0, 100.0, kUsable);
@@ -725,7 +725,7 @@ UMBRIEL_TEST(draggingTheBoundaryBelowAGroupResizesIt) {
   CHECK_EQ(fixture.layout.targetBox(stub(2)).height, 244);
 }
 
-UMBRIEL_TEST(tabbingTakesTheStandaloneRunAroundTheWindow) {
+CANOPY_TEST(tabbingTakesTheStandaloneRunAroundTheWindow) {
   ScrollingFixture fixture;
   fixture.stack(4);
   fixture.layout.setTabbed(stub(0), true);
@@ -737,19 +737,19 @@ UMBRIEL_TEST(tabbingTakesTheStandaloneRunAroundTheWindow) {
   CHECK(groups.back() == (TabGroup{.first = 2, .count = 2, .active = 3, .bar = std::nullopt}));
 }
 
-UMBRIEL_TEST(aDropJoinsTheGroupItNames) {
+CANOPY_TEST(aDropJoinsTheGroupItNames) {
   ScrollingFixture fixture;
   fixture.stack(2);
   fixture.layout.setTabbed(stub(0), true);
   CHECK(fixture.layout.insertTab(stub(7), 0, 2, stub(0)));
-  CHECK(umbriel::tabGroupOf(fixture.column(), stub(7)) != nullptr);
+  CHECK(canopy::tabGroupOf(fixture.column(), stub(7)) != nullptr);
   // A row at a group's end stands beside it unless the drop asks to join.
   fixture.layout.insertViewIntoColumn(stub(8), 0, 3);
-  CHECK(umbriel::tabGroupOf(fixture.column(), stub(8)) == nullptr);
+  CHECK(canopy::tabGroupOf(fixture.column(), stub(8)) == nullptr);
   CHECK(!fixture.layout.insertTab(stub(9), 0, 5, stub(0)));
 }
 
-UMBRIEL_TEST(aDropAtAnAdjacentGroupsStartJoinsThatGroup) {
+CANOPY_TEST(aDropAtAnAdjacentGroupsStartJoinsThatGroup) {
   ScrollingFixture fixture;
   fixture.stack(3);
   fixture.layout.setTabbed(stub(0), true);
@@ -758,11 +758,11 @@ UMBRIEL_TEST(aDropAtAnAdjacentGroupsStartJoinsThatGroup) {
   CHECK(fixture.layout.insertTab(stub(7), 0, 2, stub(2)));
   const Column& column = fixture.column();
   CHECK_EQ(column.tabs.groups().front().count, size_t{2});
-  CHECK(umbriel::tabGroupOf(column, stub(7)) == umbriel::tabGroupOf(column, stub(2)));
-  CHECK(umbriel::tabGroupOf(column, stub(7)) != umbriel::tabGroupOf(column, stub(0)));
+  CHECK(canopy::tabGroupOf(column, stub(7)) == canopy::tabGroupOf(column, stub(2)));
+  CHECK(canopy::tabGroupOf(column, stub(7)) != canopy::tabGroupOf(column, stub(0)));
 }
 
-UMBRIEL_TEST(aDropAtAnAdjacentGroupsEndJoinsThatGroup) {
+CANOPY_TEST(aDropAtAnAdjacentGroupsEndJoinsThatGroup) {
   ScrollingFixture fixture;
   fixture.stack(3);
   fixture.layout.setTabbed(stub(0), true);
@@ -771,11 +771,11 @@ UMBRIEL_TEST(aDropAtAnAdjacentGroupsEndJoinsThatGroup) {
   CHECK(fixture.layout.insertTab(stub(7), 0, 2, stub(0)));
   const Column& column = fixture.column();
   CHECK_EQ(column.tabs.groups().back().count, size_t{1});
-  CHECK(umbriel::tabGroupOf(column, stub(7)) == umbriel::tabGroupOf(column, stub(0)));
-  CHECK(umbriel::tabGroupOf(column, stub(7)) != umbriel::tabGroupOf(column, stub(2)));
+  CHECK(canopy::tabGroupOf(column, stub(7)) == canopy::tabGroupOf(column, stub(0)));
+  CHECK(canopy::tabGroupOf(column, stub(7)) != canopy::tabGroupOf(column, stub(2)));
 }
 
-UMBRIEL_TEST(rebuiltColumnsReplaceTheDestinationsDefaultTabs) {
+CANOPY_TEST(rebuiltColumnsReplaceTheDestinationsDefaultTabs) {
   ScrollingFixture source;
   source.stack(3);
   source.layout.setTabbed(stub(0), true);
@@ -795,7 +795,7 @@ UMBRIEL_TEST(rebuiltColumnsReplaceTheDestinationsDefaultTabs) {
   CHECK(target.column().tabs.hidden(2));
 }
 
-UMBRIEL_TEST(replacingDefaultTabsAllowsIndependentRowWeights) {
+CANOPY_TEST(replacingDefaultTabsAllowsIndependentRowWeights) {
   ScrollingFixture target;
   target.config.tabs.defaultDisplay = ColumnDisplay::Tabbed;
   target.stack(3);
@@ -813,7 +813,7 @@ UMBRIEL_TEST(replacingDefaultTabsAllowsIndependentRowWeights) {
   CHECK(target.layout.targetBox(stub(1)).height < target.layout.targetBox(stub(2)).height);
 }
 
-UMBRIEL_TEST(masterGroupsExportTotalWeightAndKeepUntabbedProportions) {
+CANOPY_TEST(masterGroupsExportTotalWeightAndKeepUntabbedProportions) {
   MasterFixture source;
   source.addViews(3);
   View* first = source.layout.columns()[1].views[0];
@@ -832,31 +832,31 @@ UMBRIEL_TEST(masterGroupsExportTotalWeightAndKeepUntabbedProportions) {
   CHECK(sameBox(source.layout.targetBox(last), lastBox));
 }
 
-UMBRIEL_TEST(newColumnsTakeTheConfiguredDisplay) {
+CANOPY_TEST(newColumnsTakeTheConfiguredDisplay) {
   ScrollingFixture fixture;
   fixture.config.tabs.defaultDisplay = ColumnDisplay::Tabbed;
   fixture.stack(2);
   CHECK(tabbed(fixture.column()));
-  CHECK(umbriel::tabGroupOf(fixture.column(), stub(1)) != nullptr);
+  CHECK(canopy::tabGroupOf(fixture.column(), stub(1)) != nullptr);
   CHECK(fixture.layout.expel(stub(1), 1));
   CHECK(tabbed(fixture.column(1)));
 }
 
-UMBRIEL_TEST(snapshotsKeepTabsAndLetMissingMembersLeave) {
+CANOPY_TEST(snapshotsKeepTabsAndLetMissingMembersLeave) {
   ScrollingFixture fixture;
   fixture.stack(3);
   fixture.layout.setTabbed(stub(0), true);
   fixture.layout.selectTab(stub(2));
-  umbriel::LayoutCapture capture = fixture.layout.captureState();
+  canopy::LayoutCapture capture = fixture.layout.captureState();
   // The shown tab does not come back: its predecessor shows, as after a close.
-  std::erase_if(capture.members, [](const umbriel::LayoutMember& member) { return member.view == stub(2); });
+  std::erase_if(capture.members, [](const canopy::LayoutMember& member) { return member.view == stub(2); });
   ScrollingFixture restored;
   CHECK(restored.layout.restoreState(*capture.snapshot, capture.members));
   CHECK(tabbed(restored.column()));
   CHECK_EQ(shownTab(restored.column()), stub(1));
 }
 
-UMBRIEL_TEST(enteringATabbedColumnLandsOnItsShownTab) {
+CANOPY_TEST(enteringATabbedColumnLandsOnItsShownTab) {
   ScrollingFixture fixture;
   fixture.stack(3);
   fixture.layout.insertView(stub(3), 1);
@@ -864,11 +864,11 @@ UMBRIEL_TEST(enteringATabbedColumnLandsOnItsShownTab) {
   const std::vector<View*> peers = fixture.layout.focusPeers(stub(3), stub(0));
   CHECK_EQ(peers.size(), size_t{1});
   CHECK(!peers.empty() && peers.front() == stub(1));
-  CHECK_EQ(umbriel::columnEntry(fixture.column()), stub(1));
+  CHECK_EQ(canopy::columnEntry(fixture.column()), stub(1));
 }
 
 // master
-UMBRIEL_TEST(aTabbedStackSharesItsAreaBelowTheBar) {
+CANOPY_TEST(aTabbedStackSharesItsAreaBelowTheBar) {
   MasterFixture fixture;
   fixture.addViews(3);
   // Area 1 is the stack, right of the master.
@@ -883,7 +883,7 @@ UMBRIEL_TEST(aTabbedStackSharesItsAreaBelowTheBar) {
   CHECK_EQ(fixture.layout.targetBox(fixture.layout.columns()[0].views[0]).height, 700);
 }
 
-UMBRIEL_TEST(upAndDownWalkATabbedAreaWithoutWrapping) {
+CANOPY_TEST(upAndDownWalkATabbedAreaWithoutWrapping) {
   MasterFixture fixture;
   fixture.addViews(4);
   fixture.layout.setTabbed(fixture.layout.columns()[1].views[0], true);
@@ -894,7 +894,7 @@ UMBRIEL_TEST(upAndDownWalkATabbedAreaWithoutWrapping) {
   CHECK(fixture.layout.focusVerticalLeaf(stack.back(), 1) == std::optional<View*>(nullptr));
 }
 
-UMBRIEL_TEST(movingWithinATabbedAreaReordersTabs) {
+CANOPY_TEST(movingWithinATabbedAreaReordersTabs) {
   MasterFixture fixture;
   fixture.addViews(4);
   const std::vector<View*> stack = fixture.layout.columns()[1].views;
@@ -906,7 +906,7 @@ UMBRIEL_TEST(movingWithinATabbedAreaReordersTabs) {
   CHECK_EQ(fixture.layout.columns()[1].views[0], stack[0]);
 }
 
-UMBRIEL_TEST(consumeFromPullsTheStackEntryBelowTheFocusedMasterRow) {
+CANOPY_TEST(consumeFromPullsTheStackEntryBelowTheFocusedMasterRow) {
   MasterFixture fixture;
   // Rows in creation order, so the stack reads 1 then 2 below the master.
   fixture.config.master.newOnTop = false;
@@ -919,7 +919,7 @@ UMBRIEL_TEST(consumeFromPullsTheStackEntryBelowTheFocusedMasterRow) {
   CHECK_EQ(fixture.layout.columns()[1].views.front(), stub(2));
 }
 
-UMBRIEL_TEST(consumeFromTheLeftEmptiesTheAreaItPullsFrom) {
+CANOPY_TEST(consumeFromTheLeftEmptiesTheAreaItPullsFrom) {
   MasterFixture fixture;
   fixture.config.master.newOnTop = false;
   fixture.addViews(3);
@@ -930,7 +930,7 @@ UMBRIEL_TEST(consumeFromTheLeftEmptiesTheAreaItPullsFrom) {
   CHECK_EQ(fixture.layout.columns()[0].views[2], stub(0));
 }
 
-UMBRIEL_TEST(consumeFromAddsTheNeighboringAreaEntryAsATab) {
+CANOPY_TEST(consumeFromAddsTheNeighboringAreaEntryAsATab) {
   MasterFixture fixture;
   fixture.config.master.newOnTop = false;
   fixture.config.tabs.newTabPosition = NewTabPosition::AfterActive;
@@ -944,7 +944,7 @@ UMBRIEL_TEST(consumeFromAddsTheNeighboringAreaEntryAsATab) {
   CHECK_EQ(fixture.layout.columns()[1].views.front(), stub(2));
 }
 
-UMBRIEL_TEST(consumeFromDoesNothingWithoutThatNeighbor) {
+CANOPY_TEST(consumeFromDoesNothingWithoutThatNeighbor) {
   MasterFixture fixture;
   fixture.addViews(2);
   CHECK(!fixture.layout.consumeFrom(stub(0), -1));
@@ -952,7 +952,7 @@ UMBRIEL_TEST(consumeFromDoesNothingWithoutThatNeighbor) {
   CHECK(!fixture.layout.consumeFrom(stub(0), 2));
 }
 
-UMBRIEL_TEST(anEmptiedAreaTakesTheConfiguredDisplayAgain) {
+CANOPY_TEST(anEmptiedAreaTakesTheConfiguredDisplayAgain) {
   MasterFixture fixture;
   fixture.addViews(2);
   fixture.layout.setTabbed(fixture.layout.columns()[1].views[0], true);
@@ -961,7 +961,7 @@ UMBRIEL_TEST(anEmptiedAreaTakesTheConfiguredDisplayAgain) {
   CHECK(!tabbed(fixture.layout.columns()[1]));
 }
 
-UMBRIEL_TEST(aNewMasterKeepsATabbedMasterArea) {
+CANOPY_TEST(aNewMasterKeepsATabbedMasterArea) {
   MasterFixture fixture;
   fixture.config.master.newBecomesMaster = true;
   fixture.addViews(2);
@@ -971,16 +971,16 @@ UMBRIEL_TEST(aNewMasterKeepsATabbedMasterArea) {
   CHECK_EQ(fixture.layout.columns()[0].views.front(), stub(5));
 }
 
-UMBRIEL_TEST(aJoiningStackRowIsSizedForTheTabbedArea) {
+CANOPY_TEST(aJoiningStackRowIsSizedForTheTabbedArea) {
   MasterFixture fixture;
   fixture.addViews(2);
   fixture.layout.setTabbed(fixture.layout.columns()[1].views[0], true);
-  const umbriel::Layout::InitialSize size =
+  const canopy::Layout::InitialSize size =
       fixture.layout.initialSize(kUsable, false, std::nullopt, std::nullopt, nullptr);
   CHECK_EQ(size.height, 700 - kReserve);
 }
 
-UMBRIEL_TEST(aMasterAreaHidesItsBarOnRequest) {
+CANOPY_TEST(aMasterAreaHidesItsBarOnRequest) {
   MasterFixture fixture;
   fixture.addViews(3);
   View* tab = fixture.layout.columns()[1].views[0];

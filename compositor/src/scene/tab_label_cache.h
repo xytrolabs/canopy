@@ -10,7 +10,7 @@
 
 struct wlr_buffer;
 
-namespace umbriel {
+namespace canopy {
 
   // What a tab title renders from.
   struct TabLabelRequest {
@@ -60,4 +60,4 @@ namespace umbriel {
     std::unordered_map<std::string, std::list<Entry>::iterator> m_index;
   };
 
-} // namespace umbriel
+} // namespace canopy

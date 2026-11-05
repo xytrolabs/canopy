@@ -13,7 +13,7 @@ extern "C" {
 #include <wlr/util/edges.h>
 }
 
-namespace umbriel {
+namespace canopy {
 
   namespace {
 
@@ -1120,4 +1120,4 @@ namespace umbriel {
     );
   }
 
-} // namespace umbriel
+} // namespace canopy

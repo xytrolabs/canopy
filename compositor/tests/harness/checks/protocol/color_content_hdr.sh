@@ -2,29 +2,29 @@
 # A PQ transport does not make SDR-limited content HDR. Real committed metadata
 # must move the automatic output request in both directions without changing TF.
 set -euo pipefail
-source "$UMBRIEL_HARNESS_LIB"
+source "$CANOPY_HARNESS_LIB"
 
-cat >> "$UMBRIEL_CONFIG" <<'CONFIG'
+cat >> "$CANOPY_CONFIG" <<'CONFIG'
 [animation]
 enabled = false
 [output.HEADLESS-1]
 hdr = "auto"
 CONFIG
-"$UMBRIEL" msg config-reload > /dev/null
+"$CANOPY" msg config-reload > /dev/null
 
 request() {
   local command=$1 previous
   previous=$(events "$CLIENT_LOG" "{\"event\":\"snapshot\",\"label\":\"$command\"")
   printf '%s\n' "$command" >&"$CLIENT_FD"
   await_lines "$CLIENT_LOG" "{\"event\":\"snapshot\",\"label\":\"$command\"" "$((previous + 1))"
-  "$UMBRIEL" settle > /dev/null
+  "$CANOPY" settle > /dev/null
 }
 
 expect_request() {
   local requested=$1 fullscreen=$2 phase=$3 color windows
   for _ in $(seq 60); do
-    color=$("$UMBRIEL" color --json)
-    windows=$("$UMBRIEL" windows --json)
+    color=$("$CANOPY" color --json)
+    windows=$("$CANOPY" windows --json)
     if jq -e --argjson requested "$requested" '
       .outputs[0].hdr_mode == "auto" and .outputs[0].hdr_requested == $requested
       and .outputs[0].hdr_active == false
@@ -43,7 +43,7 @@ expect_request() {
 
 expect_peak() {
   local peak=$1 color
-  color=$("$UMBRIEL" color --json)
+  color=$("$CANOPY" color --json)
   # SDR child metadata is intentionally absent from root HDR diagnostics.
   # A root tag and HDR-tagged descendants must preserve their original PQ tag.
   if ! jq -e --argjson peak "$peak" '
@@ -56,16 +56,16 @@ expect_peak() {
 }
 
 for mode in toplevel subsurface subsurface-desync; do
-  CLIENT_LOG="$UMBRIEL_RUNTIME_DIR/content-light-$mode.log"
-  fifo="$UMBRIEL_RUNTIME_DIR/content-light-$mode.fifo"
+  CLIENT_LOG="$CANOPY_RUNTIME_DIR/content-light-$mode.log"
+  fifo="$CANOPY_RUNTIME_DIR/content-light-$mode.fifo"
   mkfifo "$fifo"
   args=(content-light)
   [[ $mode == toplevel ]] || args+=("$mode")
-  "$UMBRIEL_COLOR_FEEDBACK_CLIENT" "${args[@]}" < "$fifo" > "$CLIENT_LOG" 2>&1 &
+  "$CANOPY_COLOR_FEEDBACK_CLIENT" "${args[@]}" < "$fifo" > "$CLIENT_LOG" 2>&1 &
   client_pid=$!
   exec {CLIENT_FD}> "$fifo"
   await_lines "$CLIENT_LOG" '{"event":"mapped"}' 1
-  "$UMBRIEL" settle > /dev/null
+  "$CANOPY" settle > /dev/null
 
   expect_request false true 'PQ SDR peak 203 at map'
   [[ $mode != toplevel ]] || expect_peak 203
@@ -94,7 +94,7 @@ for mode in toplevel subsurface subsurface-desync; do
   kill -TERM "$client_pid"
   wait "$client_pid" 2>/dev/null || true
   exec {CLIENT_FD}>&-
-  "$UMBRIEL" settle > /dev/null
+  "$CANOPY" settle > /dev/null
 done
 
 echo "automatic HDR follows committed content peaks, preserving SDR-limited PQ and unknown-peak HDR across fullscreen and child surfaces"

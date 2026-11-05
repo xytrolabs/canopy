@@ -6,7 +6,7 @@ struct wl_display;
 struct wlr_backend;
 struct wlr_output;
 
-namespace umbriel {
+namespace canopy {
 
   class DrmLeaseManager {
   public:
@@ -25,4 +25,4 @@ namespace umbriel {
     std::unique_ptr<Impl> m_impl;
   };
 
-} // namespace umbriel
+} // namespace canopy

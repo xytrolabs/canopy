@@ -4,7 +4,7 @@
 
 #include <string>
 
-namespace umbriel {
+namespace canopy {
 
   class Server;
 
@@ -20,4 +20,4 @@ namespace umbriel {
   // non-sentinel action is advertised.
   bool actionRegistryComplete();
 
-} // namespace umbriel
+} // namespace canopy

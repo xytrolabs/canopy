@@ -4,14 +4,14 @@
 # entry dropped while reading an array would show up as an unstyled window.
 set -euo pipefail
 
-readonly CLIENT="${UMBRIEL_UNMAP_CLIENT:-./build-debug/tests/unmap-client}"
+readonly CLIENT="${CANOPY_UNMAP_CLIENT:-./build-debug/tests/unmap-client}"
 
 if [[ ! -x $CLIENT ]]; then
   echo "unmap-client is not built at $CLIENT"
   exit 1
 fi
 
-cat >> "$UMBRIEL_CONFIG" <<'EOF'
+cat >> "$CANOPY_CONFIG" <<'EOF'
 
 [animation]
 enabled = false
@@ -28,10 +28,10 @@ default_floating = true
 match.xdg_tag = ["^multi-tag-a$", "^multi-tag-b$"]
 default_floating = true
 EOF
-"$UMBRIEL" msg config-reload > /dev/null
+"$CANOPY" msg config-reload > /dev/null
 
 field_of() {
-  "$UMBRIEL" windows --json | jq -r --arg t "$1" --arg f "$2" '.[] | select(.title == $t) | .[$f]'
+  "$CANOPY" windows --json | jq -r --arg t "$1" --arg f "$2" '.[] | select(.title == $t) | .[$f]'
 }
 
 wait_mapped() {
@@ -47,7 +47,7 @@ wait_mapped() {
 open() {
   local title=$1
   shift
-  env "$@" "$CLIENT" "$title" > "$UMBRIEL_RUNTIME_DIR/$title.log" 2>&1 &
+  env "$@" "$CLIENT" "$title" > "$CANOPY_RUNTIME_DIR/$title.log" 2>&1 &
   wait_mapped "$title"
 }
 

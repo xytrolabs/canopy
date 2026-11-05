@@ -1,6 +1,6 @@
 #pragma once
 
-namespace umbriel {
+namespace canopy {
 
   // HDR policy changes are committed with the next rendered output frame. A
   // failed commit leaves the request pending so a later frame can retry it.
@@ -20,4 +20,4 @@ namespace umbriel {
     bool m_committedRequest = false;
   };
 
-} // namespace umbriel
+} // namespace canopy

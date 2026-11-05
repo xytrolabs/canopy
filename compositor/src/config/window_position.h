@@ -5,7 +5,7 @@
 #include <optional>
 #include <string_view>
 
-namespace umbriel {
+namespace canopy {
 
   enum class WindowPositionAnchor {
     TopLeft,
@@ -56,4 +56,4 @@ namespace umbriel {
     const auto* found = std::ranges::find(kWindowPositionAnchorNames, anchor, &WindowPositionAnchorName::anchor);
     return found == kWindowPositionAnchorNames.end() ? std::string_view{} : found->name;
   }
-} // namespace umbriel
+} // namespace canopy

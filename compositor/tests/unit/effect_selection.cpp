@@ -4,7 +4,7 @@
 
 #include <array>
 
-using namespace umbriel;
+using namespace canopy;
 
 namespace {
   Effects configuration(EffectSelectionPolicy policy = EffectSelectionPolicy::UnusedFirst) {
@@ -33,7 +33,7 @@ namespace {
   }
 } // namespace
 
-UMBRIEL_TEST(unusedFirstUsesSmallestCountThenDeclarationOrder) {
+CANOPY_TEST(unusedFirstUsesSmallestCountThenDeclarationOrder) {
   const std::vector<std::string> members{"z", "x", "y"};
   CHECK_EQ(pickEffectMember(members, {}, EffectSelectionPolicy::UnusedFirst, "", 999).name, "z");
   const std::array<std::size_t, 3> counts{4, 1, 1};
@@ -42,7 +42,7 @@ UMBRIEL_TEST(unusedFirstUsesSmallestCountThenDeclarationOrder) {
   CHECK_EQ(pickEffectMember(members, least, EffectSelectionPolicy::UnusedFirst, "", 0).name, "y");
 }
 
-UMBRIEL_TEST(pureRoundRobinAndRandomHaveExplicitInputs) {
+CANOPY_TEST(pureRoundRobinAndRandomHaveExplicitInputs) {
   const std::vector<std::string> members{"z", "x", "y"};
   auto pick = pickEffectMember(members, {}, EffectSelectionPolicy::RoundRobin, "", 0);
   CHECK_EQ(pick.name, "z");
@@ -56,7 +56,7 @@ UMBRIEL_TEST(pureRoundRobinAndRandomHaveExplicitInputs) {
   CHECK_EQ(pickEffectMember({}, {}, EffectSelectionPolicy::RoundRobin, "x", 0).lastHandout, "x");
 }
 
-UMBRIEL_TEST(holdCountsUseOnlyLiveUnsuppressedAssignmentsFromThisPool) {
+CANOPY_TEST(holdCountsUseOnlyLiveUnsuppressedAssignmentsFromThisPool) {
   const auto effects = configuration();
   EffectSelection selection(1);
   auto first = configured("A");
@@ -79,7 +79,7 @@ UMBRIEL_TEST(holdCountsUseOnlyLiveUnsuppressedAssignmentsFromThisPool) {
   CHECK_EQ(effectPoolHoldCounts(effects.pools[1], slots), (EffectHoldCounts{1, 0}));
 }
 
-UMBRIEL_TEST(unmappedResolutionAndNewMappedLifetimeDoNotReuseAssignments) {
+CANOPY_TEST(unmappedResolutionAndNewMappedLifetimeDoNotReuseAssignments) {
   const auto effects = configuration(EffectSelectionPolicy::RoundRobin);
   EffectSelection selection(1);
   auto slot = configured("A");
@@ -95,7 +95,7 @@ UMBRIEL_TEST(unmappedResolutionAndNewMappedLifetimeDoNotReuseAssignments) {
   CHECK_EQ(slot.name, "y");
 }
 
-UMBRIEL_TEST(historyWinsBeforeCurrentMemberReuseWhenChangingPools) {
+CANOPY_TEST(historyWinsBeforeCurrentMemberReuseWhenChangingPools) {
   const auto effects = configuration(EffectSelectionPolicy::RoundRobin);
   EffectSelection selection(1);
   auto slot = configured("A");
@@ -122,7 +122,7 @@ UMBRIEL_TEST(historyWinsBeforeCurrentMemberReuseWhenChangingPools) {
   CHECK_EQ(another.name, "x");
 }
 
-UMBRIEL_TEST(changingPoolsReusesCurrentMemberBeforeFreshPolicyPick) {
+CANOPY_TEST(changingPoolsReusesCurrentMemberBeforeFreshPolicyPick) {
   auto effects = configuration(EffectSelectionPolicy::RoundRobin);
   EffectSelection selection(1);
   auto slot = configured("y");
@@ -140,7 +140,7 @@ UMBRIEL_TEST(changingPoolsReusesCurrentMemberBeforeFreshPolicyPick) {
   CHECK_EQ(other.name, "x");
 }
 
-UMBRIEL_TEST(suppressionKeepsSelectorsAndHistoryWhileRulesResolveUnderneath) {
+CANOPY_TEST(suppressionKeepsSelectorsAndHistoryWhileRulesResolveUnderneath) {
   const auto effects = configuration();
   EffectSelection selection(1);
   auto slot = configured("A");
@@ -168,7 +168,7 @@ UMBRIEL_TEST(suppressionKeepsSelectorsAndHistoryWhileRulesResolveUnderneath) {
   CHECK(!action(selection, slot, effects, EffectSlotAction::Toggle).changed);
 }
 
-UMBRIEL_TEST(explicitSetMakesFreshPolicyPickAndRuntimeWinsRules) {
+CANOPY_TEST(explicitSetMakesFreshPolicyPickAndRuntimeWinsRules) {
   const auto effects = configuration(EffectSelectionPolicy::RoundRobin);
   EffectSelection selection(1);
   auto slot = configured("A");
@@ -187,7 +187,7 @@ UMBRIEL_TEST(explicitSetMakesFreshPolicyPickAndRuntimeWinsRules) {
   CHECK(!action(selection, slot, effects, EffectSlotAction::Set, "empty").error);
 }
 
-UMBRIEL_TEST(cycleUsesUnderlyingMemberAndDoesNotAdvancePolicyUnlessPicking) {
+CANOPY_TEST(cycleUsesUnderlyingMemberAndDoesNotAdvancePolicyUnlessPicking) {
   auto effects = configuration(EffectSelectionPolicy::RoundRobin);
   effects.pools.push_back({.name = "single", .kind = EffectKind::Window, .members = {"y"}});
   EffectSelection selection(1);
@@ -209,7 +209,7 @@ UMBRIEL_TEST(cycleUsesUnderlyingMemberAndDoesNotAdvancePolicyUnlessPicking) {
   CHECK_EQ(slot.name, "x");
 }
 
-UMBRIEL_TEST(resetClearsRuntimeHistoryAndCurrentMemberBeforeConfiguredPick) {
+CANOPY_TEST(resetClearsRuntimeHistoryAndCurrentMemberBeforeConfiguredPick) {
   const auto effects = configuration();
   EffectSelection selection(1);
   auto slot = configured("A");
@@ -226,7 +226,7 @@ UMBRIEL_TEST(resetClearsRuntimeHistoryAndCurrentMemberBeforeConfiguredPick) {
   CHECK_EQ(slot.history.at("A"), "x");
 }
 
-UMBRIEL_TEST(rejectedActionsLeaveSlotAndRandomSequenceUntouched) {
+CANOPY_TEST(rejectedActionsLeaveSlotAndRandomSequenceUntouched) {
   const auto effects = configuration(EffectSelectionPolicy::Random);
   EffectSelection selection(77);
   EffectSelection control(77);
@@ -253,7 +253,7 @@ UMBRIEL_TEST(rejectedActionsLeaveSlotAndRandomSequenceUntouched) {
   }
 }
 
-UMBRIEL_TEST(reloadRetainsValidAssignmentsAndPrunesOnlyInvalidHistory) {
+CANOPY_TEST(reloadRetainsValidAssignmentsAndPrunesOnlyInvalidHistory) {
   auto effects = configuration(EffectSelectionPolicy::RoundRobin);
   EffectSelection selection(1);
   auto slot = configured("A");
@@ -274,7 +274,7 @@ UMBRIEL_TEST(reloadRetainsValidAssignmentsAndPrunesOnlyInvalidHistory) {
   CHECK_EQ(slot.name, "x");
 }
 
-UMBRIEL_TEST(roundRobinReloadTracksLastHandoutByNameAndResetsInvalidState) {
+CANOPY_TEST(roundRobinReloadTracksLastHandoutByNameAndResetsInvalidState) {
   auto effects = configuration(EffectSelectionPolicy::RoundRobin);
   EffectSelection selection(1);
   auto slot = configured("A");
@@ -301,7 +301,7 @@ UMBRIEL_TEST(roundRobinReloadTracksLastHandoutByNameAndResetsInvalidState) {
   CHECK_EQ(slot.name, "z");
 }
 
-UMBRIEL_TEST(reloadDropsDeletedOrWrongKindOverridesButKeepsSuppression) {
+CANOPY_TEST(reloadDropsDeletedOrWrongKindOverridesButKeepsSuppression) {
   auto effects = configuration();
   EffectSelection selection(1);
   auto slot = configured("z");
@@ -321,7 +321,7 @@ UMBRIEL_TEST(reloadDropsDeletedOrWrongKindOverridesButKeepsSuppression) {
   CHECK_EQ(slot.name, "z");
 }
 
-UMBRIEL_TEST(repeatedResolutionInspectionAndRecoveryDoNotConsumeRandomDraws) {
+CANOPY_TEST(repeatedResolutionInspectionAndRecoveryDoNotConsumeRandomDraws) {
   const auto effects = configuration(EffectSelectionPolicy::Random);
   EffectSelection selection(2026);
   EffectSelection control(2026);
@@ -346,7 +346,7 @@ UMBRIEL_TEST(repeatedResolutionInspectionAndRecoveryDoNotConsumeRandomDraws) {
   }
 }
 
-UMBRIEL_TEST(presentScreenOwnersRetainDisabledStateAndReconnectStartsFresh) {
+CANOPY_TEST(presentScreenOwnersRetainDisabledStateAndReconnectStartsFresh) {
   Effects effects;
   effects.presets = {
       {.name = "screen-z", .kind = EffectKind::Screen}, {.name = "screen-a", .kind = EffectKind::Screen}
@@ -379,7 +379,7 @@ UMBRIEL_TEST(presentScreenOwnersRetainDisabledStateAndReconnectStartsFresh) {
   CHECK_EQ(first.history.size(), size_t{1});
 }
 
-UMBRIEL_TEST(reloadBatchCountsIgnoreRemovedAssignmentsBeforeAnyOwnerIsResolved) {
+CANOPY_TEST(reloadBatchCountsIgnoreRemovedAssignmentsBeforeAnyOwnerIsResolved) {
   auto effects = configuration();
   EffectSelection selection(33);
   auto first = configured("A");

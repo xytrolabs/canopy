@@ -5,8 +5,8 @@
 # without mutating layout, workspaces, or backend state.
 set -euo pipefail
 
-readonly OUTPUT_MANAGEMENT=${UMBRIEL_OUTPUT_MANAGEMENT_CLIENT:-./build-debug/tests/output-management-client}
-readonly POINTER=${UMBRIEL_POINTER_CLIENT:-./build-debug/tests/pointer-client}
+readonly OUTPUT_MANAGEMENT=${CANOPY_OUTPUT_MANAGEMENT_CLIENT:-./build-debug/tests/output-management-client}
+readonly POINTER=${CANOPY_POINTER_CLIENT:-./build-debug/tests/pointer-client}
 readonly TEST_SHOT="$XDG_RUNTIME_DIR/output-management-test.png"
 
 spawn_client() {
@@ -16,7 +16,7 @@ spawn_client() {
 wait_for_workspace() {
   local expected=$1 workspace= windows=
   for _ in $(seq 40); do
-    windows=$("$UMBRIEL" windows --json)
+    windows=$("$CANOPY" windows --json)
     if [[ $(jq 'length' <<< "$windows") -ne 1 ]]; then
       sleep 0.1
       continue
@@ -32,9 +32,9 @@ wait_for_workspace() {
 wait_for_temporary_workspace() {
   local output=$1 native=$2 workspace=
   for _ in $(seq 40); do
-    workspace=$("$UMBRIEL" windows --json | jq -r '.[0].workspace // ""')
+    workspace=$("$CANOPY" windows --json | jq -r '.[0].workspace // ""')
     if [[ $workspace == "$output":* && $workspace != "$native" ]] \
-      && "$UMBRIEL" workspaces --json | jq -e --arg id "$workspace" \
+      && "$CANOPY" workspaces --json | jq -e --arg id "$workspace" \
         'any(.[]; .id == $id and .named == false)' > /dev/null; then
       return 0
     fi
@@ -47,7 +47,7 @@ wait_for_temporary_workspace() {
 wait_for_enabled() {
   local output=$1 expected=$2 state=
   for _ in $(seq 40); do
-    state=$("$UMBRIEL" outputs --json | jq -r --arg output "$output" '.[] | select(.name == $output) | .enabled')
+    state=$("$CANOPY" outputs --json | jq -r --arg output "$output" '.[] | select(.name == $output) | .enabled')
     [[ $state == "$expected" ]] && return 0
     sleep 0.1
   done
@@ -59,7 +59,7 @@ wait_for_position() {
   local output=$1 expected_x=$2 expected_y=$3 position=
   for _ in $(seq 40); do
     position=$(
-      "$UMBRIEL" outputs --json \
+      "$CANOPY" outputs --json \
         | jq -r --arg output "$output" '.[] | select(.name == $output) | "\(.position.x),\(.position.y)"'
     )
     [[ $position == "$expected_x,$expected_y" ]] && return 0
@@ -83,12 +83,12 @@ expect_capture_failure() {
   fi
 }
 
-log_mark() { wc -l < "$UMBRIEL_LOG"; }
+log_mark() { wc -l < "$CANOPY_LOG"; }
 
 wait_for_log_since() {
   local mark=$1 pattern=$2
   for _ in $(seq 40); do
-    if tail -n +"$((mark + 1))" "$UMBRIEL_LOG" | grep -q "$pattern"; then
+    if tail -n +"$((mark + 1))" "$CANOPY_LOG" | grep -q "$pattern"; then
       return 0
     fi
     sleep 0.1
@@ -99,9 +99,9 @@ wait_for_log_since() {
 
 spawn_client
 wait_for_workspace 'HEADLESS-2:1'
-native_refuge=$("$UMBRIEL" workspaces --json | jq -r '.[] | select(.output == "HEADLESS-1" and .index == 1) | .id')
+native_refuge=$("$CANOPY" workspaces --json | jq -r '.[] | select(.output == "HEADLESS-1" and .index == 1) | .id')
 read -r initial_x initial_y < <(
-  "$UMBRIEL" outputs --json \
+  "$CANOPY" outputs --json \
     | jq -r '.[] | select(.name == "HEADLESS-2") | "\(.position.x) \(.position.y)"'
 )
 
@@ -117,7 +117,7 @@ mark=$(log_mark)
 "$OUTPUT_MANAGEMENT" apply disable HEADLESS-2 > /dev/null
 wait_for_enabled HEADLESS-2 false
 wait_for_temporary_workspace HEADLESS-1 "$native_refuge"
-displaced_workspace=$("$UMBRIEL" windows --json | jq -r '.[0].workspace')
+displaced_workspace=$("$CANOPY" windows --json | jq -r '.[0].workspace')
 wait_for_log_since "$mark" "output 'HEADLESS-2': disabled by output management, power off"
 expect_capture_failure HEADLESS-2 "$XDG_RUNTIME_DIR/output-management-disabled.png"
 
@@ -136,17 +136,17 @@ wait_for_workspace 'HEADLESS-2:1'
 # If the only remaining logical output is asleep, disabling the powered output
 # must preserve DPMS. Its displaced window waits until input wakes the logical
 # fallback, then restores there instead of remaining unassigned.
-"$UMBRIEL" msg window-move-to-workspace 1 --output HEADLESS-1 > /dev/null
+"$CANOPY" msg window-move-to-workspace 1 --output HEADLESS-1 > /dev/null
 wait_for_workspace 'HEADLESS-1:1'
-sleeping_refuge=$("$UMBRIEL" workspaces --json | jq -r '.[] | select(.output == "HEADLESS-2" and .index == 1) | .id')
+sleeping_refuge=$("$CANOPY" workspaces --json | jq -r '.[] | select(.output == "HEADLESS-2" and .index == 1) | .id')
 mark=$(log_mark)
-"$UMBRIEL" msg dpms-off HEADLESS-2 > /dev/null
+"$CANOPY" msg dpms-off HEADLESS-2 > /dev/null
 wait_for_log_since "$mark" "output 'HEADLESS-2': powered off"
 mark=$(log_mark)
 "$OUTPUT_MANAGEMENT" apply disable HEADLESS-1 > /dev/null
 wait_for_enabled HEADLESS-1 false
 wait_for_log_since "$mark" "output 'HEADLESS-2': enabled by output management, power off"
-if tail -n +"$((mark + 1))" "$UMBRIEL_LOG" | grep -q "output 'HEADLESS-2': applied mode="; then
+if tail -n +"$((mark + 1))" "$CANOPY_LOG" | grep -q "output 'HEADLESS-2': applied mode="; then
   echo "output-management woke DPMS-off HEADLESS-2"
   exit 1
 fi

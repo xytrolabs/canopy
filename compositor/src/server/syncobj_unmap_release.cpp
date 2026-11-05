@@ -4,7 +4,7 @@
 
 #include <cstdint>
 
-namespace umbriel {
+namespace canopy {
 
   namespace {
 
@@ -61,7 +61,7 @@ namespace umbriel {
         return;
       }
       uint64_t point = 0;
-      wlr_drm_syncobj_timeline* timeline = umbrielfx_linux_drm_syncobj_release_point(surface, &point);
+      wlr_drm_syncobj_timeline* timeline = canopyfx_linux_drm_syncobj_release_point(surface, &point);
       if (timeline == nullptr) {
         return;
       }
@@ -102,4 +102,4 @@ namespace umbriel {
     wl_signal_add(&watch->surface->events.destroy, &watch->destroy);
   }
 
-} // namespace umbriel
+} // namespace canopy

@@ -146,13 +146,13 @@ Then set `curve = "myBezier"` or `curve = "myBounce"`.
 
 ## Custom effects
 
-Every animation event other than `windows_drag` can run a custom program. Define an `animation` preset and select it with `effect`; the event's enabled state, duration, and curve still control its timeline. Umbriel ships `reveal` and `squash`:
+Every animation event other than `windows_drag` can run a custom program. Define an `animation` preset and select it with `effect`; the event's enabled state, duration, and curve still control its timeline. Canopy ships `reveal` and `squash`:
 
 ```toml
 [include]
 files = [
-  "/usr/share/umbriel/effects/animation/reveal/effect.toml",
-  "/usr/share/umbriel/effects/animation/squash/effect.toml",
+  "/usr/share/canopy/effects/animation/reveal/effect.toml",
+  "/usr/share/canopy/effects/animation/squash/effect.toml",
 ]
 
 [animation.windows_in]
@@ -175,11 +175,11 @@ Adjust `/usr` for the package prefix. Defining your own preset, the shader inter
 
 | Name                       | Meaning                                       |
 | -------------------------- | --------------------------------------------- |
-| `umbriel_progress`         | Eased progress, including overshoot           |
-| `umbriel_clamped_progress` | Eased progress clamped to 0 through 1         |
-| `umbriel_linear_progress`  | Progress before easing                        |
-| `umbriel_direction`        | `1` for entering and `-1` for leaving         |
-| `umbriel_random_seed`      | Four stable random values for this transition |
+| `canopy_progress`         | Eased progress, including overshoot           |
+| `canopy_clamped_progress` | Eased progress clamped to 0 through 1         |
+| `canopy_linear_progress`  | Progress before easing                        |
+| `canopy_direction`        | `1` for entering and `-1` for leaving         |
+| `canopy_random_seed`      | Four stable random values for this transition |
 
 ### Targets
 
@@ -221,7 +221,7 @@ Include the bundled preset alongside your existing includes, then select it:
 
 ```toml
 [include]
-files = ["/usr/share/umbriel/effects/animation/workspace_wipe/effect.toml"]
+files = ["/usr/share/canopy/effects/animation/workspace_wipe/effect.toml"]
 
 [animation.workspaces]
 style = "reveal"
@@ -233,4 +233,4 @@ curve = "easeout"
 
 Use your installation prefix in the include path. Reveal requires an animation preset with a shader; a missing or invalid selection produces a configuration diagnostic and uses slide. Shader compilation failures are reported by the effect registry. If reveal composition fails, navigation resumes native slide at the current progress. Disabling workspace animation ends the transition. `effects.in_capture` continues to control persistent window/screen effects in captures; the workspace transition itself remains visible.
 
-Reveal shaders use `umbriel_sample(uv)` for the outgoing scene and `umbriel_sample_incoming(uv)` for the incoming scene, with output-wide UVs. The shader returns the final scene pixel; for example, `mix(umbriel_sample(uv), umbriel_sample_incoming(uv), umbriel_clamped_progress)` produces a crossfade. A shader that reads only `umbriel_sample` shows only the outgoing scene. `umbriel_sample_previous` reads this effect's previous result.
+Reveal shaders use `canopy_sample(uv)` for the outgoing scene and `canopy_sample_incoming(uv)` for the incoming scene, with output-wide UVs. The shader returns the final scene pixel; for example, `mix(canopy_sample(uv), canopy_sample_incoming(uv), canopy_clamped_progress)` produces a crossfade. A shader that reads only `canopy_sample` shows only the outgoing scene. `canopy_sample_previous` reads this effect's previous result.

@@ -7,7 +7,7 @@ struct wlr_scene_tree;
 struct wlr_xwayland_surface;
 struct wlr_xwayland_surface_configure_event;
 
-namespace umbriel {
+namespace canopy {
 
   class Server;
 
@@ -65,4 +65,4 @@ namespace umbriel {
     wl_listener m_shapeChanged{};
   };
 
-} // namespace umbriel
+} // namespace canopy

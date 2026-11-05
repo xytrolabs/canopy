@@ -3,7 +3,7 @@
 #include <algorithm>
 #include <cmath>
 
-namespace umbriel {
+namespace canopy {
   namespace {
     // The sheet's spring model is tuned through DragPhysics::Tuning
     // ([animation.windows_drag]); only the integration and stability
@@ -287,4 +287,4 @@ namespace umbriel {
 
   float DragPhysics::maxVelocity() const { return largestComponent(m_velocity); }
 
-} // namespace umbriel
+} // namespace canopy

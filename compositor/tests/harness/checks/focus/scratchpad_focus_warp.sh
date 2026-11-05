@@ -4,12 +4,12 @@
 # sequence distinguishes this from a target that merely remained shown.
 set -euo pipefail
 
-readonly CLIENT="${UMBRIEL_UNMAP_CLIENT:-./build-debug/tests/unmap-client}"
+readonly CLIENT="${CANOPY_UNMAP_CLIENT:-./build-debug/tests/unmap-client}"
 readonly TITLE=scratchpad-focus-warp
-readonly CLIENT_LOG="$UMBRIEL_RUNTIME_DIR/${TITLE}.log"
+readonly CLIENT_LOG="$CANOPY_RUNTIME_DIR/${TITLE}.log"
 readonly SCRATCHPAD=focus-target
 
-cat >> "$UMBRIEL_CONFIG" <<'EOF'
+cat >> "$CANOPY_CONFIG" <<'EOF'
 
 [animation]
 enabled = false
@@ -22,9 +22,9 @@ match.title = "^scratchpad-focus-warp$"
 default_floating = true
 default_floating_size_px = { width = 420, height = 260 }
 EOF
-"$UMBRIEL" msg config-reload > /dev/null
+"$CANOPY" msg config-reload > /dev/null
 
-windows() { "$UMBRIEL" windows --json; }
+windows() { "$CANOPY" windows --json; }
 
 wait_for_scratchpad_state() {
   local active=$1 state=
@@ -58,18 +58,18 @@ if [[ -z $target_id || $target_id == null ]]; then
   exit 1
 fi
 
-"$UMBRIEL" msg window-focus "$target_id" > /dev/null
-"$UMBRIEL" msg window-move-to-scratchpad "$SCRATCHPAD" > /dev/null
+"$CANOPY" msg window-focus "$target_id" > /dev/null
+"$CANOPY" msg window-move-to-scratchpad "$SCRATCHPAD" > /dev/null
 wait_for_scratchpad_state false
 
 # Exercise the report's hidden-scratchpad state explicitly rather than relying
 # on move-to-scratchpad's initial hidden presentation.
-"$UMBRIEL" msg scratchpad-toggle "$SCRATCHPAD" > /dev/null
+"$CANOPY" msg scratchpad-toggle "$SCRATCHPAD" > /dev/null
 wait_for_scratchpad_state true
-"$UMBRIEL" msg scratchpad-toggle "$SCRATCHPAD" > /dev/null
+"$CANOPY" msg scratchpad-toggle "$SCRATCHPAD" > /dev/null
 wait_for_scratchpad_state false
 
-"$UMBRIEL" msg window-focus-warp "$target_id" > /dev/null
+"$CANOPY" msg window-focus-warp "$target_id" > /dev/null
 wait_for_scratchpad_state true
 
 echo "window-focus-warp summoned and focused the hidden scratchpad target"

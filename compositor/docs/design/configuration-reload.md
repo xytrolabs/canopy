@@ -4,7 +4,7 @@ This note records the reload guarantees that maintainers must preserve. The user
 
 ## Core contract
 
-A reload is transactional. Umbriel commits a new configuration only after the complete file set parses and validates successfully.
+A reload is transactional. Canopy commits a new configuration only after the complete file set parses and validates successfully.
 
 If a reload fails:
 
@@ -17,7 +17,7 @@ A successful reload applies only the runtime effects caused by changed sections.
 
 ## Implicit source discovery
 
-Without `-c`, Umbriel captures the lookup candidates from its startup environment before applying configured environment variables. The order is the user path, every `$XDG_CONFIG_DIRS` path in order, then the packaged path. Each automatic or manual reload selects the first regular file from that fixed list.
+Without `-c`, Canopy captures the lookup candidates from its startup environment before applying configured environment variables. The order is the user path, every `$XDG_CONFIG_DIRS` path in order, then the packaged path. Each automatic or manual reload selects the first regular file from that fixed list.
 
 All candidates remain watched, including paths whose parent directories do not exist yet. The watcher follows the nearest existing ancestor and rearms as path components appear. Creating a higher-priority file can therefore promote it without a restart. Removing the current file selects the next existing candidate. When no candidate exists, built-in defaults, including the built-in keybinds, are a successful implicit selection.
 

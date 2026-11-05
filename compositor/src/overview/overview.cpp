@@ -2,7 +2,7 @@
 
 #include "overview/preview_geometry.h"
 extern "C" {
-#include <umbrielfx/render/effect.h>
+#include <canopyfx/render/effect.h>
 }
 
 #include "config/config.h"
@@ -45,7 +45,7 @@ extern "C" {
 #include "workspace/workspace.h"
 #include "xwayland/xwayland.h"
 
-namespace umbriel {
+namespace canopy {
 
   namespace {
     constexpr Logger kLog("overview");
@@ -517,7 +517,7 @@ namespace umbriel {
       if (card.shadowTree == nullptr) {
         return;
       }
-      (void)umbrielfx_scene_node_share_capture_policy(&card.shadowTree->node, &card.tree->node);
+      (void)canopyfx_scene_node_share_capture_policy(&card.shadowTree->node, &card.tree->node);
       card.shadow = wlr_scene_shadow_create(card.shadowTree, 0, 0, 0, 0.0F, source->color);
       if (card.shadow == nullptr) {
         destroyCardShadow(card);
@@ -576,7 +576,7 @@ namespace umbriel {
   }
 
   void Overview::layoutOutput(OutputState& state) {
-    UMBRIEL_ZONE("Overview::layoutOutput");
+    CANOPY_ZONE("Overview::layoutOutput");
     PreviewMetrics metrics{};
     if (!previewMetrics(state, *m_server, zoom(), metrics)) {
       return;
@@ -1208,7 +1208,7 @@ namespace umbriel {
       return nullptr;
     }
     card->surfaceTree = wlr_scene_tree_create(card->tree);
-    (void)umbrielfx_scene_node_share_capture_policy(&card->tree->node, &view->sceneTree()->node);
+    (void)canopyfx_scene_node_share_capture_policy(&card->tree->node, &view->sceneTree()->node);
     if (card->surfaceTree == nullptr) {
       wlr_scene_node_destroy(&card->tree->node);
       return nullptr;
@@ -1241,7 +1241,7 @@ namespace umbriel {
     if (snapshot == nullptr) {
       return;
     }
-    if (!umbrielfx_scene_node_share_capture_policy(&snapshot->node, &card.tree->node)) {
+    if (!canopyfx_scene_node_share_capture_policy(&snapshot->node, &card.tree->node)) {
       wlr_scene_node_destroy(&snapshot->node);
       return;
     }
@@ -1676,7 +1676,7 @@ namespace umbriel {
   }
 
   void Overview::buildState() {
-    UMBRIEL_ZONE("Overview::buildState");
+    CANOPY_ZONE("Overview::buildState");
     m_tree = m_server->overviewTree();
     for (const auto& output : m_server->outputs()) {
       WorkspaceGroup* group = output->workspaceGroup();
@@ -1714,7 +1714,7 @@ namespace umbriel {
   // -: open/close
 
   bool Overview::beginPresentation() {
-    UMBRIEL_ZONE("Overview::beginPresentation");
+    CANOPY_ZONE("Overview::beginPresentation");
     if (m_active) {
       return true;
     }
@@ -1811,7 +1811,7 @@ namespace umbriel {
   }
 
   void Overview::open() {
-    UMBRIEL_ZONE("Overview::open");
+    CANOPY_ZONE("Overview::open");
     if (m_active) {
       if (ScratchpadManager* scratchpad = m_server->scratchpadManager()) {
         scratchpad->hideAll();
@@ -3808,4 +3808,4 @@ namespace umbriel {
     }
   }
 
-} // namespace umbriel
+} // namespace canopy

@@ -12,7 +12,7 @@ extern "C" {
 
 struct wlr_scene_node;
 
-namespace umbriel {
+namespace canopy {
 
   struct BorderEffectGate {
     bool focused = false;
@@ -74,4 +74,4 @@ namespace umbriel {
     std::vector<const void*> m_owners; // nodes registered in the ledger
   };
 
-} // namespace umbriel
+} // namespace canopy

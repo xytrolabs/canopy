@@ -12,36 +12,36 @@ spawn_client() {
 
 wait_for_windows() {
   for _ in $(seq 60); do
-    [[ $("$UMBRIEL" windows --json | jq 'length') == "$1" ]] && return 0
+    [[ $("$CANOPY" windows --json | jq 'length') == "$1" ]] && return 0
     sleep 0.1
   done
-  echo "expected $1 window(s): $("$UMBRIEL" windows --json)"
+  echo "expected $1 window(s): $("$CANOPY" windows --json)"
   return 1
 }
 
 bottom_of() {
-  "$UMBRIEL" windows --json | jq -r --arg title "$1" '.[] | select(.title == $title) | .y + .h'
+  "$CANOPY" windows --json | jq -r --arg title "$1" '.[] | select(.title == $title) | .y + .h'
 }
 
 spawn_client tab-a
 wait_for_windows 1
 spawn_client tab-b
 wait_for_windows 2
-"$UMBRIEL" msg window-consume-left > /dev/null
-"$UMBRIEL" msg column-toggle-tabbed > /dev/null
+"$CANOPY" msg window-consume-left > /dev/null
+"$CANOPY" msg column-toggle-tabbed > /dev/null
 spawn_client below
 wait_for_windows 3
-"$UMBRIEL" msg window-consume-left > /dev/null
-"$UMBRIEL" msg window-move-down > /dev/null
-"$UMBRIEL" settle
-tab_y=$("$UMBRIEL" windows --json | jq -r '.[] | select(.title == "tab-b") | .y')
+"$CANOPY" msg window-consume-left > /dev/null
+"$CANOPY" msg window-move-down > /dev/null
+"$CANOPY" settle
+tab_y=$("$CANOPY" windows --json | jq -r '.[] | select(.title == "tab-b") | .y')
 
 for _ in $(seq 10); do
-  "$UMBRIEL" msg window-modify-secondary-extent 0.1 > /dev/null
+  "$CANOPY" msg window-modify-secondary-extent 0.1 > /dev/null
 done
-"$UMBRIEL" settle
+"$CANOPY" settle
 
-windows=$("$UMBRIEL" windows --json)
+windows=$("$CANOPY" windows --json)
 if ! jq -e --argjson tab_y "$tab_y" '
   (.[] | select(.title == "tab-b")) as $tab
   | (.[] | select(.title == "below")) as $below
@@ -55,10 +55,10 @@ fi
 drag_edge_to() {
   local edge x y
   edge='.[] | select(.title == "tab-b") | "\(.x + 100) \(.y + .h - 5)"'
-  read -r x y <<< "$("$UMBRIEL" windows --json | jq -r "$edge")"
-  "$UMBRIEL_POINTER_CLIENT" 1280 720 mod logo move "$x" "$y" press "$BTN_RIGHT" move "$x" "$1" release "$BTN_RIGHT" \
+  read -r x y <<< "$("$CANOPY" windows --json | jq -r "$edge")"
+  "$CANOPY_POINTER_CLIENT" 1280 720 mod logo move "$x" "$y" press "$BTN_RIGHT" move "$x" "$1" release "$BTN_RIGHT" \
     mod none
-  "$UMBRIEL" settle
+  "$CANOPY" settle
 }
 
 # A group held at its minimum follows the next drag at once, so it never stores less than it shows.
@@ -67,7 +67,7 @@ expect_drag_follows() {
   bottom=$(bottom_of tab-b)
   drag_edge_to "$((bottom + 35))"
   if [[ $(bottom_of tab-b) != "$((bottom + 40))" ]]; then
-    echo "$1: expected tab-b's bottom to follow the drag from $bottom to $((bottom + 40)): $("$UMBRIEL" windows --json)"
+    echo "$1: expected tab-b's bottom to follow the drag from $bottom to $((bottom + 40)): $("$CANOPY" windows --json)"
     exit 1
   fi
 }

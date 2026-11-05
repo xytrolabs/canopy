@@ -5,7 +5,7 @@
 # again, and a long slide carries the card to the far workspace, past the last preview.
 set -euo pipefail
 
-source "$UMBRIEL_HARNESS_LIB"
+source "$CANOPY_HARNESS_LIB"
 
 readonly BTN_LEFT=272
 readonly OUTPUT_W=1280
@@ -14,7 +14,7 @@ readonly OUTPUT_H=720
 readonly CARD='r > 0.08'
 readonly RED='r > 0.3 && g < 0.1'
 
-cat > "$UMBRIEL_CONFIG" <<EOF
+cat > "$CANOPY_CONFIG" <<EOF
 [general]
 xwayland = false
 show_cheatsheet = false
@@ -39,46 +39,46 @@ zoom = 0.5
 [output."HEADLESS-1"]
 workspaces = 3
 EOF
-"$UMBRIEL" msg config-reload > /dev/null
+"$CANOPY" msg config-reload > /dev/null
 
 # One window per workspace; the ones on 2 and 3 are the markers the slide brings into view.
 count=0
 for ws in 2 3 1; do
-  "$UMBRIEL" msg workspace-switch "$ws" > /dev/null
+  "$CANOPY" msg workspace-switch "$ws" > /dev/null
   colour=$([[ $ws == 3 ]] && echo 800000 || echo 222222)
   foot --title="card-wsedge-$ws" -o "colors.background=$colour" sh -c 'sleep 120' > /dev/null 2>&1 &
   count=$((count + 1))
   for _ in $(seq 60); do
-    [[ $("$UMBRIEL" windows --json | jq 'length') -eq $count ]] && break
+    [[ $("$CANOPY" windows --json | jq 'length') -eq $count ]] && break
     sleep 0.25
   done
 done
-"$UMBRIEL" settle
+"$CANOPY" settle
 
-window_workspace() { "$UMBRIEL" windows --json | jq -r '.[] | select(.title == "card-wsedge-1") | .workspace'; }
+window_workspace() { "$CANOPY" windows --json | jq -r '.[] | select(.title == "card-wsedge-1") | .workspace'; }
 
 # Waits until pixels matching the predicate cover part of the region, sampled from live frames while the edge
 # scroll runs.
 await_card() {
-  local frame=$UMBRIEL_RUNTIME_DIR/edge.png
+  local frame=$CANOPY_RUNTIME_DIR/edge.png
   for _ in $(seq 200); do
     grim "$frame"
-    (($("$UMBRIEL_PIXEL_PROBE" "$frame" count "$1" "$2") > 0)) && return 0
+    (($("$CANOPY_PIXEL_PROBE" "$frame" count "$1" "$2") > 0)) && return 0
   done
   return 1
 }
 
-windows=$("$UMBRIEL" windows --json)
+windows=$("$CANOPY" windows --json)
 start_x=$(jq -r '.[] | select(.title == "card-wsedge-1") | (.x + .w / 2 | round)' <<< "$windows")
 start_y=$(jq -r '.[] | select(.title == "card-wsedge-1") | (.y + .h / 2 | round)' <<< "$windows")
 # The active preview sits at (320,180) at half scale; rows step 396 px along Y.
 press_x=$((320 + start_x / 2))
 press_y=$((180 + start_y / 2))
 
-"$UMBRIEL_POINTER_CLIENT" "$OUTPUT_W" "$OUTPUT_H" move 640 360
-"$UMBRIEL" msg overview-open > /dev/null
-"$UMBRIEL" settle
-grim "$UMBRIEL_RUNTIME_DIR/before.png"
+"$CANOPY_POINTER_CLIENT" "$OUTPUT_W" "$OUTPUT_H" move 640 360
+"$CANOPY" msg overview-open > /dev/null
+"$CANOPY" settle
+grim "$CANOPY_RUNTIME_DIR/before.png"
 
 # Short slide: workspace 2's card rises into the gap below the active preview, then the card drops back on workspace
 # 1, which still covers y=200 at any offset reached here.
@@ -91,14 +91,14 @@ await_card "$CARD" 20x10+630+556 || {
   exit 1
 }
 pointer_release
-"$UMBRIEL" settle
+"$CANOPY" settle
 
 [[ $(window_workspace) == *":1" ]] || {
   echo "the short slide's drop left workspace 1: $(window_workspace)"
   exit 1
 }
-grim "$UMBRIEL_RUNTIME_DIR/after.png"
-read -r _ changed < <("$UMBRIEL_PIXEL_PROBE" "$UMBRIEL_RUNTIME_DIR/after.png" diff "$UMBRIEL_RUNTIME_DIR/before.png" 640x720+0+0)
+grim "$CANOPY_RUNTIME_DIR/after.png"
+read -r _ changed < <("$CANOPY_PIXEL_PROBE" "$CANOPY_RUNTIME_DIR/after.png" diff "$CANOPY_RUNTIME_DIR/before.png" 640x720+0+0)
 ((changed == 0)) || {
   echo "the rows did not settle back on workspace 1 after the drop: $changed pixels differ"
   exit 1
@@ -115,7 +115,7 @@ await_card "$RED" 20x20+630+350 || {
   exit 1
 }
 pointer_release
-"$UMBRIEL" settle
+"$CANOPY" settle
 
 [[ $(window_workspace) == *":3" ]] || {
   echo "the long slide did not drop on workspace 3: $(window_workspace)"

@@ -60,7 +60,7 @@ namespace {
     void stopObserving() { m_leds = nullptr; }
 
     void observe(
-        umbriel::KeyboardLeds& leds, bool changesSource = true, bool virtualDevice = false, bool initialNumLock = false
+        canopy::KeyboardLeds& leds, bool changesSource = true, bool virtualDevice = false, bool initialNumLock = false
     ) {
       m_leds = &leds;
       m_changesSource = changesSource;
@@ -80,11 +80,11 @@ namespace {
       }
       // Config replacement callbacks do not select a fresh input source.
       // Refresh shared locks after the state-preserving helper has returned.
-      umbriel::KeyboardLeds* observer = m_leds;
+      canopy::KeyboardLeds* observer = m_leds;
       if (preserveState) {
         m_leds = nullptr;
       }
-      const bool applied = preserveState ? umbriel::setKeyboardKeymapPreservingState(&m_keyboard, keymap)
+      const bool applied = preserveState ? canopy::setKeyboardKeymapPreservingState(&m_keyboard, keymap)
                                          : wlr_keyboard_set_keymap(&m_keyboard, keymap);
       m_leds = observer;
       if (preserveState && m_leds != nullptr) {
@@ -194,7 +194,7 @@ namespace {
 
     wlr_keyboard m_keyboard{};
     std::vector<uint32_t> m_writes;
-    umbriel::KeyboardLeds* m_leds = nullptr;
+    canopy::KeyboardLeds* m_leds = nullptr;
     wl_listener m_key{};
     wl_listener m_modifiers{};
     uint32_t m_time = 0;
@@ -204,9 +204,9 @@ namespace {
 
 } // namespace
 
-UMBRIEL_TEST(ledlessSourceSharesTheFirstCapsAndNumTransitions) {
+CANOPY_TEST(ledlessSourceSharesTheFirstCapsAndNumTransitions) {
   EventLoop loop;
-  umbriel::KeyboardLeds leds(loop.get());
+  canopy::KeyboardLeds leds(loop.get());
   BackendKeyboard laptop;
   BackendKeyboard receiver;
   BackendKeyboard proxy(false);
@@ -241,9 +241,9 @@ UMBRIEL_TEST(ledlessSourceSharesTheFirstCapsAndNumTransitions) {
   CHECK(receiver.locked(XKB_MOD_NAME_NUM));
 }
 
-UMBRIEL_TEST(alternatingOrdinaryInputPreservesNumLockWithoutLedFlicker) {
+CANOPY_TEST(alternatingOrdinaryInputPreservesNumLockWithoutLedFlicker) {
   EventLoop loop;
-  umbriel::KeyboardLeds leds(loop.get());
+  canopy::KeyboardLeds leds(loop.get());
   BackendKeyboard laptop;
   BackendKeyboard proxy(false);
   laptop.tap(69);
@@ -275,9 +275,9 @@ UMBRIEL_TEST(alternatingOrdinaryInputPreservesNumLockWithoutLedFlicker) {
   CHECK_EQ(laptop.writes(), std::vector<uint32_t>{0});
 }
 
-UMBRIEL_TEST(sharedLocksPreserveHeldModifiersLatchesLayoutsAndKeymaps) {
+CANOPY_TEST(sharedLocksPreserveHeldModifiersLatchesLayoutsAndKeymaps) {
   EventLoop loop;
-  umbriel::KeyboardLeds leds(loop.get());
+  canopy::KeyboardLeds leds(loop.get());
   BackendKeyboard laptop(true, "de,us");
   BackendKeyboard proxy(false, "us,de");
   const uint32_t shift = laptop.modifierMask(XKB_MOD_NAME_SHIFT);
@@ -309,9 +309,9 @@ UMBRIEL_TEST(sharedLocksPreserveHeldModifiersLatchesLayoutsAndKeymaps) {
   CHECK(proxy.locked(XKB_MOD_NAME_CAPS));
 }
 
-UMBRIEL_TEST(hotplugAndKeymapReplacementInheritCurrentLocks) {
+CANOPY_TEST(hotplugAndKeymapReplacementInheritCurrentLocks) {
   EventLoop loop;
-  umbriel::KeyboardLeds leds(loop.get());
+  canopy::KeyboardLeds leds(loop.get());
   BackendKeyboard laptop;
   BackendKeyboard proxy(false);
   laptop.observe(leds);
@@ -345,9 +345,9 @@ UMBRIEL_TEST(hotplugAndKeymapReplacementInheritCurrentLocks) {
   CHECK(!proxy.locked(XKB_MOD_NAME_CAPS));
 }
 
-UMBRIEL_TEST(aReplacementKeymapGainsSharedLocksThatTheOldMapCannotRepresent) {
+CANOPY_TEST(aReplacementKeymapGainsSharedLocksThatTheOldMapCannotRepresent) {
   EventLoop loop;
-  umbriel::KeyboardLeds leds(loop.get());
+  canopy::KeyboardLeds leds(loop.get());
   BackendKeyboard laptop;
   BackendKeyboard secondary;
   secondary.renameNumModifier();
@@ -370,9 +370,9 @@ UMBRIEL_TEST(aReplacementKeymapGainsSharedLocksThatTheOldMapCannotRepresent) {
   CHECK(laptop.locked(XKB_MOD_NAME_NUM));
 }
 
-UMBRIEL_TEST(numLockStartupPolicyDoesNotOverrideLaterHotplugOrReconnects) {
+CANOPY_TEST(numLockStartupPolicyDoesNotOverrideLaterHotplugOrReconnects) {
   EventLoop loop;
-  umbriel::KeyboardLeds leds(loop.get());
+  canopy::KeyboardLeds leds(loop.get());
   BackendKeyboard laptop;
   laptop.observe(leds, true, false, true);
   loop.flush();
@@ -401,9 +401,9 @@ UMBRIEL_TEST(numLockStartupPolicyDoesNotOverrideLaterHotplugOrReconnects) {
   CHECK(reconnect.writes().empty());
 }
 
-UMBRIEL_TEST(sourceRemovalBeforeIdlePreservesSharedLocks) {
+CANOPY_TEST(sourceRemovalBeforeIdlePreservesSharedLocks) {
   EventLoop loop;
-  umbriel::KeyboardLeds leds(loop.get());
+  canopy::KeyboardLeds leds(loop.get());
   BackendKeyboard laptop;
   BackendKeyboard proxy(false);
   laptop.observe(leds);
@@ -429,9 +429,9 @@ UMBRIEL_TEST(sourceRemovalBeforeIdlePreservesSharedLocks) {
   CHECK_EQ(laptop.get()->leds, both);
 }
 
-UMBRIEL_TEST(staleVirtualSnapshotsOnlyChangeLocksTheyActuallyToggle) {
+CANOPY_TEST(staleVirtualSnapshotsOnlyChangeLocksTheyActuallyToggle) {
   EventLoop loop;
-  umbriel::KeyboardLeds leds(loop.get());
+  canopy::KeyboardLeds leds(loop.get());
   BackendKeyboard laptop;
   BackendKeyboard client;
   laptop.tap(69);
@@ -481,9 +481,9 @@ UMBRIEL_TEST(staleVirtualSnapshotsOnlyChangeLocksTheyActuallyToggle) {
   CHECK(laptop.writes().empty());
 }
 
-UMBRIEL_TEST(changedIndicatorNamesDoNotTurnInvalidIndexesIntoActiveLeds) {
+CANOPY_TEST(changedIndicatorNamesDoNotTurnInvalidIndexesIntoActiveLeds) {
   EventLoop loop;
-  umbriel::KeyboardLeds leds(loop.get());
+  canopy::KeyboardLeds leds(loop.get());
   BackendKeyboard laptop;
   BackendKeyboard proxy(false);
   laptop.observe(leds);
@@ -504,9 +504,9 @@ UMBRIEL_TEST(changedIndicatorNamesDoNotTurnInvalidIndexesIntoActiveLeds) {
   CHECK_EQ(laptop.get()->leds, uint32_t{WLR_LED_CAPS_LOCK});
 }
 
-UMBRIEL_TEST(losingTheFinalUsableSourceClearsSurvivingIndicators) {
+CANOPY_TEST(losingTheFinalUsableSourceClearsSurvivingIndicators) {
   EventLoop loop;
-  umbriel::KeyboardLeds leds(loop.get());
+  canopy::KeyboardLeds leds(loop.get());
   BackendKeyboard laptop;
   BackendKeyboard proxy(false);
   laptop.observe(leds);
@@ -522,10 +522,10 @@ UMBRIEL_TEST(losingTheFinalUsableSourceClearsSurvivingIndicators) {
   CHECK_EQ(laptop.get()->leds, uint32_t{0});
 }
 
-UMBRIEL_TEST(inputMethodEchoesCannotChangeSharedLocksOrVirtualKeymaps) {
+CANOPY_TEST(inputMethodEchoesCannotChangeSharedLocksOrVirtualKeymaps) {
   EventLoop loop;
   wlr_keyboard* excluded = nullptr;
-  umbriel::KeyboardLeds leds(loop.get(), [&excluded](wlr_keyboard* source) { return source != excluded; });
+  canopy::KeyboardLeds leds(loop.get(), [&excluded](wlr_keyboard* source) { return source != excluded; });
   BackendKeyboard laptop;
   BackendKeyboard proxy(false);
   BackendKeyboard inputMethod;
@@ -566,11 +566,11 @@ UMBRIEL_TEST(inputMethodEchoesCannotChangeSharedLocksOrVirtualKeymaps) {
   CHECK_EQ(laptop.get()->leds, uint32_t{WLR_LED_CAPS_LOCK});
 }
 
-UMBRIEL_TEST(destroyingTheRelayCancelsPendingCallbacksAndRemovesListeners) {
+CANOPY_TEST(destroyingTheRelayCancelsPendingCallbacksAndRemovesListeners) {
   EventLoop loop;
   BackendKeyboard keyboard;
   {
-    umbriel::KeyboardLeds leds(loop.get());
+    canopy::KeyboardLeds leds(loop.get());
     keyboard.observe(leds);
   }
   keyboard.stopObserving();

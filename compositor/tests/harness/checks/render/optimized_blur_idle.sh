@@ -3,13 +3,13 @@
 # placement, and layer geometry still update the cached backdrop seen through a translucent window.
 set -euo pipefail
 
-source "$UMBRIEL_HARNESS_LIB"
+source "$CANOPY_HARNESS_LIB"
 
-readonly LAYER_LOG="$UMBRIEL_RUNTIME_DIR/blur-idle-layer.log"
-readonly CAPTURE_LOG="$UMBRIEL_RUNTIME_DIR/blur-idle-capture.log"
-readonly IMAGE="$UMBRIEL_RUNTIME_DIR/blur-idle.png"
+readonly LAYER_LOG="$CANOPY_RUNTIME_DIR/blur-idle-layer.log"
+readonly CAPTURE_LOG="$CANOPY_RUNTIME_DIR/blur-idle-capture.log"
+readonly IMAGE="$CANOPY_RUNTIME_DIR/blur-idle.png"
 
-cat >> "$UMBRIEL_CONFIG" <<'EOF'
+cat >> "$CANOPY_CONFIG" <<'EOF'
 
 [animation]
 enabled = false
@@ -36,22 +36,22 @@ default_position = { x = 100, y = 100, anchor = "top_left" }
 blur = true
 blur_optimized = true
 EOF
-"$UMBRIEL" msg config-reload > /dev/null
+"$CANOPY" msg config-reload > /dev/null
 
-mkfifo "$UMBRIEL_RUNTIME_DIR/layer.fifo" "$UMBRIEL_RUNTIME_DIR/capture.fifo"
-env LAYER_CONTROL=1 "$UMBRIEL_LAYER_CLIENT" HEADLESS-1 0 \
-  < "$UMBRIEL_RUNTIME_DIR/layer.fifo" > "$LAYER_LOG" 2>&1 &
-exec {layer_fd}> "$UMBRIEL_RUNTIME_DIR/layer.fifo"
+mkfifo "$CANOPY_RUNTIME_DIR/layer.fifo" "$CANOPY_RUNTIME_DIR/capture.fifo"
+env LAYER_CONTROL=1 "$CANOPY_LAYER_CLIENT" HEADLESS-1 0 \
+  < "$CANOPY_RUNTIME_DIR/layer.fifo" > "$LAYER_LOG" 2>&1 &
+exec {layer_fd}> "$CANOPY_RUNTIME_DIR/layer.fifo"
 await_lines "$LAYER_LOG" ready 1
 
-env TRANSLUCENT_CONTENT=1 "$UMBRIEL_SUBSURFACE_CLIENT" optimized-blur-idle 900 600 \
-  > "$UMBRIEL_RUNTIME_DIR/blur-idle-window.log" 2>&1 &
-await_lines "$UMBRIEL_RUNTIME_DIR/blur-idle-window.log" mapped 1
-"$UMBRIEL" settle > /dev/null
+env TRANSLUCENT_CONTENT=1 "$CANOPY_SUBSURFACE_CLIENT" optimized-blur-idle 900 600 \
+  > "$CANOPY_RUNTIME_DIR/blur-idle-window.log" 2>&1 &
+await_lines "$CANOPY_RUNTIME_DIR/blur-idle-window.log" mapped 1
+"$CANOPY" settle > /dev/null
 
-env CAPTURE_CONTROL=1 "$UMBRIEL_CAPTURE_CLIENT" --output HEADLESS-1 \
-  < "$UMBRIEL_RUNTIME_DIR/capture.fifo" > "$CAPTURE_LOG" 2>&1 &
-exec {capture_fd}> "$UMBRIEL_RUNTIME_DIR/capture.fifo"
+env CAPTURE_CONTROL=1 "$CANOPY_CAPTURE_CLIENT" --output HEADLESS-1 \
+  < "$CANOPY_RUNTIME_DIR/capture.fifo" > "$CAPTURE_LOG" 2>&1 &
+exec {capture_fd}> "$CANOPY_RUNTIME_DIR/capture.fifo"
 await_lines "$CAPTURE_LOG" 'session-ready HEADLESS-1' 1
 await_lines "$CAPTURE_LOG" 'frame HEADLESS-1' 1
 
@@ -61,7 +61,7 @@ layer_command() {
   [[ $action == frames ]] && count=$1
   printf '%s %s %s\n' "$action" "$label" "$*" >&"$layer_fd"
   await_lines "$LAYER_LOG" "done $label callbacks $count" 1
-  "$UMBRIEL" settle > /dev/null
+  "$CANOPY" settle > /dev/null
 }
 
 capture_count() {
@@ -73,7 +73,7 @@ capture_count() {
 
 sample() {
   grim "$IMAGE"
-  "$UMBRIEL_PIXEL_PROBE" "$IMAGE" pixel 150 150
+  "$CANOPY_PIXEL_PROBE" "$IMAGE" pixel 150 150
 }
 
 require_change() {

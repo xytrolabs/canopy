@@ -41,7 +41,7 @@ namespace {
   };
 } // namespace
 
-namespace umbriel {
+namespace canopy {
   wlr_buffer* createCairoBuffer(cairo_surface_t* surface) {
     auto* image = new CairoBuffer;
     image->surface = surface;
@@ -51,4 +51,4 @@ namespace umbriel {
     );
     return &image->base;
   }
-} // namespace umbriel
+} // namespace canopy

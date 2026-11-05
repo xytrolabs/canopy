@@ -3,14 +3,14 @@
 # A notification must retain client geometry from its first visible frame, even
 # before a later override-redirect change could rescue a misclassified window.
 set -euo pipefail
-source "$UMBRIEL_HARNESS_LIB"
+source "$CANOPY_HARNESS_LIB"
 
 readonly NATIVE_TITLE=xwayland-notification-native
-readonly NATIVE_LOG="$UMBRIEL_RUNTIME_DIR/notification-native.log"
+readonly NATIVE_LOG="$CANOPY_RUNTIME_DIR/notification-native.log"
 client_pid=
 sequence=0
 
-cat >> "$UMBRIEL_CONFIG" <<'CONFIG'
+cat >> "$CANOPY_CONFIG" <<'CONFIG'
 [animation]
 enabled = false
 [animation.dim_unfocused]
@@ -41,17 +41,17 @@ match.title = "Steam"
 default_floating = false
 default_maximize = true
 CONFIG
-"$UMBRIEL" msg config-reload > /dev/null
+"$CANOPY" msg config-reload > /dev/null
 
-views() { "$UMBRIEL" windows --json | jq -c '[.[] | select(.app_id == "steam")]'; }
+views() { "$CANOPY" windows --json | jq -c '[.[] | select(.app_id == "steam")]'; }
 send() { printf '%s\n' "$@" >&"$control_fd"; }
 
 start_client() {
-  local name=$1 fifo="$UMBRIEL_RUNTIME_DIR/notification-$1.control"
-  client_log="$UMBRIEL_RUNTIME_DIR/notification-$name.log"
+  local name=$1 fifo="$CANOPY_RUNTIME_DIR/notification-$1.control"
+  client_log="$CANOPY_RUNTIME_DIR/notification-$name.log"
   mkfifo "$fifo"
   exec {control_fd}<> "$fifo"
-  "$UMBRIEL_XWAYLAND_POPUP_CLIENT" "notificationtoasts_$name" <&"$control_fd" > "$client_log" 2>&1 &
+  "$CANOPY_XWAYLAND_POPUP_CLIENT" "notificationtoasts_$name" <&"$control_fd" > "$client_log" 2>&1 &
   client_pid=$!
   await_lines "$client_log" ready 1 0.025
   send 'class steam' 'geometry 930 550 300 160'
@@ -121,11 +121,11 @@ expect_client_geometry() {
 }
 
 expect_corner_pixels() {
-  local image="$UMBRIEL_RUNTIME_DIR/notification.png" center corner
-  "$UMBRIEL" settle > /dev/null
+  local image="$CANOPY_RUNTIME_DIR/notification.png" center corner
+  "$CANOPY" settle > /dev/null
   grim -o HEADLESS-1 "$image"
-  center=$("$UMBRIEL_PIXEL_PROBE" "$image" pixel 640 360)
-  corner=$("$UMBRIEL_PIXEL_PROBE" "$image" pixel 1080 630)
+  center=$("$CANOPY_PIXEL_PROBE" "$image" pixel 640 360)
+  corner=$("$CANOPY_PIXEL_PROBE" "$image" pixel 1080 630)
   if [[ $center != '0 255 0' || $corner != '48 96 144' ]]; then
     echo "notification pixels: center=$center corner=$corner"
     exit 1
@@ -133,24 +133,24 @@ expect_corner_pixels() {
 }
 
 expect_native_held() {
-  "$UMBRIEL" settle > /dev/null
+  "$CANOPY" settle > /dev/null
   if [[ $(events "$NATIVE_LOG" keyboard-leave) != "$native_leaves" ]]; then
     echo "notification took native keyboard focus: $(cat "$NATIVE_LOG")"
     exit 1
   fi
-  "$UMBRIEL" windows --json | jq -e --arg title "$NATIVE_TITLE" '.[] | select(.title == $title) | .active' > /dev/null
+  "$CANOPY" windows --json | jq -e --arg title "$NATIVE_TITLE" '.[] | select(.title == $title) | .active' > /dev/null
 }
 
-"$UMBRIEL_SEAT_LOG_CLIENT" "$NATIVE_TITLE" > "$NATIVE_LOG" 2>&1 &
+"$CANOPY_SEAT_LOG_CLIENT" "$NATIVE_TITLE" > "$NATIVE_LOG" 2>&1 &
 await_lines "$NATIVE_LOG" keyboard-enter 1 0.025
-native_id=$("$UMBRIEL" windows --json | jq -r --arg title "$NATIVE_TITLE" '.[] | select(.title == $title) | .id')
+native_id=$("$CANOPY" windows --json | jq -r --arg title "$NATIVE_TITLE" '.[] | select(.title == $title) | .id')
 native_leaves=$(events "$NATIVE_LOG" keyboard-leave)
 
 # No Input=False hint and no OR flag: NOTIFICATION itself owns the policy.
 start_client before-map
 send 'type notification' map
 await_lines "$client_log" mapped 1 0.025
-"$UMBRIEL" settle > /dev/null
+"$CANOPY" settle > /dev/null
 expect_client_geometry
 expect_native_held
 expect_notification false
@@ -165,7 +165,7 @@ for _ in $(seq 100); do
   sleep 0.025
 done
 views | jq -e 'length == 1 and .[0].floating and (.[0].x == 490) and (.[0].y == 280)' > /dev/null
-"$UMBRIEL" msg window-focus "$native_id" > /dev/null
+"$CANOPY" msg window-focus "$native_id" > /dev/null
 await_lines "$NATIVE_LOG" keyboard-enter 2 0.025
 native_leaves=$(events "$NATIVE_LOG" keyboard-leave)
 sync_client before-notification
@@ -199,13 +199,13 @@ expect_client_geometry
 stop_client
 
 # Even an application rule forcing maximize and tiling must not own a toast.
-cat >> "$UMBRIEL_CONFIG" <<'CONFIG'
+cat >> "$CANOPY_CONFIG" <<'CONFIG'
 [[window_rule]]
 match.app_id = "^steam$"
 default_floating = false
 default_maximize = true
 CONFIG
-"$UMBRIEL" msg config-reload > /dev/null
+"$CANOPY" msg config-reload > /dev/null
 for mode in broad override no-input; do
   start_client "$mode"
   send 'type notification'
@@ -218,7 +218,7 @@ for mode in broad override no-input; do
   fi
   send map
   await_lines "$client_log" mapped 1 0.025
-  "$UMBRIEL" settle > /dev/null
+  "$CANOPY" settle > /dev/null
   expect_client_geometry
   expect_native_held
   expect_notification "$override"
@@ -227,7 +227,7 @@ for mode in broad override no-input; do
 done
 
 native_keys=$(events "$NATIVE_LOG" 'keyboard-key code=39 state=pressed')
-"$UMBRIEL_POINTER_CLIENT" 1280 720 keyboard-only tap 39 > /dev/null
+"$CANOPY_POINTER_CLIENT" 1280 720 keyboard-only tap 39 > /dev/null
 await_lines "$NATIVE_LOG" 'keyboard-key code=39 state=pressed' "$((native_keys + 1))" 0.025
 
 echo 'X11 notifications retain client geometry from first map, bypass Steam rules, and preserve native keyboard focus'

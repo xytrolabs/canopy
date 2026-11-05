@@ -7,7 +7,7 @@ extern "C" {
 #include <wlr/util/edges.h>
 }
 
-namespace umbriel {
+namespace canopy {
   int titleBarButtonDiameter(int height) {
     const int diameter = std::max(8, (height + 1) / 2);
     if ((height - diameter) % 2 == 0)
@@ -99,4 +99,4 @@ namespace umbriel {
   wlr_box contentBoxInTile(const wlr_box& tile, int titleBarHeight) {
     return {tile.x, tile.y + titleBarHeight, tile.width, std::max(1, tile.height - titleBarHeight)};
   }
-} // namespace umbriel
+} // namespace canopy

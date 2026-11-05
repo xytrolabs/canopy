@@ -2,12 +2,12 @@
 #include "wlr_color.h"
 
 extern "C" {
-#include <umbrielfx/render/fx_renderer/fx_renderer.h>
-#include <umbrielfx/types/linux_drm_syncobj.h>
-#include <umbrielfx/types/scene_capture.h>
-#include <umbrielfx/types/wlr_scene.h>
+#include <canopyfx/render/fx_renderer/fx_renderer.h>
+#include <canopyfx/types/linux_drm_syncobj.h>
+#include <canopyfx/types/scene_capture.h>
+#include <canopyfx/types/wlr_scene.h>
 #include <wlr/backend.h>
-#if UMBRIEL_HAS_NATIVE_DRM_POLICY
+#if CANOPY_HAS_NATIVE_DRM_POLICY
 #include <wlr/backend/drm.h>
 #endif
 #include <wlr/backend/headless.h>

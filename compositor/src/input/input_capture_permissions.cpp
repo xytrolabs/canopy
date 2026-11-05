@@ -12,7 +12,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
-namespace umbriel {
+namespace canopy {
 
   namespace {
     constexpr size_t kMaxGrants = 128;
@@ -125,10 +125,10 @@ namespace umbriel {
 
   std::filesystem::path InputCapturePermissions::defaultPath() {
     if (const char* state = std::getenv("XDG_STATE_HOME"); state != nullptr && *state != '\0') {
-      return std::filesystem::path(state) / "umbriel/input-capture-permissions.json";
+      return std::filesystem::path(state) / "canopy/input-capture-permissions.json";
     }
     if (const char* home = std::getenv("HOME"); home != nullptr && *home != '\0') {
-      return std::filesystem::path(home) / ".local/state/umbriel/input-capture-permissions.json";
+      return std::filesystem::path(home) / ".local/state/canopy/input-capture-permissions.json";
     }
     return {};
   }
@@ -425,4 +425,4 @@ namespace umbriel {
     });
   }
 
-} // namespace umbriel
+} // namespace canopy

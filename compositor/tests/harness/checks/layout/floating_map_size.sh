@@ -3,9 +3,9 @@
 # A title settling between the opening configure and map applies new floating
 # dimensions once, without replaying unchanged axes over the client's first size.
 set -euo pipefail
-source "$UMBRIEL_HARNESS_LIB"
+source "$CANOPY_HARNESS_LIB"
 
-cat >> "$UMBRIEL_CONFIG" <<'CONFIG'
+cat >> "$CANOPY_CONFIG" <<'CONFIG'
 [animation]
 enabled = false
 [layout]
@@ -57,17 +57,17 @@ default_output = "HEADLESS-2"
 default_floating_size = { width = 0.5, height = 0.5 }
 default_floating_size_px = { width = 300 }
 CONFIG
-"$UMBRIEL" msg config-reload > /dev/null
+"$CANOPY" msg config-reload > /dev/null
 
 open_case() {
   local title=$1 initial_title=$2 configured=$3 first=$4 expected=$5 resize=$6 phase=$7
-  local log="$UMBRIEL_RUNTIME_DIR/$title.log" control_fd actual
+  local log="$CANOPY_RUNTIME_DIR/$title.log" control_fd actual
   local args=(LOG_CONFIGURES=1 DECORATION_CONTROL=1)
   [[ $resize == false ]] || args+=(RESIZE_BEFORE_MAP=1)
   [[ $phase != before ]] || args+=("TITLE_AFTER_CONFIGURE=$title")
-  mkfifo "$UMBRIEL_RUNTIME_DIR/$title.fifo"
-  exec {control_fd}<> "$UMBRIEL_RUNTIME_DIR/$title.fifo"
-  env "${args[@]}" "$UMBRIEL_FRACTIONAL_CLIENT" "$initial_title" 700 500 \
+  mkfifo "$CANOPY_RUNTIME_DIR/$title.fifo"
+  exec {control_fd}<> "$CANOPY_RUNTIME_DIR/$title.fifo"
+  env "${args[@]}" "$CANOPY_FRACTIONAL_CLIENT" "$initial_title" 700 500 \
     <&"$control_fd" > "$log" 2>&1 &
 
   await_lines "$log" "mapped $first buffer " 1
@@ -78,14 +78,14 @@ open_case() {
     return 1
   fi
   if [[ $phase == after ]]; then
-    "$UMBRIEL" settle > /dev/null
+    "$CANOPY" settle > /dev/null
     printf 'title %s\n' "$title" >&"$control_fd"
   elif [[ $phase == before ]]; then
     await_lines "$log" "title-after-configure $title" 1
   fi
   await_lines "$log" "mapped $expected buffer " 1
-  "$UMBRIEL" settle > /dev/null
-  actual=$("$UMBRIEL" windows --json | jq -c --arg title "$title" '.[] | select(.title == $title)')
+  "$CANOPY" settle > /dev/null
+  actual=$("$CANOPY" windows --json | jq -c --arg title "$title" '.[] | select(.title == $title)')
   if ! jq -e --arg size "$expected" '
     .floating and (.fullscreen | not) and (.maximized | not)
       and "\(.w)x\(.h)" == $size
@@ -121,8 +121,8 @@ open_case() {
   fi
   printf 'resize 540 330\n' >&"$control_fd"
   await_lines "$log" 'mapped 540x330 buffer ' 1
-  "$UMBRIEL" settle > /dev/null
-  actual=$("$UMBRIEL" windows --json | jq -c --arg title "$title" '.[] | select(.title == $title)')
+  "$CANOPY" settle > /dev/null
+  actual=$("$CANOPY" windows --json | jq -c --arg title "$title" '.[] | select(.title == $title)')
   if ! jq -e '.floating and .w == 540 and .h == 330' <<< "$actual" > /dev/null; then
     echo "$title: the opening rule overwrote a later client resize: $actual"
     return 1
@@ -149,7 +149,7 @@ open_case opening-postmap waiting-postmap 1280x720 1280x720 800x625 false after
 
 # Fractions use the final output's logical usable area; pixels still take precedence.
 open_case opening-scaled waiting-scaled 1280x720 1280x720 300x180 false before
-"$UMBRIEL" windows --json | jq -e '
+"$CANOPY" windows --json | jq -e '
   any(.[]; .title == "opening-scaled" and .output == "HEADLESS-2")
 ' > /dev/null
 

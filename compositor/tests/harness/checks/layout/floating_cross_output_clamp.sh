@@ -6,10 +6,10 @@
 # the usable area per axis, the same margin a free drop settles into.
 set -euo pipefail
 
-readonly CLIENT="${UMBRIEL_FRACTIONAL_CLIENT:-./build-debug/tests/fractional-client}"
+readonly CLIENT="${CANOPY_FRACTIONAL_CLIENT:-./build-debug/tests/fractional-client}"
 readonly TITLE=cross-clamp
 
-BASELINE=$(< "$UMBRIEL_CONFIG")
+BASELINE=$(< "$CANOPY_CONFIG")
 {
   printf '%s\n' "$BASELINE"
   printf '\n[animation]\nenabled = false\n'
@@ -23,11 +23,11 @@ default_floating = true
 default_output = "HEADLESS-1"
 default_floating_size_px = { width = 400, height = 300 }
 EOF
-} > "$UMBRIEL_CONFIG"
-"$UMBRIEL" msg config-reload > /dev/null
+} > "$CANOPY_CONFIG"
+"$CANOPY" msg config-reload > /dev/null
 
 output_scale() {
-  "$UMBRIEL" outputs | awk -v name="$1" '$1 == name { found = 1; next } found && /Scale:/ { print $2; exit }'
+  "$CANOPY" outputs | awk -v name="$1" '$1 == name { found = 1; next } found && /Scale:/ { print $2; exit }'
 }
 
 wait_for_output_scale() {
@@ -38,32 +38,32 @@ wait_for_output_scale() {
     sleep 0.1
   done
   echo "$1 did not settle at scale $2, got $actual"
-  "$UMBRIEL" outputs
+  "$CANOPY" outputs
   return 1
 }
 
 ipc_box() {
-  "$UMBRIEL" windows --json | jq -r --arg title "$TITLE" '.[] | select(.title == $title) | "\(.x) \(.y) \(.w) \(.h)"'
+  "$CANOPY" windows --json | jq -r --arg title "$TITLE" '.[] | select(.title == $title) | "\(.x) \(.y) \(.w) \(.h)"'
 }
 
 workspace_of() {
-  "$UMBRIEL" windows --json | jq -r --arg title "$TITLE" '.[] | select(.title == $title) | .workspace'
+  "$CANOPY" windows --json | jq -r --arg title "$TITLE" '.[] | select(.title == $title) | .workspace'
 }
 
 # HEADLESS-2 is the 1280x720 headless mode at scale 2: a 640x360 logical output sitting at x=1280, right of the
 # scale-1 HEADLESS-1.
 wait_for_output_scale HEADLESS-2 2.000000
 
-"$CLIENT" "$TITLE" 400 300 > "$UMBRIEL_RUNTIME_DIR/cross-clamp.log" 2>&1 &
+"$CLIENT" "$TITLE" 400 300 > "$CANOPY_RUNTIME_DIR/cross-clamp.log" 2>&1 &
 for _ in $(seq 60); do
   [[ -n $(ipc_box) ]] && break
   sleep 0.25
 done
-"$UMBRIEL" settle
+"$CANOPY" settle
 
 # Park the float at the right-bottom clamp of its own output: x=1205/1280 and y=645/720 of the usable area.
-"$UMBRIEL" msg window-move-by 9999 9999 > /dev/null
-"$UMBRIEL" settle
+"$CANOPY" msg window-move-by 9999 9999 > /dev/null
+"$CANOPY" settle
 read -r sx sy sw sh < <(ipc_box)
 if ((sx != 1205 || sy != 645)); then
   echo "the float did not park at the source margin: $(ipc_box)"
@@ -72,8 +72,8 @@ fi
 
 # The same fractions on the scaled output land at x=603, y=323 of its 640x360 usable area, where only 37px and 37px
 # of the 400x300 window stay visible; the margin asks for 75px per axis.
-"$UMBRIEL" msg window-move-to-output-right > /dev/null
-"$UMBRIEL" settle
+"$CANOPY" msg window-move-to-output-right > /dev/null
+"$CANOPY" settle
 
 ws=$(workspace_of)
 if [[ $ws != HEADLESS-2:* ]]; then

@@ -1,13 +1,13 @@
 # Focus-model fixtures use real X11 clients and a separate XTEST sender for native Wayland typing observations.
-source "$UMBRIEL_REPO/tests/harness/eis_lib.sh"
+source "$CANOPY_REPO/tests/harness/eis_lib.sh"
 
-readonly X_FOCUS_CLIENT="${UMBRIEL_XWAYLAND_FOCUS_CLIENT:-./build-debug/tests/xwayland-focus-client}"
+readonly X_FOCUS_CLIENT="${CANOPY_XWAYLAND_FOCUS_CLIENT:-./build-debug/tests/xwayland-focus-client}"
 declare -A X_FOCUS_FDS=() X_FOCUS_PIDS=() X_FOCUS_LOGS=()
 
 x_focus_start() {
   local id=$1 title=$2 model=$3 fd
-  local fifo="$UMBRIEL_RUNTIME_DIR/focus-$id.fifo"
-  X_FOCUS_LOGS[$id]="$UMBRIEL_RUNTIME_DIR/focus-$id.log"
+  local fifo="$CANOPY_RUNTIME_DIR/focus-$id.fifo"
+  X_FOCUS_LOGS[$id]="$CANOPY_RUNTIME_DIR/focus-$id.log"
   mkfifo "$fifo"
   exec {fd}<> "$fifo"
   X_FOCUS_FDS[$id]=$fd
@@ -15,7 +15,7 @@ x_focus_start() {
   X_FOCUS_PIDS[$id]=$!
   await_events "${X_FOCUS_LOGS[$id]}" ready 1 "$title X11 connection"
   eis_wait_window "$title"
-  "$UMBRIEL" settle > /dev/null
+  "$CANOPY" settle > /dev/null
 }
 
 x_focus_send() {
@@ -51,12 +51,12 @@ x_focus_wait_unmapped() {
     [[ -z $(eis_window "$title") ]] && return 0
     sleep 0.05
   done
-  echo "X11 fixture $title did not unmap: $("$UMBRIEL" windows --json)"
+  echo "X11 fixture $title did not unmap: $("$CANOPY" windows --json)"
   return 1
 }
 
 x_focus_fixture_config() {
-  cat >> "$UMBRIEL_CONFIG" <<'CONFIG'
+  cat >> "$CANOPY_CONFIG" <<'CONFIG'
 
 [animation]
 enabled = false
@@ -73,5 +73,5 @@ default_floating = true
 default_floating_size_px = { width = 480, height = 360 }
 default_position = { x = 780, y = 100, anchor = "top_left" }
 CONFIG
-  "$UMBRIEL" msg config-reload > /dev/null
+  "$CANOPY" msg config-reload > /dev/null
 }

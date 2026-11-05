@@ -10,7 +10,7 @@
 #include "workspace/workspace.h"
 #include "xwayland/xwayland.h"
 
-namespace umbriel {
+namespace canopy {
 
   namespace {
     constexpr Logger kLog("view");
@@ -256,11 +256,11 @@ namespace umbriel {
       }
       view.m_captureBlocked = excluded;
       // Allocation failure makes scene captures fail closed, without hiding the local view.
-      (void)umbrielfx_scene_node_set_capture_excluded(&view.m_sceneTree->node, excluded);
+      (void)canopyfx_scene_node_set_capture_excluded(&view.m_sceneTree->node, excluded);
       if (excluded && view.m_captureSource != nullptr) {
         // Copy submission stops immediately; destruction is deferred past the
         // new-session/rule-evaluation stack that may have enabled protection.
-        umbrielfx_scene_capture_source_revoke(view.m_captureSource);
+        canopyfx_scene_capture_source_revoke(view.m_captureSource);
       }
     }
     if (m_server->xwayland() != nullptr) {
@@ -272,4 +272,4 @@ namespace umbriel {
     m_server->scheduleSuspensionSync();
   }
 
-} // namespace umbriel
+} // namespace canopy

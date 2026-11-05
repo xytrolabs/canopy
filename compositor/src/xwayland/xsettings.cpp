@@ -3,7 +3,7 @@
 #include <algorithm>
 #include <cmath>
 
-namespace umbriel {
+namespace canopy {
 
   namespace {
     constexpr double kBaseDpi = 96.0 * 1024.0;
@@ -76,4 +76,4 @@ namespace umbriel {
     return out;
   }
 
-} // namespace umbriel
+} // namespace canopy

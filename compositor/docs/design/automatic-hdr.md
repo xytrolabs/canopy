@@ -1,6 +1,6 @@
 # Automatic HDR color feedback
 
-The color-management protocol describes a logical encoding independently of the destination color volume. Umbriel offers a PQ encoding in automatic HDR mode on outputs that can activate HDR, even while their current scanout is SDR. This prevents a startup dependency with clients such as Wine: the client needs HDR headroom before creating HDR content, while physical activation needs that content to arrive first.
+The color-management protocol describes a logical encoding independently of the destination color volume. Canopy offers a PQ encoding in automatic HDR mode on outputs that can activate HDR, even while their current scanout is SDR. This prevents a startup dependency with clients such as Wine: the client needs HDR headroom before creating HDR content, while physical activation needs that content to arrive first.
 
 `ColorManager::descriptionForOutput` selects the logical description, and both per-output information and preferred surface information use it. An idle automatic HDR output offers BT.2020 PQ with a primary maximum of 10000 cd/m² and the configured SDR reference white. Its target remains sRGB with the nominal SDR luminance range. Active HDR replaces that target with the output's display metadata. Unsupported outputs and disabled HDR policies retain SDR descriptions.
 
@@ -22,7 +22,7 @@ A real activation rejection withdraws logical HDR availability even if SDR fallb
 
 The scene marks HDR sources for SDR mapping when their destination is SDR. This includes PQ, absolute-luminance scRGB and descriptions with luminance headroom. The texture shader decodes and converts straight RGB before applying a continuous Reinhard shoulder above linear 0.8. Scaling all channels together retains their ratios. It then restores premultiplied alpha before blending. Ordinary SDR sources and intermediate textures leave the mapping disabled.
 
-The pending output state selects this policy, so a static source buffer moves between SDR mapping and HDR presentation without requiring a client repaint. Window capture scenes use the same SDR mapping. The additional texture option belongs to UmbrielFX; shared wlroots structure prefixes remain unchanged.
+The pending output state selects this policy, so a static source buffer moves between SDR mapping and HDR presentation without requiring a client repaint. Window capture scenes use the same SDR mapping. The additional texture option belongs to CanopyFX; shared wlroots structure prefixes remain unchanged.
 
 ## Verification
 

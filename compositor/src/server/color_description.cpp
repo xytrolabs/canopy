@@ -2,7 +2,7 @@
 
 #include <cmath>
 
-namespace umbriel {
+namespace canopy {
 
   namespace {
 
@@ -144,4 +144,4 @@ namespace umbriel {
     return description;
   }
 
-} // namespace umbriel
+} // namespace canopy

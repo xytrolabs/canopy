@@ -13,7 +13,7 @@ shot() { grim -o "$1" "$2"; }
 
 # Callers finish every animation first; settle then also waits for clients to commit their latest configure.
 shot_settled() {
-  "$UMBRIEL" settle
+  "$CANOPY" settle
   shot "$1" "$2"
 }
 
@@ -23,21 +23,21 @@ spawn() {
 
 wait_windows() {
   for _ in $(seq 60); do
-    [[ $("$UMBRIEL" windows --json | jq 'length') -eq $1 ]] && return 0
+    [[ $("$CANOPY" windows --json | jq 'length') -eq $1 ]] && return 0
     sleep 0.25
   done
-  echo "expected $1 window(s), got $("$UMBRIEL" windows --json | jq 'length')"
+  echo "expected $1 window(s), got $("$CANOPY" windows --json | jq 'length')"
   return 1
 }
 
 output_x() {
-  "$UMBRIEL" outputs | awk -v name="$1" '$1 == name {found = 1; next} found && /Position:/ {split($2, p, ","); print p[1]; exit}'
+  "$CANOPY" outputs | awk -v name="$1" '$1 == name {found = 1; next} found && /Position:/ {split($2, p, ","); print p[1]; exit}'
 }
 
 # Whether a crop of two screenshots differs at all.
 region_state() {
   local _ differing
-  read -r _ differing < <("$UMBRIEL_PIXEL_PROBE" "$1" diff "$2" "$3")
+  read -r _ differing < <("$CANOPY_PIXEL_PROBE" "$1" diff "$2" "$3")
   if (( differing == 0 )); then echo same; else echo changed; fi
 }
 
@@ -51,55 +51,55 @@ check() {
 }
 
 focused_width() {
-  "$UMBRIEL" windows --json | jq -r '.[] | select(.active) | .w'
+  "$CANOPY" windows --json | jq -r '.[] | select(.active) | .w'
 }
 
 # Animation time only moves by clock-advance; 2000 ms finishes any animation in this check.
-"$UMBRIEL" clock-freeze
+"$CANOPY" clock-freeze
 spawn probe
 wait_windows 1
-home=$("$UMBRIEL" windows --json | jq -r '.[0].workspace' | cut -d: -f1)
+home=$("$CANOPY" windows --json | jq -r '.[0].workspace' | cut -d: -f1)
 if [[ $home == HEADLESS-1 ]]; then neighbour=HEADLESS-2; else neighbour=HEADLESS-1; fi
 home_x=$(output_x "$home")
 echo "windows land on $home (x=$home_x), watching $neighbour (x=$(output_x "$neighbour"))"
 
-"$UMBRIEL" clock-advance 2000
-shot_settled "$neighbour" "$UMBRIEL_RUNTIME_DIR/neighbour-base.png"
-shot_settled "$home" "$UMBRIEL_RUNTIME_DIR/home-base.png"
+"$CANOPY" clock-advance 2000
+shot_settled "$neighbour" "$CANOPY_RUNTIME_DIR/neighbour-base.png"
+shot_settled "$home" "$CANOPY_RUNTIME_DIR/home-base.png"
 # The rightmost on-strip column ends just short of the shared edge, so this crop is window content when the strip is
 # populated and backdrop when it is empty.
 edge_crop=20x600+1246+60
 
 # Overview baseline while the home output holds a single card: its filmstrip cannot overhang the shared edge yet, so
 # this is the neighbour showing nothing but its own filmstrip.
-"$UMBRIEL" msg overview-open > /dev/null
-"$UMBRIEL" clock-advance 2000
-shot_settled "$neighbour" "$UMBRIEL_RUNTIME_DIR/neighbour-ov-base.png"
-"$UMBRIEL" msg overview-close > /dev/null
-"$UMBRIEL" clock-advance 2000
+"$CANOPY" msg overview-open > /dev/null
+"$CANOPY" clock-advance 2000
+shot_settled "$neighbour" "$CANOPY_RUNTIME_DIR/neighbour-ov-base.png"
+"$CANOPY" msg overview-close > /dev/null
+"$CANOPY" clock-advance 2000
 
 # 624-wide columns on a 1280-wide output fit two at a time. Focusing the leftmost column scrolls the surplus off the
 # RIGHT edge, which in a side-by-side layout is exactly where the neighbouring output lives.
 for i in 2 3 4 5; do spawn "bleed-$i"; done
 wait_windows 5
-"$UMBRIEL" clock-advance 2000
-for _ in $(seq 6); do "$UMBRIEL" msg window-focus-left > /dev/null; "$UMBRIEL" clock-advance 2000; done
+"$CANOPY" clock-advance 2000
+for _ in $(seq 6); do "$CANOPY" msg window-focus-left > /dev/null; "$CANOPY" clock-advance 2000; done
 
 edge=$((home_x + 1280))
-"$UMBRIEL" windows --json | jq -c '[.[] | {title, x, w}] | sort_by(.x)'
-over=$("$UMBRIEL" windows --json | jq --argjson e "$edge" '[.[] | select(.x + .w > $e)] | length')
+"$CANOPY" windows --json | jq -c '[.[] | {title, x, w}] | sort_by(.x)'
+over=$("$CANOPY" windows --json | jq --argjson e "$edge" '[.[] | select(.x + .w > $e)] | length')
 echo "columns reaching past the shared edge at x=$edge: $over"
 [[ $over -gt 0 ]] || {
   echo "SETUP FAIL: nothing reaches past the shared edge"
   exit 1
 }
 
-shot_settled "$neighbour" "$UMBRIEL_RUNTIME_DIR/neighbour-full.png"
-shot_settled "$home" "$UMBRIEL_RUNTIME_DIR/home-full.png"
+shot_settled "$neighbour" "$CANOPY_RUNTIME_DIR/neighbour-full.png"
+shot_settled "$home" "$CANOPY_RUNTIME_DIR/home-full.png"
 
-neighbour_same=$(cmp -s "$UMBRIEL_RUNTIME_DIR/neighbour-base.png" "$UMBRIEL_RUNTIME_DIR/neighbour-full.png" && echo same || echo changed)
-home_same=$(cmp -s "$UMBRIEL_RUNTIME_DIR/home-base.png" "$UMBRIEL_RUNTIME_DIR/home-full.png" && echo same || echo changed)
-edge_state=$(region_state "$UMBRIEL_RUNTIME_DIR/home-base.png" "$UMBRIEL_RUNTIME_DIR/home-full.png" "$edge_crop")
+neighbour_same=$(cmp -s "$CANOPY_RUNTIME_DIR/neighbour-base.png" "$CANOPY_RUNTIME_DIR/neighbour-full.png" && echo same || echo changed)
+home_same=$(cmp -s "$CANOPY_RUNTIME_DIR/home-base.png" "$CANOPY_RUNTIME_DIR/home-full.png" && echo same || echo changed)
+edge_state=$(region_state "$CANOPY_RUNTIME_DIR/home-base.png" "$CANOPY_RUNTIME_DIR/home-full.png" "$edge_crop")
 
 check "no bleed onto $neighbour" "$neighbour_same" same
 check "content drawn on $home" "$home_same" changed
@@ -112,7 +112,7 @@ transition_drift=0
 for action in window-toggle-fullscreen window-toggle-fullscreen workspace-next workspace-previous \
   window-focus-right window-focus-left column-move-right column-move-left; do
   width=$(focused_width)
-  "$UMBRIEL" msg "$action" > /dev/null
+  "$CANOPY" msg "$action" > /dev/null
   if [[ $action == window-toggle-fullscreen ]]; then
     for _ in $(seq 80); do
       [[ $(focused_width) != "$width" ]] && break
@@ -120,25 +120,25 @@ for action in window-toggle-fullscreen window-toggle-fullscreen workspace-next w
     done
   fi
   for _ in 1 2 3; do
-    "$UMBRIEL" clock-advance 80
-    shot "$neighbour" "$UMBRIEL_RUNTIME_DIR/neighbour-step.png"
-    if ! cmp -s "$UMBRIEL_RUNTIME_DIR/neighbour-base.png" "$UMBRIEL_RUNTIME_DIR/neighbour-step.png"; then
+    "$CANOPY" clock-advance 80
+    shot "$neighbour" "$CANOPY_RUNTIME_DIR/neighbour-step.png"
+    if ! cmp -s "$CANOPY_RUNTIME_DIR/neighbour-base.png" "$CANOPY_RUNTIME_DIR/neighbour-step.png"; then
       echo "  drift after $action"
       transition_drift=$((transition_drift + 1))
-      cp "$UMBRIEL_RUNTIME_DIR/neighbour-step.png" "$UMBRIEL_RUNTIME_DIR/drift-$action.png"
+      cp "$CANOPY_RUNTIME_DIR/neighbour-step.png" "$CANOPY_RUNTIME_DIR/drift-$action.png"
       break
     fi
   done
-  "$UMBRIEL" clock-advance 2000
+  "$CANOPY" clock-advance 2000
 done
 check "no bleed onto $neighbour across transitions" "$transition_drift" 0
 
 # Same output, now with a populated and scrolled strip: cards for off-strip columns land past the shared edge. The
 # neighbour must look exactly as it did with one card next door.
-"$UMBRIEL" msg overview-open > /dev/null
-"$UMBRIEL" clock-advance 2000
-shot_settled "$neighbour" "$UMBRIEL_RUNTIME_DIR/neighbour-ov-full.png"
-overview_same=$(cmp -s "$UMBRIEL_RUNTIME_DIR/neighbour-ov-base.png" "$UMBRIEL_RUNTIME_DIR/neighbour-ov-full.png" && echo same || echo changed)
+"$CANOPY" msg overview-open > /dev/null
+"$CANOPY" clock-advance 2000
+shot_settled "$neighbour" "$CANOPY_RUNTIME_DIR/neighbour-ov-full.png"
+overview_same=$(cmp -s "$CANOPY_RUNTIME_DIR/neighbour-ov-base.png" "$CANOPY_RUNTIME_DIR/neighbour-ov-full.png" && echo same || echo changed)
 check "no bleed onto $neighbour with the overview open" "$overview_same" same
 
 # A failing check keeps its runtime directory, so the framebuffers above are

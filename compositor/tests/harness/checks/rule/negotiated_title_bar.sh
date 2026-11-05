@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 # Negotiated mode requires Wayland decoration negotiation and follows live protocol changes.
 set -euo pipefail
-source "$(dirname "$UMBRIEL_HARNESS_LIB")/title_bar.sh"
+source "$(dirname "$CANOPY_HARNESS_LIB")/title_bar.sh"
 title_bar_config
-cat >> "$UMBRIEL_CONFIG" <<'CONFIG'
+cat >> "$CANOPY_CONFIG" <<'CONFIG'
 [[window_rule]]
 match.title = "^negotiated-rule$"
 title_bar = "negotiated"
@@ -14,28 +14,28 @@ title_bar = "on"
 match.title = "^negotiated-forced$"
 title_bar = "forced"
 CONFIG
-"$UMBRIEL" msg config-reload > /dev/null
+"$CANOPY" msg config-reload > /dev/null
 
 declare -A controls
 start_controlled() {
   local title=$1 fd
   shift
-  mkfifo "$UMBRIEL_RUNTIME_DIR/$title.fifo"
-  exec {fd}<>"$UMBRIEL_RUNTIME_DIR/$title.fifo"
+  mkfifo "$CANOPY_RUNTIME_DIR/$title.fifo"
+  exec {fd}<>"$CANOPY_RUNTIME_DIR/$title.fifo"
   controls[$title]=$fd
-  env DECORATION_CONTROL=1 LOG_CONFIGURES=1 "$@" "$UMBRIEL_FRACTIONAL_CLIENT" "$title" 480 300 \
-    <&"$fd" > "$UMBRIEL_RUNTIME_DIR/$title.log" 2>&1 &
+  env DECORATION_CONTROL=1 LOG_CONFIGURES=1 "$@" "$CANOPY_FRACTIONAL_CLIENT" "$title" 480 300 \
+    <&"$fd" > "$CANOPY_RUNTIME_DIR/$title.log" 2>&1 &
 }
 command_to() {
   printf '%s\n' "$2" >&"${controls[$1]}"
 }
 set_mode() {
-  sed -i '/^\[appearance.title_bar\]$/ { n; s/mode = "[^"]*"/mode = "'"$1"'"/; }' "$UMBRIEL_CONFIG"
-  "$UMBRIEL" msg config-reload > /dev/null
+  sed -i '/^\[appearance.title_bar\]$/ { n; s/mode = "[^"]*"/mode = "'"$1"'"/; }' "$CANOPY_CONFIG"
+  "$CANOPY" msg config-reload > /dev/null
 }
 initial_height() {
   local first
-  first=$(rg -m 1 '^configure ' "$UMBRIEL_RUNTIME_DIR/$1.log")
+  first=$(rg -m 1 '^configure ' "$CANOPY_RUNTIME_DIR/$1.log")
   [[ ${first##*x} == "$2" ]] || { echo "$1: expected initial height $2, got $first"; return 1; }
 }
 
@@ -43,23 +43,23 @@ initial_height() {
 start_controlled negotiated-inherit
 title_bar_wait_field negotiated-inherit title_bar true
 initial_height negotiated-inherit 676
-"$UMBRIEL" settle > /dev/null
+"$CANOPY" settle > /dev/null
 before=$(title_bar_window negotiated-inherit)
 pixel_x=$(($(jq -r .x <<< "$before") + 5))
 pixel_y=$(($(jq -r .y <<< "$before") - 14))
-image=$UMBRIEL_RUNTIME_DIR/negotiated.png
+image=$CANOPY_RUNTIME_DIR/negotiated.png
 grim -o HEADLESS-1 "$image"
-read -r red green blue < <("$UMBRIEL_PIXEL_PROBE" "$image" pixel "$pixel_x" "$pixel_y")
+read -r red green blue < <("$CANOPY_PIXEL_PROBE" "$image" pixel "$pixel_x" "$pixel_y")
 ((red > 240 && green < 12 && blue > 240))
 set_mode negotiated
 title_bar_wait_field negotiated-inherit title_bar false
-"$UMBRIEL" settle > /dev/null
+"$CANOPY" settle > /dev/null
 after=$(title_bar_window negotiated-inherit)
 [[ $(jq -r .h <<< "$after") == $(($(jq -r .h <<< "$before") + 28)) ]]
 [[ $(jq -r .y <<< "$after") == $(($(jq -r .y <<< "$before") - 28)) ]]
 [[ $(jq -c '[.x, .w]' <<< "$after") == "$(jq -c '[.x, .w]' <<< "$before")" ]]
 grim -o HEADLESS-1 "$image"
-read -r red _ _ < <("$UMBRIEL_PIXEL_PROBE" "$image" pixel "$pixel_x" "$pixel_y")
+read -r red _ _ < <("$CANOPY_PIXEL_PROBE" "$image" pixel "$pixel_x" "$pixel_y")
 ((red < 12))
 start_controlled negotiated-late
 title_bar_wait_field negotiated-late title_bar false
@@ -117,12 +117,12 @@ for mode in on forced off negotiated; do
 done
 
 # A later matching negotiated rule replaces forced mode on an existing CSD window.
-cat >> "$UMBRIEL_CONFIG" <<'CONFIG'
+cat >> "$CANOPY_CONFIG" <<'CONFIG'
 [[window_rule]]
 match.title = "^negotiated-forced$"
 title_bar = "negotiated"
 CONFIG
-"$UMBRIEL" msg config-reload > /dev/null
+"$CANOPY" msg config-reload > /dev/null
 title_bar_wait_field negotiated-forced title_bar false
 command_to negotiated-forced 'xdg server'
 title_bar_wait_field negotiated-forced title_bar true

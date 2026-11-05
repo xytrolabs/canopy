@@ -9,7 +9,7 @@
 #include <string>
 #include <string_view>
 
-namespace umbriel {
+namespace canopy {
 
   class Server;
 
@@ -41,7 +41,7 @@ namespace umbriel {
     // The reply to clock-advance. The IPC server advances the clock and holds the reply until every output has drawn.
     static nlohmann::json clockAdvance(Server& server, IpcArgs args);
     static nlohmann::json clockResume(Server& server, IpcArgs args);
-#ifdef UMBRIEL_HARNESS
+#ifdef CANOPY_HARNESS
     static nlohmann::json rendererRecover(Server& server, IpcArgs args);
     static nlohmann::json swipeForTest(Server& server, IpcArgs args);
     static nlohmann::json animationCaptureFail(Server& server, IpcArgs args);
@@ -52,7 +52,7 @@ namespace umbriel {
 #endif
   };
 
-  // The `umbriel --help` section that lists a command.
+  // The `canopy --help` section that lists a command.
   enum class IpcCommandGroup {
     Control,
     Inspect,
@@ -78,4 +78,4 @@ namespace umbriel {
   // ("WIDTHxHEIGHT[@HZ]"). Returns false with `error` set on anything else.
   bool parseOutputCreateArgs(IpcArgs args, std::string& name, std::optional<OutputMode>& mode, std::string& error);
 
-} // namespace umbriel
+} // namespace canopy

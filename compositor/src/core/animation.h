@@ -7,7 +7,7 @@
 #include <optional>
 #include <string_view>
 
-namespace umbriel {
+namespace canopy {
 
   class Output;
 
@@ -283,4 +283,4 @@ namespace umbriel {
     bool m_animating = false;
   };
 
-} // namespace umbriel
+} // namespace canopy

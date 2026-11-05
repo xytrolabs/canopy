@@ -8,7 +8,7 @@
 
 struct wlr_box;
 
-namespace umbriel {
+namespace canopy {
 
   class View;
 
@@ -134,4 +134,4 @@ namespace umbriel {
     mutable std::vector<LayoutTarget> m_targets;
   };
 
-} // namespace umbriel
+} // namespace canopy

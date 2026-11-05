@@ -2,7 +2,7 @@
 
 #include <algorithm>
 
-namespace umbriel {
+namespace canopy {
 
   namespace {
     constexpr std::string_view kUnknown = "Unknown";
@@ -75,4 +75,4 @@ namespace umbriel {
     return descriptorEquals(identity, configured) ? OutputNameMatch::Descriptor : OutputNameMatch::None;
   }
 
-} // namespace umbriel
+} // namespace canopy

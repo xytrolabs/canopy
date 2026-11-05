@@ -4,10 +4,10 @@
 # overview round trip must reveal the borders settled rather than replaying.
 set -euo pipefail
 
-readonly IMAGE="$UMBRIEL_RUNTIME_DIR/border-focus-transition.png"
-readonly LAYER_CLIENT="${UMBRIEL_LAYER_CLIENT:-./build-debug/tests/layer-client}"
+readonly IMAGE="$CANOPY_RUNTIME_DIR/border-focus-transition.png"
+readonly LAYER_CLIENT="${CANOPY_LAYER_CLIENT:-./build-debug/tests/layer-client}"
 
-cat >> "$UMBRIEL_CONFIG" <<'EOF'
+cat >> "$CANOPY_CONFIG" <<'EOF'
 
 [colors]
 backdrop = "#000000FF"
@@ -44,12 +44,12 @@ match.title = "^focus-border-b$"
 default_floating = true
 default_position = { x = 800, y = 120, anchor = "top_left" }
 EOF
-"$UMBRIEL" msg config-reload > /dev/null
+"$CANOPY" msg config-reload > /dev/null
 
 for title in focus-border-a focus-border-b; do
-  "$UMBRIEL_UNMAP_CLIENT" "$title" 300 300 > "$UMBRIEL_RUNTIME_DIR/$title.log" 2>&1 &
+  "$CANOPY_UNMAP_CLIENT" "$title" 300 300 > "$CANOPY_RUNTIME_DIR/$title.log" 2>&1 &
   for _ in $(seq 80); do
-    window=$("$UMBRIEL" windows --json | jq -c --arg title "$title" '.[] | select(.title == $title)')
+    window=$("$CANOPY" windows --json | jq -c --arg title "$title" '.[] | select(.title == $title)')
     [[ -n $window ]] && break
     sleep 0.025
   done
@@ -59,14 +59,14 @@ done
 border_position() {
   local title=$1
   local window
-  window=$("$UMBRIEL" windows --json | jq -c --arg title "$title" '.[] | select(.title == $title)')
+  window=$("$CANOPY" windows --json | jq -c --arg title "$title" '.[] | select(.title == $title)')
   jq -r '"\(.x + (.w / 2 | floor)) \(.y - 8)"' <<< "$window"
 }
 
 sample_border() {
   local title=$1 x y
   read -r x y < <(border_position "$title")
-  "$UMBRIEL_PIXEL_PROBE" "$IMAGE" mean "4x4+$x+$y"
+  "$CANOPY_PIXEL_PROBE" "$IMAGE" mean "4x4+$x+$y"
 }
 
 assert_color() {
@@ -82,21 +82,21 @@ assert_color() {
   }
 }
 
-window=$("$UMBRIEL" windows --json | jq -c '.[] | select(.title == "focus-border-a")')
+window=$("$CANOPY" windows --json | jq -c '.[] | select(.title == "focus-border-a")')
 a_id=$(jq -r .id <<< "$window")
-window=$("$UMBRIEL" windows --json | jq -c '.[] | select(.title == "focus-border-b")')
+window=$("$CANOPY" windows --json | jq -c '.[] | select(.title == "focus-border-b")')
 b_id=$(jq -r .id <<< "$window")
 
-"$UMBRIEL" msg window-focus "$a_id" > /dev/null
-"$UMBRIEL" settle
+"$CANOPY" msg window-focus "$a_id" > /dev/null
+"$CANOPY" settle
 grim "$IMAGE"
 assert_color focus-border-a red
 assert_color focus-border-b blue
 
 # Animation time only moves by clock-advance; advancing 1000 ms finishes every border and overview timeline.
-"$UMBRIEL" clock-freeze
-"$UMBRIEL" msg window-focus "$b_id" > /dev/null
-"$UMBRIEL" clock-advance 350
+"$CANOPY" clock-freeze
+"$CANOPY" msg window-focus "$b_id" > /dev/null
+"$CANOPY" clock-advance 350
 grim "$IMAGE"
 assert_color focus-border-a mixed
 assert_color focus-border-b mixed
@@ -104,12 +104,12 @@ assert_color focus-border-b mixed
 # Opening the overview clears focus on the hidden windows and closing restores it; the reveal must show the settled
 # result instead of the transition.
 overview_round_trip() {
-  "$UMBRIEL" clock-advance 1000
-  "$UMBRIEL" settle
-  "$UMBRIEL" msg overview-open > /dev/null
-  "$UMBRIEL" clock-advance 600
-  "$UMBRIEL" msg overview-close > /dev/null
-  "$UMBRIEL" clock-advance 600
+  "$CANOPY" clock-advance 1000
+  "$CANOPY" settle
+  "$CANOPY" msg overview-open > /dev/null
+  "$CANOPY" clock-advance 600
+  "$CANOPY" msg overview-close > /dev/null
+  "$CANOPY" clock-advance 600
   grim "$IMAGE"
   assert_color focus-border-a blue
   assert_color focus-border-b red
@@ -119,7 +119,7 @@ overview_round_trip
 # A shell's overview-scoped capture layer holds the keyboard exclusively while the overview is open and is dropped
 # on the closed event. That event must go out as the close starts, so focus returns while the windows are still
 # hidden.
-"$UMBRIEL" subscribe overview | while read -r event; do
+"$CANOPY" subscribe overview | while read -r event; do
   if [[ $(jq -r .data.open <<< "$event") == true ]]; then
     "$LAYER_CLIENT" HEADLESS-1 0 bottom-layer keyboard=exclusive > /dev/null 2>&1 &
     capture=$!
@@ -130,17 +130,17 @@ overview_round_trip
 done &
 overview_round_trip
 
-"$UMBRIEL" clock-advance 1000
-"$UMBRIEL" clock-resume
+"$CANOPY" clock-advance 1000
+"$CANOPY" clock-resume
 
 # A zero-width border has nothing to fade, so a focus change leaves no animation running and settle succeeds on a
 # frozen clock.
-sed -i 's/^border_width = 20$/border_width = 0/' "$UMBRIEL_CONFIG"
-"$UMBRIEL" msg config-reload > /dev/null
-"$UMBRIEL" settle
-"$UMBRIEL" clock-freeze
-"$UMBRIEL" msg window-focus "$a_id" > /dev/null
-if ! timeout 5 "$UMBRIEL" settle; then
+sed -i 's/^border_width = 20$/border_width = 0/' "$CANOPY_CONFIG"
+"$CANOPY" msg config-reload > /dev/null
+"$CANOPY" settle
+"$CANOPY" clock-freeze
+"$CANOPY" msg window-focus "$a_id" > /dev/null
+if ! timeout 5 "$CANOPY" settle; then
   echo "a focus change animated a zero-width border"
   exit 1
 fi

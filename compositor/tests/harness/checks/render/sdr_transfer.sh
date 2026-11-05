@@ -3,15 +3,15 @@
 # Per-output SDR transfer choices survive reload independently. Headless outputs
 # cannot enter PQ, so both choices must leave their SDR fallback pixels intact.
 set -euo pipefail
-source "$UMBRIEL_HARNESS_LIB"
+source "$CANOPY_HARNESS_LIB"
 
-readonly BASELINE=$(< "$UMBRIEL_CONFIG")
-readonly LEFT_LOG="$UMBRIEL_RUNTIME_DIR/sdr-transfer-left.log"
-readonly RIGHT_LOG="$UMBRIEL_RUNTIME_DIR/sdr-transfer-right.log"
-readonly LEFT_BASE="$UMBRIEL_RUNTIME_DIR/sdr-transfer-left-base.png"
-readonly RIGHT_BASE="$UMBRIEL_RUNTIME_DIR/sdr-transfer-right-base.png"
-readonly LEFT_IMAGE="$UMBRIEL_RUNTIME_DIR/sdr-transfer-left.png"
-readonly RIGHT_IMAGE="$UMBRIEL_RUNTIME_DIR/sdr-transfer-right.png"
+readonly BASELINE=$(< "$CANOPY_CONFIG")
+readonly LEFT_LOG="$CANOPY_RUNTIME_DIR/sdr-transfer-left.log"
+readonly RIGHT_LOG="$CANOPY_RUNTIME_DIR/sdr-transfer-right.log"
+readonly LEFT_BASE="$CANOPY_RUNTIME_DIR/sdr-transfer-left-base.png"
+readonly RIGHT_BASE="$CANOPY_RUNTIME_DIR/sdr-transfer-right-base.png"
+readonly LEFT_IMAGE="$CANOPY_RUNTIME_DIR/sdr-transfer-left.png"
+readonly RIGHT_IMAGE="$CANOPY_RUNTIME_DIR/sdr-transfer-right.png"
 
 write_config() {
   local left=$1 right=$2
@@ -29,14 +29,14 @@ CONFIG
     [[ -z $left ]] || printf 'sdr_transfer = "%s"\n' "$left"
     printf '\n[output.HEADLESS-2]\nhdr = "on"\n'
     [[ -z $right ]] || printf 'sdr_transfer = "%s"\n' "$right"
-  } > "$UMBRIEL_CONFIG"
-  "$UMBRIEL" msg config-reload > /dev/null
-  "$UMBRIEL" settle > /dev/null
+  } > "$CANOPY_CONFIG"
+  "$CANOPY" msg config-reload > /dev/null
+  "$CANOPY" settle > /dev/null
 }
 
 expect_choices() {
   local left=$1 right=$2 color
-  color=$("$UMBRIEL" color --json)
+  color=$("$CANOPY" color --json)
   if ! jq -e --arg left "$left" --arg right "$right" '
     .outputs | length == 2
       and all(.[]; .hdr_mode == "on" and .hdr_requested and (.hdr_active | not)
@@ -54,12 +54,12 @@ layer_command() {
   local descriptor=$1 log=$2 label=$3 color=$4
   printf 'color %s %s\n' "$label" "$color" >&"$descriptor"
   await_lines "$log" "done $label callbacks 1" 1
-  "$UMBRIEL" settle > /dev/null
+  "$CANOPY" settle > /dev/null
 }
 
 expect_dark_pixel() {
   local image=$1 level=$2 label=$3 red green blue
-  read -r red green blue < <("$UMBRIEL_PIXEL_PROBE" "$image" pixel 640 360)
+  read -r red green blue < <("$CANOPY_PIXEL_PROBE" "$image" pixel 640 360)
   if ((red != level || green != level || blue != level)); then
     echo "$label: SDR fallback rendered $red $green $blue, expected $level per channel"
     exit 1
@@ -68,7 +68,7 @@ expect_dark_pixel() {
 
 expect_same_image() {
   local image=$1 baseline=$2 label=$3 maximum changed
-  read -r maximum changed < <("$UMBRIEL_PIXEL_PROBE" "$image" diff "$baseline" 400x300+400+250)
+  read -r maximum changed < <("$CANOPY_PIXEL_PROBE" "$image" diff "$baseline" 400x300+400+250)
   if ((maximum != 0 || changed != 0)); then
     echo "$label: the SDR transfer choice changed fallback pixels, maximum=$maximum changed=$changed"
     exit 1
@@ -88,13 +88,13 @@ expect_fallback_pixels() {
 write_config '' ''
 expect_choices gamma22 gamma22
 
-mkfifo "$UMBRIEL_RUNTIME_DIR/sdr-transfer-left.fifo" "$UMBRIEL_RUNTIME_DIR/sdr-transfer-right.fifo"
-LAYER_CONTROL=1 "$UMBRIEL_LAYER_CLIENT" HEADLESS-1 0 \
-  < "$UMBRIEL_RUNTIME_DIR/sdr-transfer-left.fifo" > "$LEFT_LOG" 2>&1 &
-exec {left_fd}> "$UMBRIEL_RUNTIME_DIR/sdr-transfer-left.fifo"
-LAYER_CONTROL=1 "$UMBRIEL_LAYER_CLIENT" HEADLESS-2 0 \
-  < "$UMBRIEL_RUNTIME_DIR/sdr-transfer-right.fifo" > "$RIGHT_LOG" 2>&1 &
-exec {right_fd}> "$UMBRIEL_RUNTIME_DIR/sdr-transfer-right.fifo"
+mkfifo "$CANOPY_RUNTIME_DIR/sdr-transfer-left.fifo" "$CANOPY_RUNTIME_DIR/sdr-transfer-right.fifo"
+LAYER_CONTROL=1 "$CANOPY_LAYER_CLIENT" HEADLESS-1 0 \
+  < "$CANOPY_RUNTIME_DIR/sdr-transfer-left.fifo" > "$LEFT_LOG" 2>&1 &
+exec {left_fd}> "$CANOPY_RUNTIME_DIR/sdr-transfer-left.fifo"
+LAYER_CONTROL=1 "$CANOPY_LAYER_CLIENT" HEADLESS-2 0 \
+  < "$CANOPY_RUNTIME_DIR/sdr-transfer-right.fifo" > "$RIGHT_LOG" 2>&1 &
+exec {right_fd}> "$CANOPY_RUNTIME_DIR/sdr-transfer-right.fifo"
 await_lines "$LEFT_LOG" ready 1
 await_lines "$RIGHT_LOG" ready 1
 layer_command "$left_fd" "$LEFT_LOG" left-dark FF101010

@@ -1,6 +1,6 @@
 #include "view/effects.h"
 
-namespace umbriel {
+namespace canopy {
 
   bool borderEffectApplies(const BorderEffectGate& gate) {
     return (gate.focused || gate.allowUnfocused) && gate.decorated && !gate.urgent && !gate.fullscreen;
@@ -10,4 +10,4 @@ namespace umbriel {
     return compiled && preset != nullptr && preset->kind == EffectKind::Border ? preset->padding : 0;
   }
 
-} // namespace umbriel
+} // namespace canopy

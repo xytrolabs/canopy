@@ -6,7 +6,7 @@
 #include "wlr.h"
 // clang-format on
 
-namespace umbriel {
+namespace canopy {
 
   void applySurfaceShape(wlr_scene_buffer* buffer, wlr_surface* surface, const pixman_region32_t* shape) {
     if (shape == nullptr) {
@@ -68,4 +68,4 @@ namespace umbriel {
     }
   }
 
-} // namespace umbriel
+} // namespace canopy

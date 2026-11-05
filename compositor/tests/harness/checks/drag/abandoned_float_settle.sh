@@ -8,18 +8,18 @@
 # losing it leaves the window stranded mostly out of frame with nothing to
 # re-clamp it.
 set -euo pipefail
-source "$UMBRIEL_HARNESS_LIB"
+source "$CANOPY_HARNESS_LIB"
 
-readonly CLIENT="${UMBRIEL_FRACTIONAL_CLIENT:-./build-debug/tests/fractional-client}"
-readonly LOCK_CLIENT="${UMBRIEL_LOCK_CLIENT:-./build-debug/tests/lock-client}"
+readonly CLIENT="${CANOPY_FRACTIONAL_CLIENT:-./build-debug/tests/fractional-client}"
+readonly LOCK_CLIENT="${CANOPY_LOCK_CLIENT:-./build-debug/tests/lock-client}"
 readonly TITLE=abandon-float
-readonly LOCK_LOG="$UMBRIEL_RUNTIME_DIR/abandon-lock.log"
-readonly LOCK_FIFO="$UMBRIEL_RUNTIME_DIR/abandon-lock-control"
+readonly LOCK_LOG="$CANOPY_RUNTIME_DIR/abandon-lock.log"
+readonly LOCK_FIFO="$CANOPY_RUNTIME_DIR/abandon-lock-control"
 readonly BTN_LEFT=272
 readonly OUTPUT_W=1280
 readonly OUTPUT_H=720
 
-cat >>"$UMBRIEL_CONFIG" <<'EOF'
+cat >>"$CANOPY_CONFIG" <<'EOF'
 
 [layout]
 mode = "stacking"
@@ -39,18 +39,18 @@ match.title = "^abandon-float$"
 default_floating = true
 default_floating_size_px = { width = 400, height = 300 }
 EOF
-"$UMBRIEL" msg config-reload >/dev/null
+"$CANOPY" msg config-reload >/dev/null
 
 ipc_box() {
-  "$UMBRIEL" windows --json | jq -r --arg title "$TITLE" '.[] | select(.title == $title) | "\(.x) \(.y) \(.w) \(.h)"'
+  "$CANOPY" windows --json | jq -r --arg title "$TITLE" '.[] | select(.title == $title) | "\(.x) \(.y) \(.w) \(.h)"'
 }
 
-"$CLIENT" "$TITLE" 400 300 >"$UMBRIEL_RUNTIME_DIR/abandon-float.log" 2>&1 &
+"$CLIENT" "$TITLE" 400 300 >"$CANOPY_RUNTIME_DIR/abandon-float.log" 2>&1 &
 for _ in $(seq 60); do
   [[ -n $(ipc_box) ]] && break
   sleep 0.25
 done
-"$UMBRIEL" settle
+"$CANOPY" settle
 
 # Grab the title bar at the window's right edge and shove the window left until
 # only a few pixels stay on screen: the margin (75px of the 400px window) wants
@@ -88,7 +88,7 @@ if ! grep -q '^unlocked$' "$LOCK_LOG"; then
   exit 1
 fi
 pointer_release
-"$UMBRIEL" settle
+"$CANOPY" settle
 
 read -r wx wy ww wh < <(ipc_box)
 visible_x=$((ww / 4))

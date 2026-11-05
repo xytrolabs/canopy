@@ -24,7 +24,7 @@ namespace {
 
 } // namespace
 
-namespace umbriel {
+namespace canopy {
 
   QuitConfirm::QuitConfirm(Server& server, wlr_scene_tree* parent) : m_server(server), m_parent(parent) {}
 
@@ -97,7 +97,7 @@ namespace umbriel {
 
     const std::string_view heading = m_kind == Kind::InputCapture ? "Allow input capture?"
         : m_kind == Kind::InputEmulation                          ? "Allow desktop control?"
-        : m_kind == Kind::SessionQuit                             ? "Quit Umbriel?"
+        : m_kind == Kind::SessionQuit                             ? "Quit Canopy?"
                                                                   : "Allow screencast target changes?";
     std::string_view captureChoices = "Enter allows this capture session.\n"
                                       "Any other key or click denies it.";
@@ -121,7 +121,7 @@ namespace umbriel {
         : m_kind == Kind::InputEmulation
         ? std::format(
               "An X11 application claiming to be '{}' wants to control your pointer and keyboard.\n"
-              "Enter allows it for this Umbriel session; any other key or click denies it.",
+              "Enter allows it for this Canopy session; any other key or click denies it.",
               m_application
           )
         : m_kind == Kind::SessionQuit
@@ -188,4 +188,4 @@ namespace umbriel {
     }
   }
 
-} // namespace umbriel
+} // namespace canopy

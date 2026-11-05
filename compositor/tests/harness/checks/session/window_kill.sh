@@ -9,18 +9,18 @@ import signal
 import subprocess
 import time
 
-umbriel = os.environ["UMBRIEL"]
-client = os.environ["UMBRIEL_SEAT_LOG_CLIENT"]
+canopy = os.environ["CANOPY"]
+client = os.environ["CANOPY_SEAT_LOG_CLIENT"]
 
 
 def action(*words, success=True):
-    result = subprocess.run([umbriel, "msg", *words], capture_output=True, text=True, timeout=5)
+    result = subprocess.run([canopy, "msg", *words], capture_output=True, text=True, timeout=5)
     if (result.returncode == 0) != success:
         raise SystemExit(f"unexpected result for {' '.join(words)}: {result.stdout} {result.stderr}")
 
 
 def windows():
-    result = subprocess.run([umbriel, "windows", "--json"], capture_output=True, text=True, check=True, timeout=5)
+    result = subprocess.run([canopy, "windows", "--json"], capture_output=True, text=True, check=True, timeout=5)
     return json.loads(result.stdout)
 
 
@@ -34,7 +34,7 @@ def await_windows(predicate, description):
 
 
 def spawn(title):
-    log = open(os.path.join(os.environ["UMBRIEL_RUNTIME_DIR"], title + ".log"), "w")
+    log = open(os.path.join(os.environ["CANOPY_RUNTIME_DIR"], title + ".log"), "w")
     process = subprocess.Popen([client, title], stdout=log, stderr=subprocess.STDOUT)
     log.close()
     state = await_windows(lambda state: any(w["pid"] == process.pid and w["active"] for w in state), title)

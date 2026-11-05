@@ -15,7 +15,7 @@
 #include <utility>
 #include <vector>
 
-namespace umbriel {
+namespace canopy {
 
   namespace {
 
@@ -217,4 +217,4 @@ namespace umbriel {
     return registry::namedTables<Config>("output", outputFields(), acceptOutput);
   }
 
-} // namespace umbriel
+} // namespace canopy

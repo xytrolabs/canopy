@@ -5,7 +5,7 @@
 # until the drop, so the client's ack of the new size arrives while it is still
 # tiled and must not be mistaken for an interactive resize tracking the pointer.
 set -euo pipefail
-source "$UMBRIEL_HARNESS_LIB"
+source "$CANOPY_HARNESS_LIB"
 
 readonly TITLE=drag-toggle-animation
 readonly BTN_LEFT=272
@@ -16,7 +16,7 @@ readonly OUTPUT_H=720
 wait_for_box() {
   local expected=$1 actual=
   for _ in $(seq 100); do
-    actual=$("$UMBRIEL" windows --json | jq -r --arg t "$TITLE" '.[] | select(.title == $t) | "\(.w)x\(.h)"')
+    actual=$("$CANOPY" windows --json | jq -r --arg t "$TITLE" '.[] | select(.title == $t) | "\(.w)x\(.h)"')
     [[ $actual == "$expected" ]] && return 0
     sleep 0.05
   done
@@ -27,12 +27,12 @@ wait_for_box() {
 # Width of everything the output is drawing. The dragged window is the only
 # window, so this is its presented width, clipped at the output edge.
 capture_width() {
-  local image="$UMBRIEL_RUNTIME_DIR/$1.png"
+  local image="$CANOPY_RUNTIME_DIR/$1.png"
   grim "$image"
-  "$UMBRIEL_PIXEL_PROBE" "$image" bbox 'r > 0.01 || g > 0.01 || b > 0.01' | awk '{ print $3 }'
+  "$CANOPY_PIXEL_PROBE" "$image" bbox 'r > 0.01 || g > 0.01 || b > 0.01' | awk '{ print $3 }'
 }
 
-cat >> "$UMBRIEL_CONFIG" <<'EOF'
+cat >> "$CANOPY_CONFIG" <<'EOF'
 
 [input]
 window_drag_toggle = "floating"
@@ -52,30 +52,30 @@ enabled = false
 [layout.scrolling]
 default_extent_fraction = 1.0
 EOF
-"$UMBRIEL" msg config-reload > /dev/null
+"$CANOPY" msg config-reload > /dev/null
 # Animation time only moves by clock-advance; advancing 3000 ms finishes any 2000 ms timeline.
-"$UMBRIEL" clock-freeze
+"$CANOPY" clock-freeze
 
 foot --title="$TITLE" sh -c 'sleep 120' > /dev/null 2>&1 &
 wait_for_box 1264x704
 
 # Give it a floating size well below its column, so the retarget has a visible
 # distance to animate, then tile it again for the drag to start from.
-"$UMBRIEL" msg window-toggle-floating > /dev/null
-"$UMBRIEL" clock-advance 3000
-"$UMBRIEL" msg window-set-primary-extent 0.25 > /dev/null
-"$UMBRIEL" msg window-set-secondary-extent 0.3 > /dev/null
+"$CANOPY" msg window-toggle-floating > /dev/null
+"$CANOPY" clock-advance 3000
+"$CANOPY" msg window-set-primary-extent 0.25 > /dev/null
+"$CANOPY" msg window-set-secondary-extent 0.3 > /dev/null
 wait_for_box 320x216
-"$UMBRIEL" msg window-toggle-floating > /dev/null
+"$CANOPY" msg window-toggle-floating > /dev/null
 wait_for_box 1264x704
 # The re-tile animates too: halfway through it still shows a box between the floating and tiled widths.
-"$UMBRIEL" clock-advance 1000
+"$CANOPY" clock-advance 1000
 retile_width=$(capture_width retile)
 if ((retile_width <= 320 || retile_width >= 1264)); then
   echo "the re-tile did not animate from the floating size: width $retile_width halfway through"
   exit 1
 fi
-"$UMBRIEL" clock-advance 3000
+"$CANOPY" clock-advance 3000
 tiled_width=$(capture_width tiled)
 if ((tiled_width < 1264)); then
   echo "setup did not fill the output with the tiled window: $tiled_width"
@@ -87,14 +87,14 @@ fi
 pointer_hold "$OUTPUT_W" "$OUTPUT_H" move 640 360 mod logo press "$BTN_LEFT" move 640 400 \
   press "$BTN_RIGHT" release "$BTN_RIGHT" -- move 641 400 release "$BTN_LEFT" mod none
 wait_for_box 320x216
-"$UMBRIEL" clock-advance 350
+"$CANOPY" clock-advance 350
 early=$(capture_width early)
-"$UMBRIEL" clock-advance 800
+"$CANOPY" clock-advance 800
 late=$(capture_width late)
-"$UMBRIEL" clock-advance 3000
+"$CANOPY" clock-advance 3000
 settled=$(capture_width settled)
 pointer_release
-"$UMBRIEL" clock-advance 3000
+"$CANOPY" clock-advance 3000
 
 if ((early <= late || late <= settled)); then
   echo "the retarget did not animate: widths ${early} -> ${late} -> ${settled} (expected a shrinking presented size)"
@@ -104,8 +104,8 @@ if ((settled != 320)); then
   echo "the animation did not settle on the floating width: $settled"
   exit 1
 fi
-if [[ $("$UMBRIEL" windows --json | jq -r --arg t "$TITLE" '.[] | select(.title == $t) | .floating') != true ]]; then
-  echo "the drop did not float the window: $("$UMBRIEL" windows --json)"
+if [[ $("$CANOPY" windows --json | jq -r --arg t "$TITLE" '.[] | select(.title == $t) | .floating') != true ]]; then
+  echo "the drop did not float the window: $("$CANOPY" windows --json)"
   exit 1
 fi
 

@@ -33,7 +33,7 @@ let
   version = lib.trim (builtins.readFile ../VERSION);
 in
 stdenv.mkDerivation {
-  pname = "umbriel";
+  pname = "canopy";
   inherit version;
 
   src = ../.;
@@ -76,25 +76,25 @@ stdenv.mkDerivation {
 
   postPatch = ''
     substituteInPlace meson.build \
-      --replace-fail "umbriel_git_revision_config.set('VCS_TAG', 'unknown')" "umbriel_git_revision_config.set('VCS_TAG', '${rev}')"
+      --replace-fail "canopy_git_revision_config.set('VCS_TAG', 'unknown')" "canopy_git_revision_config.set('VCS_TAG', '${rev}')"
   '';
 
   postInstall = ''
-    if [ -f "$out/share/wayland-sessions/umbriel.desktop" ]; then
-      substituteInPlace "$out/share/wayland-sessions/umbriel.desktop" \
-        --replace-fail 'Exec=start-umbriel' "Exec=$out/bin/start-umbriel"
+    if [ -f "$out/share/wayland-sessions/canopy.desktop" ]; then
+      substituteInPlace "$out/share/wayland-sessions/canopy.desktop" \
+        --replace-fail 'Exec=start-canopy' "Exec=$out/bin/start-canopy"
     fi
-    wrapProgram $out/bin/umbriel \
+    wrapProgram $out/bin/canopy \
       --prefix PATH : ${lib.makeBinPath [ xwayland ]} \
   '';
 
-  passthru.providedSessions = [ "umbriel" ];
+  passthru.providedSessions = [ "canopy" ];
 
   meta = with lib; {
     description = "A Wayland compositor built on wlroots";
-    homepage = "https://github.com/noctalia-dev/umbriel";
+    homepage = "https://github.com/xytrolabs/canopy";
     license = licenses.mit;
     platforms = platforms.linux;
-    mainProgram = "umbriel";
+    mainProgram = "canopy";
   };
 }

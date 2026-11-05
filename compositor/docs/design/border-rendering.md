@@ -1,6 +1,6 @@
 # Border rendering
 
-Umbriel renders each decorated window with one `umbrielfx` `wlr_scene_border` node. The node owns both color bands and submits one draw through the dedicated `border.frag` shader. The regular rounded-rectangle shader is not part of the window border path.
+Canopy renders each decorated window with one `canopyfx` `wlr_scene_border` node. The node owns both color bands and submits one draw through the dedicated `border.frag` shader. The regular rounded-rectangle shader is not part of the window border path.
 
 ## Geometry contract
 
@@ -41,13 +41,13 @@ Inner and outer edge coverage is symmetric around the corresponding geometric bo
 
 ## CPU clipping
 
-`umbrielfx` limits fragment work by subtracting areas that are certainly inside the transparent content hole. Rounded corners must remain shader-owned. `apply_clip_region` uses the explicit content radii and subtracts only a central horizontal and vertical cross. Integer truncation of a diagonal approximation can otherwise remove an isolated fragment before the shader runs.
+`canopyfx` limits fragment work by subtracting areas that are certainly inside the transparent content hole. Rounded corners must remain shader-owned. `apply_clip_region` uses the explicit content radii and subtracts only a central horizontal and vertical cross. Integer truncation of a diagonal approximation can otherwise remove an isolated fragment before the shader runs.
 
 ## Content coverage
 
 The hole is transparent, so the client surface owns every pixel inside it. Both boxes are scaled from the same logical edges, which is what keeps the surface's physical box and the hole identical under fractional scaling. Nothing in the render path may resize a surface's destination box to match its buffer: a client that renders at the exact output scale can report a pixel count one short of that box, and shrinking the destination leaves a line of background inside the hole that neither the border nor the surface paints.
 
-Texel alignment is recovered from the source box instead. `umbrielfx` snaps a source box to integer texels and then adopts the destination extent whenever the two are within one texel, so sampling lands on texel centers rather than between them, which is what keeps subpixel-hinted text sharp.
+Texel alignment is recovered from the source box instead. `canopyfx` snaps a source box to integer texels and then adopts the destination extent whenever the two are within one texel, so sampling lands on texel centers rather than between them, which is what keeps subpixel-hinted text sharp.
 
 Snapping a source box outward can reach past the region it describes. A client-side-decorated window is cropped to its xdg geometry, and under fractional scale that crop edge falls between texels: the toolkit renders its window into a pixel-aligned sub-rect and leaves the straddling texel to its transparent shadow margin. Sampling it draws one see-through line along the cropped edge. `fx_render_texture_options.sample_box` carries the whole texels the source region owns, rounded inward, and selects a texture shader variant that clamps every coordinate into it. The edge texel inside the crop is duplicated instead, which is both opaque and sharp.
 
@@ -55,7 +55,7 @@ The clamp variant is confined to source boxes that cross an interior crop edge. 
 
 ## Surface rounding
 
-The content edge is a shader contour, so the client surfaces inside the hole have to follow the same arc or their square corners cover it. Each scene buffer carries `corner_box`, the rounded rectangle its radii describe, in node-relative coordinates. Umbriel gives every buffer under a toplevel's surface tree the same box, the window's content box, and the fragment shader clips to it and rounds its corners.
+The content edge is a shader contour, so the client surfaces inside the hole have to follow the same arc or their square corners cover it. Each scene buffer carries `corner_box`, the rounded rectangle its radii describe, in node-relative coordinates. Canopy gives every buffer under a toplevel's surface tree the same box, the window's content box, and the fragment shader clips to it and rounds its corners.
 
 Nothing in that rule inspects a buffer's own destination quad, which is what makes it hold in every state a window reaches:
 

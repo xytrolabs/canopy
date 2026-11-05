@@ -1,6 +1,18 @@
 # Credits
 
-Noctalia is made possible by the incredible work of many open-source projects and contributors.
+Canopy is made possible by the incredible work of many open-source projects and contributors.
+
+## Compositor
+
+`canopywc`, Canopy's compositor, is a fork of [Umbriel](https://github.com/noctalia-dev/umbriel),
+which is the compositor half of [Noctalia](https://github.com/noctalia-dev/noctalia) — the same
+project the shell began life as. Their window management, protocols, effects work and keybind
+model carried over wholesale; the identity, the stacking default and the look are Canopy's.
+
+- **[Umbriel](https://github.com/noctalia-dev/umbriel)** — the compositor `canopywc` was forked from (MIT)
+- **[Noctalia](https://github.com/noctalia-dev/noctalia)** — the upstream project both halves descend from (MIT)
+- **[wlroots](https://gitlab.freedesktop.org/wlroots/wlroots)** — the compositor library underneath (MIT)
+- **[SceneFX](https://github.com/wlrfx/scenefx)** — `canopyfx`, the scene graph and renderer, is a hard fork of it (MIT)
 
 ## Design & Branding
 
@@ -54,18 +66,19 @@ Bundled in `third_party/` and built from source:
 
 ## System Integration
 
-External tools Noctalia integrates with at runtime when present:
+External tools Canopy integrates with at runtime when present:
 
 - **[ddcutil](https://www.ddcutil.com/)** — External display brightness control
 
 ## Special Thanks
 
 - The **Wayland** community for building the future of Linux desktop graphics
+- The **Umbriel** and **Noctalia** contributors, for the compositor Canopy grew from
 - The **Niri**, **Hyprland**, **Sway**, **Labwc**, and **MangoWC** teams for their excellent Wayland compositors
-- All the contributors and users who have helped make Noctalia better
+- All the contributors and users who have helped make Canopy better
 
 ## License
 
-Noctalia is licensed under the MIT License. See [LICENSE](LICENSE) for details.
+Canopy is licensed under the MIT License. See [LICENSE](LICENSE) for details.
 
 Each dependency listed above is governed by its own respective license. Please refer to their individual projects for licensing information.

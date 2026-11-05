@@ -8,7 +8,7 @@ extern "C" {
 #include <wlr/types/wlr_output.h>
 }
 
-namespace umbriel {
+namespace canopy {
 
   enum class [[nodiscard]] RenderedStateCommitResult {
     BuildFailed,
@@ -29,4 +29,4 @@ namespace umbriel {
                                                : RenderedStateCommitResult::CommitFailed;
   }
 
-} // namespace umbriel
+} // namespace canopy

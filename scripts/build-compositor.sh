@@ -41,12 +41,11 @@ fi
 say ">> building compositor"
 meson compile -C "$BUILD_DIR"
 
-BIN="$BUILD_DIR/umbriel"
+BIN="$BUILD_DIR/canopywc"
 [ -x "$BIN" ] || { say "error: $BIN was not produced" >&2; exit 1; }
 say ">> built $BIN"
 
-# Name resolution for the fork's IPC, as the shell expects it:
-#   $XDG_RUNTIME_DIR/<binary>-<WAYLAND_DISPLAY>.sock, exported as UMBRIEL_SOCKET
+# The compositor exports CANOPY_SOCKET and reads ~/.config/canopy/compositor.toml.
 say ""
 say "Run it under the shell with:"
-say "  CANOPY_COMPOSITOR_BUILD=$BIN sh scripts/canopy-session --compositor umbriel"
+say "  sh scripts/canopy-session --compositor canopywc"

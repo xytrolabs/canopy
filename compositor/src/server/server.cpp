@@ -42,7 +42,7 @@
 #include "xwayland/xwayland.h"
 
 extern "C" {
-#include <umbrielfx/render/effect.h>
+#include <canopyfx/render/effect.h>
 }
 
 #include <algorithm>
@@ -63,7 +63,7 @@ extern "C" {
 #include <unistd.h>
 #include <vector>
 
-namespace umbriel {
+namespace canopy {
 
   namespace {
 
@@ -221,12 +221,12 @@ namespace umbriel {
           configuredAssignments.empty() ? "" : " && systemctl --user set-environment" + configuredAssignments;
       std::string command =
           "variables='WAYLAND_DISPLAY DISPLAY XDG_CURRENT_DESKTOP XDG_SESSION_DESKTOP XDG_SESSION_TYPE "
-          "XCURSOR_THEME XCURSOR_SIZE UMBRIEL_SOCKET'; systemd_ready=false; "
+          "XCURSOR_THEME XCURSOR_SIZE CANOPY_SOCKET'; systemd_ready=false; "
           "if command -v systemctl >/dev/null 2>&1 && systemctl --user show-environment >/dev/null 2>&1; then "
           "if systemctl --user import-environment $variables";
       command += publishConfigured;
       command += "; then systemd_ready=true; else "
-                 "echo 'umbriel: failed to publish the session environment' >&2; exit 1; fi; fi; "
+                 "echo 'canopy: failed to publish the session environment' >&2; exit 1; fi; fi; "
                  // The compositor waits on this script with its event loop stopped. Without a bus address, libdbus
                  // autolaunches over X11, and DISPLAY names an Xwayland that only that loop can start. Use the
                  // user bus socket when the address is unset, and skip the update when there is no bus at all.
@@ -235,11 +235,11 @@ namespace umbriel {
                  "if [ -n \"${DBUS_SESSION_BUS_ADDRESS:-}\" ] "
                  "&& command -v dbus-update-activation-environment >/dev/null 2>&1; then "
                  "dbus-update-activation-environment $variables || { "
-                 "echo 'umbriel: failed to update the D-Bus activation environment' >&2; exit 1; }; fi; ";
+                 "echo 'canopy: failed to update the D-Bus activation environment' >&2; exit 1; }; fi; ";
       if (managedReadiness) {
         command += "$systemd_ready";
       } else {
-        command += "if $systemd_ready; then systemctl --user start --no-block umbriel-session.target; fi";
+        command += "if $systemd_ready; then systemctl --user start --no-block canopywc-session.target; fi";
       }
       return command;
     }
@@ -700,10 +700,10 @@ namespace umbriel {
     m_outputLayout = wlr_output_layout_create(m_display);
     wlr_xdg_output_manager_v1_create(m_display, m_outputLayout);
     // A scene helper served by libwlroots allocates nodes too small for
-    // umbrielfx's trailing fields, which renders every surface black instead of
+    // canopyfx's trailing fields, which renders every surface black instead of
     // failing. Refuse to build a scene on top of that.
-    if (const char* mismatch = umbrielfx_scene_check_helpers(); mismatch != nullptr) {
-      throw std::runtime_error(std::string("umbrielfx scene helpers are not linked correctly: ") + mismatch);
+    if (const char* mismatch = canopyfx_scene_check_helpers(); mismatch != nullptr) {
+      throw std::runtime_error(std::string("canopyfx scene helpers are not linked correctly: ") + mismatch);
     }
     m_scene = wlr_scene_create();
     if (linuxDmabuf != nullptr) {
@@ -1202,13 +1202,13 @@ namespace umbriel {
       m_systemctlExecutable = resolveExecutable("systemctl");
       m_systemdControlEnvironment = captureSystemdControlEnvironment();
       const std::string ownerUnit = currentSystemdUnit();
-      m_sessionShutdownAvailable = ownerUnit == "umbriel.service" && !m_systemctlExecutable.empty();
+      m_sessionShutdownAvailable = ownerUnit == "canopywc.service" && !m_systemctlExecutable.empty();
       if (m_systemdRunExecutable.empty()) {
         kLog.warn("application scope isolation unavailable: systemd-run was not found on PATH");
       } else if (ownerUnit.empty()) {
         kLog.warn("application scope isolation unavailable: cannot identify the compositor unit");
       } else {
-        m_applicationScopePartOfProperty = "--property=PartOf=umbriel-session.target";
+        m_applicationScopePartOfProperty = "--property=PartOf=canopywc-session.target";
         m_applicationScopeBindsToProperty = "--property=BindsTo=" + ownerUnit;
         m_applicationScopeAfterProperty = "--property=After=" + ownerUnit;
         m_applicationScopeEnvironmentArguments = applicationScopeEnvironmentArguments(config().environment.variables);
@@ -1233,12 +1233,12 @@ namespace umbriel {
     m_backgroundRenderTimer =
         wl_event_loop_add_timer(wl_display_get_event_loop(m_display), onBackgroundRenderTimer, this);
     setenv(
-        "UMBRIEL_SOCKET",
-        (std::string(std::getenv("XDG_RUNTIME_DIR") ?: "") + "/umbriel-" + m_socketName + ".sock").c_str(), true
+        "CANOPY_SOCKET",
+        (std::string(std::getenv("XDG_RUNTIME_DIR") ?: "") + "/canopywc-" + m_socketName + ".sock").c_str(), true
     );
     m_ipc = std::make_unique<Ipc>(*this, m_socketName);
-    setenv("XDG_CURRENT_DESKTOP", "umbriel", 1);
-    setenv("XDG_SESSION_DESKTOP", "umbriel", 1);
+    setenv("XDG_CURRENT_DESKTOP", "canopy", 1);
+    setenv("XDG_SESSION_DESKTOP", "canopy", 1);
     setenv("XDG_SESSION_TYPE", "wayland", 1);
 
     // Export cursor settings so X11 clients and toolkit clients pick up the
@@ -1311,9 +1311,9 @@ namespace umbriel {
       wl_event_source_timer_update(m_startupRulesTimer, kStartupRuleDurationMs);
     }
 
-#ifdef UMBRIEL_HARNESS
-    // Harness builds only: UMBRIEL_CONFIG_WATCH=0 turns the config file watcher off.
-    const char* watchSetting = std::getenv("UMBRIEL_CONFIG_WATCH");
+#ifdef CANOPY_HARNESS
+    // Harness builds only: CANOPY_CONFIG_WATCH=0 turns the config file watcher off.
+    const char* watchSetting = std::getenv("CANOPY_CONFIG_WATCH");
     const bool watchConfig = watchSetting == nullptr || std::strcmp(watchSetting, "0") != 0;
 #else
     constexpr bool watchConfig = true;
@@ -1448,7 +1448,7 @@ namespace umbriel {
     }
     m_sessionExitResultFd = resultPipe[0];
     const std::string command = shellQuote(m_systemctlExecutable)
-        + " --user start --job-mode=replace-irreversibly --no-block umbriel-shutdown.target 1>&2 && printf x";
+        + " --user start --job-mode=replace-irreversibly --no-block canopywc-shutdown.target 1>&2 && printf x";
     const pid_t pid = fork();
     if (pid == 0) {
       resetChildSignalState();
@@ -1553,7 +1553,7 @@ namespace umbriel {
       return;
     }
     const std::string scopeUnitArgument = scopeRequired
-        ? "--unit=app-umbriel-" + std::to_string(getpid()) + "-" + std::to_string(m_nextApplicationScopeId++) + ".scope"
+        ? "--unit=app-canopy-" + std::to_string(getpid()) + "-" + std::to_string(m_nextApplicationScopeId++) + ".scope"
         : "";
 
     wlr_xdg_activation_token_v1* launchToken = nullptr;
@@ -1949,7 +1949,7 @@ namespace umbriel {
   void Server::unregisterAnimatable(Animatable* animatable) { std::erase(m_animatables, animatable); }
 
   bool Server::tickAnimations(double nowMsec) {
-    UMBRIEL_ZONE("Server::tickAnimations");
+    CANOPY_ZONE("Server::tickAnimations");
     // Outputs tick at their own vblank instants, which interleave. Animation state is shared, so an earlier instant
     // than the last tick never moves it backwards.
     if (nowMsec <= m_lastAnimTickMsec) {
@@ -2005,7 +2005,7 @@ namespace umbriel {
   }
 
   double Server::animationFrameClockMsec(double monotonicMsec) const {
-#ifdef UMBRIEL_HARNESS
+#ifdef CANOPY_HARNESS
     if (m_frozenAnimationClockMsec) {
       return static_cast<double>(*m_frozenAnimationClockMsec);
     }
@@ -2015,7 +2015,7 @@ namespace umbriel {
 #endif
   }
 
-#ifdef UMBRIEL_HARNESS
+#ifdef CANOPY_HARNESS
   void Server::freezeAnimationClock() {
     if (!m_frozenAnimationClockMsec) {
       m_frozenAnimationClockMsec = animationClockMsec();
@@ -2193,4 +2193,4 @@ namespace umbriel {
     const auto diff = std::chrono::steady_clock::now() - m_startTime;
     return std::chrono::duration_cast<std::chrono::milliseconds>(diff).count();
   }
-} // namespace umbriel
+} // namespace canopy

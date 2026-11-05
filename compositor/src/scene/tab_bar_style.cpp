@@ -1,6 +1,6 @@
 #include "scene/tab_bar_style.h"
 
-namespace umbriel {
+namespace canopy {
 
   TabBarStyle resolveTabBarStyle(const Config& config) {
     const Config::Appearance::TabBar& bar = config.appearance.tabBar;
@@ -17,4 +17,4 @@ namespace umbriel {
     };
   }
 
-} // namespace umbriel
+} // namespace canopy

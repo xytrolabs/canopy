@@ -3,19 +3,19 @@
 # A solid client on the black headless output makes its presented width measurable before, during, and after the action.
 set -euo pipefail
 
-readonly CLIENT="${UMBRIEL_UNMAP_CLIENT:-./build-debug/tests/unmap-client}"
-readonly CLIENT_LOG="$UMBRIEL_RUNTIME_DIR/maximize-to-edges-animation-client.log"
-readonly BEFORE="$UMBRIEL_RUNTIME_DIR/maximize-to-edges-before.png"
-readonly DURING="$UMBRIEL_RUNTIME_DIR/maximize-to-edges-during.png"
-readonly AFTER="$UMBRIEL_RUNTIME_DIR/maximize-to-edges-after.png"
+readonly CLIENT="${CANOPY_UNMAP_CLIENT:-./build-debug/tests/unmap-client}"
+readonly CLIENT_LOG="$CANOPY_RUNTIME_DIR/maximize-to-edges-animation-client.log"
+readonly BEFORE="$CANOPY_RUNTIME_DIR/maximize-to-edges-before.png"
+readonly DURING="$CANOPY_RUNTIME_DIR/maximize-to-edges-during.png"
+readonly AFTER="$CANOPY_RUNTIME_DIR/maximize-to-edges-after.png"
 
 # Pixels on the middle row within 2% of the client's #5577AA fill.
 presented_width() {
-  "$UMBRIEL_PIXEL_PROBE" "$1" count \
+  "$CANOPY_PIXEL_PROBE" "$1" count \
     'r > 0.313 && r < 0.354 && g > 0.447 && g < 0.487 && b > 0.647 && b < 0.687' 1280x1+0+360
 }
 
-cat >> "$UMBRIEL_CONFIG" <<'EOF'
+cat >> "$CANOPY_CONFIG" <<'EOF'
 
 [animation]
 duration_ms = 2000
@@ -29,14 +29,14 @@ corner_radius = 0
 [layout.scrolling]
 default_extent_fraction = 0.5
 EOF
-"$UMBRIEL" msg config-reload > /dev/null
+"$CANOPY" msg config-reload > /dev/null
 
 # Animation time only moves by clock-advance: the sample lands halfway through the 2000 ms linear timeline.
-"$UMBRIEL" clock-freeze
+"$CANOPY" clock-freeze
 "$CLIENT" "maximize-to-edges-animation" 1280 720 > "$CLIENT_LOG" 2>&1 &
 
 for _ in $(seq 60); do
-  "$UMBRIEL" windows --json | jq -e '.[] | select(.title == "maximize-to-edges-animation")' > /dev/null && break
+  "$CANOPY" windows --json | jq -e '.[] | select(.title == "maximize-to-edges-animation")' > /dev/null && break
   sleep 0.05
 done
 if ! grep -q '^mapped$' "$CLIENT_LOG"; then
@@ -44,18 +44,18 @@ if ! grep -q '^mapped$' "$CLIENT_LOG"; then
   exit 1
 fi
 
-"$UMBRIEL" clock-advance 2500
-"$UMBRIEL" settle
+"$CANOPY" clock-advance 2500
+"$CANOPY" settle
 grim "$BEFORE"
 before_width=$(presented_width "$BEFORE")
 
-"$UMBRIEL" msg window-toggle-maximize-to-edges > /dev/null
-"$UMBRIEL" clock-advance 1000
+"$CANOPY" msg window-toggle-maximize-to-edges > /dev/null
+"$CANOPY" clock-advance 1000
 grim "$DURING"
 during_width=$(presented_width "$DURING")
 
-"$UMBRIEL" clock-advance 2000
-"$UMBRIEL" settle
+"$CANOPY" clock-advance 2000
+"$CANOPY" settle
 grim "$AFTER"
 after_width=$(presented_width "$AFTER")
 

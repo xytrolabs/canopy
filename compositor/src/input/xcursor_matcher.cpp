@@ -9,7 +9,7 @@ extern "C" {
 #include <wlr/xcursor.h>
 }
 
-namespace umbriel {
+namespace canopy {
   namespace {
 
     constexpr size_t kBytesPerPixel = 4;
@@ -138,4 +138,4 @@ namespace umbriel {
     return std::nullopt;
   }
 
-} // namespace umbriel
+} // namespace canopy

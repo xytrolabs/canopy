@@ -13,7 +13,7 @@ struct wlr_scene_tree;
 struct wlr_surface;
 struct wlr_xdg_popup;
 
-namespace umbriel {
+namespace canopy {
 
   class Output;
   class Server;
@@ -99,4 +99,4 @@ namespace umbriel {
     wl_listener m_sceneDestroy{};
   };
 
-} // namespace umbriel
+} // namespace canopy

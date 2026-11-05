@@ -22,7 +22,7 @@ struct wlr_xwayland_surface;
 struct wlr_xwayland_surface_configure_event;
 struct xcb_connection_t;
 
-namespace umbriel {
+namespace canopy {
 
   class Server;
   class XwaylandWindow;
@@ -130,4 +130,4 @@ namespace umbriel {
     wl_listener m_keyboardFocusChange{};
   };
 
-} // namespace umbriel
+} // namespace canopy

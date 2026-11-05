@@ -5,7 +5,7 @@ struct wlr_scene_node;
 struct wlr_scene_tree;
 struct wlr_surface;
 
-namespace umbriel {
+namespace canopy {
 
   class Server;
   class Workspace;
@@ -22,4 +22,4 @@ namespace umbriel {
     Workspace* windowRuleWorkspace(WorkspaceGroup* group, const ResolvedWindowRule& rule);
   } // namespace view_detail
 
-} // namespace umbriel
+} // namespace canopy

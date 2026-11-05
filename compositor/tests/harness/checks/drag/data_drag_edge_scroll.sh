@@ -3,18 +3,18 @@
 # Moving inward over that newly revealed client and releasing must complete a real Wayland drop.
 set -euo pipefail
 
-source "$UMBRIEL_HARNESS_LIB"
+source "$CANOPY_HARNESS_LIB"
 
 readonly OUTPUT_W=1280
 readonly OUTPUT_H=720
 readonly LEFT_BUTTON=272
-readonly DRAG_CLIENT="${UMBRIEL_DRAG_CLIENT:-./build-debug/tests/drag-client}"
-readonly CLIENT="${UMBRIEL_UNMAP_CLIENT:-./build-debug/tests/unmap-client}"
-readonly SOURCE_LOG="$UMBRIEL_RUNTIME_DIR/data-drag-edge-source.log"
-readonly TARGET_LOG="$UMBRIEL_RUNTIME_DIR/data-drag-edge-target.log"
+readonly DRAG_CLIENT="${CANOPY_DRAG_CLIENT:-./build-debug/tests/drag-client}"
+readonly CLIENT="${CANOPY_UNMAP_CLIENT:-./build-debug/tests/unmap-client}"
+readonly SOURCE_LOG="$CANOPY_RUNTIME_DIR/data-drag-edge-source.log"
+readonly TARGET_LOG="$CANOPY_RUNTIME_DIR/data-drag-edge-target.log"
 
 window_count() {
-  "$UMBRIEL" windows --json | jq 'length'
+  "$CANOPY" windows --json | jq 'length'
 }
 
 wait_for_count() {
@@ -23,7 +23,7 @@ wait_for_count() {
     [[ $(window_count) -eq $want ]] && return 0
     sleep 0.1
   done
-  echo "expected $want windows, got: $("$UMBRIEL" windows --json)"
+  echo "expected $want windows, got: $("$CANOPY" windows --json)"
   return 1
 }
 
@@ -39,16 +39,16 @@ wait_for_log() {
 
 spawn_client() {
   local title=$1
-  "$CLIENT" "$title" 624 700 > "$UMBRIEL_RUNTIME_DIR/$title.log" 2>&1 &
+  "$CLIENT" "$title" 624 700 > "$CANOPY_RUNTIME_DIR/$title.log" 2>&1 &
 }
 
-cat >> "$UMBRIEL_CONFIG" <<'EOF'
+cat >> "$CANOPY_CONFIG" <<'EOF'
 
 [layout.scrolling]
 default_extent_fraction = 0.5
 center_focused = "never"
 EOF
-"$UMBRIEL" msg config-reload > /dev/null
+"$CANOPY" msg config-reload > /dev/null
 
 spawn_client data-drag-edge-a
 wait_for_count 1
@@ -61,10 +61,10 @@ TARGET_PID=$!
 wait_for_log "$TARGET_LOG" '^ready$' "drop target"
 wait_for_count 4
 
-"$UMBRIEL" msg column-focus-first > /dev/null
-"$UMBRIEL" settle
+"$CANOPY" msg column-focus-first > /dev/null
+"$CANOPY" settle
 
-windows=$("$UMBRIEL" windows --json)
+windows=$("$CANOPY" windows --json)
 initial_first_x=$(jq -r '.[] | select(.title == "data-drag-edge-a") | .x' <<< "$windows")
 initial_target_x=$(jq -r '.[] | select(.title == "data-drag-edge-target") | .x' <<< "$windows")
 if ((initial_target_x < OUTPUT_W)); then
@@ -86,7 +86,7 @@ moved=false
 first_x=$initial_first_x
 target_x=$initial_target_x
 for _ in $(seq 120); do
-  windows=$("$UMBRIEL" windows --json)
+  windows=$("$CANOPY" windows --json)
   first_x=$(jq -r '.[] | select(.title == "data-drag-edge-a") | .x' <<< "$windows")
   target_x=$(jq -r '.[] | select(.title == "data-drag-edge-target") | .x' <<< "$windows")
   if ((first_x < initial_first_x && target_x <= 700)); then

@@ -13,7 +13,7 @@
 #include <utility>
 #include <vector>
 
-namespace umbriel {
+namespace canopy {
 
   namespace {
 
@@ -142,4 +142,4 @@ namespace umbriel {
     );
   }
 
-} // namespace umbriel
+} // namespace canopy

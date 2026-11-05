@@ -16,12 +16,12 @@ extern "C" {
 #undef static
 }
 
-using umbriel::FormatCommitResult;
-using umbriel::FormatSequenceOps;
-using umbriel::FormatSequenceParams;
-using umbriel::FormatSequenceResult;
-using umbriel::FormatTier;
-using umbriel::runFormatSequence;
+using canopy::FormatCommitResult;
+using canopy::FormatSequenceOps;
+using canopy::FormatSequenceParams;
+using canopy::FormatSequenceResult;
+using canopy::FormatTier;
+using canopy::runFormatSequence;
 
 namespace {
 
@@ -134,7 +134,7 @@ namespace {
 } // namespace
 
 // SDR8 baseline: XR24 must pass its test before it is committed.
-UMBRIEL_TEST(sdr8CommitsXr24) {
+CANOPY_TEST(sdr8CommitsXr24) {
   MockOps m;
   m.testResults = {true};
 
@@ -148,7 +148,7 @@ UMBRIEL_TEST(sdr8CommitsXr24) {
   CHECK_EQ(m.count(Kind::Commit), size_t{1});
 }
 
-UMBRIEL_TEST(sdr8StageFailureSkipsTestAndCommit) {
+CANOPY_TEST(sdr8StageFailureSkipsTestAndCommit) {
   MockOps m;
   m.nonPrimaryFormats = {DRM_FORMAT_XRGB8888};
   m.testResults = {true};
@@ -162,7 +162,7 @@ UMBRIEL_TEST(sdr8StageFailureSkipsTestAndCommit) {
 }
 
 // A rejected VRR swapchain must retry without VRR before rendering a frame.
-UMBRIEL_TEST(sdr8TestRejectionRetriesWithoutVrr) {
+CANOPY_TEST(sdr8TestRejectionRetriesWithoutVrr) {
   MockOps m;
   m.testResults = {false, true};
 
@@ -187,7 +187,7 @@ UMBRIEL_TEST(sdr8TestRejectionRetriesWithoutVrr) {
 }
 
 // SDR10: XR30 fails its test, XB30 passes and is the only commit.
-UMBRIEL_TEST(sdr10XR30TestFailedFallsBackToXB30) {
+CANOPY_TEST(sdr10XR30TestFailedFallsBackToXB30) {
   MockOps m;
   m.testResults = {false, true};
 
@@ -205,7 +205,7 @@ UMBRIEL_TEST(sdr10XR30TestFailedFallsBackToXB30) {
 }
 
 // Keep XB30 when it is already active instead of switching to XR30.
-UMBRIEL_TEST(sdr10PrefersActiveXB30) {
+CANOPY_TEST(sdr10PrefersActiveXB30) {
   MockOps m;
   m.testResults = {true};
 
@@ -226,7 +226,7 @@ UMBRIEL_TEST(sdr10PrefersActiveXB30) {
 
 // SDR10: Both 10-bit formats fail their tests. Nothing is committed for them,
 // the reason is set, and XR24 commits.
-UMBRIEL_TEST(sdr10BothRejectedSetsFallbackReasonAndCommitsSdr8) {
+CANOPY_TEST(sdr10BothRejectedSetsFallbackReasonAndCommitsSdr8) {
   MockOps m;
   m.testResults = {false, false, true};
 
@@ -244,7 +244,7 @@ UMBRIEL_TEST(sdr10BothRejectedSetsFallbackReasonAndCommitsSdr8) {
 }
 
 // A format outside the primary plane set is skipped without a test.
-UMBRIEL_TEST(nonPrimaryFormatIsNotTested) {
+CANOPY_TEST(nonPrimaryFormatIsNotTested) {
   MockOps m;
   m.nonPrimaryFormats = {DRM_FORMAT_XRGB2101010};
   m.testResults = {true};
@@ -260,7 +260,7 @@ UMBRIEL_TEST(nonPrimaryFormatIsNotTested) {
 }
 
 // VRR retry: XR24 commit fails with VRR and succeeds without it.
-UMBRIEL_TEST(vrrRetryCommitsWithoutVrr) {
+CANOPY_TEST(vrrRetryCommitsWithoutVrr) {
   MockOps m;
   m.testResults = {true};
   m.commitResults = {false, true};
@@ -282,7 +282,7 @@ UMBRIEL_TEST(vrrRetryCommitsWithoutVrr) {
 
 // SDR10 VRR retry: Both formats fail with VRR. The active XB30 passes
 // without VRR and is the only commit.
-UMBRIEL_TEST(sdr10VrrRetryWarnsWhenVrrDropped) {
+CANOPY_TEST(sdr10VrrRetryWarnsWhenVrrDropped) {
   MockOps m;
   m.testResults = {false, false, true};
 
@@ -308,7 +308,7 @@ UMBRIEL_TEST(sdr10VrrRetryWarnsWhenVrrDropped) {
 }
 
 // HDR VRR retry: HDR only passes its test without VRR.
-UMBRIEL_TEST(hdrVrrRetryWarnsWhenVrrDropped) {
+CANOPY_TEST(hdrVrrRetryWarnsWhenVrrDropped) {
   MockOps m;
   m.testResults = {false, false, true};
 
@@ -327,7 +327,7 @@ UMBRIEL_TEST(hdrVrrRetryWarnsWhenVrrDropped) {
 }
 
 // No warning when VRR is kept.
-UMBRIEL_TEST(sdr10WithVrrDoesNotWarn) {
+CANOPY_TEST(sdr10WithVrrDoesNotWarn) {
   MockOps m;
   m.testResults = {true};
 
@@ -344,7 +344,7 @@ UMBRIEL_TEST(sdr10WithVrrDoesNotWarn) {
 }
 
 // The VRR warning is not repeated when the same tier dropped VRR last time.
-UMBRIEL_TEST(vrrWarningNotRepeatedForSameTier) {
+CANOPY_TEST(vrrWarningNotRepeatedForSameTier) {
   MockOps m;
   m.testResults = {true};
   m.commitResults = {false, true};
@@ -361,7 +361,7 @@ UMBRIEL_TEST(vrrWarningNotRepeatedForSameTier) {
 }
 
 // The VRR warning comes back when a different tier drops VRR.
-UMBRIEL_TEST(vrrWarningRepeatsWhenTierChanges) {
+CANOPY_TEST(vrrWarningRepeatsWhenTierChanges) {
   MockOps m;
   m.testResults = {true};
   m.commitResults = {false, true};
@@ -379,7 +379,7 @@ UMBRIEL_TEST(vrrWarningRepeatsWhenTierChanges) {
 
 // A failed XR30 commit ends the tier; XB30 is only considered when XR30
 // fails its pre-commit test.
-UMBRIEL_TEST(sdr10CommitFailureFallsThroughToSdr8) {
+CANOPY_TEST(sdr10CommitFailureFallsThroughToSdr8) {
   MockOps m;
   m.testResults = {true};
   m.commitResults = {false, true};
@@ -400,7 +400,7 @@ UMBRIEL_TEST(sdr10CommitFailureFallsThroughToSdr8) {
 }
 
 // HDR commit failure drops to SDR10 without committing the other HDR format.
-UMBRIEL_TEST(hdrCommitFailureFallsThroughToSdr10) {
+CANOPY_TEST(hdrCommitFailureFallsThroughToSdr10) {
   MockOps m;
   m.testResults = {true};
   m.commitResults = {false, true};
@@ -423,7 +423,7 @@ UMBRIEL_TEST(hdrCommitFailureFallsThroughToSdr10) {
 
 // A render/build failure is not evidence that HDR or its selected format is
 // unsupported. Stop before capability fallbacks so the frame can retry.
-UMBRIEL_TEST(retryableHdrApplyFailureStopsBeforeSdrFallback) {
+CANOPY_TEST(retryableHdrApplyFailureStopsBeforeSdrFallback) {
   MockOps m;
   m.testResults = {true};
   m.commitResults = {true};
@@ -443,7 +443,7 @@ UMBRIEL_TEST(retryableHdrApplyFailureStopsBeforeSdrFallback) {
 
 // A failed HDR+VRR commit retries the same format without VRR
 // directly. It neither tests the retry nor considers the alternate format.
-UMBRIEL_TEST(hdrCommitFailureRetriesSameFormatWithoutVrr) {
+CANOPY_TEST(hdrCommitFailureRetriesSameFormatWithoutVrr) {
   MockOps m;
   m.testResults = {true};
   m.commitResults = {false, true};
@@ -473,7 +473,7 @@ UMBRIEL_TEST(hdrCommitFailureRetriesSameFormatWithoutVrr) {
 }
 
 // If both commits fail, HDR falls through without trying XB30.
-UMBRIEL_TEST(hdrBothCommitsFailFallsThroughToSdr8) {
+CANOPY_TEST(hdrBothCommitsFailFallsThroughToSdr8) {
   MockOps m;
   m.testResults = {true};
   m.commitResults = {false, false, true};
@@ -504,7 +504,7 @@ UMBRIEL_TEST(hdrBothCommitsFailFallsThroughToSdr8) {
 
 // A weak pre-commit test can accept VRR even though the real commit rejects it.
 // Retry the same SDR10 format without testing it again.
-UMBRIEL_TEST(sdr10CommitFailureRetriesSameFormatWithoutVrr) {
+CANOPY_TEST(sdr10CommitFailureRetriesSameFormatWithoutVrr) {
   MockOps m;
   m.testResults = {true};
   m.commitResults = {false, true};
@@ -532,7 +532,7 @@ UMBRIEL_TEST(sdr10CommitFailureRetriesSameFormatWithoutVrr) {
 }
 
 // XB30 is still tried if XR30 fails its test rather than its commit.
-UMBRIEL_TEST(sdr10VrrTestFailureTriesXB30WithVrr) {
+CANOPY_TEST(sdr10VrrTestFailureTriesXB30WithVrr) {
   MockOps m;
   m.testResults = {false, true};
 
@@ -555,7 +555,7 @@ UMBRIEL_TEST(sdr10VrrTestFailureTriesXB30WithVrr) {
 }
 
 // A failed XR30 VRR commit does not try XB30, even when XB30 could commit.
-UMBRIEL_TEST(sdr10CommitFailureDoesNotTryXB30WithVrr) {
+CANOPY_TEST(sdr10CommitFailureDoesNotTryXB30WithVrr) {
   MockOps m;
   m.testResults = {true};
   m.commitResults = {false, true};
@@ -581,7 +581,7 @@ UMBRIEL_TEST(sdr10CommitFailureDoesNotTryXB30WithVrr) {
 }
 
 // Both failed commits of the selected SDR10 format fall through to SDR8.
-UMBRIEL_TEST(sdr10BothCommitsFailFallsThroughToSdr8) {
+CANOPY_TEST(sdr10BothCommitsFailFallsThroughToSdr8) {
   MockOps m;
   m.testResults = {true};
   m.commitResults = {false, false, true};
@@ -609,7 +609,7 @@ UMBRIEL_TEST(sdr10BothCommitsFailFallsThroughToSdr8) {
 }
 
 // HDR fail -> SDR10: All HDR formats fail their tests, XB30 SDR10 commits.
-UMBRIEL_TEST(hdrFailFollowedBySdr10Success) {
+CANOPY_TEST(hdrFailFollowedBySdr10Success) {
   MockOps m;
   m.testResults = {false, false, false, true}; // HDR XR30, HDR XB30, SDR10 XR30, SDR10 XB30
 
@@ -630,7 +630,7 @@ UMBRIEL_TEST(hdrFailFollowedBySdr10Success) {
 
 // Tests alone pick the tier: With every HDR and SDR10 test failing, the only
 // commit is the SDR8 last resort.
-UMBRIEL_TEST(tierTestsDoNotCommit) {
+CANOPY_TEST(tierTestsDoNotCommit) {
   MockOps m;
   m.testResults = {false, false, false, false, false, false, false, false, true};
 
@@ -651,9 +651,9 @@ UMBRIEL_TEST(tierTestsDoNotCommit) {
 
 // Worst case: Every test passes and every commit fails, across both modes.
 // Each mode spends up to two commits on HDR, two on SDR10, and two on SDR8.
-UMBRIEL_TEST(worstCaseCommitCountIsBounded) {
+CANOPY_TEST(worstCaseCommitCountIsBounded) {
   static wlr_output_mode preferred{};
-  static const umbriel::OutputMode spec{1280, 720, 60000};
+  static const canopy::OutputMode spec{1280, 720, 60000};
 
   MockOps m;
   m.testResults = {true};
@@ -675,14 +675,14 @@ UMBRIEL_TEST(worstCaseCommitCountIsBounded) {
 }
 
 // Mode fallback: The staged mode cannot commit, the preferred mode retry succeeds.
-UMBRIEL_TEST(modeFallbackRetriesOnPreferredMode) {
+CANOPY_TEST(modeFallbackRetriesOnPreferredMode) {
   static wlr_output_mode preferred{};
 
   MockOps m;
   m.testResults = {true};
   m.commitResults = {false, true};
 
-  static const umbriel::OutputMode spec{1280, 720, 60000};
+  static const canopy::OutputMode spec{1280, 720, 60000};
   FormatSequenceParams p = sdr8Params();
   p.configuredModeSpec = &spec;
   p.preferredMode = &preferred;
@@ -698,12 +698,12 @@ UMBRIEL_TEST(modeFallbackRetriesOnPreferredMode) {
 
 // Backend rejection must reach the preferred mode before scene building can
 // turn the rejected SDR8 swapchain into a retryable rendering failure.
-UMBRIEL_TEST(rejectedSdr8SwapchainReachesPreferredModeBeforeSceneBuild) {
+CANOPY_TEST(rejectedSdr8SwapchainReachesPreferredModeBeforeSceneBuild) {
   wlr_output_mode preferred{};
   preferred.width = 3440;
   preferred.height = 1440;
   preferred.refresh = 59973;
-  const umbriel::OutputMode spec{3440, 1440, 360097};
+  const canopy::OutputMode spec{3440, 1440, 360097};
 
   MockOps m;
   m.nonPrimaryFormats = {DRM_FORMAT_XRGB2101010};
@@ -754,9 +754,9 @@ UMBRIEL_TEST(rejectedSdr8SwapchainReachesPreferredModeBeforeSceneBuild) {
 
 // An accepted output state followed by a rendering failure still retries the
 // same mode, instead of downgrading to the preferred mode.
-UMBRIEL_TEST(retryableSdr8SceneFailureDoesNotChangeMode) {
+CANOPY_TEST(retryableSdr8SceneFailureDoesNotChangeMode) {
   wlr_output_mode preferred{};
-  const umbriel::OutputMode spec{3440, 1440, 360097};
+  const canopy::OutputMode spec{3440, 1440, 360097};
   MockOps m;
   m.testResults = {true};
   m.retryCommitIndices = {0};
@@ -781,7 +781,7 @@ UMBRIEL_TEST(retryableSdr8SceneFailureDoesNotChangeMode) {
 // the result. First mode: HDR and SDR10 fail their tests, SDR8 fails to commit.
 // Preferred mode: HDR fails its tests, SDR10 commits XB30, so the result
 // carries a fresh HDR reason and an empty SDR10 reason.
-UMBRIEL_TEST(modeFallbackRerunsFullSequenceAndResetsReasons) {
+CANOPY_TEST(modeFallbackRerunsFullSequenceAndResetsReasons) {
   static wlr_output_mode preferred{};
 
   MockOps m;
@@ -794,7 +794,7 @@ UMBRIEL_TEST(modeFallbackRerunsFullSequenceAndResetsReasons) {
   };
   m.commitResults = {false, true}; // Mode 1: SDR8 XR24. Mode 2: SDR10 XB30.
 
-  static const umbriel::OutputMode spec{1280, 720, 60000};
+  static const canopy::OutputMode spec{1280, 720, 60000};
   FormatSequenceParams p = sdr8Params();
   p.hdrRequested = true;
   p.imageDescAvailable = true;
@@ -821,14 +821,14 @@ UMBRIEL_TEST(modeFallbackRerunsFullSequenceAndResetsReasons) {
 
 // Mode fallback clears a first-mode SDR10 reason when the preferred mode
 // commits SDR10 without HDR configured.
-UMBRIEL_TEST(modeFallbackClearsSdr10ReasonOnPreferredCommit) {
+CANOPY_TEST(modeFallbackClearsSdr10ReasonOnPreferredCommit) {
   static wlr_output_mode preferred{};
 
   MockOps m;
   m.testResults = {false, false, true, true}; // Mode 1: XR30, XB30, XR24. Mode 2: XR30.
   m.commitResults = {false, true};            // Mode 1: XR24. Mode 2: XR30.
 
-  static const umbriel::OutputMode spec{1280, 720, 60000};
+  static const canopy::OutputMode spec{1280, 720, 60000};
   FormatSequenceParams p = sdr8Params();
   p.bitDepth = 10;
   p.configuredModeSpec = &spec;
@@ -848,10 +848,10 @@ UMBRIEL_TEST(modeFallbackClearsSdr10ReasonOnPreferredCommit) {
 
 // A kernel may refuse to change connector properties without a modeset, so a
 // rejected sequence on a kept live mode stages that mode and runs once more.
-UMBRIEL_TEST(rejectedKeptLiveModeRetriesWithTheModeStaged) {
+CANOPY_TEST(rejectedKeptLiveModeRetriesWithTheModeStaged) {
   static wlr_output_mode live{};
   static wlr_output_mode preferred{};
-  static const umbriel::OutputMode spec{1280, 720, 60000};
+  static const canopy::OutputMode spec{1280, 720, 60000};
 
   MockOps m;
   m.testResults = {false, true};
@@ -870,10 +870,10 @@ UMBRIEL_TEST(rejectedKeptLiveModeRetriesWithTheModeStaged) {
   CHECK(!m.modeFallbackWarned);
 }
 
-UMBRIEL_TEST(rejectedRetryOnKeptLiveModeFallsBackToPreferredMode) {
+CANOPY_TEST(rejectedRetryOnKeptLiveModeFallsBackToPreferredMode) {
   static wlr_output_mode live{};
   static wlr_output_mode preferred{};
-  static const umbriel::OutputMode spec{1280, 720, 60000};
+  static const canopy::OutputMode spec{1280, 720, 60000};
 
   MockOps m;
   m.testResults = {false, false, true};
@@ -893,7 +893,7 @@ UMBRIEL_TEST(rejectedRetryOnKeptLiveModeFallsBackToPreferredMode) {
 
 // A retryable scene failure is not a backend rejection, so it keeps the live
 // mode instead of forcing a modeset.
-UMBRIEL_TEST(retryableSceneFailureOnKeptLiveModeDoesNotStageIt) {
+CANOPY_TEST(retryableSceneFailureOnKeptLiveModeDoesNotStageIt) {
   wlr_output_mode live{};
   MockOps m;
   m.testResults = {true};
@@ -912,12 +912,12 @@ UMBRIEL_TEST(retryableSceneFailureOnKeptLiveModeDoesNotStageIt) {
 }
 
 // No preferred mode (headless): Nothing commits, no fallback, uncommitted.
-UMBRIEL_TEST(noPreferredModeYieldsUncommitted) {
+CANOPY_TEST(noPreferredModeYieldsUncommitted) {
   MockOps m;
   m.testResults = {true};
   m.commitResults = {false};
 
-  static const umbriel::OutputMode spec{1280, 720, 60000};
+  static const canopy::OutputMode spec{1280, 720, 60000};
   FormatSequenceParams p = sdr8Params();
   p.configuredModeSpec = &spec;
   p.preferredMode = nullptr;

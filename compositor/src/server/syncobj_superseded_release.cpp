@@ -9,7 +9,7 @@
 #include <vector>
 #include <xf86drm.h>
 
-namespace umbriel {
+namespace canopy {
 
   namespace {
 
@@ -80,7 +80,7 @@ namespace umbriel {
       }
       uint64_t point = 0;
       wlr_drm_syncobj_timeline* timeline =
-          umbrielfx_linux_drm_syncobj_state_release_point(surface, &surface->pending, &point);
+          canopyfx_linux_drm_syncobj_state_release_point(surface, &surface->pending, &point);
       if (timeline == nullptr) {
         return;
       }
@@ -97,7 +97,7 @@ namespace umbriel {
       }
       uint64_t point = 0;
       wlr_drm_syncobj_timeline* timeline =
-          umbrielfx_linux_drm_syncobj_state_release_point(watch.surface, state, &point);
+          canopyfx_linux_drm_syncobj_state_release_point(watch.surface, state, &point);
       if (timeline == nullptr) {
         return;
       }
@@ -141,7 +141,7 @@ namespace umbriel {
       }
       uint64_t point = 0;
       wlr_drm_syncobj_timeline* timeline =
-          umbrielfx_linux_drm_syncobj_state_acquire_point(watch.surface, state, &point);
+          canopyfx_linux_drm_syncobj_state_acquire_point(watch.surface, state, &point);
       if (timeline == nullptr) {
         return;
       }
@@ -244,4 +244,4 @@ namespace umbriel {
     wl_signal_add(&watch->surface->events.destroy, &watch->destroy);
   }
 
-} // namespace umbriel
+} // namespace canopy

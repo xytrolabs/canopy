@@ -8,7 +8,7 @@
 #include <optional>
 #include <string>
 
-namespace umbriel {
+namespace canopy {
 
   // Own the monitor identity while its Output is absent. Temporary refuge workspaces retain explicit names, while
   // anonymous ones use their current numeric position. Layout rules and returning windows retain the original home.
@@ -35,4 +35,4 @@ namespace umbriel {
     }
   };
 
-} // namespace umbriel
+} // namespace canopy

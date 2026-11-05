@@ -5,7 +5,7 @@
 #include <algorithm>
 #include <cairo.h>
 
-namespace umbriel {
+namespace canopy {
   wlr_buffer* renderTitleBarIcon(TitleBarButton button, int pixels, const std::array<float, 4>& color) {
     pixels = std::max(1, pixels);
     cairo_surface_t* surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, pixels, pixels);
@@ -34,4 +34,4 @@ namespace umbriel {
     cairo_destroy(cr);
     return createCairoBuffer(surface);
   }
-} // namespace umbriel
+} // namespace canopy

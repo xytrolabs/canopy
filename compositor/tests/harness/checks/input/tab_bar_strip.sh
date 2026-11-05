@@ -11,14 +11,14 @@ readonly BORDER=2
 readonly GAP=8
 readonly BAR=24
 readonly SLOTS=2
-readonly POINTER="${UMBRIEL_POINTER_CLIENT:-./build-debug/tests/pointer-client}"
+readonly POINTER="${CANOPY_POINTER_CLIENT:-./build-debug/tests/pointer-client}"
 
 pointer() {
   "$POINTER" "$OUTPUT_W" "$OUTPUT_H" "$@"
 }
 
 accepts() {
-  if ! out=$("$UMBRIEL" msg "$@" 2>&1); then
+  if ! out=$("$CANOPY" msg "$@" 2>&1); then
     echo "expected '$*' to be accepted, got: $out"
     return 1
   fi
@@ -31,7 +31,7 @@ spawn_client() {
 wait_for_windows() {
   local expected=$1 count=
   for _ in $(seq 60); do
-    count=$("$UMBRIEL" windows --json | jq 'length')
+    count=$("$CANOPY" windows --json | jq 'length')
     [[ $count == "$expected" ]] && return 0
     sleep 0.1
   done
@@ -42,7 +42,7 @@ wait_for_windows() {
 wait_for_shown() {
   local shown=$1 windows=
   for _ in $(seq 50); do
-    windows=$("$UMBRIEL" windows --json)
+    windows=$("$CANOPY" windows --json)
     if jq -e --arg shown "$shown" '
       map(select(.title == $shown and .tabbed and (.tab_hidden | not) and .active)) | length == 1
     ' <<< "$windows" > /dev/null; then
@@ -57,7 +57,7 @@ wait_for_shown() {
 # The centre of a part of the scrolling bar: `back`, `forward`, or visible slot N. The bar has more tabs than slots, so
 # a square button sits at each end and, with tab_gap 0, the slots split the rest evenly.
 part_center() {
-  "$UMBRIEL" windows --json | jq -r --arg part "$1" --argjson count "$SLOTS" --argjson border "$BORDER" \
+  "$CANOPY" windows --json | jq -r --arg part "$1" --argjson count "$SLOTS" --argjson border "$BORDER" \
     --argjson gap "$GAP" --argjson bar "$BAR" '
     map(select(.tabbed and (.tab_hidden | not)))[0]
     | (.x - $border) as $left | (.w + 2 * $border) as $width
@@ -72,10 +72,10 @@ click_part() {
   local x y
   read -r x y <<< "$(part_center "$1")"
   pointer move "$x" "$y" click "$BTN_LEFT"
-  "$UMBRIEL" settle
+  "$CANOPY" settle
 }
 
-cat >> "$UMBRIEL_CONFIG" <<EOF
+cat >> "$CANOPY_CONFIG" <<EOF
 
 [layout.tabs]
 default_display = "tabbed"
@@ -88,7 +88,7 @@ max_tabs = $SLOTS
 match.title = "^tab-"
 default_scrolling_column = "tabs"
 EOF
-"$UMBRIEL" msg config-reload > /dev/null
+"$CANOPY" msg config-reload > /dev/null
 
 count=0
 for title in tab-a tab-b tab-c tab-d; do
@@ -96,7 +96,7 @@ for title in tab-a tab-b tab-c tab-d; do
   count=$((count + 1))
   wait_for_windows "$count"
 done
-"$UMBRIEL" settle
+"$CANOPY" settle
 
 # The strip follows the active tab to the end: tab-c and tab-d show, so the first slot is tab-c.
 accepts column-focus-tab -1

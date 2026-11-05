@@ -12,14 +12,14 @@
 #include <wlr/util/edges.h>
 // clang-format on
 
-using umbriel::CenterFocusedColumn;
-using umbriel::Column;
-using umbriel::Layout;
-using umbriel::LayoutConstraints;
-using umbriel::ResolvedLayoutConfig;
-using umbriel::ScrollingDirection;
-using umbriel::ScrollingLayout;
-using umbriel::View;
+using canopy::CenterFocusedColumn;
+using canopy::Column;
+using canopy::Layout;
+using canopy::LayoutConstraints;
+using canopy::ResolvedLayoutConfig;
+using canopy::ScrollingDirection;
+using canopy::ScrollingLayout;
+using canopy::View;
 
 namespace {
 
@@ -64,7 +64,7 @@ namespace {
 } // namespace
 
 // column bookkeeping
-UMBRIEL_TEST(insertAndRemoveTracksColumns) {
+CANOPY_TEST(insertAndRemoveTracksColumns) {
   Fixture fixture;
   fixture.addColumns(3);
   CHECK_EQ(fixture.layout.columns().size(), size_t{3});
@@ -78,14 +78,14 @@ UMBRIEL_TEST(insertAndRemoveTracksColumns) {
   CHECK_EQ(fixture.layout.columnOf(stub(2)), 1);
 }
 
-UMBRIEL_TEST(insertIsIdempotentPerView) {
+CANOPY_TEST(insertIsIdempotentPerView) {
   Fixture fixture;
   fixture.layout.insertView(stub(0), 0);
   fixture.layout.insertView(stub(0), 0);
   CHECK_EQ(fixture.layout.columns().size(), size_t{1});
 }
 
-UMBRIEL_TEST(unknownViewHasNoColumnOrRow) {
+CANOPY_TEST(unknownViewHasNoColumnOrRow) {
   Fixture fixture;
   fixture.addColumns(2);
   CHECK_EQ(fixture.layout.columnOf(stub(99)), -1);
@@ -93,7 +93,7 @@ UMBRIEL_TEST(unknownViewHasNoColumnOrRow) {
   CHECK_EQ(fixture.layout.columnOf(nullptr), -1);
 }
 
-UMBRIEL_TEST(moveColumnReorders) {
+CANOPY_TEST(moveColumnReorders) {
   Fixture fixture;
   fixture.addColumns(3);
   fixture.layout.moveColumn(0, 2);
@@ -103,7 +103,7 @@ UMBRIEL_TEST(moveColumnReorders) {
 }
 
 // consume and expel
-UMBRIEL_TEST(consumeLeftStacksIntoThePreviousColumn) {
+CANOPY_TEST(consumeLeftStacksIntoThePreviousColumn) {
   Fixture fixture;
   fixture.addColumns(2);
 
@@ -116,14 +116,14 @@ UMBRIEL_TEST(consumeLeftStacksIntoThePreviousColumn) {
   CHECK_EQ(fixture.layout.columns()[0].heightWeights.size(), size_t{2});
 }
 
-UMBRIEL_TEST(consumeLeftFailsOnTheFirstColumn) {
+CANOPY_TEST(consumeLeftFailsOnTheFirstColumn) {
   Fixture fixture;
   fixture.addColumns(2);
   CHECK(!fixture.layout.consume(stub(0), -1));
   CHECK_EQ(fixture.layout.columns().size(), size_t{2});
 }
 
-UMBRIEL_TEST(consumeRightStacksIntoTheNextColumn) {
+CANOPY_TEST(consumeRightStacksIntoTheNextColumn) {
   Fixture fixture;
   fixture.addColumns(2);
 
@@ -133,7 +133,7 @@ UMBRIEL_TEST(consumeRightStacksIntoTheNextColumn) {
   CHECK_EQ(fixture.layout.rowOf(stub(0)), 1);
 }
 
-UMBRIEL_TEST(expelRightUndoesConsumeLeft) {
+CANOPY_TEST(expelRightUndoesConsumeLeft) {
   Fixture fixture;
   fixture.addColumns(2);
   CHECK(fixture.layout.setWidthFraction(0, 1.0 / 3));
@@ -148,7 +148,7 @@ UMBRIEL_TEST(expelRightUndoesConsumeLeft) {
   CHECK_EQ(fixture.layout.columns()[1].widthFrac, 2.0 / 3);
 }
 
-UMBRIEL_TEST(expelLeftUndoesConsumeRight) {
+CANOPY_TEST(expelLeftUndoesConsumeRight) {
   Fixture fixture;
   fixture.addColumns(2);
   CHECK(fixture.layout.consume(stub(0), 1));
@@ -159,7 +159,7 @@ UMBRIEL_TEST(expelLeftUndoesConsumeRight) {
   CHECK_EQ(fixture.layout.columnOf(stub(1)), 1);
 }
 
-UMBRIEL_TEST(expelForgetsTheExtentOfARemovedRow) {
+CANOPY_TEST(expelForgetsTheExtentOfARemovedRow) {
   Fixture fixture;
   fixture.addColumns(2);
   CHECK(fixture.layout.setWidthFraction(1, 2.0 / 3));
@@ -171,7 +171,7 @@ UMBRIEL_TEST(expelForgetsTheExtentOfARemovedRow) {
   CHECK_EQ(fixture.layout.columns()[1].widthFrac, 0.5);
 }
 
-UMBRIEL_TEST(expelRestoresTheExtentAFullWidthColumnHadBefore) {
+CANOPY_TEST(expelRestoresTheExtentAFullWidthColumnHadBefore) {
   Fixture fixture;
   fixture.addColumns(2);
   CHECK(fixture.layout.setWidthFraction(1, 1.0 / 3));
@@ -183,7 +183,7 @@ UMBRIEL_TEST(expelRestoresTheExtentAFullWidthColumnHadBefore) {
   CHECK(!fixture.layout.isFullWidth(1));
 }
 
-UMBRIEL_TEST(expelRightFailsOnASingleViewColumn) {
+CANOPY_TEST(expelRightFailsOnASingleViewColumn) {
   Fixture fixture;
   fixture.addColumns(2);
   CHECK(!fixture.layout.expel(stub(0), 1));
@@ -191,7 +191,7 @@ UMBRIEL_TEST(expelRightFailsOnASingleViewColumn) {
 }
 
 // height math
-UMBRIEL_TEST(setHeightFractionResizesAStackedRow) {
+CANOPY_TEST(setHeightFractionResizesAStackedRow) {
   Fixture fixture;
   fixture.addColumns(2);
   CHECK(fixture.layout.consume(stub(1), -1));
@@ -204,7 +204,7 @@ UMBRIEL_TEST(setHeightFractionResizesAStackedRow) {
   CHECK_NEAR(fixture.layout.targetBox(stub(1)).height, static_cast<int>(std::lround(0.7 * stackCross)), 1);
 }
 
-UMBRIEL_TEST(setHeightFractionShrinksASoloRowFromItsBottomEdge) {
+CANOPY_TEST(setHeightFractionShrinksASoloRowFromItsBottomEdge) {
   Fixture fixture;
   fixture.addColumns(1);
   CHECK_NEAR(fixture.layout.heightFraction(stub(0)), 1.0, 1e-9);
@@ -228,7 +228,7 @@ UMBRIEL_TEST(setHeightFractionShrinksASoloRowFromItsBottomEdge) {
   CHECK_EQ(fixture.layout.targetBox(stub(0)).height, stackCross);
 }
 
-UMBRIEL_TEST(aSecondRowTakesTheSpaceASoloRowFreed) {
+CANOPY_TEST(aSecondRowTakesTheSpaceASoloRowFreed) {
   // Why the top edge is kept: the space below a shrunk lone window is where the next window in the column lands, at
   // the size the user made room for.
   Fixture fixture;
@@ -249,7 +249,7 @@ UMBRIEL_TEST(aSecondRowTakesTheSpaceASoloRowFreed) {
   CHECK_EQ(second.height, stackCross - first.height);
 }
 
-UMBRIEL_TEST(consumeIntoAColumnTakesTheSpaceItsRowFreed) {
+CANOPY_TEST(consumeIntoAColumnTakesTheSpaceItsRowFreed) {
   // Consuming a neighbour is the other way a second window reaches the column, so it claims the freed space too.
   // Carrying the incoming row's old weight in beside the gap would leave a dead band at the column's bottom.
   Fixture fixture;
@@ -270,7 +270,7 @@ UMBRIEL_TEST(consumeIntoAColumnTakesTheSpaceItsRowFreed) {
   CHECK_EQ(second.height, stackCross - first.height);
 }
 
-UMBRIEL_TEST(soloRowHeightFractionReportsPointerDrivenEdgeGaps) {
+CANOPY_TEST(soloRowHeightFractionReportsPointerDrivenEdgeGaps) {
   // What the pointer leaves behind must be what the cycle action reads, otherwise cycling from a mouse-resized solo
   // window starts from the wrong preset.
   Fixture fixture;
@@ -286,7 +286,7 @@ UMBRIEL_TEST(soloRowHeightFractionReportsPointerDrivenEdgeGaps) {
   CHECK_EQ(fixture.layout.targetBox(stub(0)).y, fixture.config.edgePad);
 }
 
-UMBRIEL_TEST(moveViewVerticalReordersWithinAColumn) {
+CANOPY_TEST(moveViewVerticalReordersWithinAColumn) {
   Fixture fixture;
   fixture.addColumns(2);
   CHECK(fixture.layout.consume(stub(1), -1));
@@ -300,7 +300,7 @@ UMBRIEL_TEST(moveViewVerticalReordersWithinAColumn) {
   CHECK(!fixture.layout.moveViewVertical(stub(1), -1));
 }
 
-UMBRIEL_TEST(swapViewsAcrossColumnsKeepsGeometryWithTheSlots) {
+CANOPY_TEST(swapViewsAcrossColumnsKeepsGeometryWithTheSlots) {
   Fixture fixture;
   fixture.addColumns(2);
   CHECK(fixture.layout.setWidthFraction(0, 1.0 / 3.0));
@@ -320,14 +320,14 @@ UMBRIEL_TEST(swapViewsAcrossColumnsKeepsGeometryWithTheSlots) {
 }
 
 // width math
-UMBRIEL_TEST(halfWidthColumnMatchesTheGapAwareFormula) {
+CANOPY_TEST(halfWidthColumnMatchesTheGapAwareFormula) {
   Fixture fixture;
   fixture.addColumns(1);
   // round(0.5 * (1260 + 12)) - 12 = 636 - 12 = 624
   CHECK_EQ(fixture.layout.columnWidth(0, kViewport), 624);
 }
 
-UMBRIEL_TEST(twoHalfColumnsTileExactlyAcrossTheViewport) {
+CANOPY_TEST(twoHalfColumnsTileExactlyAcrossTheViewport) {
   Fixture fixture;
   fixture.addColumns(2);
   const int a = fixture.layout.columnWidth(0, kViewport);
@@ -336,7 +336,7 @@ UMBRIEL_TEST(twoHalfColumnsTileExactlyAcrossTheViewport) {
   CHECK_EQ(a + b + fixture.config.totalGap, kViewport);
 }
 
-UMBRIEL_TEST(oddGapHalfColumnsTileExactlyWithoutFocusScroll) {
+CANOPY_TEST(oddGapHalfColumnsTileExactlyWithoutFocusScroll) {
   Fixture fixture;
   fixture.config.gap = 5;
   fixture.config.totalGap = 9;
@@ -355,7 +355,7 @@ UMBRIEL_TEST(oddGapHalfColumnsTileExactlyWithoutFocusScroll) {
   CHECK_EQ(fixture.layout.scroll(), 0.0);
 }
 
-UMBRIEL_TEST(threeThirdColumnsTileExactlyAcrossTheViewport) {
+CANOPY_TEST(threeThirdColumnsTileExactlyAcrossTheViewport) {
   Fixture fixture;
   fixture.addColumns(3);
   for (int i = 0; i < 3; ++i) {
@@ -369,7 +369,7 @@ UMBRIEL_TEST(threeThirdColumnsTileExactlyAcrossTheViewport) {
   CHECK_EQ(total + 2 * fixture.config.totalGap, kViewport);
 }
 
-UMBRIEL_TEST(columnXAccumulatesWidthsAndGaps) {
+CANOPY_TEST(columnXAccumulatesWidthsAndGaps) {
   Fixture fixture;
   fixture.addColumns(2);
   const int first = fixture.layout.columnWidth(0, kViewport);
@@ -377,7 +377,7 @@ UMBRIEL_TEST(columnXAccumulatesWidthsAndGaps) {
   CHECK_EQ(fixture.layout.columnX(1, kViewport), first + fixture.config.totalGap);
 }
 
-UMBRIEL_TEST(aNarrowRowIsCentered) {
+CANOPY_TEST(aNarrowRowIsCentered) {
   Fixture fixture;
   fixture.addColumns(1);
   CHECK(fixture.layout.setWidthFraction(0, 1.0 / 3));
@@ -386,7 +386,7 @@ UMBRIEL_TEST(aNarrowRowIsCentered) {
   CHECK_EQ(fixture.layout.columnX(0, kViewport), (kViewport - width) / 2);
 }
 
-UMBRIEL_TEST(disablingUnderfullCenteringLeftAlignsTheWholeStrip) {
+CANOPY_TEST(disablingUnderfullCenteringLeftAlignsTheWholeStrip) {
   Fixture fixture;
   fixture.config.scrolling.centerUnderfullStrip = false;
   fixture.addColumns(2);
@@ -395,7 +395,7 @@ UMBRIEL_TEST(disablingUnderfullCenteringLeftAlignsTheWholeStrip) {
   CHECK_EQ(fixture.layout.columnX(0, kViewport), 0);
 }
 
-UMBRIEL_TEST(horizontalResizeRecentersAnUnderfullStripImmediately) {
+CANOPY_TEST(horizontalResizeRecentersAnUnderfullStripImmediately) {
   Fixture fixture;
   fixture.addColumns(2);
   CHECK(fixture.layout.setWidthFraction(0, 1.0 / 3));
@@ -422,7 +422,7 @@ UMBRIEL_TEST(horizontalResizeRecentersAnUnderfullStripImmediately) {
   );
 }
 
-UMBRIEL_TEST(leftwardResizeGrowsCurrentColumnAfterPreviousHitsMinimumWidth) {
+CANOPY_TEST(leftwardResizeGrowsCurrentColumnAfterPreviousHitsMinimumWidth) {
   Fixture fixture;
   fixture.addColumns(2);
   fixture.layout.setConstraints([](const View* view) {
@@ -448,7 +448,7 @@ UMBRIEL_TEST(leftwardResizeGrowsCurrentColumnAfterPreviousHitsMinimumWidth) {
   CHECK(currentAfter.width > currentBefore.width);
 }
 
-UMBRIEL_TEST(centeredUnderfullLeftwardResizeKeepsCurrentRightEdgeFixed) {
+CANOPY_TEST(centeredUnderfullLeftwardResizeKeepsCurrentRightEdgeFixed) {
   Fixture fixture;
   fixture.addColumns(2);
   fixture.layout.setConstraints([](const View* view) {
@@ -475,7 +475,7 @@ UMBRIEL_TEST(centeredUnderfullLeftwardResizeKeepsCurrentRightEdgeFixed) {
   CHECK_EQ(currentAfter.width, currentBefore.width + 80);
 }
 
-UMBRIEL_TEST(middleOfPartiallyOffscreenColumnGrabsNothing) {
+CANOPY_TEST(middleOfPartiallyOffscreenColumnGrabsNothing) {
   Fixture fixture;
   fixture.addColumns(2);
   CHECK(fixture.layout.setWidthFraction(0, 0.5));
@@ -485,7 +485,7 @@ UMBRIEL_TEST(middleOfPartiallyOffscreenColumnGrabsNothing) {
   CHECK_EQ(fixture.layout.resizeEdgesAt(stub(1), 1000, 360), 0U);
 }
 
-UMBRIEL_TEST(rightThirdGrabsTheRightEdgeEvenNearACorner) {
+CANOPY_TEST(rightThirdGrabsTheRightEdgeEvenNearACorner) {
   Fixture fixture;
   fixture.addColumns(2);
   CHECK(fixture.layout.setWidthFraction(0, 0.5));
@@ -495,7 +495,7 @@ UMBRIEL_TEST(rightThirdGrabsTheRightEdgeEvenNearACorner) {
   CHECK_EQ(fixture.layout.resizeEdgesAt(stub(1), 1210, 100), static_cast<uint32_t>(WLR_EDGE_RIGHT | WLR_EDGE_TOP));
 }
 
-UMBRIEL_TEST(resizeEdgesComeFromTileThirds) {
+CANOPY_TEST(resizeEdgesComeFromTileThirds) {
   Fixture fixture;
   fixture.addColumns(2);
   CHECK(fixture.layout.setWidthFraction(0, 0.5));
@@ -507,7 +507,7 @@ UMBRIEL_TEST(resizeEdgesComeFromTileThirds) {
   CHECK_EQ(fixture.layout.resizeEdgesAt(stub(1), 700, 650), static_cast<uint32_t>(WLR_EDGE_LEFT | WLR_EDGE_BOTTOM));
 }
 
-UMBRIEL_TEST(firstColumnLeftEdgeStaysFixedWithoutCentering) {
+CANOPY_TEST(firstColumnLeftEdgeStaysFixedWithoutCentering) {
   Fixture fixed;
   fixed.config.scrolling.centerUnderfullStrip = false;
   fixed.addColumns(1);
@@ -521,7 +521,7 @@ UMBRIEL_TEST(firstColumnLeftEdgeStaysFixedWithoutCentering) {
   CHECK_EQ(centered.layout.resizeEdgesAt(stub(0), 60, 360), static_cast<uint32_t>(WLR_EDGE_LEFT));
 }
 
-UMBRIEL_TEST(widthFractionsAreClamped) {
+CANOPY_TEST(widthFractionsAreClamped) {
   Fixture fixture;
   fixture.addColumns(1);
   CHECK(fixture.layout.setWidthFraction(0, 5.0));
@@ -533,7 +533,7 @@ UMBRIEL_TEST(widthFractionsAreClamped) {
   CHECK(!fixture.layout.setWidthFraction(-1, 0.5));
 }
 
-UMBRIEL_TEST(cycleWidthWalksThePresets) {
+CANOPY_TEST(cycleWidthWalksThePresets) {
   Fixture fixture;
   fixture.addColumns(1);
   CHECK(fixture.layout.setWidthFraction(0, 1.0 / 3));
@@ -550,7 +550,7 @@ UMBRIEL_TEST(cycleWidthWalksThePresets) {
   CHECK_NEAR(fixture.layout.widthFraction(0), 1.0 / 3, 1e-6);
 }
 
-UMBRIEL_TEST(cycleWidthBackWalksThePresetsInReverse) {
+CANOPY_TEST(cycleWidthBackWalksThePresetsInReverse) {
   Fixture fixture;
   fixture.addColumns(1);
   CHECK(fixture.layout.setWidthFraction(0, 2.0 / 3));
@@ -566,7 +566,7 @@ UMBRIEL_TEST(cycleWidthBackWalksThePresetsInReverse) {
   CHECK_NEAR(fixture.layout.widthFraction(0), 2.0 / 3, 1e-6);
 }
 
-UMBRIEL_TEST(toggleFullWidthRestoresThePreviousFraction) {
+CANOPY_TEST(toggleFullWidthRestoresThePreviousFraction) {
   Fixture fixture;
   fixture.addColumns(2);
   CHECK(fixture.layout.setWidthFraction(0, 1.0 / 3));
@@ -585,7 +585,7 @@ UMBRIEL_TEST(toggleFullWidthRestoresThePreviousFraction) {
   CHECK(!fixture.layout.toggleFullWidth(9));
 }
 
-UMBRIEL_TEST(clearFullWidthStateDropsTheRestorePoint) {
+CANOPY_TEST(clearFullWidthStateDropsTheRestorePoint) {
   Fixture fixture;
   fixture.addColumns(2);
   CHECK(fixture.layout.toggleFullWidth(0));
@@ -595,7 +595,7 @@ UMBRIEL_TEST(clearFullWidthStateDropsTheRestorePoint) {
 }
 
 // constraints
-UMBRIEL_TEST(clientMinWidthWidensAColumn) {
+CANOPY_TEST(clientMinWidthWidensAColumn) {
   Fixture fixture;
   fixture.addColumns(1);
   CHECK(fixture.layout.setWidthFraction(0, 1.0 / 3));
@@ -606,21 +606,21 @@ UMBRIEL_TEST(clientMinWidthWidensAColumn) {
   CHECK_EQ(fixture.layout.columnWidth(0, kViewport), 900);
 }
 
-UMBRIEL_TEST(clientMaxWidthNarrowsAColumn) {
+CANOPY_TEST(clientMaxWidthNarrowsAColumn) {
   Fixture fixture;
   fixture.addColumns(1);
   fixture.layout.setConstraints([](const View*) { return LayoutConstraints{.maxWidth = 300}; });
   CHECK_EQ(fixture.layout.columnWidth(0, kViewport), 300);
 }
 
-UMBRIEL_TEST(constraintsNeverExceedTheViewport) {
+CANOPY_TEST(constraintsNeverExceedTheViewport) {
   Fixture fixture;
   fixture.addColumns(1);
   fixture.layout.setConstraints([](const View*) { return LayoutConstraints{.minWidth = 99999}; });
   CHECK_EQ(fixture.layout.columnWidth(0, kViewport), kViewport);
 }
 
-UMBRIEL_TEST(clientMinHintKeepsAWideColumnAtItsOwnExtent) {
+CANOPY_TEST(clientMinHintKeepsAWideColumnAtItsOwnExtent) {
   Fixture fixture;
   fixture.addColumns(1);
   fixture.layout.setConstraints([](const View*) { return LayoutConstraints{.minWidth = 99999}; });
@@ -628,7 +628,7 @@ UMBRIEL_TEST(clientMinHintKeepsAWideColumnAtItsOwnExtent) {
   CHECK_EQ(fixture.layout.columnWidth(0, kViewport), 2532);
 }
 
-UMBRIEL_TEST(clientMaxHintCapsAWideColumn) {
+CANOPY_TEST(clientMaxHintCapsAWideColumn) {
   Fixture fixture;
   fixture.addColumns(1);
   fixture.layout.setConstraints([](const View*) { return LayoutConstraints{.maxWidth = 2000}; });
@@ -636,7 +636,7 @@ UMBRIEL_TEST(clientMaxHintCapsAWideColumn) {
   CHECK_EQ(fixture.layout.columnWidth(0, kViewport), 2000);
 }
 
-UMBRIEL_TEST(fullscreenColumnFillsTheUsableAreaIgnoringFractions) {
+CANOPY_TEST(fullscreenColumnFillsTheUsableAreaIgnoringFractions) {
   Fixture fixture;
   fixture.addColumns(2);
   CHECK(fixture.layout.setWidthFraction(0, 1.0 / 3));
@@ -647,7 +647,7 @@ UMBRIEL_TEST(fullscreenColumnFillsTheUsableAreaIgnoringFractions) {
   CHECK(!fixture.layout.isFullWidth(1));
 }
 
-UMBRIEL_TEST(maximizedToEdgesColumnFillsTheUsableAreaIgnoringFractions) {
+CANOPY_TEST(maximizedToEdgesColumnFillsTheUsableAreaIgnoringFractions) {
   Fixture fixture;
   fixture.addColumns(2);
   CHECK(fixture.layout.setWidthFraction(0, 1.0 / 3));
@@ -662,7 +662,7 @@ UMBRIEL_TEST(maximizedToEdgesColumnFillsTheUsableAreaIgnoringFractions) {
 // A column that fills the viewport is presented against the usable area rather than the strut-inset strip, so the
 // strip has to reserve the strut band the window bleeds into. Without that reservation the next column keeps its old
 // offset and the window paints over it.
-UMBRIEL_TEST(aFillingColumnReservesTheStrutBandItBleedsInto) {
+CANOPY_TEST(aFillingColumnReservesTheStrutBandItBleedsInto) {
   Fixture fixture;
   fixture.config.struts = {.left = 17, .right = 23};
   fixture.addColumns(2);
@@ -677,7 +677,7 @@ UMBRIEL_TEST(aFillingColumnReservesTheStrutBandItBleedsInto) {
   CHECK_EQ(fixture.layout.columnX(1, kViewport), 17 + filling + fixture.config.totalGap + 23);
 }
 
-UMBRIEL_TEST(aFillingColumnInAVerticalStripReservesTheTopAndBottomStruts) {
+CANOPY_TEST(aFillingColumnInAVerticalStripReservesTheTopAndBottomStruts) {
   Fixture fixture(ScrollingDirection::Vertical);
   fixture.config.struts = {.left = 17, .right = 23, .top = 31, .bottom = 41};
   fixture.addColumns(2);
@@ -688,7 +688,7 @@ UMBRIEL_TEST(aFillingColumnInAVerticalStripReservesTheTopAndBottomStruts) {
   CHECK_EQ(fixture.layout.columnX(1, kVerticalViewport), 31 + filling + fixture.config.totalGap + 41);
 }
 
-UMBRIEL_TEST(preservedFullWidthSurvivesEdgeMaximizeToggle) {
+CANOPY_TEST(preservedFullWidthSurvivesEdgeMaximizeToggle) {
   Fixture fixture;
   fixture.addColumns(1);
   CHECK(fixture.layout.setWidthFraction(0, 0.5));
@@ -706,7 +706,7 @@ UMBRIEL_TEST(preservedFullWidthSurvivesEdgeMaximizeToggle) {
   CHECK_NEAR(fixture.layout.widthFraction(0), 0.5, 1e-6);
 }
 
-UMBRIEL_TEST(unsetConstraintsMeanUnconstrained) {
+CANOPY_TEST(unsetConstraintsMeanUnconstrained) {
   Fixture fixture;
   fixture.addColumns(1);
   // No setConstraints call at all: the layout must still produce sane geometry.
@@ -715,7 +715,7 @@ UMBRIEL_TEST(unsetConstraintsMeanUnconstrained) {
 }
 
 // initial sizing
-UMBRIEL_TEST(initialSizeMatchesWhatArrangeWillAssign) {
+CANOPY_TEST(initialSizeMatchesWhatArrangeWillAssign) {
   // The invariant: the size a view is configured with before it joins the layout must equal the size the layout gives
   // it once it has. Any drift and the client's first buffer is wrong and the window resizes on first paint.
   Fixture fixture;
@@ -729,7 +729,7 @@ UMBRIEL_TEST(initialSizeMatchesWhatArrangeWillAssign) {
   CHECK_EQ(initial.height, arranged.height);
 }
 
-UMBRIEL_TEST(initialSizeHonoursARuleExtentFraction) {
+CANOPY_TEST(initialSizeHonoursARuleExtentFraction) {
   Fixture fixture;
   const Layout::InitialSize initial = fixture.layout.initialSize(kUsable, false, 1.0 / 3, std::nullopt, nullptr);
 
@@ -741,13 +741,13 @@ UMBRIEL_TEST(initialSizeHonoursARuleExtentFraction) {
   CHECK(initial.width < fixture.layout.initialSize(kUsable, false, std::nullopt, std::nullopt, nullptr).width);
 }
 
-UMBRIEL_TEST(initialSizeUsesTheDefaultFractionWhenNoRuleApplies) {
+CANOPY_TEST(initialSizeUsesTheDefaultFractionWhenNoRuleApplies) {
   Fixture fixture;
   CHECK_EQ(fixture.layout.initialSize(kUsable, false, std::nullopt, std::nullopt, nullptr).width, 624);
   CHECK_EQ(fixture.layout.initialSize(kUsable, false, std::nullopt, std::nullopt, nullptr).height, 700);
 }
 
-UMBRIEL_TEST(initialSizeLeavesTheScrollAxisUnconstrainedWhenNoDefaultIsSet) {
+CANOPY_TEST(initialSizeLeavesTheScrollAxisUnconstrainedWhenNoDefaultIsSet) {
   Fixture horizontal;
   horizontal.config.scrolling.defaultExtentFraction.reset();
   const Layout::InitialSize horizontalSize =
@@ -763,7 +763,7 @@ UMBRIEL_TEST(initialSizeLeavesTheScrollAxisUnconstrainedWhenNoDefaultIsSet) {
   CHECK_EQ(verticalSize.height, 0);
 }
 
-UMBRIEL_TEST(initialSizeHonoursAPixelExtentWithoutAFractionDefault) {
+CANOPY_TEST(initialSizeHonoursAPixelExtentWithoutAFractionDefault) {
   Fixture horizontal;
   horizontal.config.scrolling.defaultExtentFraction.reset();
   const Layout::InitialSize horizontalSize = horizontal.layout.initialSize(kUsable, false, std::nullopt, 800, nullptr);
@@ -777,7 +777,7 @@ UMBRIEL_TEST(initialSizeHonoursAPixelExtentWithoutAFractionDefault) {
   CHECK_EQ(verticalSize.height, 300);
 }
 
-UMBRIEL_TEST(mappedClientWidthCanBecomeTheColumnWidth) {
+CANOPY_TEST(mappedClientWidthCanBecomeTheColumnWidth) {
   Fixture fixture;
   fixture.addColumns(1);
   CHECK(fixture.layout.setWidthFromPixels(0, kViewport, 800));
@@ -786,13 +786,13 @@ UMBRIEL_TEST(mappedClientWidthCanBecomeTheColumnWidth) {
 }
 
 // scrolling
-UMBRIEL_TEST(maxScrollIsZeroWhileEverythingFits) {
+CANOPY_TEST(maxScrollIsZeroWhileEverythingFits) {
   Fixture fixture;
   fixture.addColumns(2);
   CHECK_EQ(fixture.layout.maxScroll(kViewport), 0);
 }
 
-UMBRIEL_TEST(maxScrollGrowsWithOverflowingColumns) {
+CANOPY_TEST(maxScrollGrowsWithOverflowingColumns) {
   Fixture fixture;
   fixture.addColumns(6);
   CHECK(fixture.layout.maxScroll(kViewport) > 0);
@@ -806,7 +806,7 @@ int screenX(const ScrollingLayout& layout, int column) {
   return layout.columnX(column, kViewport) - static_cast<int>(std::lround(layout.scroll()));
 }
 
-UMBRIEL_TEST(removingAColumnLeftOfTheViewportDoesNotMoveTheVisibleOnes) {
+CANOPY_TEST(removingAColumnLeftOfTheViewportDoesNotMoveTheVisibleOnes) {
   Fixture fixture;
   fixture.addColumns(3);
   // Scrolled fully right: column 0 (0..624) sits entirely left of the viewport,
@@ -822,7 +822,7 @@ UMBRIEL_TEST(removingAColumnLeftOfTheViewportDoesNotMoveTheVisibleOnes) {
   CHECK_EQ(screenX(fixture.layout, 0), before);
 }
 
-UMBRIEL_TEST(theShiftIsTheColumnWidthPlusOneGap) {
+CANOPY_TEST(theShiftIsTheColumnWidthPlusOneGap) {
   Fixture fixture;
   fixture.addColumns(3);
   fixture.layout.setScroll(636);
@@ -830,7 +830,7 @@ UMBRIEL_TEST(theShiftIsTheColumnWidthPlusOneGap) {
   CHECK_EQ(fixture.layout.scrollShiftForColumnRemoval(0, kViewport), 636.0);
 }
 
-UMBRIEL_TEST(closingAnOffScreenFillingColumnCompensatesItsBleedToo) {
+CANOPY_TEST(closingAnOffScreenFillingColumnCompensatesItsBleedToo) {
   Fixture fixture;
   fixture.config.struts = {.left = 17, .right = 23};
   fixture.addColumns(3);
@@ -850,7 +850,7 @@ UMBRIEL_TEST(closingAnOffScreenFillingColumnCompensatesItsBleedToo) {
   CHECK_EQ(screenX(fixture.layout, 0), before);
 }
 
-UMBRIEL_TEST(aColumnAtTheViewportEdgeIsNotCompensated) {
+CANOPY_TEST(aColumnAtTheViewportEdgeIsNotCompensated) {
   Fixture fixture;
   fixture.addColumns(3);
   fixture.layout.setScroll(0);
@@ -859,7 +859,7 @@ UMBRIEL_TEST(aColumnAtTheViewportEdgeIsNotCompensated) {
   CHECK_EQ(fixture.layout.scrollShiftForColumnRemoval(0, kViewport), 0.0);
 }
 
-UMBRIEL_TEST(aPartlyHiddenColumnIsCompensatedByTheHiddenPart) {
+CANOPY_TEST(aPartlyHiddenColumnIsCompensatedByTheHiddenPart) {
   Fixture fixture;
   fixture.addColumns(3);
   fixture.layout.setScroll(300);
@@ -868,7 +868,7 @@ UMBRIEL_TEST(aPartlyHiddenColumnIsCompensatedByTheHiddenPart) {
   CHECK_EQ(fixture.layout.scrollShiftForColumnRemoval(0, kViewport), 300.0);
 }
 
-UMBRIEL_TEST(aColumnRightOfTheViewportIsNotCompensated) {
+CANOPY_TEST(aColumnRightOfTheViewportIsNotCompensated) {
   Fixture fixture;
   fixture.addColumns(3);
   fixture.layout.setScroll(0);
@@ -876,7 +876,7 @@ UMBRIEL_TEST(aColumnRightOfTheViewportIsNotCompensated) {
   CHECK_EQ(fixture.layout.scrollShiftForColumnRemoval(2, kViewport), 0.0);
 }
 
-UMBRIEL_TEST(losingOneRowOfAStackShiftsNothing) {
+CANOPY_TEST(losingOneRowOfAStackShiftsNothing) {
   Fixture fixture;
   fixture.addColumns(3);
   // Stack view 1 onto column 0, so removing it leaves the column standing.
@@ -885,7 +885,7 @@ UMBRIEL_TEST(losingOneRowOfAStackShiftsNothing) {
   CHECK_EQ(fixture.layout.scrollShiftForColumnRemoval(0, kViewport), 0.0);
 }
 
-UMBRIEL_TEST(anOutOfRangeColumnShiftsNothing) {
+CANOPY_TEST(anOutOfRangeColumnShiftsNothing) {
   Fixture fixture;
   fixture.addColumns(3);
   fixture.layout.setScroll(636);
@@ -894,7 +894,7 @@ UMBRIEL_TEST(anOutOfRangeColumnShiftsNothing) {
   CHECK_EQ(fixture.layout.scrollShiftForColumnRemoval(0, 0), 0.0);
 }
 
-UMBRIEL_TEST(setScrollStoresVerbatimAndDoesNotClamp) {
+CANOPY_TEST(setScrollStoresVerbatimAndDoesNotClamp) {
   // setScroll is a raw setter; callers clamp to [0, maxScroll] themselves (see Server::executeAction,
   // layout-scroll-*). Unclamped overscroll parks the strip past an edge.
   Fixture fixture;
@@ -910,7 +910,7 @@ UMBRIEL_TEST(setScrollStoresVerbatimAndDoesNotClamp) {
   CHECK(fixture.layout.maxScroll(kViewport) > 0);
 }
 
-UMBRIEL_TEST(ensureVisibleStaysWithinTheScrollRange) {
+CANOPY_TEST(ensureVisibleStaysWithinTheScrollRange) {
   // ensureVisible does clamp, unlike setScroll.
   Fixture fixture;
   fixture.addColumns(6);
@@ -921,7 +921,7 @@ UMBRIEL_TEST(ensureVisibleStaysWithinTheScrollRange) {
   }
 }
 
-UMBRIEL_TEST(ensureVisibleReachesBothEnds) {
+CANOPY_TEST(ensureVisibleReachesBothEnds) {
   Fixture fixture;
   fixture.addColumns(6);
 
@@ -933,7 +933,7 @@ UMBRIEL_TEST(ensureVisibleReachesBothEnds) {
   CHECK_EQ(fixture.layout.scroll(), 0.0);
 }
 
-UMBRIEL_TEST(snapVisibleTargetsRequestedColumn) {
+CANOPY_TEST(snapVisibleTargetsRequestedColumn) {
   Fixture fixture;
   fixture.addColumns(6);
   constexpr int column = 3;
@@ -944,7 +944,7 @@ UMBRIEL_TEST(snapVisibleTargetsRequestedColumn) {
   CHECK_EQ(fixture.layout.scroll(), static_cast<double>(fixture.layout.columnX(column, kViewport)));
 }
 
-UMBRIEL_TEST(snapVisibleCentersFullWidthColumn) {
+CANOPY_TEST(snapVisibleCentersFullWidthColumn) {
   Fixture fixture;
   fixture.addColumns(3);
   fixture.layout.setConstraints([](const View* view) { return LayoutConstraints{.fullscreen = view == stub(1)}; });
@@ -959,7 +959,7 @@ UMBRIEL_TEST(snapVisibleCentersFullWidthColumn) {
 
 // A gesture released onto a fullscreen column rests covering the viewport, not with an edge pad of strip showing on
 // either side of it.
-UMBRIEL_TEST(snapScrollsCoverTheViewportWithAFullscreenColumn) {
+CANOPY_TEST(snapScrollsCoverTheViewportWithAFullscreenColumn) {
   Fixture fixture;
   fixture.addColumns(2);
   fixture.layout.setConstraints([](const View* view) { return LayoutConstraints{.fullscreen = view == stub(1)}; });
@@ -971,7 +971,7 @@ UMBRIEL_TEST(snapScrollsCoverTheViewportWithAFullscreenColumn) {
   CHECK_EQ(snaps[1], cover);
 }
 
-UMBRIEL_TEST(centerFocusedCentersAnInteriorColumn) {
+CANOPY_TEST(centerFocusedCentersAnInteriorColumn) {
   Fixture fixture;
   fixture.addColumns(3);
   fixture.config.scrolling.centerFocused = CenterFocusedColumn::Always;
@@ -985,7 +985,7 @@ UMBRIEL_TEST(centerFocusedCentersAnInteriorColumn) {
   CHECK(fixture.layout.centeredRest());
 }
 
-UMBRIEL_TEST(centerFocusedAllowsEdgeColumnsToOverscroll) {
+CANOPY_TEST(centerFocusedAllowsEdgeColumnsToOverscroll) {
   Fixture fixture;
   fixture.addColumns(3);
   fixture.config.scrolling.centerFocused = CenterFocusedColumn::Always;
@@ -997,7 +997,7 @@ UMBRIEL_TEST(centerFocusedAllowsEdgeColumnsToOverscroll) {
   CHECK(fixture.layout.scroll() > static_cast<double>(fixture.layout.maxScroll(kViewport)));
 }
 
-UMBRIEL_TEST(disablingCenterFocusedReturnsTheFocusedColumnToTheScrollRange) {
+CANOPY_TEST(disablingCenterFocusedReturnsTheFocusedColumnToTheScrollRange) {
   Fixture fixture;
   fixture.addColumns(3);
   fixture.config.scrolling.centerFocused = CenterFocusedColumn::Always;
@@ -1011,7 +1011,7 @@ UMBRIEL_TEST(disablingCenterFocusedReturnsTheFocusedColumnToTheScrollRange) {
   CHECK(!fixture.layout.centeredRest());
 }
 
-UMBRIEL_TEST(onOverflowCentersWhenTheColumnPairExceedsTheViewport) {
+CANOPY_TEST(onOverflowCentersWhenTheColumnPairExceedsTheViewport) {
   Fixture fixture;
   fixture.config.scrolling.centerFocused = CenterFocusedColumn::OnOverflow;
   fixture.addColumns(3);
@@ -1031,7 +1031,7 @@ UMBRIEL_TEST(onOverflowCentersWhenTheColumnPairExceedsTheViewport) {
   CHECK(fixture.layout.centeredRest());
 }
 
-UMBRIEL_TEST(onOverflowLeavesAFittingColumnPairAtTheEdge) {
+CANOPY_TEST(onOverflowLeavesAFittingColumnPairAtTheEdge) {
   Fixture fixture;
   // Two 0.5-fraction columns and the gap between them fill the viewport exactly.
   fixture.config.scrolling.centerFocused = CenterFocusedColumn::OnOverflow;
@@ -1047,7 +1047,7 @@ UMBRIEL_TEST(onOverflowLeavesAFittingColumnPairAtTheEdge) {
 
 // Focus moving left measures the pair by the neighbor on the right, whose width is the one that decides whether both
 // fit. Measuring the target twice instead would call this pair 1012 wide and leave it uncentered.
-UMBRIEL_TEST(onOverflowMeasuresTheRightHandColumnWhenFocusMovesLeft) {
+CANOPY_TEST(onOverflowMeasuresTheRightHandColumnWhenFocusMovesLeft) {
   Fixture fixture;
   fixture.config.scrolling.centerFocused = CenterFocusedColumn::OnOverflow;
   fixture.addColumns(3);
@@ -1068,7 +1068,7 @@ UMBRIEL_TEST(onOverflowMeasuresTheRightHandColumnWhenFocusMovesLeft) {
 
 // A move keeps focus on the window and only changes its index, so OnOverflow needs the index the column came from.
 // Without it the move falls back to a fit and the moved column stays off center.
-UMBRIEL_TEST(onOverflowCentersAMovedColumn) {
+CANOPY_TEST(onOverflowCentersAMovedColumn) {
   Fixture fixture;
   fixture.config.scrolling.centerFocused = CenterFocusedColumn::OnOverflow;
   fixture.addColumns(3);
@@ -1091,7 +1091,7 @@ UMBRIEL_TEST(onOverflowCentersAMovedColumn) {
 // Closing the focused column leaves no side of its own, so the survivor inherits the side the dying column was on and
 // is judged against the column that took its place. The reveal focus triggers cannot do that while the dying column is
 // still in the layout, so it only fits the survivor, and the removal re-judges it on the geometry it leaves.
-UMBRIEL_TEST(onOverflowJudgesTheSurvivorOfAClosedColumnAgainstItsReplacement) {
+CANOPY_TEST(onOverflowJudgesTheSurvivorOfAClosedColumnAgainstItsReplacement) {
   Fixture fixture;
   fixture.config.scrolling.centerFocused = CenterFocusedColumn::OnOverflow;
   fixture.addColumns(3);
@@ -1119,7 +1119,7 @@ UMBRIEL_TEST(onOverflowJudgesTheSurvivorOfAClosedColumnAgainstItsReplacement) {
 
 // Removing the focused column can leave a lone survivor, which has no pair left to overflow against. It rests at the
 // strip start, so center_underfull_strip alone decides whether it ends up centered or flush left.
-UMBRIEL_TEST(onOverflowRestsTheLoneSurvivorOfARemovedColumnAtTheStripStart) {
+CANOPY_TEST(onOverflowRestsTheLoneSurvivorOfARemovedColumnAtTheStripStart) {
   for (const bool centerUnderfullStrip : {false, true}) {
     Fixture fixture;
     fixture.config.scrolling.centerFocused = CenterFocusedColumn::OnOverflow;
@@ -1146,7 +1146,7 @@ UMBRIEL_TEST(onOverflowRestsTheLoneSurvivorOfARemovedColumnAtTheStripStart) {
 
 // on_overflow centers a column because it and the one it came from cannot share the viewport. A lone column has no such
 // pair, so even a fullscreen one is not a centered rest.
-UMBRIEL_TEST(onOverflowJudgesNoPairForALoneColumn) {
+CANOPY_TEST(onOverflowJudgesNoPairForALoneColumn) {
   Fixture fixture;
   fixture.config.scrolling.centerFocused = CenterFocusedColumn::OnOverflow;
   fixture.addColumns(1);
@@ -1159,7 +1159,7 @@ UMBRIEL_TEST(onOverflowJudgesNoPairForALoneColumn) {
 
 // When the last tiled column closes and focus passes to a floating window, no survivor is judged. A later close of an
 // unfocused column must not replay that judgment on whatever column is focused by then.
-UMBRIEL_TEST(onOverflowForgetsAClosedColumnWithNoTiledSurvivor) {
+CANOPY_TEST(onOverflowForgetsAClosedColumnWithNoTiledSurvivor) {
   Fixture fixture;
   fixture.config.scrolling.centerFocused = CenterFocusedColumn::OnOverflow;
   fixture.layout.insertView(stub(0), 0);
@@ -1190,7 +1190,7 @@ UMBRIEL_TEST(onOverflowForgetsAClosedColumnWithNoTiledSurvivor) {
 // A width change has to be judged by the geometry it produced, not by the one the last focus step saw, or the focused
 // column stays uncentered until focus happens to leave and come back. Once the pair fits again the centered rest has to
 // go with it, which the fit alone would not do: the column is already fully visible.
-UMBRIEL_TEST(onOverflowFollowsTheFocusedColumnWidth) {
+CANOPY_TEST(onOverflowFollowsTheFocusedColumnWidth) {
   Fixture fixture;
   fixture.config.scrolling.centerFocused = CenterFocusedColumn::OnOverflow;
   fixture.addColumns(2);
@@ -1214,7 +1214,7 @@ UMBRIEL_TEST(onOverflowFollowsTheFocusedColumnWidth) {
 }
 
 // The last column has no column after it to stand in for a side, so the one before it is measured instead.
-UMBRIEL_TEST(onOverflowRecenterAfterTheLastFocusedColumnWidens) {
+CANOPY_TEST(onOverflowRecenterAfterTheLastFocusedColumnWidens) {
   Fixture fixture;
   fixture.config.scrolling.centerFocused = CenterFocusedColumn::OnOverflow;
   fixture.addColumns(2);
@@ -1231,7 +1231,7 @@ UMBRIEL_TEST(onOverflowRecenterAfterTheLastFocusedColumnWidens) {
 
 // A width change is judged by the pair the focus move was judged by, not by a neighbor picked at resize time: with
 // three columns in the way, the pair that overflows is the one focus came from.
-UMBRIEL_TEST(onOverflowMeasuresTheSideFocusCameFromAfterAWidthChange) {
+CANOPY_TEST(onOverflowMeasuresTheSideFocusCameFromAfterAWidthChange) {
   Fixture fixture;
   fixture.config.scrolling.centerFocused = CenterFocusedColumn::OnOverflow;
   fixture.addColumns(3);
@@ -1266,7 +1266,7 @@ UMBRIEL_TEST(onOverflowMeasuresTheSideFocusCameFromAfterAWidthChange) {
 
 // A fullscreen lane is wider than the viewport, so it centers; handing the strip back at the restored extent is a width
 // change, so the snap judges it too.
-UMBRIEL_TEST(onOverflowFollowsAFullscreenTransition) {
+CANOPY_TEST(onOverflowFollowsAFullscreenTransition) {
   Fixture fixture;
   fixture.config.scrolling.centerFocused = CenterFocusedColumn::OnOverflow;
   fixture.addColumns(3);
@@ -1293,7 +1293,7 @@ UMBRIEL_TEST(onOverflowFollowsAFullscreenTransition) {
 
 // Leaving maximize-to-edges makes the pair fit, so the restore is the documented one: the pair side by side at the edge
 // focus came from, not at whichever edge the lane left the strip against.
-UMBRIEL_TEST(onOverflowPutsThePairBackWhenAMaximizedToEdgesLaneGoesAway) {
+CANOPY_TEST(onOverflowPutsThePairBackWhenAMaximizedToEdgesLaneGoesAway) {
   Fixture fixture;
   fixture.config.scrolling.centerFocused = CenterFocusedColumn::OnOverflow;
   // Two 624 wide columns and the gap between them fill the 1260 viewport exactly, so the pair fits.
@@ -1322,7 +1322,7 @@ UMBRIEL_TEST(onOverflowPutsThePairBackWhenAMaximizedToEdgesLaneGoesAway) {
 
 // The centering a lane needed was the policy's, so a round trip must not leave it holding one it would take back on the
 // next width change and read the user's own column-center as a leftover.
-UMBRIEL_TEST(onOverflowLeavesAColumnCenterAloneAfterAFullscreenRoundTrip) {
+CANOPY_TEST(onOverflowLeavesAColumnCenterAloneAfterAFullscreenRoundTrip) {
   Fixture fixture;
   fixture.config.scrolling.centerFocused = CenterFocusedColumn::OnOverflow;
   fixture.addColumns(3);
@@ -1355,7 +1355,7 @@ UMBRIEL_TEST(onOverflowLeavesAColumnCenterAloneAfterAFullscreenRoundTrip) {
 
 // A column-center is the user's own, so OnOverflow gives up only the rest it took itself: a width change that keeps the
 // pair fitting must leave a manual centering where it is.
-UMBRIEL_TEST(onOverflowKeepsAManualCenteredRestAcrossAWidthChange) {
+CANOPY_TEST(onOverflowKeepsAManualCenteredRestAcrossAWidthChange) {
   Fixture fixture;
   fixture.config.scrolling.centerFocused = CenterFocusedColumn::OnOverflow;
   fixture.addColumns(3);
@@ -1380,7 +1380,7 @@ UMBRIEL_TEST(onOverflowKeepsAManualCenteredRestAcrossAWidthChange) {
 }
 
 // A rest under Never is the user's own, so a width change must not undo a column-center.
-UMBRIEL_TEST(neverKeepsACenteredRestAcrossAWidthChange) {
+CANOPY_TEST(neverKeepsACenteredRestAcrossAWidthChange) {
   Fixture fixture;
   fixture.config.scrolling.centerFocused = CenterFocusedColumn::Never;
   fixture.addColumns(2);
@@ -1398,7 +1398,7 @@ UMBRIEL_TEST(neverKeepsACenteredRestAcrossAWidthChange) {
   CHECK(fixture.layout.centeredRest());
 }
 
-UMBRIEL_TEST(ensureVisibleIsANoOpForAnAlreadyVisibleColumn) {
+CANOPY_TEST(ensureVisibleIsANoOpForAnAlreadyVisibleColumn) {
   Fixture fixture;
   fixture.addColumns(6);
   fixture.layout.setScroll(0);
@@ -1407,7 +1407,7 @@ UMBRIEL_TEST(ensureVisibleIsANoOpForAnAlreadyVisibleColumn) {
   CHECK_EQ(fixture.layout.scrollAmountToEnsureVisible(0, kViewport), 0.0);
 }
 
-UMBRIEL_TEST(ensureVisibleKeepsAFlushRightColumnInPlace) {
+CANOPY_TEST(ensureVisibleKeepsAFlushRightColumnInPlace) {
   // Two half-width columns plus a third: the second column is fully visible flush against the viewport edge, so
   // focusing it must not nudge the strip to reveal a sliver of the third column.
   Fixture fixture;
@@ -1419,7 +1419,7 @@ UMBRIEL_TEST(ensureVisibleKeepsAFlushRightColumnInPlace) {
   CHECK_EQ(fixture.layout.scrollAmountToEnsureVisible(1, kViewport), 0.0);
 }
 
-UMBRIEL_TEST(ensureVisibleKeepsAFlushLeftColumnInPlace) {
+CANOPY_TEST(ensureVisibleKeepsAFlushLeftColumnInPlace) {
   // Mirrors the flush-right case at the other end: at max scroll the second
   // column sits flush against the left edge, still fully visible.
   Fixture fixture;
@@ -1432,7 +1432,7 @@ UMBRIEL_TEST(ensureVisibleKeepsAFlushLeftColumnInPlace) {
   CHECK_EQ(fixture.layout.scrollAmountToEnsureVisible(1, kViewport), 0.0);
 }
 
-UMBRIEL_TEST(centerColumnLetsTheFirstColumnRestPastStripStart) {
+CANOPY_TEST(centerColumnLetsTheFirstColumnRestPastStripStart) {
   Fixture fixture;
   fixture.addColumns(3);
   const double expected = static_cast<double>(fixture.layout.columnX(0, kViewport))
@@ -1448,7 +1448,7 @@ UMBRIEL_TEST(centerColumnLetsTheFirstColumnRestPastStripStart) {
   CHECK_EQ(fixture.layout.scrollAmountToEnsureVisible(0, kViewport), 0.0);
 }
 
-UMBRIEL_TEST(centerColumnLetsTheLastColumnRestPastStripEnd) {
+CANOPY_TEST(centerColumnLetsTheLastColumnRestPastStripEnd) {
   Fixture fixture;
   fixture.addColumns(3);
   const double expected = static_cast<double>(fixture.layout.columnX(2, kViewport))
@@ -1463,7 +1463,7 @@ UMBRIEL_TEST(centerColumnLetsTheLastColumnRestPastStripEnd) {
   CHECK_EQ(fixture.layout.scroll(), expected);
 }
 
-UMBRIEL_TEST(rawScrollDoesNotInheritAColumnCenterRest) {
+CANOPY_TEST(rawScrollDoesNotInheritAColumnCenterRest) {
   Fixture fixture;
   fixture.addColumns(3);
   CHECK(fixture.layout.centerColumn(0, kViewport));
@@ -1474,7 +1474,7 @@ UMBRIEL_TEST(rawScrollDoesNotInheritAColumnCenterRest) {
   CHECK_EQ(fixture.layout.scroll(), 0.0);
 }
 
-UMBRIEL_TEST(revealingAHiddenColumnEndsTheCenteredRest) {
+CANOPY_TEST(revealingAHiddenColumnEndsTheCenteredRest) {
   Fixture fixture;
   fixture.addColumns(3);
   CHECK(fixture.layout.centerColumn(0, kViewport));
@@ -1485,7 +1485,7 @@ UMBRIEL_TEST(revealingAHiddenColumnEndsTheCenteredRest) {
   CHECK(fixture.layout.scroll() <= static_cast<double>(fixture.layout.maxScroll(kViewport)));
 }
 
-UMBRIEL_TEST(centerColumnRejectsInvalidGeometryWithoutMoving) {
+CANOPY_TEST(centerColumnRejectsInvalidGeometryWithoutMoving) {
   Fixture fixture;
   fixture.addColumns(2);
   fixture.layout.setScroll(123.0);
@@ -1497,7 +1497,7 @@ UMBRIEL_TEST(centerColumnRejectsInvalidGeometryWithoutMoving) {
   CHECK(!fixture.layout.centeredRest());
 }
 
-UMBRIEL_TEST(ensureVisibleGivesBackLeftOverscroll) {
+CANOPY_TEST(ensureVisibleGivesBackLeftOverscroll) {
   // Raw gesture overscroll is not a centered resting position. Even though column 0 remains fully visible,
   // ensureVisible must return the strip to its normal range.
   Fixture fixture;
@@ -1515,7 +1515,7 @@ UMBRIEL_TEST(ensureVisibleGivesBackLeftOverscroll) {
   CHECK_EQ(fixture.layout.scroll(), 0.0);
 }
 
-UMBRIEL_TEST(ensureVisibleGivesBackRightOverscroll) {
+CANOPY_TEST(ensureVisibleGivesBackRightOverscroll) {
   // Mirrors the left extremity: raw overscroll past max scroll is still temporary, even while the last column remains
   // fully visible.
   Fixture fixture;
@@ -1533,7 +1533,7 @@ UMBRIEL_TEST(ensureVisibleGivesBackRightOverscroll) {
   CHECK_EQ(fixture.layout.scroll(), maxScroll);
 }
 
-UMBRIEL_TEST(ensureVisibleAlignsInsertedHalfWidthColumnToTheRightEdge) {
+CANOPY_TEST(ensureVisibleAlignsInsertedHalfWidthColumnToTheRightEdge) {
   Fixture fixture;
   fixture.addColumns(2);
   CHECK(fixture.layout.setWidthFraction(0, 1.0));
@@ -1551,7 +1551,7 @@ UMBRIEL_TEST(ensureVisibleAlignsInsertedHalfWidthColumnToTheRightEdge) {
 }
 
 // arrange and targetBox
-UMBRIEL_TEST(arrangePlacesColumnsSideBySide) {
+CANOPY_TEST(arrangePlacesColumnsSideBySide) {
   Fixture fixture;
   fixture.addColumns(2);
   fixture.layout.arrange(kUsable);
@@ -1566,7 +1566,7 @@ UMBRIEL_TEST(arrangePlacesColumnsSideBySide) {
   CHECK_EQ(first.x, kUsable.x + fixture.config.edgePad);
 }
 
-UMBRIEL_TEST(arrangeStacksRowsWithinAColumn) {
+CANOPY_TEST(arrangeStacksRowsWithinAColumn) {
   Fixture fixture;
   fixture.addColumns(2);
   CHECK(fixture.layout.consume(stub(1), -1));
@@ -1582,7 +1582,7 @@ UMBRIEL_TEST(arrangeStacksRowsWithinAColumn) {
   CHECK_NEAR(upper.height, lower.height, 1);
 }
 
-UMBRIEL_TEST(arrangeHonorsClientMinHeight) {
+CANOPY_TEST(arrangeHonorsClientMinHeight) {
   Fixture fixture;
   fixture.addColumns(2);
   CHECK(fixture.layout.consume(stub(1), -1));
@@ -1593,7 +1593,7 @@ UMBRIEL_TEST(arrangeHonorsClientMinHeight) {
   CHECK(fixture.layout.targetBox(stub(1)).height >= 600);
 }
 
-UMBRIEL_TEST(targetBoxOfAnUnknownViewIsEmpty) {
+CANOPY_TEST(targetBoxOfAnUnknownViewIsEmpty) {
   Fixture fixture;
   fixture.addColumns(1);
   fixture.layout.arrange(kUsable);
@@ -1602,7 +1602,7 @@ UMBRIEL_TEST(targetBoxOfAnUnknownViewIsEmpty) {
   CHECK_EQ(box.height, 0);
 }
 
-UMBRIEL_TEST(arrangeShiftsColumnsByTheScrollOffset) {
+CANOPY_TEST(arrangeShiftsColumnsByTheScrollOffset) {
   Fixture fixture;
   fixture.addColumns(6);
   fixture.layout.arrange(kUsable);
@@ -1613,7 +1613,7 @@ UMBRIEL_TEST(arrangeShiftsColumnsByTheScrollOffset) {
   CHECK_EQ(fixture.layout.targetBox(stub(0)).x, unscrolled - 100);
 }
 
-UMBRIEL_TEST(arrangeOnAnEmptyLayoutIsHarmless) {
+CANOPY_TEST(arrangeOnAnEmptyLayoutIsHarmless) {
   Fixture fixture;
   fixture.layout.arrange(kUsable);
   CHECK_EQ(fixture.layout.columns().size(), size_t{0});
@@ -1621,7 +1621,7 @@ UMBRIEL_TEST(arrangeOnAnEmptyLayoutIsHarmless) {
 }
 
 // row weights
-UMBRIEL_TEST(heightWeightsDefaultToOneAndTrackViews) {
+CANOPY_TEST(heightWeightsDefaultToOneAndTrackViews) {
   Fixture fixture;
   fixture.addColumns(2);
   CHECK(fixture.layout.consume(stub(1), -1));
@@ -1630,7 +1630,7 @@ UMBRIEL_TEST(heightWeightsDefaultToOneAndTrackViews) {
   CHECK_EQ(fixture.layout.columns()[0].heightWeights.size(), size_t{2});
 }
 
-UMBRIEL_TEST(setHeightWeightChangesTheStackSplit) {
+CANOPY_TEST(setHeightWeightChangesTheStackSplit) {
   Fixture fixture;
   fixture.addColumns(2);
   CHECK(fixture.layout.consume(stub(1), -1));
@@ -1642,7 +1642,7 @@ UMBRIEL_TEST(setHeightWeightChangesTheStackSplit) {
   CHECK(upper.height > lower.height);
 }
 
-UMBRIEL_TEST(gapWeightsInsetTheStack) {
+CANOPY_TEST(gapWeightsInsetTheStack) {
   Fixture fixture;
   fixture.addColumns(1);
   fixture.layout.arrange(kUsable);
@@ -1656,7 +1656,7 @@ UMBRIEL_TEST(gapWeightsInsetTheStack) {
   CHECK_NEAR(fixture.layout.topGapWeight(0), 1.0, 1e-9);
 }
 
-UMBRIEL_TEST(insertAtBottomConsumesTheResizedGap) {
+CANOPY_TEST(insertAtBottomConsumesTheResizedGap) {
   Fixture fixture;
   fixture.addColumns(1);
   CHECK(fixture.layout.setHeightWeight(0, 0, 0.25));
@@ -1675,7 +1675,7 @@ UMBRIEL_TEST(insertAtBottomConsumesTheResizedGap) {
   CHECK_NEAR(fixture.layout.bottomGapWeight(0), 0.0, 1e-9);
 }
 
-UMBRIEL_TEST(insertAtTopConsumesTheResizedGap) {
+CANOPY_TEST(insertAtTopConsumesTheResizedGap) {
   Fixture fixture;
   fixture.addColumns(1);
   CHECK(fixture.layout.setHeightWeight(0, 0, 0.25));
@@ -1695,7 +1695,7 @@ UMBRIEL_TEST(insertAtTopConsumesTheResizedGap) {
 }
 
 // vertical scrolling
-UMBRIEL_TEST(verticalArrangePlacesLanesTopToBottom) {
+CANOPY_TEST(verticalArrangePlacesLanesTopToBottom) {
   Fixture fixture(ScrollingDirection::Vertical);
   fixture.addColumns(2);
   fixture.layout.arrange(kUsable);
@@ -1712,7 +1712,7 @@ UMBRIEL_TEST(verticalArrangePlacesLanesTopToBottom) {
   CHECK_EQ(second.height, 344);
 }
 
-UMBRIEL_TEST(verticalArrangeStacksViewsSideBySideWithinALane) {
+CANOPY_TEST(verticalArrangeStacksViewsSideBySideWithinALane) {
   Fixture fixture(ScrollingDirection::Vertical);
   fixture.addColumns(2);
   CHECK(fixture.layout.consume(stub(1), -1));
@@ -1727,13 +1727,13 @@ UMBRIEL_TEST(verticalArrangeStacksViewsSideBySideWithinALane) {
   CHECK_EQ(left.height, 344);
 }
 
-UMBRIEL_TEST(verticalLaneExtentUsesTheGapAwareFormula) {
+CANOPY_TEST(verticalLaneExtentUsesTheGapAwareFormula) {
   Fixture fixture(ScrollingDirection::Vertical);
   fixture.addColumns(1);
   CHECK_EQ(fixture.layout.columnWidth(0, kVerticalViewport), 344);
 }
 
-UMBRIEL_TEST(verticalInitialSizeMatchesWhatArrangeWillAssign) {
+CANOPY_TEST(verticalInitialSizeMatchesWhatArrangeWillAssign) {
   Fixture fixture(ScrollingDirection::Vertical);
   const Layout::InitialSize initial = fixture.layout.initialSize(kUsable, false, std::nullopt, std::nullopt, nullptr);
   CHECK_EQ(initial.width, 1260);
@@ -1746,7 +1746,7 @@ UMBRIEL_TEST(verticalInitialSizeMatchesWhatArrangeWillAssign) {
   CHECK_EQ(initial.height, arranged.height);
 }
 
-UMBRIEL_TEST(clientMinHeightWidensAVerticalLane) {
+CANOPY_TEST(clientMinHeightWidensAVerticalLane) {
   Fixture fixture(ScrollingDirection::Vertical);
   fixture.addColumns(1);
   const int unconstrained = fixture.layout.columnWidth(0, kVerticalViewport);
@@ -1755,14 +1755,14 @@ UMBRIEL_TEST(clientMinHeightWidensAVerticalLane) {
   CHECK_EQ(fixture.layout.columnWidth(0, kVerticalViewport), 500);
 }
 
-UMBRIEL_TEST(clientMaxHeightNarrowsAVerticalLane) {
+CANOPY_TEST(clientMaxHeightNarrowsAVerticalLane) {
   Fixture fixture(ScrollingDirection::Vertical);
   fixture.addColumns(1);
   fixture.layout.setConstraints([](const View*) { return LayoutConstraints{.maxHeight = 300}; });
   CHECK_EQ(fixture.layout.columnWidth(0, kVerticalViewport), 300);
 }
 
-UMBRIEL_TEST(clientMinWidthClampsWithinAVerticalLane) {
+CANOPY_TEST(clientMinWidthClampsWithinAVerticalLane) {
   Fixture fixture(ScrollingDirection::Vertical);
   fixture.addColumns(2);
   CHECK(fixture.layout.consume(stub(1), -1));
@@ -1772,7 +1772,7 @@ UMBRIEL_TEST(clientMinWidthClampsWithinAVerticalLane) {
   CHECK(fixture.layout.targetBox(stub(1)).width >= 900);
 }
 
-UMBRIEL_TEST(verticalArrangeShiftsLanesByTheScrollOffset) {
+CANOPY_TEST(verticalArrangeShiftsLanesByTheScrollOffset) {
   Fixture fixture(ScrollingDirection::Vertical);
   fixture.addColumns(3);
   fixture.layout.arrange(kUsable);
@@ -1785,7 +1785,7 @@ UMBRIEL_TEST(verticalArrangeShiftsLanesByTheScrollOffset) {
   CHECK_EQ(scrolled.y, unscrolled.y - 100);
 }
 
-UMBRIEL_TEST(verticalFirstLaneTopEdgeStaysFixedWithoutCentering) {
+CANOPY_TEST(verticalFirstLaneTopEdgeStaysFixedWithoutCentering) {
   Fixture fixture(ScrollingDirection::Vertical);
   fixture.config.scrolling.centerUnderfullStrip = false;
   fixture.addColumns(1);
@@ -1794,7 +1794,7 @@ UMBRIEL_TEST(verticalFirstLaneTopEdgeStaysFixedWithoutCentering) {
   CHECK((edges & WLR_EDGE_LEFT) != 0);
 }
 
-UMBRIEL_TEST(verticalResizeBottomEdgeGrowsTheLaneWithDy) {
+CANOPY_TEST(verticalResizeBottomEdgeGrowsTheLaneWithDy) {
   Fixture fixture(ScrollingDirection::Vertical);
   fixture.addColumns(1);
   fixture.layout.arrange(kUsable);
@@ -1807,7 +1807,7 @@ UMBRIEL_TEST(verticalResizeBottomEdgeGrowsTheLaneWithDy) {
   CHECK(fixture.layout.targetBox(stub(0)).height > before);
 }
 
-UMBRIEL_TEST(directionFlipKeepsFractionsAndRearranges) {
+CANOPY_TEST(directionFlipKeepsFractionsAndRearranges) {
   Fixture fixture;
   fixture.addColumns(2);
   const double firstFraction = fixture.layout.widthFraction(0);
@@ -1828,7 +1828,7 @@ UMBRIEL_TEST(directionFlipKeepsFractionsAndRearranges) {
   CHECK_EQ(vertical.height, 344);
 }
 
-UMBRIEL_TEST(snapshotRestoresColumnsStacksWidthsAndViewport) {
+CANOPY_TEST(snapshotRestoresColumnsStacksWidthsAndViewport) {
   Fixture source;
   source.addColumns(4);
   CHECK(source.layout.consume(stub(2), -1));
@@ -1878,7 +1878,7 @@ UMBRIEL_TEST(snapshotRestoresColumnsStacksWidthsAndViewport) {
   CHECK_NEAR(restored.layout.widthFraction(restored.layout.columnOf(stub(0))), 0.67, 1e-9);
 }
 
-UMBRIEL_TEST(snapshotPrunesMissingRowsAndColumns) {
+CANOPY_TEST(snapshotPrunesMissingRowsAndColumns) {
   Fixture source;
   source.addColumns(3);
   CHECK(source.layout.consume(stub(1), -1));
@@ -1901,7 +1901,7 @@ UMBRIEL_TEST(snapshotPrunesMissingRowsAndColumns) {
   CHECK(survivor.x + survivor.width > kUsable.x);
 }
 
-UMBRIEL_TEST(snapshotKeepsTheAnchorAtTheSameRelativePositionOnANewViewport) {
+CANOPY_TEST(snapshotKeepsTheAnchorAtTheSameRelativePositionOnANewViewport) {
   Fixture source;
   source.addColumns(4);
   source.layout.arrange(kUsable);
@@ -1930,7 +1930,7 @@ UMBRIEL_TEST(snapshotKeepsTheAnchorAtTheSameRelativePositionOnANewViewport) {
   CHECK(restored.layout.scroll() <= restored.layout.maxScroll(newViewport));
 }
 
-UMBRIEL_TEST(snapshotFallsBackToTheNearestLaneWhenTheCenteredLaneClosed) {
+CANOPY_TEST(snapshotFallsBackToTheNearestLaneWhenTheCenteredLaneClosed) {
   Fixture source;
   source.addColumns(5);
   source.layout.arrange(kUsable);
@@ -1958,7 +1958,7 @@ UMBRIEL_TEST(snapshotFallsBackToTheNearestLaneWhenTheCenteredLaneClosed) {
   CHECK(restored.layout.scroll() < restored.layout.maxScroll(kViewport));
 }
 
-UMBRIEL_TEST(snapshotRejectsRawScrollWhenLaneGeometryChanged) {
+CANOPY_TEST(snapshotRejectsRawScrollWhenLaneGeometryChanged) {
   Fixture source;
   source.addColumns(4);
   source.layout.arrange(kUsable);
@@ -1984,7 +1984,7 @@ UMBRIEL_TEST(snapshotRejectsRawScrollWhenLaneGeometryChanged) {
   CHECK(restored.layout.scroll() != source.layout.scroll());
 }
 
-UMBRIEL_TEST(snapshotUsesMemberIdsInsteadOfCapturedViewPointers) {
+CANOPY_TEST(snapshotUsesMemberIdsInsteadOfCapturedViewPointers) {
   Fixture source;
   source.addColumns(3);
   CHECK(source.layout.consume(stub(2), -1));
@@ -2004,7 +2004,7 @@ UMBRIEL_TEST(snapshotUsesMemberIdsInsteadOfCapturedViewPointers) {
 }
 
 // wide columns: a scrolling column may span more than one viewport, panned through with scroll actions.
-UMBRIEL_TEST(wideFractionSpansMultipleViewports) {
+CANOPY_TEST(wideFractionSpansMultipleViewports) {
   Fixture fixture;
   fixture.addColumns(1);
   // Slot arithmetic: round(fraction * (viewport + totalGap)) - totalGap.
@@ -2019,7 +2019,7 @@ UMBRIEL_TEST(wideFractionSpansMultipleViewports) {
   CHECK(fixture.layout.widthFraction(0) == 0.1);
 }
 
-UMBRIEL_TEST(wideLoneColumnScrollsAndSnapsAtBothEnds) {
+CANOPY_TEST(wideLoneColumnScrollsAndSnapsAtBothEnds) {
   Fixture fixture;
   fixture.addColumns(1);
   CHECK(fixture.layout.setWidthFraction(0, 2.0));
@@ -2041,7 +2041,7 @@ UMBRIEL_TEST(wideLoneColumnScrollsAndSnapsAtBothEnds) {
   CHECK(cover[0] == cover[1]);
 }
 
-UMBRIEL_TEST(ensureVisibleKeepsAPannedWideColumn) {
+CANOPY_TEST(ensureVisibleKeepsAPannedWideColumn) {
   Fixture fixture;
   fixture.addColumns(1);
   CHECK(fixture.layout.setWidthFraction(0, 2.0));
@@ -2059,7 +2059,7 @@ UMBRIEL_TEST(ensureVisibleKeepsAPannedWideColumn) {
   CHECK(fixture.layout.scroll() == x + width - kViewport);
 }
 
-UMBRIEL_TEST(activateColumnPansAWideColumnFromTheEntrySide) {
+CANOPY_TEST(activateColumnPansAWideColumnFromTheEntrySide) {
   Fixture fixture;
   fixture.addColumns(3);
   CHECK(fixture.layout.setWidthFraction(1, 2.0));
@@ -2078,7 +2078,7 @@ UMBRIEL_TEST(activateColumnPansAWideColumnFromTheEntrySide) {
   CHECK(fixture.layout.scroll() == x);
 }
 
-UMBRIEL_TEST(alwaysPolicyDoesNotRecenterAPannableColumn) {
+CANOPY_TEST(alwaysPolicyDoesNotRecenterAPannableColumn) {
   // A column wider than the viewport pans, so Always centering must not yank the strip to its midpoint on refocus.
   Fixture fixture;
   fixture.config.scrolling.centerFocused = CenterFocusedColumn::Always;
@@ -2091,7 +2091,7 @@ UMBRIEL_TEST(alwaysPolicyDoesNotRecenterAPannableColumn) {
   CHECK(fixture.layout.scroll() == x + 600.0);
 }
 
-UMBRIEL_TEST(snapVisibleKeepsAnEntrySideLanding) {
+CANOPY_TEST(snapVisibleKeepsAnEntrySideLanding) {
   // A forced snap (a fullscreen or maximize-to-edges extent change) must not overwrite the edge the focus move landed:
   // the pan rule owns the strip even when the snap forces.
   Fixture fixture;
@@ -2108,7 +2108,7 @@ UMBRIEL_TEST(snapVisibleKeepsAnEntrySideLanding) {
   CHECK(fixture.layout.scroll() == x + width - kViewport);
 }
 
-UMBRIEL_TEST(widthGrowthKeepsTheLeadingEdge) {
+CANOPY_TEST(widthGrowthKeepsTheLeadingEdge) {
   // Never policy: growing a focused column past the viewport anchors its leading edge instead of recentring.
   Fixture fixture;
   fixture.addColumns(3);
@@ -2121,7 +2121,7 @@ UMBRIEL_TEST(widthGrowthKeepsTheLeadingEdge) {
   CHECK(fixture.layout.scroll() == x);
 }
 
-UMBRIEL_TEST(wideningAPolicyCenteredColumnFollowsThePanRule) {
+CANOPY_TEST(wideningAPolicyCenteredColumnFollowsThePanRule) {
   // OnOverflow centered this column because its pair overflowed. Widening it past the viewport must not "undo" that
   // centering to the neighbor's edge: the pan rule owns the strip and lands the nearest edge of the pan range.
   Fixture fixture;
@@ -2136,7 +2136,7 @@ UMBRIEL_TEST(wideningAPolicyCenteredColumnFollowsThePanRule) {
   CHECK(fixture.layout.scroll() == leading);
 }
 
-UMBRIEL_TEST(justOverTheViewportStillPans) {
+CANOPY_TEST(justOverTheViewportStillPans) {
   // Between one viewport and the fullscreen overhang lies a band of user-set fractions; those columns pan too.
   Fixture fixture;
   fixture.addColumns(1);
@@ -2146,7 +2146,7 @@ UMBRIEL_TEST(justOverTheViewportStillPans) {
   CHECK(snap[0] != snap[1]);
 }
 
-UMBRIEL_TEST(snapshotRoundTripKeepsWideFractions) {
+CANOPY_TEST(snapshotRoundTripKeepsWideFractions) {
   Fixture source;
   source.addColumns(1);
   CHECK(source.layout.setWidthFraction(0, 1.5));

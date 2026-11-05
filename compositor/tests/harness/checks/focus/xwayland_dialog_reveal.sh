@@ -3,14 +3,14 @@
 # A tiled transient takes focus while its parent remains beneath the pointer
 # during scrolling reveal. Incidental motion must not steal that focus back.
 set -euo pipefail
-source "$UMBRIEL_HARNESS_LIB"
+source "$CANOPY_HARNESS_LIB"
 
-readonly CLIENT="$UMBRIEL_XWAYLAND_DIALOG_CLIENT"
-readonly CLIENT_LOG="$UMBRIEL_RUNTIME_DIR/xwayland-dialog.log"
-readonly CONTROL="$UMBRIEL_RUNTIME_DIR/xwayland-dialog.control"
+readonly CLIENT="$CANOPY_XWAYLAND_DIALOG_CLIENT"
+readonly CLIENT_LOG="$CANOPY_RUNTIME_DIR/xwayland-dialog.log"
+readonly CONTROL="$CANOPY_RUNTIME_DIR/xwayland-dialog.control"
 readonly PARENT=xwayland-dialog-parent
 readonly CHILD=xwayland-dialog-child
-windows() { "$UMBRIEL" windows --json; }
+windows() { "$CANOPY" windows --json; }
 window() { windows | jq -c --arg title "$1" '.[] | select(.title == $title)'; }
 send_client() { printf '%s\n' "$@" >&"$control_fd"; }
 
@@ -53,20 +53,20 @@ expect_x_focus() {
 }
 
 assert_pixel() {
-  local phase=$1 x=$2 y=$3 expected=$4 image="$UMBRIEL_RUNTIME_DIR/dialog-$1.png" actual
+  local phase=$1 x=$2 y=$3 expected=$4 image="$CANOPY_RUNTIME_DIR/dialog-$1.png" actual
   grim -o HEADLESS-1 "$image"
-  actual=$("$UMBRIEL_PIXEL_PROBE" "$image" pixel "$x" "$y")
+  actual=$("$CANOPY_PIXEL_PROBE" "$image" pixel "$x" "$y")
   [[ $actual == "$expected" ]] || { echo "$phase: expected $expected at $x,$y, got $actual"; return 1; }
 }
 
 type_into() {
   local title=$1 key=$2 phase=$3 before
   before=$(events "$CLIENT_LOG" "key window=$title code=$((key + 8)) state=pressed")
-  "$UMBRIEL_POINTER_CLIENT" 1280 720 tap "$key" > /dev/null
+  "$CANOPY_POINTER_CLIENT" 1280 720 tap "$key" > /dev/null
   await_events "$CLIENT_LOG" "key window=$title code=$((key + 8)) state=pressed" "$((before + 1))" "$phase"
 }
 
-cat >> "$UMBRIEL_CONFIG" <<'CONFIG'
+cat >> "$CANOPY_CONFIG" <<'CONFIG'
 [layout]
 mode = "scrolling"
 [layout.scrolling]
@@ -89,7 +89,7 @@ enabled = false
 follows_mouse = true
 
 [[window_rule]]
-match.app_id = "^UmbrielXwaylandDialog$"
+match.app_id = "^CanopyXwaylandDialog$"
 default_floating = false
 opacity = 1.0
 blur = false
@@ -98,21 +98,21 @@ blur = false
 match.title = "^xwayland-dialog-parent$"
 default_maximize = true
 CONFIG
-"$UMBRIEL" msg config-reload > /dev/null
+"$CANOPY" msg config-reload > /dev/null
 
 mkfifo "$CONTROL"
 exec {control_fd}<> "$CONTROL"
 "$CLIENT" <&"$control_fd" > "$CLIENT_LOG" 2>&1 &
 wait_window "$PARENT"
 wait_active "$PARENT" 'initial parent'
-"$UMBRIEL" settle > /dev/null
+"$CANOPY" settle > /dev/null
 expect_x_focus "$PARENT" initial
 await_events "$CLIENT_LOG" "take-focus window=$PARENT" 1 'globally active parent handshake'
 type_into "$PARENT" 30 'initial parent keyboard'
 parent_id=$(window "$PARENT" | jq -r .id)
 
 pointer_hold 1280 720 move 128 360 -- move 129 360 mark incidental hold
-"$UMBRIEL" clock-freeze > /dev/null
+"$CANOPY" clock-freeze > /dev/null
 assert_pixel before-map 128 360 '48 96 144'
 send_client map-dialog
 wait_window "$CHILD"
@@ -135,53 +135,53 @@ assert_active "$CHILD" 'one-pixel motion inside the same parent during reveal'
 expect_x_focus "$CHILD" incidental
 type_into "$CHILD" 31 'dialog keyboard during reveal'
 pointer_release
-"$UMBRIEL" clock-advance 2000 > /dev/null
-"$UMBRIEL" settle > /dev/null
+"$CANOPY" clock-advance 2000 > /dev/null
+"$CANOPY" settle > /dev/null
 assert_active "$CHILD" 'completed dialog reveal'
 
 # An explicit strip scroll intentionally refreshes hover after it settles.
 # The pointer stays inside the same parent while the child owns the seat,
 # so this also distinguishes that refresh from map-time invalidation.
-"$UMBRIEL" msg layout-scroll-left > /dev/null
+"$CANOPY" msg layout-scroll-left > /dev/null
 assert_active "$CHILD" 'pending explicit strip scroll'
-"$UMBRIEL" clock-advance 2000 > /dev/null
-"$UMBRIEL" settle > /dev/null
+"$CANOPY" clock-advance 2000 > /dev/null
+"$CANOPY" settle > /dev/null
 assert_pixel scrolled-parent 129 360 '48 96 144'
-"$UMBRIEL_POINTER_CLIENT" 1280 720 move 130 360 > /dev/null
+"$CANOPY_POINTER_CLIENT" 1280 720 move 130 360 > /dev/null
 wait_active "$PARENT" 'hover refresh after explicit strip scroll'
 expect_x_focus "$PARENT" scrolled
-"$UMBRIEL" msg window-focus "$child_id" > /dev/null
+"$CANOPY" msg window-focus "$child_id" > /dev/null
 wait_active "$CHILD" 'child focus after explicit scroll control'
-"$UMBRIEL" clock-advance 2000 > /dev/null
-"$UMBRIEL" settle > /dev/null
+"$CANOPY" clock-advance 2000 > /dev/null
+"$CANOPY" settle > /dev/null
 
 # A real crossing into the parent remains an intentional hover focus change.
 child_x=$(window "$CHILD" | jq -r '.x + .w / 2 | floor')
 parent_x=$(window "$PARENT" | jq -r '(([.x, 0] | max) + ([.x + .w, 1280] | min)) / 2 | floor')
 assert_pixel revealed "$child_x" 360 '96 192 48'
-"$UMBRIEL_POINTER_CLIENT" 1280 720 move "$child_x" 360 > /dev/null
+"$CANOPY_POINTER_CLIENT" 1280 720 move "$child_x" 360 > /dev/null
 wait_active "$CHILD" 'pointer inside revealed dialog'
-"$UMBRIEL_POINTER_CLIENT" 1280 720 move "$parent_x" 360 > /dev/null
+"$CANOPY_POINTER_CLIENT" 1280 720 move "$parent_x" 360 > /dev/null
 wait_active "$PARENT" 'geometric entry into parent'
 expect_x_focus "$PARENT" entered
-"$UMBRIEL" clock-advance 2000 > /dev/null
-"$UMBRIEL" settle > /dev/null
+"$CANOPY" clock-advance 2000 > /dev/null
+"$CANOPY" settle > /dev/null
 
 # Explicit clicks also override a child's pending reveal while the pointer
 # has remained inside the parent. No geometric entry is needed for a click.
-"$UMBRIEL_POINTER_CLIENT" 1280 720 move 128 360 > /dev/null
-"$UMBRIEL" msg window-focus "$child_id" > /dev/null
+"$CANOPY_POINTER_CLIENT" 1280 720 move 128 360 > /dev/null
+"$CANOPY" msg window-focus "$child_id" > /dev/null
 wait_active "$CHILD" 'explicit child focus'
 assert_pixel pending-click 128 360 '48 96 144'
 buttons_before=$(events "$CLIENT_LOG" "button window=$PARENT code=1 state=pressed")
-"$UMBRIEL_POINTER_CLIENT" 1280 720 click 272 > /dev/null
+"$CANOPY_POINTER_CLIENT" 1280 720 click 272 > /dev/null
 wait_active "$PARENT" 'explicit parent click'
 expect_x_focus "$PARENT" clicked
 await_events "$CLIENT_LOG" "button window=$PARENT code=1 state=pressed" "$((buttons_before + 1))" 'parent click delivery'
 
 # Withdrawing the focused child restores a usable parent and retires its
 # pending reveal state rather than retaining a stale dialog focus target.
-"$UMBRIEL" msg window-focus "$child_id" > /dev/null
+"$CANOPY" msg window-focus "$child_id" > /dev/null
 wait_active "$CHILD" 'child focus before withdrawal'
 send_client unmap-dialog
 for _ in $(seq 100); do

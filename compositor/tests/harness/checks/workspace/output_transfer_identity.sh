@@ -3,13 +3,13 @@
 # A transfer moves a stable workspace identity and every member across output groups.
 set -euo pipefail
 
-readonly BASELINE="$(< "$UMBRIEL_CONFIG")"
-readonly WORKSPACE="${UMBRIEL_WORKSPACE_CLIENT:-./build-debug/tests/workspace-client}"
-readonly FOREIGN="${UMBRIEL_FOREIGN_TOPLEVEL_CLIENT:-./build-debug/tests/foreign-toplevel-client}"
+readonly BASELINE="$(< "$CANOPY_CONFIG")"
+readonly WORKSPACE="${CANOPY_WORKSPACE_CLIENT:-./build-debug/tests/workspace-client}"
+readonly FOREIGN="${CANOPY_FOREIGN_TOPLEVEL_CLIENT:-./build-debug/tests/foreign-toplevel-client}"
 
-msg() { "$UMBRIEL" msg "$@" > /dev/null; }
-state() { "$UMBRIEL" workspaces --json; }
-window_id() { "$UMBRIEL" windows --json | jq -r --arg title "$1" '.[] | select(.title == $title) | .id'; }
+msg() { "$CANOPY" msg "$@" > /dev/null; }
+state() { "$CANOPY" workspaces --json; }
+window_id() { "$CANOPY" windows --json | jq -r --arg title "$1" '.[] | select(.title == $title) | .id'; }
 spawn() {
   foot --title="$1" sleep 120 > /dev/null 2>&1 &
   for _ in $(seq 60); do
@@ -27,14 +27,14 @@ check() {
 }
 reject() {
   local before after
-  "$UMBRIEL" settle
+  "$CANOPY" settle
   before=$(state)
   if msg "$1" 2> /dev/null; then echo "unexpectedly accepted $1"; exit 1; fi
   after=$(state)
   [[ $before == "$after" ]] || { echo "rejected transfer changed inventory"; exit 1; }
 }
 
-cat >> "$UMBRIEL_CONFIG" <<'CONFIG'
+cat >> "$CANOPY_CONFIG" <<'CONFIG'
 [animation]
 enabled = false
 [output.HEADLESS-1]
@@ -60,19 +60,19 @@ spawn transfer-pin
 msg window-toggle-floating
 msg window-toggle-pinned
 msg window-focus "$(window_id transfer-tile)"
-"$UMBRIEL" settle
+"$CANOPY" settle
 
 # IDs and names survive the group change. Fixed inventories shrink and grow rather than reusing a slot. Pinned windows
 # stay on their output with the source's newly active workspace.
 msg workspace-move-to-output-next
-"$UMBRIEL" settle
+"$CANOPY" settle
 check --arg id "$work" '
   any(.[]; .id == $id and .name == "WORK" and .output == "HEADLESS-2" and .index == 2 and .focused)
   and ([.[] | select(.output == "HEADLESS-1") | .name] == ["BEFORE", "AFTER"])
   and ([.[] | select(.output == "HEADLESS-2") | .name] == ["TARGET", "WORK", "TAIL"])
   and any(.[]; .name == "BEFORE" and .active)'
 before=$(state | jq -r '.[] | select(.name == "BEFORE") | .id')
-"$UMBRIEL" windows --json | jq -e --arg id "$work" --arg before "$before" '
+"$CANOPY" windows --json | jq -e --arg id "$work" --arg before "$before" '
   length == 3
   and all(.[]; if .title == "transfer-pin" then .workspace == $before and .output == "HEADLESS-1" and .pinned
                else .workspace == $id end)' > /dev/null
@@ -93,14 +93,14 @@ check --arg id "$work" 'any(.[]; .id == $id and .output == "HEADLESS-1" and .foc
 # Attached dialogs keep following their placement root, including foreign-toplevel output membership.
 for title in transfer-float transfer-pin; do msg window-close "$(window_id "$title")"; done
 for _ in $(seq 60); do
-  [[ $("$UMBRIEL" windows --json | jq length) == 1 ]] && break
+  [[ $("$CANOPY" windows --json | jq length) == 1 ]] && break
   sleep 0.05
 done
-[[ $("$UMBRIEL" windows --json | jq length) == 1 ]]
-mkfifo "$UMBRIEL_RUNTIME_DIR/dialog-control"
-exec {dialog_fd}<>"$UMBRIEL_RUNTIME_DIR/dialog-control"
+[[ $("$CANOPY" windows --json | jq length) == 1 ]]
+mkfifo "$CANOPY_RUNTIME_DIR/dialog-control"
+exec {dialog_fd}<>"$CANOPY_RUNTIME_DIR/dialog-control"
 TRANSIENT_SUITE=1 TRANSIENT_MODAL=1 TRANSIENT_DIALOG_ON_STDIN=1 FILL_COLOR=0xFFFF0000 \
-  "$UMBRIEL_UNMAP_CLIENT" transfer-dialog 200 150 <&"$dialog_fd" > "$UMBRIEL_RUNTIME_DIR/dialog.log" 2>&1 &
+  "$CANOPY_UNMAP_CLIENT" transfer-dialog 200 150 <&"$dialog_fd" > "$CANOPY_RUNTIME_DIR/dialog.log" 2>&1 &
 for _ in $(seq 60); do
   [[ -n $(window_id transfer-dialog) ]] && break
   sleep 0.05
@@ -108,13 +108,13 @@ done
 [[ -n $(window_id transfer-dialog) ]]
 msg window-focus "$(window_id transient-parent)"
 msg workspace-move-to-output-next
-"$UMBRIEL" settle
-"$UMBRIEL" windows --json | jq -e --arg id "$work" 'any(.[]; .title == "transfer-dialog" and .active and .workspace == $id and .output == "HEADLESS-2")' > /dev/null
+"$CANOPY" settle
+"$CANOPY" windows --json | jq -e --arg id "$work" 'any(.[]; .title == "transfer-dialog" and .active and .workspace == $id and .output == "HEADLESS-2")' > /dev/null
 "$FOREIGN" transfer-dialog HEADLESS-2
-grim -o HEADLESS-1 "$UMBRIEL_RUNTIME_DIR/transfer-source.png"
-grim -o HEADLESS-2 "$UMBRIEL_RUNTIME_DIR/transfer-destination.png"
-[[ $("$UMBRIEL_PIXEL_PROBE" "$UMBRIEL_RUNTIME_DIR/transfer-source.png" count 'r > 0.7 && g < 0.2 && b < 0.2') == 0 ]]
-(( $("$UMBRIEL_PIXEL_PROBE" "$UMBRIEL_RUNTIME_DIR/transfer-destination.png" count 'r > 0.7 && g < 0.2 && b < 0.2') > 1000 ))
+grim -o HEADLESS-1 "$CANOPY_RUNTIME_DIR/transfer-source.png"
+grim -o HEADLESS-2 "$CANOPY_RUNTIME_DIR/transfer-destination.png"
+[[ $("$CANOPY_PIXEL_PROBE" "$CANOPY_RUNTIME_DIR/transfer-source.png" count 'r > 0.7 && g < 0.2 && b < 0.2') == 0 ]]
+(( $("$CANOPY_PIXEL_PROBE" "$CANOPY_RUNTIME_DIR/transfer-destination.png" count 'r > 0.7 && g < 0.2 && b < 0.2') > 1000 ))
 msg workspace-move-to-output-previous
 msg workspace-switch THIRD --output HEADLESS-3
 empty=$(state | jq -r '.[] | select(.name == "THIRD") | .id')
@@ -128,7 +128,7 @@ msg workspace-switch WORK --output HEADLESS-1
 for layout in dwindle master scrolling stacking; do
   msg workspace-set-layout "$layout"
   msg workspace-move-to-output-right
-  "$UMBRIEL" settle
+  "$CANOPY" settle
   check --arg id "$work" --arg layout "$layout" 'any(.[]; .id == $id and .layout == $layout and .output == "HEADLESS-2")'
   msg workspace-move-to-output-left
 done
@@ -138,43 +138,43 @@ msg workspace-set-layout scrolling
 msg window-focus "$(window_id transfer-tile)"
 msg window-toggle-fullscreen
 msg workspace-move-to-output-right
-"$UMBRIEL" settle
-"$UMBRIEL" windows --json | jq -e '.[] | select(.title == "transfer-tile") | .fullscreen and .output == "HEADLESS-2"' > /dev/null
+"$CANOPY" settle
+"$CANOPY" windows --json | jq -e '.[] | select(.title == "transfer-tile") | .fullscreen and .output == "HEADLESS-2"' > /dev/null
 msg window-toggle-fullscreen
 msg overview-toggle
 msg workspace-move-to-output-left
-"$UMBRIEL" settle
+"$CANOPY" settle
 check --arg id "$work" 'any(.[]; .id == $id and .output == "HEADLESS-1")'
 msg overview-toggle
 
 # A changed configured inventory is reapplied on reload after session-only transfers.
-sed -i 's/"BEFORE", "WORK", "AFTER"/"BEFORE", "WORK", "AFTER", "NEW"/' "$UMBRIEL_CONFIG"
+sed -i 's/"BEFORE", "WORK", "AFTER"/"BEFORE", "WORK", "AFTER", "NEW"/' "$CANOPY_CONFIG"
 msg config-reload
 check '([.[] | select(.output == "HEADLESS-1") | .name] == ["BEFORE", "WORK", "AFTER", "NEW"])
   and ([.[] | select(.output == "HEADLESS-2") | .name] == ["TARGET", "TAIL"])'
 
 # Transfer an incoming workspace while its source is still showing a workspace slide.
-sed -i 's/enabled = false/enabled = true/' "$UMBRIEL_CONFIG"
-cat >> "$UMBRIEL_CONFIG" <<'CONFIG'
+sed -i 's/enabled = false/enabled = true/' "$CANOPY_CONFIG"
+cat >> "$CANOPY_CONFIG" <<'CONFIG'
 [animation.workspaces]
 duration_ms = 1000
 curve = "linear"
 CONFIG
 msg config-reload
 msg workspace-switch BEFORE --output HEADLESS-1
-"$UMBRIEL" settle
-"$UMBRIEL" clock-freeze
+"$CANOPY" settle
+"$CANOPY" clock-freeze
 msg workspace-switch WORK --output HEADLESS-1
-"$UMBRIEL" clock-advance 250
+"$CANOPY" clock-advance 250
 msg workspace-move-to-output-right
-"$UMBRIEL" clock-advance 1200
-"$UMBRIEL" clock-resume
-"$UMBRIEL" settle
+"$CANOPY" clock-advance 1200
+"$CANOPY" clock-resume
+"$CANOPY" settle
 check --arg id "$work" 'any(.[]; .id == $id and .output == "HEADLESS-2" and .active)'
 
 # Dynamic reconciliation must neither recreate the source name nor anonymize the transferred workspace.
-printf '%s\n' "$BASELINE" > "$UMBRIEL_CONFIG"
-cat >> "$UMBRIEL_CONFIG" <<'CONFIG'
+printf '%s\n' "$BASELINE" > "$CANOPY_CONFIG"
+cat >> "$CANOPY_CONFIG" <<'CONFIG'
 [animation]
 enabled = false
 [output.HEADLESS-1]
@@ -197,7 +197,7 @@ spawn dynamic-member
 msg workspace-move-to-output-next
 spawn dynamic-after-transfer
 msg window-close
-"$UMBRIEL" settle
+"$CANOPY" settle
 check --arg id "$dynamic" '
   ([.[] | select(.name == "DYNAMIC")] | length == 1)
   and any(.[]; .id == $id and .output == "HEADLESS-2" and .layout == "dwindle" and .named)'

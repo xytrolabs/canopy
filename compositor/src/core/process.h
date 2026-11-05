@@ -3,7 +3,7 @@
 #include <string>
 #include <string_view>
 
-namespace umbriel {
+namespace canopy {
 
   // Undo everything the compositor did to the process that a child must not inherit. `wl_event_loop_add_signal` blocks
   // SIGINT/SIGTERM process-wide via sigprocmask, and a blocked mask survives fork and exec. Restore the child defaults
@@ -31,4 +31,4 @@ namespace umbriel {
   // empty result means no executable was found.
   std::string resolveExecutable(const char* name);
 
-} // namespace umbriel
+} // namespace canopy

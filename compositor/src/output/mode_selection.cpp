@@ -8,7 +8,7 @@ extern "C" {
 #include <wlr/types/wlr_output.h>
 }
 
-namespace umbriel {
+namespace canopy {
 
   bool outputCanAutoEnable(wlr_output* output) {
     if (wl_list_empty(&output->modes)) {
@@ -62,4 +62,4 @@ namespace umbriel {
     return output.render_format != renderFormat || (output.image_description != nullptr) != hdr;
   }
 
-} // namespace umbriel
+} // namespace canopy

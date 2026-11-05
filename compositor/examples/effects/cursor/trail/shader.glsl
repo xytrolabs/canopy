@@ -10,13 +10,13 @@ vec3 trailTint(float life) {
 
 // Curve from p1 to p2; p0 and p3 are its neighbours (repeated at the ends).
 void trailSegment(vec2 uv, vec4 p0, vec4 p1, vec4 p2, vec4 p3, inout float coverage, inout vec3 colour) {
-  vec2 here = uv * umbriel_size;
-  vec2 a = p1.xy * umbriel_size;
-  vec2 b = p2.xy * umbriel_size;
+  vec2 here = uv * canopy_size;
+  vec2 a = p1.xy * canopy_size;
+  vec2 b = p2.xy * canopy_size;
   vec2 chord = b - a;
   float dt = max(p1.z - p2.z, 0.001);
-  vec2 m0 = (b - p0.xy * umbriel_size) * dt / max(p0.z - p2.z, 0.001);
-  vec2 m1 = (p3.xy * umbriel_size - a) * dt / max(p1.z - p3.z, 0.001);
+  vec2 m0 = (b - p0.xy * canopy_size) * dt / max(p0.z - p2.z, 0.001);
+  vec2 m1 = (p3.xy * canopy_size - a) * dt / max(p1.z - p3.z, 0.001);
   // A warp or jump reads as near-infinite speed; cap tangents so it cannot loop.
   float limit = 1.5 * length(chord);
   m0 *= min(1.0, limit / max(length(m0), 0.001));
@@ -51,7 +51,7 @@ void trailSegment(vec2 uv, vec4 p0, vec4 p1, vec4 p2, vec4 p3, inout float cover
 }
 
 vec4 cursor(vec2 uv) {
-  vec4 background = umbriel_sample(uv);
+  vec4 background = canopy_sample(uv);
   float coverage = 0.0;
   vec3 colour = vec3(0.0);
   // Sliding window over the samples: p0..p3 = samples k-3..k, clamped at the oldest.
@@ -60,8 +60,8 @@ vec4 cursor(vec2 uv) {
   vec4 p2 = p0;
   vec4 p3 = p0;
   for (int k = 0; k < 8; ++k) {
-    if (k < umbriel_pointer_count) {
-      vec4 next = umbriel_pointer_history[k];
+    if (k < canopy_pointer_count) {
+      vec4 next = canopy_pointer_history[k];
       if (k == 0) {
         p1 = next;
         p2 = next;
@@ -76,7 +76,7 @@ vec4 cursor(vec2 uv) {
       }
     }
   }
-  if (umbriel_pointer_count >= 2) {
+  if (canopy_pointer_count >= 2) {
     trailSegment(uv, p1, p2, p3, p3, coverage, colour);
   }
   return mix(background, vec4(colour, 1.0), coverage * 0.85);

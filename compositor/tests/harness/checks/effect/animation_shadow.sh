@@ -2,11 +2,11 @@
 # Bright green makes detached shadows observable against both black wallpaper
 # and the blue client. Check intermediate silhouette edges, not just teardown.
 set -euo pipefail
-readonly IMAGE="$UMBRIEL_RUNTIME_DIR/shadows.png"
-cat > "$UMBRIEL_RUNTIME_DIR/half.glsl" <<'GLSL'
-vec4 animation(vec2 uv) { return uv.x < 0.5 ? umbriel_sample(uv) : vec4(0.0); }
+readonly IMAGE="$CANOPY_RUNTIME_DIR/shadows.png"
+cat > "$CANOPY_RUNTIME_DIR/half.glsl" <<'GLSL'
+vec4 animation(vec2 uv) { return uv.x < 0.5 ? canopy_sample(uv) : vec4(0.0); }
 GLSL
-cat >> "$UMBRIEL_CONFIG" <<'EOF'
+cat >> "$CANOPY_CONFIG" <<'EOF'
 
 [colors]
 shadow = "#00FF00FF"
@@ -39,25 +39,25 @@ match.title = "^shadow-caster$"
 default_floating = true
 default_position = { x = 200, y = 120, anchor = "top_left" }
 EOF
-"$UMBRIEL" msg config-reload > /dev/null
+"$CANOPY" msg config-reload > /dev/null
 # Animation time only moves by clock-advance: samples land 200 ms into each 2000 ms timeline.
-"$UMBRIEL" clock-freeze
-"$UMBRIEL_UNMAP_CLIENT" shadow-caster 700 400 > "$UMBRIEL_RUNTIME_DIR/client.log" 2>&1 &
+"$CANOPY" clock-freeze
+"$CANOPY_UNMAP_CLIENT" shadow-caster 700 400 > "$CANOPY_RUNTIME_DIR/client.log" 2>&1 &
 for _ in $(seq 80); do
-  window=$("$UMBRIEL" windows --json | jq -c '.[] | select(.title == "shadow-caster")')
+  window=$("$CANOPY" windows --json | jq -c '.[] | select(.title == "shadow-caster")')
   [[ -n $window ]] && break
   sleep 0.025
 done
 [[ -n $window ]]
-"$UMBRIEL" clock-advance 200
-window=$("$UMBRIEL" windows --json | jq -c '.[] | select(.title == "shadow-caster")')
+"$CANOPY" clock-advance 200
+window=$("$CANOPY" windows --json | jq -c '.[] | select(.title == "shadow-caster")')
 id=$(jq -r .id <<< "$window")
 x=$(jq -r .x <<< "$window")
 y=$(jq -r .y <<< "$window")
 w=$(jq -r .w <<< "$window")
 h=$(jq -r .h <<< "$window")
 pixel() {
-  read -r r g b < <("$UMBRIEL_PIXEL_PROBE" "$IMAGE" mean "2x2+$1+$2")
+  read -r r g b < <("$CANOPY_PIXEL_PROBE" "$IMAGE" mean "2x2+$1+$2")
 }
 assert_half_shadow() {
   grim "$IMAGE"
@@ -86,20 +86,20 @@ done
 if (( changes < 10 )); then
   echo "silhouette blur has stepped bands: only $changes shades across 12 pixels"; exit 1
 fi
-"$UMBRIEL" clock-advance 2000
-"$UMBRIEL" settle
+"$CANOPY" clock-advance 2000
+"$CANOPY" settle
 grim "$IMAGE"
 pixel "$((x+3*w/4))" "$((y+h+6))"
 if ! (( g > 25 && r < 5 && b < 5 )); then
   echo "settled window did not restore its full analytic shadow: $r $g $b"; exit 1
 fi
-"$UMBRIEL" msg window-close "$id" > /dev/null
-"$UMBRIEL" clock-advance 200
+"$CANOPY" msg window-close "$id" > /dev/null
+"$CANOPY" clock-advance 200
 assert_half_shadow closing
-"$UMBRIEL" clock-advance 2000
-"$UMBRIEL" settle
+"$CANOPY" clock-advance 2000
+"$CANOPY" settle
 grim "$IMAGE"
-green=$("$UMBRIEL_PIXEL_PROBE" "$IMAGE" count 'g > 0.05 && r < 0.01 && b < 0.01')
+green=$("$CANOPY_PIXEL_PROBE" "$IMAGE" count 'g > 0.05 && r < 0.01 && b < 0.01')
 if [[ $green != 0 ]]; then
   echo "shadow survived its closing snapshot: $green pixels"; exit 1
 fi

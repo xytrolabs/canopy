@@ -4,11 +4,11 @@
 # X11 geometry can be queued while the first Wayland buffer is already ready.
 # Delay that real geometry event, then inspect every captured output frame.
 set -euo pipefail
-source "$UMBRIEL_HARNESS_LIB"
+source "$CANOPY_HARNESS_LIB"
 
-readonly CAPTURE_LOG="$UMBRIEL_RUNTIME_DIR/initial-position-capture.log"
-readonly PROXY_LOG="$UMBRIEL_XWAYLAND_ASSOCIATION_LOG"
-readonly PROXY_CONTROL="$UMBRIEL_XWAYLAND_ASSOCIATION_CONTROL"
+readonly CAPTURE_LOG="$CANOPY_RUNTIME_DIR/initial-position-capture.log"
+readonly PROXY_LOG="$CANOPY_XWAYLAND_ASSOCIATION_LOG"
+readonly PROXY_CONTROL="$CANOPY_XWAYLAND_ASSOCIATION_CONTROL"
 client_pid=
 sequence=0
 
@@ -21,7 +21,7 @@ cleanup_client() {
   fi
 }
 
-cat >> "$UMBRIEL_CONFIG" <<'CONFIG'
+cat >> "$CANOPY_CONFIG" <<'CONFIG'
 [animation]
 enabled = false
 [animation.dim_unfocused]
@@ -40,19 +40,19 @@ backdrop = "#00FF00FF"
 match.app_id = "steam"
 default_floating = true
 CONFIG
-"$UMBRIEL" msg config-reload > /dev/null
-CAPTURE_PROBES='640 360 1080 630' "$UMBRIEL_CAPTURE_CLIENT" --output HEADLESS-1 > "$CAPTURE_LOG" 2>&1 &
+"$CANOPY" msg config-reload > /dev/null
+CAPTURE_PROBES='640 360 1080 630' "$CANOPY_CAPTURE_CLIENT" --output HEADLESS-1 > "$CAPTURE_LOG" 2>&1 &
 await_lines "$CAPTURE_LOG" 'probe HEADLESS-1 .*x=640 y=360 rgb=00ff00' 1 0.01
 
 send() { printf '%s\n' "$@" >&"$control_fd"; }
 mark() { echo $(($(wc -l < "$CAPTURE_LOG") + 1)); }
 
 start_client() {
-  local name=$1 fifo="$UMBRIEL_RUNTIME_DIR/initial-position-$1.control"
-  client_log="$UMBRIEL_RUNTIME_DIR/initial-position-$name.log"
+  local name=$1 fifo="$CANOPY_RUNTIME_DIR/initial-position-$1.control"
+  client_log="$CANOPY_RUNTIME_DIR/initial-position-$name.log"
   mkfifo "$fifo"
   exec {control_fd}<> "$fifo"
-  "$UMBRIEL_XWAYLAND_POPUP_CLIENT" "notificationtoasts_$name" <&"$control_fd" > "$client_log" 2>&1 &
+  "$CANOPY_XWAYLAND_POPUP_CLIENT" "notificationtoasts_$name" <&"$control_fd" > "$client_log" 2>&1 &
   client_pid=$!
   await_lines "$client_log" ready 1 0.01
   window=$(sed -n 's/^ready window=//p' "$client_log")
@@ -86,11 +86,11 @@ expect_x_position() {
 }
 
 expect_blank() {
-  local phase=${1:-pending-placement} image="$UMBRIEL_RUNTIME_DIR/initial-position-held.png" center corner
-  "$UMBRIEL" settle > /dev/null
+  local phase=${1:-pending-placement} image="$CANOPY_RUNTIME_DIR/initial-position-held.png" center corner
+  "$CANOPY" settle > /dev/null
   grim -o HEADLESS-1 "$image"
-  center=$("$UMBRIEL_PIXEL_PROBE" "$image" pixel 640 360)
-  corner=$("$UMBRIEL_PIXEL_PROBE" "$image" pixel 1080 630)
+  center=$("$CANOPY_PIXEL_PROBE" "$image" pixel 640 360)
+  corner=$("$CANOPY_PIXEL_PROBE" "$image" pixel 1080 630)
   if [[ $center != '0 255 0' || $corner != '0 255 0' ]]; then
     echo "$phase: window rendered before pending X11 placement was dispatched: center=$center corner=$corner"
     exit 1

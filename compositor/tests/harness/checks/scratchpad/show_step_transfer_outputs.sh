@@ -4,13 +4,13 @@
 # different window on the other output, the moved window is not shown there, so it must not keep keyboard focus.
 set -euo pipefail
 
-readonly CLIENT="${UMBRIEL_UNMAP_CLIENT:-./build-debug/tests/unmap-client}"
-readonly POINTER="${UMBRIEL_POINTER_CLIENT:-./build-debug/tests/pointer-client}"
-readonly CONTROL="$UMBRIEL_RUNTIME_DIR/transfer-outputs-control"
-readonly FRAME="$UMBRIEL_RUNTIME_DIR/show-step-transfer-outputs.png"
-readonly RED_LOG="$UMBRIEL_RUNTIME_DIR/transfer-red.log"
+readonly CLIENT="${CANOPY_UNMAP_CLIENT:-./build-debug/tests/unmap-client}"
+readonly POINTER="${CANOPY_POINTER_CLIENT:-./build-debug/tests/pointer-client}"
+readonly CONTROL="$CANOPY_RUNTIME_DIR/transfer-outputs-control"
+readonly FRAME="$CANOPY_RUNTIME_DIR/show-step-transfer-outputs.png"
+readonly RED_LOG="$CANOPY_RUNTIME_DIR/transfer-red.log"
 
-cat >> "$UMBRIEL_CONFIG" <<'EOF'
+cat >> "$CANOPY_CONFIG" <<'EOF'
 
 [animation]
 enabled = false
@@ -50,9 +50,9 @@ default_floating_size_px = { width = 300, height = 200 }
 match.title = "^moved-out$"
 default_scratchpad = "b"
 EOF
-"$UMBRIEL" msg config-reload > /dev/null
+"$CANOPY" msg config-reload > /dev/null
 
-windows() { "$UMBRIEL" windows --json; }
+windows() { "$CANOPY" windows --json; }
 window_of() { windows | jq -c --arg title "$1" '.[] | select(.title == $title)'; }
 
 wait_for_window() {
@@ -66,22 +66,22 @@ wait_for_window() {
 
 # Which of the two colours are on screen across both outputs.
 shown() {
-  "$UMBRIEL" settle
+  "$CANOPY" settle
   grim "$FRAME"
   local visible=() w h
-  read -r _ _ w h < <("$UMBRIEL_PIXEL_PROBE" "$FRAME" bbox 'r > 0.9 && g < 0.1 && b < 0.1')
+  read -r _ _ w h < <("$CANOPY_PIXEL_PROBE" "$FRAME" bbox 'r > 0.9 && g < 0.1 && b < 0.1')
   ((w > 0 && h > 0)) && visible+=(red)
-  read -r _ _ w h < <("$UMBRIEL_PIXEL_PROBE" "$FRAME" bbox 'g > 0.9 && r < 0.1 && b < 0.1')
+  read -r _ _ w h < <("$CANOPY_PIXEL_PROBE" "$FRAME" bbox 'g > 0.9 && r < 0.1 && b < 0.1')
   ((w > 0 && h > 0)) && visible+=(green)
   echo "${visible[*]}"
 }
 
 # Scratchpad b shows its green window on its own on the right output.
 "$POINTER" 2560 720 move 1920 360
-FILL_COLOR=0xFF00FF00 "$CLIENT" transfer-green 300 200 > "$UMBRIEL_RUNTIME_DIR/transfer-green.log" 2>&1 &
+FILL_COLOR=0xFF00FF00 "$CLIENT" transfer-green 300 200 > "$CANOPY_RUNTIME_DIR/transfer-green.log" 2>&1 &
 wait_for_window transfer-green
-"$UMBRIEL" msg window-move-to-scratchpad b > /dev/null
-"$UMBRIEL" msg scratchpad-window-show-next b > /dev/null
+"$CANOPY" msg window-move-to-scratchpad b > /dev/null
+"$CANOPY" msg scratchpad-window-show-next b > /dev/null
 
 # Scratchpad a shows its red window on its own, focused, on the left output.
 "$POINTER" 2560 720 move 640 360
@@ -90,8 +90,8 @@ exec {control_fd}<> "$CONTROL"
 FILL_COLOR=0xFFFF0000 TITLE_AFTER_MAP=moved-out "$CLIENT" transfer-red 300 200 \
   < "$CONTROL" > "$RED_LOG" 2>&1 &
 wait_for_window transfer-red
-"$UMBRIEL" msg window-move-to-scratchpad a > /dev/null
-"$UMBRIEL" msg scratchpad-window-show-next a > /dev/null
+"$CANOPY" msg window-move-to-scratchpad a > /dev/null
+"$CANOPY" msg scratchpad-window-show-next a > /dev/null
 before=$(shown)
 if [[ $before != "red green" ]]; then
   echo "both scratchpads did not show their window: [$before]: $(windows)"
@@ -120,7 +120,7 @@ fi
 
 # A key typed now must not reach the window nobody can see.
 "$POINTER" 1 1 keyboard-only tap 30 > /dev/null
-"$UMBRIEL" settle
+"$CANOPY" settle
 if grep -q '^key 30 ' "$RED_LOG"; then
   echo "a key typed after the move reached the hidden window: $(grep -E '^keyboard-|^key ' "$RED_LOG" | tr '\n' ' ')"
   exit 1

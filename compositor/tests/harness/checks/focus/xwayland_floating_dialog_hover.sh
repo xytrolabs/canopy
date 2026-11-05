@@ -3,13 +3,13 @@
 # A floating transient must keep its keyboard while the pointer travels through
 # the parent beneath it. An explicit parent click remains authoritative.
 set -euo pipefail
-source "$UMBRIEL_HARNESS_LIB"
+source "$CANOPY_HARNESS_LIB"
 
-readonly CLIENT_LOG="$UMBRIEL_RUNTIME_DIR/floating-dialog.log"
-readonly CONTROL="$UMBRIEL_RUNTIME_DIR/floating-dialog.control"
+readonly CLIENT_LOG="$CANOPY_RUNTIME_DIR/floating-dialog.log"
+readonly CONTROL="$CANOPY_RUNTIME_DIR/floating-dialog.control"
 readonly PARENT=xwayland-dialog-parent
 readonly CHILD=xwayland-dialog-child
-windows() { "$UMBRIEL" windows --json; }
+windows() { "$CANOPY" windows --json; }
 window() { windows | jq -c --arg title "$1" '.[] | select(.title == $title)'; }
 send_client() { printf '%s\n' "$@" >&"$control_fd"; }
 
@@ -55,21 +55,21 @@ expect_x_focus() {
 type_into() {
   local title=$1 key=$2 phase=$3 before
   before=$(events "$CLIENT_LOG" "key window=$title code=$((key + 8)) state=pressed")
-  "$UMBRIEL_POINTER_CLIENT" 1280 720 keyboard-only tap "$key" > /dev/null
+  "$CANOPY_POINTER_CLIENT" 1280 720 keyboard-only tap "$key" > /dev/null
   await_events "$CLIENT_LOG" "key window=$title code=$((key + 8)) state=pressed" "$((before + 1))" "$phase"
 }
 
 assert_pixel() {
-  local phase=$1 x=$2 y=$3 expected=$4 image="$UMBRIEL_RUNTIME_DIR/floating-dialog-$1.png" actual
+  local phase=$1 x=$2 y=$3 expected=$4 image="$CANOPY_RUNTIME_DIR/floating-dialog-$1.png" actual
   grim -o HEADLESS-1 "$image"
-  actual=$("$UMBRIEL_PIXEL_PROBE" "$image" pixel "$x" "$y")
+  actual=$("$CANOPY_PIXEL_PROBE" "$image" pixel "$x" "$y")
   [[ $actual == "$expected" ]] || {
     echo "$phase: expected $expected at $x,$y, got $actual"
     return 1
   }
 }
 
-cat >> "$UMBRIEL_CONFIG" << 'CONFIG'
+cat >> "$CANOPY_CONFIG" << 'CONFIG'
 [animation]
 enabled = false
 [layout]
@@ -85,7 +85,7 @@ follows_mouse = true
 hover_raises = true
 
 [[window_rule]]
-match.app_id = "^UmbrielXwaylandDialog$"
+match.app_id = "^CanopyXwaylandDialog$"
 opacity = 1.0
 blur = false
 
@@ -101,22 +101,22 @@ default_focused = true
 default_floating_size_px = { width = 480, height = 320 }
 default_position = { x = 400, y = 200, anchor = "top_left" }
 CONFIG
-"$UMBRIEL" msg config-reload > /dev/null
+"$CANOPY" msg config-reload > /dev/null
 
 mkfifo "$CONTROL"
 exec {control_fd}<> "$CONTROL"
-"$UMBRIEL_XWAYLAND_DIALOG_CLIENT" <&"$control_fd" > "$CLIENT_LOG" 2>&1 &
+"$CANOPY_XWAYLAND_DIALOG_CLIENT" <&"$control_fd" > "$CLIENT_LOG" 2>&1 &
 wait_window "$PARENT"
 wait_focus "$PARENT" 'initial parent'
-"$UMBRIEL" settle > /dev/null
+"$CANOPY" settle > /dev/null
 expect_x_focus "$PARENT" initial
 parent_id=$(window "$PARENT" | jq -r .id)
 
 for raises in true false; do
-  sed -i "s/^hover_raises = .*/hover_raises = $raises/" "$UMBRIEL_CONFIG"
-  "$UMBRIEL" msg config-reload > /dev/null
+  sed -i "s/^hover_raises = .*/hover_raises = $raises/" "$CANOPY_CONFIG"
+  "$CANOPY" msg config-reload > /dev/null
   wait_focus "$PARENT" "hover_raises=$raises parent before map"
-  rm -f "$UMBRIEL_RUNTIME_DIR/pointer-hold.log"
+  rm -f "$CANOPY_RUNTIME_DIR/pointer-hold.log"
   pointer_hold 1280 720 move 128 360 -- \
     move 129 360 mark incidental hold \
     move 260 360 mark approaching hold \
@@ -130,7 +130,7 @@ for raises in true false; do
   wait_window "$CHILD"
   wait_focus "$CHILD" "hover_raises=$raises dialog map"
   expect_x_focus "$CHILD" "mapped_$raises"
-  "$UMBRIEL" settle > /dev/null
+  "$CANOPY" settle > /dev/null
   if ! window "$CHILD" | jq -e --arg parent "$parent_id" \
     '.parent == $parent and .floating and .x == 400 and .y == 200 and .w == 480 and .h == 320' > /dev/null; then
     echo "the fixture did not create the intended floating transient: $(windows)"
@@ -159,7 +159,7 @@ for raises in true false; do
   pointer_step parent-return
   wait_focus "$PARENT" "hover_raises=$raises geometric entry into parent"
   child_id=$(window "$CHILD" | jq -r .id)
-  "$UMBRIEL" msg window-focus "$child_id" > /dev/null
+  "$CANOPY" msg window-focus "$child_id" > /dev/null
   wait_focus "$CHILD" "hover_raises=$raises child focus before parent click"
   expect_x_focus "$CHILD" "before_click_$raises"
   buttons_before=$(events "$CLIENT_LOG" "button window=$PARENT code=1 state=pressed")

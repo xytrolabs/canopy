@@ -9,7 +9,7 @@ A scratchpad stores windows outside normal workspaces so they can be shown or hi
 
 ## Default scratchpad
 
-Without `[[scratchpad]]` entries, Umbriel creates one implicit scratchpad named `default`. The packaged config binds it without a name suffix:
+Without `[[scratchpad]]` entries, Canopy creates one implicit scratchpad named `default`. The packaged config binds it without a name suffix:
 
 ```toml
 [keybinds]
@@ -161,7 +161,7 @@ Backdrop dim and blur affect only the output showing the scratchpad.
 
 ## Restoring windows
 
-Each member remembers its source output, workspace, and tiled or floating state. If that output or workspace no longer exists, Umbriel restores the window to the scratchpad's current output and active workspace.
+Each member remembers its source output, workspace, and tiled or floating state. If that output or workspace no longer exists, Canopy restores the window to the scratchpad's current output and active workspace.
 
 Fullscreen, pinned, and maximize-to-edges state are cleared when a window enters a scratchpad, and the window floats at its current size. A window that opens into a scratchpad through `default_scratchpad` takes its size, position, fullscreen, and maximize-to-edges state from its [window rules](window-rules.md#scratchpad-placement).
 

@@ -5,8 +5,8 @@ set -euo pipefail
 
 readonly OUTPUT_W=1280
 readonly OUTPUT_H=720
-readonly POINTER="${UMBRIEL_POINTER_CLIENT:-./build-debug/tests/pointer-client}"
-readonly CLIENT="${UMBRIEL_UNMAP_CLIENT:-./build-debug/tests/unmap-client}"
+readonly POINTER="${CANOPY_POINTER_CLIENT:-./build-debug/tests/pointer-client}"
+readonly CLIENT="${CANOPY_UNMAP_CLIENT:-./build-debug/tests/unmap-client}"
 
 pointer() {
   "$POINTER" "$OUTPUT_W" "$OUTPUT_H" "$@"
@@ -15,7 +15,7 @@ pointer() {
 wait_for_windows() {
   local query=$1 message=$2 windows=
   for _ in $(seq 60); do
-    windows=$("$UMBRIEL" windows --json)
+    windows=$("$CANOPY" windows --json)
     jq -e "$query" <<< "$windows" > /dev/null && return 0
     sleep 0.1
   done
@@ -26,7 +26,7 @@ wait_for_windows() {
 wait_for_fullscreen() {
   local state=
   for _ in $(seq 60); do
-    state=$("$UMBRIEL" tearing --json)
+    state=$("$CANOPY" tearing --json)
     if jq -e '[.surfaces[] | select(.title == "hot-corner-fullscreen" and .fullscreen)] | length == 1' \
       <<< "$state" > /dev/null; then
       return 0
@@ -38,7 +38,7 @@ wait_for_fullscreen() {
 }
 
 active_workspace() {
-  "$UMBRIEL" workspaces --json | jq -r \
+  "$CANOPY" workspaces --json | jq -r \
     '.[] | select(.output == "HEADLESS-1" and .active) | .index'
 }
 
@@ -55,7 +55,7 @@ wait_for_workspace() {
 
 # Keep the pointer away from the corner while its action becomes live.
 pointer move 640 360
-cat >> "$UMBRIEL_CONFIG" <<'EOF'
+cat >> "$CANOPY_CONFIG" <<'EOF'
 
 [output.HEADLESS-1]
 workspaces = 2
@@ -71,13 +71,13 @@ enabled = true
 delay_ms = 100
 action = "workspace-switch 2 --output HEADLESS-1"
 EOF
-"$UMBRIEL" msg config-reload > /dev/null
+"$CANOPY" msg config-reload > /dev/null
 
-"$CLIENT" hot-corner-fullscreen > "$UMBRIEL_RUNTIME_DIR/hot-corner-fullscreen.log" 2>&1 &
+"$CLIENT" hot-corner-fullscreen > "$CANOPY_RUNTIME_DIR/hot-corner-fullscreen.log" 2>&1 &
 wait_for_windows \
   '[.[] | select(.title == "hot-corner-fullscreen" and .focused and .active)] | length == 1' \
   "fullscreen test window did not map with focus"
-"$UMBRIEL" msg window-toggle-fullscreen > /dev/null
+"$CANOPY" msg window-toggle-fullscreen > /dev/null
 wait_for_fullscreen
 
 # The fullscreen window owns focus, so dwelling in the corner must do nothing.
@@ -88,12 +88,12 @@ if [[ $(active_workspace) != 1 ]]; then
 fi
 pointer move 640 360
 
-"$CLIENT" hot-corner-focused > "$UMBRIEL_RUNTIME_DIR/hot-corner-focused.log" 2>&1 &
+"$CLIENT" hot-corner-focused > "$CANOPY_RUNTIME_DIR/hot-corner-focused.log" 2>&1 &
 wait_for_windows \
   'length == 2 and ([.[] | select(.title == "hot-corner-focused")] | length == 1)' \
   "second test window did not map"
-focused_id=$("$UMBRIEL" windows --json | jq -r '.[] | select(.title == "hot-corner-focused") | .id')
-"$UMBRIEL" msg window-focus "$focused_id" > /dev/null
+focused_id=$("$CANOPY" windows --json | jq -r '.[] | select(.title == "hot-corner-focused") | .id')
+"$CANOPY" msg window-focus "$focused_id" > /dev/null
 wait_for_windows \
   '([.[] | select(.title == "hot-corner-fullscreen") | [.focused, .active]] == [[false, false]])
     and ([.[] | select(.title == "hot-corner-focused") | [.focused, .active]] == [[true, true]])' \

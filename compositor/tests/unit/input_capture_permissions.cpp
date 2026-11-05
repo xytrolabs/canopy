@@ -16,7 +16,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
-using umbriel::InputCapturePermissions;
+using canopy::InputCapturePermissions;
 
 namespace {
   constexpr std::string_view kId = "11111111111111111111111111111111";
@@ -34,7 +34,7 @@ namespace {
   public:
     Fixture() {
       std::array<char, 64> pattern{};
-      constexpr std::string_view prefix = "/tmp/umbriel-capture-permissions.XXXXXX";
+      constexpr std::string_view prefix = "/tmp/canopy-capture-permissions.XXXXXX";
       std::ranges::copy(prefix, pattern.begin());
       if (mkdtemp(pattern.data()) == nullptr) {
         throw std::runtime_error("could not create a private permission test directory");
@@ -77,7 +77,7 @@ namespace {
   }
 } // namespace
 
-UMBRIEL_TEST(ephemeralRestoreRotatesTheTokenAndExpiresOnlyItsOwningPeer) {
+CANOPY_TEST(ephemeralRestoreRotatesTheTokenAndExpiresOnlyItsOwningPeer) {
   Fixture fixture;
   InputCapturePermissions permissions(fixture.path);
   const auto first = permissions.issue("org.test.First", 3, 1, 11);
@@ -109,7 +109,7 @@ UMBRIEL_TEST(ephemeralRestoreRotatesTheTokenAndExpiresOnlyItsOwningPeer) {
   CHECK(permissions.list().empty());
 }
 
-UMBRIEL_TEST(durableRestoreRefreshesStaleInstancesAndRejectsConsumedCredentials) {
+CANOPY_TEST(durableRestoreRefreshesStaleInstancesAndRejectsConsumedCredentials) {
   Fixture fixture;
   InputCapturePermissions issuer(fixture.path);
   InputCapturePermissions stale(fixture.path);
@@ -137,7 +137,7 @@ UMBRIEL_TEST(durableRestoreRefreshesStaleInstancesAndRejectsConsumedCredentials)
   }
 }
 
-UMBRIEL_TEST(failedScopeUpgradesDoNotConsumeAnOtherwiseValidCredential) {
+CANOPY_TEST(failedScopeUpgradesDoNotConsumeAnOtherwiseValidCredential) {
   Fixture fixture;
   InputCapturePermissions permissions(fixture.path);
   CHECK(!permissions.issue("org.test.Capture", 0, 2, 11));
@@ -159,7 +159,7 @@ UMBRIEL_TEST(failedScopeUpgradesDoNotConsumeAnOtherwiseValidCredential) {
   CHECK(permissions.restore(grant->token, "org.test.Capture", 1, 1, 11).has_value());
 }
 
-UMBRIEL_TEST(blankApplicationIdsRequireIndependentTokensAndSupportIndividualRevocation) {
+CANOPY_TEST(blankApplicationIdsRequireIndependentTokensAndSupportIndividualRevocation) {
   Fixture fixture;
   InputCapturePermissions permissions(fixture.path);
   InputCapturePermissions stale(fixture.path);
@@ -184,7 +184,7 @@ UMBRIEL_TEST(blankApplicationIdsRequireIndependentTokensAndSupportIndividualRevo
   CHECK(permissions.list().empty());
 }
 
-UMBRIEL_TEST(downgradingDurablePermissionRemovesTheDurableCredential) {
+CANOPY_TEST(downgradingDurablePermissionRemovesTheDurableCredential) {
   Fixture fixture;
   InputCapturePermissions permissions(fixture.path);
   const auto durable = permissions.issue("org.test.Capture", 3, 2, 11);
@@ -206,7 +206,7 @@ UMBRIEL_TEST(downgradingDurablePermissionRemovesTheDurableCredential) {
   CHECK(!permissions.restore(ephemeral->token, "org.test.Capture", 3, 1, 22));
 }
 
-UMBRIEL_TEST(restoringForOneUseConsumesPermissionWithoutIssuingAnotherToken) {
+CANOPY_TEST(restoringForOneUseConsumesPermissionWithoutIssuingAnotherToken) {
   Fixture fixture;
   InputCapturePermissions permissions(fixture.path);
   const auto durable = permissions.issue("org.test.Capture", 3, 2, 11);
@@ -226,7 +226,7 @@ UMBRIEL_TEST(restoringForOneUseConsumesPermissionWithoutIssuingAnotherToken) {
   CHECK(reopened.list().empty());
 }
 
-UMBRIEL_TEST(durableCredentialsUsePrivateFilesAndTightenTheirOwnedDirectory) {
+CANOPY_TEST(durableCredentialsUsePrivateFilesAndTightenTheirOwnedDirectory) {
   Fixture fixture;
   std::filesystem::create_directories(fixture.path.parent_path());
   CHECK_EQ(chmod(fixture.path.parent_path().c_str(), 0755), 0);
@@ -247,7 +247,7 @@ UMBRIEL_TEST(durableCredentialsUsePrivateFilesAndTightenTheirOwnedDirectory) {
   }
 }
 
-UMBRIEL_TEST(durableTransactionsCannotBypassTheStoreLockOrConsumeTokensWhileBusy) {
+CANOPY_TEST(durableTransactionsCannotBypassTheStoreLockOrConsumeTokensWhileBusy) {
   Fixture fixture;
   fixture.write(document(record()));
   InputCapturePermissions permissions(fixture.path);
@@ -265,7 +265,7 @@ UMBRIEL_TEST(durableTransactionsCannotBypassTheStoreLockOrConsumeTokensWhileBusy
   CHECK(permissions.restore(kToken, "org.test.Capture", 3, 2, 11).has_value());
 }
 
-UMBRIEL_TEST(malformedStoresNeverPartiallyAuthorizeOrGetOverwrittenByNewGrants) {
+CANOPY_TEST(malformedStoresNeverPartiallyAuthorizeOrGetOverwrittenByNewGrants) {
   constexpr std::string_view otherToken = "3333333333333333333333333333333333333333333333333333333333333333";
   const std::array documents{
       std::string{"{"},
@@ -282,7 +282,7 @@ UMBRIEL_TEST(malformedStoresNeverPartiallyAuthorizeOrGetOverwrittenByNewGrants) 
   }
 }
 
-UMBRIEL_TEST(insecureOversizedAndNonregularStoresCannotRestoreCredentials) {
+CANOPY_TEST(insecureOversizedAndNonregularStoresCannotRestoreCredentials) {
   {
     Fixture fixture;
     fixture.write(document(record()), 0644);
@@ -304,7 +304,7 @@ UMBRIEL_TEST(insecureOversizedAndNonregularStoresCannotRestoreCredentials) {
   }
 }
 
-UMBRIEL_TEST(symlinkStoresAndDirectoriesCannotAuthorizeOrReplaceTheirTargets) {
+CANOPY_TEST(symlinkStoresAndDirectoriesCannotAuthorizeOrReplaceTheirTargets) {
   {
     Fixture fixture;
     const std::string bytes = document(record());

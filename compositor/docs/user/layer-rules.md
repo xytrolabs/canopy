@@ -1,6 +1,6 @@
 # Layer Rules
 
-Layer rules apply visual effects to layer-shell surfaces such as bars, launchers, and notifications. Run `umbriel layers` to list active namespaces.
+Layer rules apply visual effects to layer-shell surfaces such as bars, launchers, and notifications. Run `canopy layers` to list active namespaces.
 
 ```toml
 [[layer_rule]]

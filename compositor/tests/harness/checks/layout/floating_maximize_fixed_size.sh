@@ -4,9 +4,9 @@
 # app_id) cannot grow it. It keeps its size, centered in the maximized box, instead of being pinned to the box's corner.
 set -euo pipefail
 
-readonly CLIENT="${UMBRIEL_SUBSURFACE_CLIENT:-./build-debug/tests/subsurface-client}"
+readonly CLIENT="${CANOPY_SUBSURFACE_CLIENT:-./build-debug/tests/subsurface-client}"
 
-cat >> "$UMBRIEL_CONFIG" << 'EOF'
+cat >> "$CANOPY_CONFIG" << 'EOF'
 
 [animation]
 enabled = false
@@ -15,12 +15,12 @@ enabled = false
 match.title = "^fixed-splash$"
 default_maximize = true
 EOF
-"$UMBRIEL" msg config-reload > /dev/null
+"$CANOPY" msg config-reload > /dev/null
 
-FIXED_SIZE=1 "$CLIENT" fixed-splash 300 200 > "$UMBRIEL_RUNTIME_DIR/fixed-splash.log" 2>&1 &
+FIXED_SIZE=1 "$CLIENT" fixed-splash 300 200 > "$CANOPY_RUNTIME_DIR/fixed-splash.log" 2>&1 &
 
 field_of() {
-  "$UMBRIEL" windows --json \
+  "$CANOPY" windows --json \
     | jq -r --arg title "$1" --arg field "$2" '.[] | select(.title == $title) | .[$field]'
 }
 
@@ -32,7 +32,7 @@ for _ in $(seq 80); do
   [[ $actual == "$expected" ]] && break
   sleep 0.1
 done
-"$UMBRIEL" settle
+"$CANOPY" settle
 actual="$(field_of fixed-splash w)x$(field_of fixed-splash h)+$(field_of fixed-splash x)+$(field_of fixed-splash y)"
 if [[ $actual != "$expected" ]]; then
   echo "expected the fixed-size maximized float at $expected, got $actual"

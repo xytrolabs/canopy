@@ -1,21 +1,21 @@
 #!/usr/bin/env bash
 # A client can request fullscreen before its first buffer, as a game whose window already matches an output does.
-# Umbriel must carry that pending request into the initial configure so the game maps as a square, borderless
+# Canopy must carry that pending request into the initial configure so the game maps as a square, borderless
 # fullscreen surface instead of an output-sized rounded tile. The client also pins its size, as Wine does for a game
 # window, and fullscreen must override that: the game opens tiled, in its own scrolling column, not as a floating
 # dialog covering the workspace.
 set -euo pipefail
 
-readonly CLIENT="${UMBRIEL_SUBSURFACE_CLIENT:-./build-debug/tests/subsurface-client}"
-readonly CLIENT_LOG="$UMBRIEL_RUNTIME_DIR/fullscreen-chrome-client.log"
-readonly SCREENSHOT="$UMBRIEL_RUNTIME_DIR/fullscreen-chrome.png"
+readonly CLIENT="${CANOPY_SUBSURFACE_CLIENT:-./build-debug/tests/subsurface-client}"
+readonly CLIENT_LOG="$CANOPY_RUNTIME_DIR/fullscreen-chrome-client.log"
+readonly SCREENSHOT="$CANOPY_RUNTIME_DIR/fullscreen-chrome.png"
 
 if [[ ! -x $CLIENT ]]; then
   echo "subsurface client not built at $CLIENT"
   exit 1
 fi
 
-cat >> "$UMBRIEL_CONFIG" <<'EOF'
+cat >> "$CANOPY_CONFIG" <<'EOF'
 
 [animation]
 duration_ms = 1
@@ -26,7 +26,7 @@ border_width = 12
 outer_border_width = 0
 corner_radius = 64
 EOF
-"$UMBRIEL" msg config-reload > /dev/null
+"$CANOPY" msg config-reload > /dev/null
 
 env INITIAL_FULLSCREEN=1 FIXED_SIZE=1 "$CLIENT" fullscreen-chrome > "$CLIENT_LOG" 2>&1 &
 
@@ -45,7 +45,7 @@ if [[ $first_configure != "first-configure 1280 720 fullscreen" ]]; then
 fi
 
 window_box() {
-  "$UMBRIEL" windows --json | jq -r '.[] | select(.title == "fullscreen-chrome") | "\(.x) \(.y) \(.w) \(.h)"'
+  "$CANOPY" windows --json | jq -r '.[] | select(.title == "fullscreen-chrome") | "\(.x) \(.y) \(.w) \(.h)"'
 }
 
 box=
@@ -62,17 +62,17 @@ if [[ ! $box =~ ^-?[0-9]+\ -?[0-9]+\ 1280\ 720$ ]]; then
 fi
 read -r win_x win_y _ _ <<< "$box"
 
-floating=$("$UMBRIEL" windows --json | jq -r '.[] | select(.title == "fullscreen-chrome") | .floating')
+floating=$("$CANOPY" windows --json | jq -r '.[] | select(.title == "fullscreen-chrome") | .floating')
 if [[ $floating != false ]]; then
   echo "fixed-size fullscreen client did not open tiled: floating=${floating:-missing}"
   exit 1
 fi
 
-"$UMBRIEL" settle
+"$CANOPY" settle
 grim "$SCREENSHOT"
 
 sample() {
-  "$UMBRIEL_PIXEL_PROBE" "$SCREENSHOT" pixel "$1" "$2"
+  "$CANOPY_PIXEL_PROBE" "$SCREENSHOT" pixel "$1" "$2"
 }
 
 read -r corner_red corner_green corner_blue <<< "$(sample $((win_x + 16)) $((win_y + 16)))"

@@ -132,7 +132,7 @@ namespace {
     State inventory;
     wl_display* display = nullptr;
     wlr_backend* multi = nullptr;
-    std::unique_ptr<umbriel::DrmLeaseManager> manager;
+    std::unique_ptr<canopy::DrmLeaseManager> manager;
 
     Fixture() {
       state = &inventory;
@@ -166,7 +166,7 @@ namespace {
       return &backend->base;
     }
 
-    void initialize() { manager = std::make_unique<umbriel::DrmLeaseManager>(display, multi); }
+    void initialize() { manager = std::make_unique<canopy::DrmLeaseManager>(display, multi); }
 
     void request(std::initializer_list<Output*> outputs) {
       CHECK(outputs.size() != 0);
@@ -273,7 +273,7 @@ void wlr_drm_lease_v1_revoke(wlr_drm_lease_v1* lease) {
 }
 } // extern "C"
 
-UMBRIEL_TEST(desktopOutputsRemainOutsideLeaseOffers) {
+CANOPY_TEST(desktopOutputsRemainOutsideLeaseOffers) {
   Fixture fixture;
   wlr_backend* backend = fixture.addBackend();
   fixture.initialize();
@@ -285,7 +285,7 @@ UMBRIEL_TEST(desktopOutputsRemainOutsideLeaseOffers) {
   CHECK_EQ(fixture.inventory.offered, (std::vector<wlr_output*>{&headset.base}));
 }
 
-UMBRIEL_TEST(unavailableAndNonDrmBackendsCannotOfferOutputs) {
+CANOPY_TEST(unavailableAndNonDrmBackendsCannotOfferOutputs) {
   Fixture fixture;
   wlr_backend* unavailable = fixture.addBackend(false);
   fixture.initialize();
@@ -296,7 +296,7 @@ UMBRIEL_TEST(unavailableAndNonDrmBackendsCannotOfferOutputs) {
   CHECK(fixture.inventory.offered.empty());
 }
 
-UMBRIEL_TEST(hotAddedBackendReceivesItsOwnLeaseDevice) {
+CANOPY_TEST(hotAddedBackendReceivesItsOwnLeaseDevice) {
   Fixture fixture;
   wlr_backend* first = fixture.addBackend();
   fixture.initialize();
@@ -310,7 +310,7 @@ UMBRIEL_TEST(hotAddedBackendReceivesItsOwnLeaseDevice) {
   CHECK_EQ(fixture.inventory.granted, 1);
 }
 
-UMBRIEL_TEST(leaseRequestsCannotClaimDesktopOrForeignBackendOutputs) {
+CANOPY_TEST(leaseRequestsCannotClaimDesktopOrForeignBackendOutputs) {
   Fixture fixture;
   wlr_backend* first = fixture.addBackend();
   wlr_backend* second = fixture.addBackend();
@@ -325,7 +325,7 @@ UMBRIEL_TEST(leaseRequestsCannotClaimDesktopOrForeignBackendOutputs) {
   CHECK_EQ(fixture.inventory.rejected, 2);
 }
 
-UMBRIEL_TEST(inactiveSessionRevokesEveryLeaseAndRejectsRequestsUntilReactivated) {
+CANOPY_TEST(inactiveSessionRevokesEveryLeaseAndRejectsRequestsUntilReactivated) {
   Fixture fixture;
   wlr_backend* first = fixture.addBackend();
   wlr_backend* second = fixture.addBackend();
@@ -351,7 +351,7 @@ UMBRIEL_TEST(inactiveSessionRevokesEveryLeaseAndRejectsRequestsUntilReactivated)
   CHECK_EQ(fixture.inventory.granted, 4);
 }
 
-UMBRIEL_TEST(removingBackendDoesNotLeaveADeviceThatCanMatchReattachment) {
+CANOPY_TEST(removingBackendDoesNotLeaveADeviceThatCanMatchReattachment) {
   Fixture fixture;
   wlr_backend* first = fixture.addBackend();
   fixture.initialize();
@@ -363,7 +363,7 @@ UMBRIEL_TEST(removingBackendDoesNotLeaveADeviceThatCanMatchReattachment) {
   CHECK_EQ(fixture.inventory.granted, 1);
 }
 
-UMBRIEL_TEST(provisioningFailureLeavesTheDeviceAvailableForAnotherRequest) {
+CANOPY_TEST(provisioningFailureLeavesTheDeviceAvailableForAnotherRequest) {
   Fixture fixture;
   wlr_backend* backend = fixture.addBackend();
   fixture.initialize();
@@ -379,7 +379,7 @@ UMBRIEL_TEST(provisioningFailureLeavesTheDeviceAvailableForAnotherRequest) {
   CHECK_EQ(fixture.inventory.granted, 1);
 }
 
-UMBRIEL_TEST(synchronousLeaseReturnReoffersOutputWithTheRequestGateAlreadyClosed) {
+CANOPY_TEST(synchronousLeaseReturnReoffersOutputWithTheRequestGateAlreadyClosed) {
   Fixture fixture;
   wlr_backend* backend = fixture.addBackend();
   fixture.initialize();
@@ -398,7 +398,7 @@ UMBRIEL_TEST(synchronousLeaseReturnReoffersOutputWithTheRequestGateAlreadyClosed
   CHECK_EQ(fixture.inventory.revoked, 1);
 }
 
-UMBRIEL_TEST(wrapperDestructionRevokesLeasesAndDetachesDisplayOwnedManagers) {
+CANOPY_TEST(wrapperDestructionRevokesLeasesAndDetachesDisplayOwnedManagers) {
   Fixture fixture;
   wlr_backend* backend = fixture.addBackend();
   fixture.initialize();
@@ -413,7 +413,7 @@ UMBRIEL_TEST(wrapperDestructionRevokesLeasesAndDetachesDisplayOwnedManagers) {
   }
 }
 
-UMBRIEL_TEST(displayDestructionDisconnectsManagersBeforeWrapperTeardown) {
+CANOPY_TEST(displayDestructionDisconnectsManagersBeforeWrapperTeardown) {
   Fixture fixture;
   wlr_backend* backend = fixture.addBackend();
   fixture.initialize();

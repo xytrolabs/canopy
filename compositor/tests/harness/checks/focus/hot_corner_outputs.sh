@@ -3,11 +3,11 @@
 # A fullscreen output blocks its corners even while another monitor owns keyboard focus.
 set -euo pipefail
 
-pointer() { "$UMBRIEL_POINTER_CLIENT" 3584 720 "$@"; }
-action() { "$UMBRIEL" msg "$@" > /dev/null; }
-windows() { "$UMBRIEL" windows --json; }
+pointer() { "$CANOPY_POINTER_CLIENT" 3584 720 "$@"; }
+action() { "$CANOPY" msg "$@" > /dev/null; }
+windows() { "$CANOPY" windows --json; }
 workspace() {
-  "$UMBRIEL" workspaces --json | jq -r --arg output "$1" '.[] | select(.output == $output and .active) | .index'
+  "$CANOPY" workspaces --json | jq -r --arg output "$1" '.[] | select(.output == $output and .active) | .index'
 }
 wait_field() {
   local title=$1 field=$2 expected=$3 actual=
@@ -36,7 +36,7 @@ wait_workspace() {
   return 1
 }
 
-cat >> "$UMBRIEL_CONFIG" <<'CONFIG'
+cat >> "$CANOPY_CONFIG" <<'CONFIG'
 [animation]
 enabled = false
 [input.focus]
@@ -77,25 +77,25 @@ CONFIG
 action config-reload
 pointer move 600 360
 for title in corner-left corner-middle-game corner-right; do
-  env FILL_COLOR=0xFF3388CC RESIZE_FILL_COLOR=0xFF3388CC "$UMBRIEL_UNMAP_CLIENT" "$title" > "$UMBRIEL_RUNTIME_DIR/$title.log" 2>&1 &
+  env FILL_COLOR=0xFF3388CC RESIZE_FILL_COLOR=0xFF3388CC "$CANOPY_UNMAP_CLIENT" "$title" > "$CANOPY_RUNTIME_DIR/$title.log" 2>&1 &
   wait_field "$title" focused true
 done
 wait_field corner-middle-game fullscreen true
-"$UMBRIEL" settle > /dev/null
-if ! "$UMBRIEL" outputs --json | jq -e '
+"$CANOPY" settle > /dev/null
+if ! "$CANOPY" outputs --json | jq -e '
   any(.[]; .name == "HEADLESS-2" and .position == {x: 1280, y: 0}
     and .logical_size == {width: 1024, height: 576})
 ' > /dev/null; then
   echo "middle output did not use the expected logical geometry"
   exit 1
 fi
-grim -o HEADLESS-2 "$UMBRIEL_RUNTIME_DIR/fullscreen.png"
-pixel=$("$UMBRIEL_PIXEL_PROBE" "$UMBRIEL_RUNTIME_DIR/fullscreen.png" pixel 100 10)
+grim -o HEADLESS-2 "$CANOPY_RUNTIME_DIR/fullscreen.png"
+pixel=$("$CANOPY_PIXEL_PROBE" "$CANOPY_RUNTIME_DIR/fullscreen.png" pixel 100 10)
 [[ $pixel == "51 136 204" ]] || { echo "fullscreen content missing at the top: $pixel"; exit 1; }
 
 for follows in false true; do
   for delay in 0 75; do
-    sed -i "s/^follows_mouse = .*/follows_mouse = $follows/; s/^delay_ms = .*/delay_ms = $delay/" "$UMBRIEL_CONFIG"
+    sed -i "s/^follows_mouse = .*/follows_mouse = $follows/; s/^delay_ms = .*/delay_ms = $delay/" "$CANOPY_CONFIG"
     action config-reload
     for side in left right; do
       if [[ $side == left ]]; then
@@ -136,11 +136,11 @@ wait_workspace HEADLESS-2 3
 wait_field corner-middle-game fullscreen true
 
 # The destination's current regular focus wins over an older fullscreen window there.
-sed -i 's/^follows_mouse = .*/follows_mouse = false/' "$UMBRIEL_CONFIG"
+sed -i 's/^follows_mouse = .*/follows_mouse = false/' "$CANOPY_CONFIG"
 action config-reload
 action workspace-switch 1 --output HEADLESS-2
 pointer move 1792 288
-"$UMBRIEL_UNMAP_CLIENT" corner-middle-foreground > "$UMBRIEL_RUNTIME_DIR/foreground.log" 2>&1 &
+"$CANOPY_UNMAP_CLIENT" corner-middle-foreground > "$CANOPY_RUNTIME_DIR/foreground.log" 2>&1 &
 wait_field corner-middle-foreground fullscreen false
 focus corner-middle-foreground
 wait_field corner-middle-foreground focused true

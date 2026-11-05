@@ -6,7 +6,7 @@
 #include "server/server.h"
 #include "wlr.h"
 
-namespace umbriel {
+namespace canopy {
 
   namespace {
     void removeListener(wl_listener& listener) {
@@ -457,4 +457,4 @@ namespace umbriel {
     }
   }
 
-} // namespace umbriel
+} // namespace canopy

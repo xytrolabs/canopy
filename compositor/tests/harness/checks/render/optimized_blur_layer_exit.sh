@@ -3,14 +3,14 @@
 # translucent windows must blur the backdrop instead of retaining the wallpaper captured during unmap.
 set -euo pipefail
 
-readonly WALLPAPER_LOG="$UMBRIEL_RUNTIME_DIR/optimized-blur-wallpaper.log"
-readonly WINDOW_LOG="$UMBRIEL_RUNTIME_DIR/optimized-blur-window.log"
-readonly BEFORE="$UMBRIEL_RUNTIME_DIR/optimized-blur-before-exit.png"
-readonly AFTER="$UMBRIEL_RUNTIME_DIR/optimized-blur-after-exit.png"
-readonly REMAPPED="$UMBRIEL_RUNTIME_DIR/optimized-blur-after-remap.png"
+readonly WALLPAPER_LOG="$CANOPY_RUNTIME_DIR/optimized-blur-wallpaper.log"
+readonly WINDOW_LOG="$CANOPY_RUNTIME_DIR/optimized-blur-window.log"
+readonly BEFORE="$CANOPY_RUNTIME_DIR/optimized-blur-before-exit.png"
+readonly AFTER="$CANOPY_RUNTIME_DIR/optimized-blur-after-exit.png"
+readonly REMAPPED="$CANOPY_RUNTIME_DIR/optimized-blur-after-remap.png"
 readonly TITLE=optimized-blur-layer-exit
 
-cat >> "$UMBRIEL_CONFIG" <<'EOF'
+cat >> "$CANOPY_CONFIG" <<'EOF'
 
 [colors]
 backdrop = "#00FF00FF"
@@ -39,7 +39,7 @@ match.title = "^optimized-blur-layer-exit$"
 blur = true
 blur_optimized = true
 EOF
-"$UMBRIEL" msg config-reload > /dev/null
+"$CANOPY" msg config-reload > /dev/null
 
 wait_for_line() {
   local log=$1 line=$2
@@ -53,24 +53,24 @@ wait_for_line() {
 
 sample_window() {
   local image=$1 windows x y w h
-  windows=$("$UMBRIEL" windows --json)
+  windows=$("$CANOPY" windows --json)
   read -r x y w h < <(
     jq -r --arg title "$TITLE" '.[] | select(.title == $title) | "\(.x) \(.y) \(.w) \(.h)"' <<< "$windows"
   )
   grim "$image"
-  "$UMBRIEL_PIXEL_PROBE" "$image" mean "40x40+$((x + w / 2 - 20))+$((y + h / 2 - 20))"
+  "$CANOPY_PIXEL_PROBE" "$image" mean "40x40+$((x + w / 2 - 20))+$((y + h / 2 - 20))"
 }
 
 # Populate the optimized cache with a stable wallpaper, then enable the close animation under test.
-"$UMBRIEL_LAYER_CLIENT" HEADLESS-1 0 > "$WALLPAPER_LOG" 2>&1 &
+"$CANOPY_LAYER_CLIENT" HEADLESS-1 0 > "$WALLPAPER_LOG" 2>&1 &
 wallpaper_pid=$!
 wait_for_line "$WALLPAPER_LOG" ready
-sed -i '/^\[animation.layers\]$/,/^\[/s/^enabled = false$/enabled = true/' "$UMBRIEL_CONFIG"
-"$UMBRIEL" msg config-reload > /dev/null
+sed -i '/^\[animation.layers\]$/,/^\[/s/^enabled = false$/enabled = true/' "$CANOPY_CONFIG"
+"$CANOPY" msg config-reload > /dev/null
 
-env TRANSLUCENT_CONTENT=1 "$UMBRIEL_SUBSURFACE_CLIENT" "$TITLE" 900 600 > "$WINDOW_LOG" 2>&1 &
+env TRANSLUCENT_CONTENT=1 "$CANOPY_SUBSURFACE_CLIENT" "$TITLE" 900 600 > "$WINDOW_LOG" 2>&1 &
 wait_for_line "$WINDOW_LOG" mapped
-"$UMBRIEL" settle
+"$CANOPY" settle
 read -r before_r before_g before_b < <(sample_window "$BEFORE")
 if ((before_r < 150 || before_g > 90 || before_b < 180)); then
   echo "optimized blur did not contain the wallpaper before exit: $before_r $before_g $before_b"
@@ -79,7 +79,7 @@ fi
 
 kill "$wallpaper_pid"
 wait "$wallpaper_pid" 2>/dev/null || true
-"$UMBRIEL" settle
+"$CANOPY" settle
 read -r after_r after_g after_b < <(sample_window "$AFTER")
 
 red_green=$((after_r - after_g)); red_green=$((red_green < 0 ? -red_green : red_green))
@@ -95,9 +95,9 @@ if ((red_green > 15 || green_blue > 15 || transition < 100)); then
 fi
 
 # Mapping another wallpaper with layer animations already enabled must refresh the cache through the opening fade too.
-"$UMBRIEL_LAYER_CLIENT" HEADLESS-1 0 > "$WALLPAPER_LOG" 2>&1 &
+"$CANOPY_LAYER_CLIENT" HEADLESS-1 0 > "$WALLPAPER_LOG" 2>&1 &
 wait_for_line "$WALLPAPER_LOG" ready
-"$UMBRIEL" settle
+"$CANOPY" settle
 read -r remapped_r remapped_g remapped_b < <(sample_window "$REMAPPED")
 if ((remapped_r < 150 || remapped_g > 90 || remapped_b < 180)); then
   echo "optimized blur did not follow the remapped wallpaper through its opening animation"

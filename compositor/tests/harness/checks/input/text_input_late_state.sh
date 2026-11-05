@@ -4,10 +4,10 @@
 # relayed to the input method.
 set -euo pipefail
 
-readonly INPUT_METHOD="${UMBRIEL_INPUT_METHOD_CLIENT:-./build-debug/tests/input-method-client}"
-readonly OBSERVER="${UMBRIEL_SEAT_LOG_CLIENT:-./build-debug/tests/seat-log-client}"
-readonly TEXT_LOG="$UMBRIEL_RUNTIME_DIR/text-input-window.log"
-readonly INPUT_METHOD_LOG="$UMBRIEL_RUNTIME_DIR/input-method.log"
+readonly INPUT_METHOD="${CANOPY_INPUT_METHOD_CLIENT:-./build-debug/tests/input-method-client}"
+readonly OBSERVER="${CANOPY_SEAT_LOG_CLIENT:-./build-debug/tests/seat-log-client}"
+readonly TEXT_LOG="$CANOPY_RUNTIME_DIR/text-input-window.log"
+readonly INPUT_METHOD_LOG="$CANOPY_RUNTIME_DIR/input-method.log"
 # zwp_text_input_v3 content_hint.spellcheck and content_purpose.url
 readonly HINT_SPELLCHECK=2
 readonly PURPOSE_URL=5

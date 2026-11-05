@@ -18,8 +18,8 @@ namespace {
     size_t stride = 0;
     bool accessible = false;
 
-    Pixels(umbriel::TitleBarButton button, int size)
-        : buffer(umbriel::renderTitleBarIcon(button, size, {1.0F, 1.0F, 1.0F, 1.0F})) {
+    Pixels(canopy::TitleBarButton button, int size)
+        : buffer(canopy::renderTitleBarIcon(button, size, {1.0F, 1.0F, 1.0F, 1.0F})) {
       accessible = wlr_buffer_begin_data_ptr_access(buffer, WLR_BUFFER_DATA_PTR_ACCESS_READ, &data, &format, &stride);
       CHECK(accessible);
       CHECK_EQ(format, DRM_FORMAT_ARGB8888);
@@ -41,8 +41,8 @@ namespace {
   };
 } // namespace
 
-UMBRIEL_TEST(buttonSymbolsHaveDistinctGeometry) {
-  using umbriel::TitleBarButton;
+CANOPY_TEST(buttonSymbolsHaveDistinctGeometry) {
+  using canopy::TitleBarButton;
   for (const int size : {8, 14, 18, 28, 64}) {
     const Pixels close(TitleBarButton::Close, size);
     const Pixels maximize(TitleBarButton::Maximize, size);
@@ -58,8 +58,8 @@ UMBRIEL_TEST(buttonSymbolsHaveDistinctGeometry) {
   }
 }
 
-UMBRIEL_TEST(buttonSymbolsKeepTransparentAntialiasedEdges) {
-  using umbriel::TitleBarButton;
+CANOPY_TEST(buttonSymbolsKeepTransparentAntialiasedEdges) {
+  using canopy::TitleBarButton;
   for (const auto button : {TitleBarButton::Close, TitleBarButton::Maximize, TitleBarButton::Minimize}) {
     const Pixels image(button, 28);
     if (!image.accessible)

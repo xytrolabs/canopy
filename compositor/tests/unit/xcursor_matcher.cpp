@@ -16,9 +16,9 @@ extern "C" {
 #include <wlr/xcursor.h>
 }
 
-using umbriel::matchXcursorManagerImage;
-using umbriel::matchXcursorThemeImage;
-using umbriel::XcursorImageView;
+using canopy::matchXcursorManagerImage;
+using canopy::matchXcursorThemeImage;
+using canopy::XcursorImageView;
 
 namespace {
 
@@ -76,7 +76,7 @@ namespace {
 
 } // namespace
 
-UMBRIEL_TEST(comparesRowsWithoutReadingStridePadding) {
+CANOPY_TEST(comparesRowsWithoutReadingStridePadding) {
   std::array<uint32_t, 4> packed{0xff102030U, 0xff405060U, 0xff708090U, 0xffa0b0c0U};
   std::array<uint32_t, 6> padded{
       0xff102030U, 0xff405060U, 0xdeadbeefU, 0xff708090U, 0xffa0b0c0U, 0xcafebabeU,
@@ -84,37 +84,37 @@ UMBRIEL_TEST(comparesRowsWithoutReadingStridePadding) {
   XcursorImageView paddedView = view(padded, 2, 2);
   paddedView.stride = 3 * sizeof(uint32_t);
 
-  CHECK(umbriel::xcursorImagesEqual(view(packed, 2, 2), paddedView));
+  CHECK(canopy::xcursorImagesEqual(view(packed, 2, 2), paddedView));
 }
 
-UMBRIEL_TEST(normalizesRgbOnlyWhenAlphaIsFullyTransparent) {
+CANOPY_TEST(normalizesRgbOnlyWhenAlphaIsFullyTransparent) {
   std::array<uint32_t, 2> first{0x00112233U, 0x01445566U};
   std::array<uint32_t, 2> transparentDifference{0x00abcdefU, 0x01445566U};
   std::array<uint32_t, 2> partialDifference{0x00112233U, 0x01445567U};
 
-  CHECK(umbriel::xcursorImagesEqual(view(first, 2, 1), view(transparentDifference, 2, 1)));
-  CHECK(!umbriel::xcursorImagesEqual(view(first, 2, 1), view(partialDifference, 2, 1)));
+  CHECK(canopy::xcursorImagesEqual(view(first, 2, 1), view(transparentDifference, 2, 1)));
+  CHECK(!canopy::xcursorImagesEqual(view(first, 2, 1), view(partialDifference, 2, 1)));
 }
 
-UMBRIEL_TEST(requiresDimensionsAndHotspotToMatch) {
+CANOPY_TEST(requiresDimensionsAndHotspotToMatch) {
   std::array<uint32_t, 4> pixels{0xff000001U, 0xff000002U, 0xff000003U, 0xff000004U};
 
-  CHECK(!umbriel::xcursorImagesEqual(view(pixels, 2, 2), view(pixels, 1, 4)));
-  CHECK(!umbriel::xcursorImagesEqual(view(pixels, 2, 2, 0, 0), view(pixels, 2, 2, 1, 0)));
+  CHECK(!canopy::xcursorImagesEqual(view(pixels, 2, 2), view(pixels, 1, 4)));
+  CHECK(!canopy::xcursorImagesEqual(view(pixels, 2, 2, 0, 0), view(pixels, 2, 2, 1, 0)));
 }
 
-UMBRIEL_TEST(rejectsMissingPixelsAndShortRows) {
+CANOPY_TEST(rejectsMissingPixelsAndShortRows) {
   std::array<uint32_t, 1> pixels{0xff123456U};
   XcursorImageView missing = view(pixels, 1, 1);
   missing.pixels = nullptr;
   XcursorImageView shortRow = view(pixels, 1, 1);
   shortRow.stride = sizeof(uint32_t) - 1;
 
-  CHECK(!umbriel::xcursorImagesEqual(view(pixels, 1, 1), missing));
-  CHECK(!umbriel::xcursorImagesEqual(view(pixels, 1, 1), shortRow));
+  CHECK(!canopy::xcursorImagesEqual(view(pixels, 1, 1), missing));
+  CHECK(!canopy::xcursorImagesEqual(view(pixels, 1, 1), shortRow));
 }
 
-UMBRIEL_TEST(preferredSemanticNameWinsIdenticalAliases) {
+CANOPY_TEST(preferredSemanticNameWinsIdenticalAliases) {
   std::array<uint32_t, 1> pixels{0xff123456U};
   wlr_xcursor_image image = themeImage(pixels, 1, 1);
   ThemeCursor first("first", {&image});
@@ -127,7 +127,7 @@ UMBRIEL_TEST(preferredSemanticNameWinsIdenticalAliases) {
   );
 }
 
-UMBRIEL_TEST(matchesAnyAnimationFrame) {
+CANOPY_TEST(matchesAnyAnimationFrame) {
   std::array<uint32_t, 1> firstPixels{0xff000001U};
   std::array<uint32_t, 1> secondPixels{0xff000002U};
   wlr_xcursor_image firstImage = themeImage(firstPixels, 1, 1);
@@ -138,7 +138,7 @@ UMBRIEL_TEST(matchesAnyAnimationFrame) {
   CHECK_EQ(matchXcursorThemeImage(&theme.theme, view(secondPixels, 1, 1)), std::optional<std::string>{"animated"});
 }
 
-UMBRIEL_TEST(rejectsAnOpaquePixelDifference) {
+CANOPY_TEST(rejectsAnOpaquePixelDifference) {
   std::array<uint32_t, 1> themePixels{0xff000001U};
   std::array<uint32_t, 1> candidatePixels{0xff000002U};
   wlr_xcursor_image image = themeImage(themePixels, 1, 1);
@@ -148,7 +148,7 @@ UMBRIEL_TEST(rejectsAnOpaquePixelDifference) {
   CHECK(!matchXcursorThemeImage(&theme.theme, view(candidatePixels, 1, 1)).has_value());
 }
 
-UMBRIEL_TEST(managerSearchesItsScaleOneTheme) {
+CANOPY_TEST(managerSearchesItsScaleOneTheme) {
   std::array<uint32_t, 1> basePixels{0xff123456U};
   std::array<uint32_t, 1> scaledPixels{0xff123456U};
   wlr_xcursor_image baseImage = themeImage(basePixels, 1, 1);

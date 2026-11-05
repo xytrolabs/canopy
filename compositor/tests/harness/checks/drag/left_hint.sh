@@ -2,7 +2,7 @@
 # The first scrolling column's prepend hint must remain outside the card when
 # the pointer crosses the centered preview boundary into the overview margin.
 set -euo pipefail
-source "$UMBRIEL_HARNESS_LIB"
+source "$CANOPY_HARNESS_LIB"
 
 readonly BTN_LEFT=272
 readonly OUTPUT_W=1280
@@ -16,7 +16,7 @@ spawn_client() {
     --title="left-hint-$1" sh -c 'sleep 120' > /dev/null 2>&1 &
 }
 
-cat >> "$UMBRIEL_CONFIG" <<'EOF'
+cat >> "$CANOPY_CONFIG" <<'EOF'
 
 [colors]
 insert_hint = "#FF0000FF"
@@ -34,23 +34,23 @@ default_extent_fraction = 0.5
 [overview]
 zoom = 0.5
 EOF
-"$UMBRIEL" msg config-reload > /dev/null
+"$CANOPY" msg config-reload > /dev/null
 
 for id in $(seq 1 6); do
   spawn_client "$id"
   for _ in $(seq 60); do
-    [[ $("$UMBRIEL" windows --json | jq 'length') -eq $id ]] && break
+    [[ $("$CANOPY" windows --json | jq 'length') -eq $id ]] && break
     sleep 0.25
   done
 done
-"$UMBRIEL" settle
+"$CANOPY" settle
 
 for _ in $(seq 1 5); do
-  "$UMBRIEL" msg window-focus-left > /dev/null
+  "$CANOPY" msg window-focus-left > /dev/null
 done
-"$UMBRIEL" settle
+"$CANOPY" settle
 
-windows=$("$UMBRIEL" windows --json)
+windows=$("$CANOPY" windows --json)
 start_x=$(jq -r --argjson origin "$OVERVIEW_X" --argjson zoom "$OVERVIEW_ZOOM" \
   '.[] | select(.focused) | ($origin + ((.x + 10) * $zoom) | round)' <<< "$windows")
 start_y=$(jq -r --argjson origin "$OVERVIEW_Y" --argjson zoom "$OVERVIEW_ZOOM" \
@@ -61,41 +61,41 @@ start_y=$(jq -r --argjson origin "$OVERVIEW_Y" --argjson zoom "$OVERVIEW_ZOOM" \
 touch_x=$((OVERVIEW_X - 13))
 inside_x=$((OVERVIEW_X + 30))
 
-"$UMBRIEL" msg overview-open > /dev/null
-"$UMBRIEL" settle
+"$CANOPY" msg overview-open > /dev/null
+"$CANOPY" settle
 # Animation time only moves by clock-advance while the drag is sampled.
-"$UMBRIEL" clock-freeze
+"$CANOPY" clock-freeze
 pointer_hold "$OUTPUT_W" "$OUTPUT_H" move "$start_x" "$start_y" press "$BTN_LEFT" move "$touch_x" 360 \
   -- move "$inside_x" 360 mark inside hold release "$BTN_LEFT"
-"$UMBRIEL" clock-advance 500 > /dev/null
+"$CANOPY" clock-advance 500 > /dev/null
 
-outside_screenshot="$UMBRIEL_RUNTIME_DIR/drag-left-outside-hint.png"
+outside_screenshot="$CANOPY_RUNTIME_DIR/drag-left-outside-hint.png"
 grim "$outside_screenshot"
 
-read -r outside_red outside_green _ < <("$UMBRIEL_PIXEL_PROBE" "$outside_screenshot" mean 100x240+190+240)
+read -r outside_red outside_green _ < <("$CANOPY_PIXEL_PROBE" "$outside_screenshot" mean 100x240+190+240)
 if (( outside_red < outside_green + 35 )); then
   echo "leading gap hint overlapped the first card instead of staying in the overview margin: red=$outside_red green=$outside_green"
   exit 1
 fi
 
 pointer_step inside
-"$UMBRIEL" clock-advance 500 > /dev/null
-inside_screenshot="$UMBRIEL_RUNTIME_DIR/drag-left-inside-hint.png"
+"$CANOPY" clock-advance 500 > /dev/null
+inside_screenshot="$CANOPY_RUNTIME_DIR/drag-left-inside-hint.png"
 grim "$inside_screenshot"
 
-read -r inside_red inside_green _ < <("$UMBRIEL_PIXEL_PROBE" "$inside_screenshot" mean 100x50+400+195)
+read -r inside_red inside_green _ < <("$CANOPY_PIXEL_PROBE" "$inside_screenshot" mean 100x50+400+195)
 if (( inside_red < inside_green + 35 )); then
   echo "the first card's outer side remained a duplicate prepend target: red=$inside_red green=$inside_green"
   exit 1
 fi
 
 pointer_release
-"$UMBRIEL" clock-resume
-"$UMBRIEL" settle
-"$UMBRIEL" msg overview-close > /dev/null
-"$UMBRIEL" settle
+"$CANOPY" clock-resume
+"$CANOPY" settle
+"$CANOPY" msg overview-close > /dev/null
+"$CANOPY" settle
 
-windows=$("$UMBRIEL" windows --json)
+windows=$("$CANOPY" windows --json)
 read -r source_x source_y source_w < <(
   jq -r '.[] | select(.title == "left-hint-1") | "\(.x) \(.y) \(.w)"' <<< "$windows"
 )

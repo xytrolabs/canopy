@@ -6,8 +6,8 @@
 # transition observable instead of merely covering an incorrectly visible scratchpad.
 set -euo pipefail
 
-readonly CLIENT="${UMBRIEL_UNMAP_CLIENT:-./build-debug/tests/unmap-client}"
-readonly POINTER="${UMBRIEL_POINTER_CLIENT:-./build-debug/tests/pointer-client}"
+readonly CLIENT="${CANOPY_UNMAP_CLIENT:-./build-debug/tests/unmap-client}"
+readonly POINTER="${CANOPY_POINTER_CLIENT:-./build-debug/tests/pointer-client}"
 readonly OUTPUT_LAYOUT_W=2560
 readonly OUTPUT_LAYOUT_H=720
 readonly FIRST_TITLE=overview-scratch-first
@@ -16,46 +16,46 @@ readonly FIRST_OUTPUT=HEADLESS-1
 readonly SECOND_OUTPUT=HEADLESS-2
 readonly FIRST_SCRATCHPAD=overview-first
 readonly SECOND_SCRATCHPAD=overview-second
-readonly FIRST_LOG="$UMBRIEL_RUNTIME_DIR/overview-scratch-first.log"
-readonly SECOND_LOG="$UMBRIEL_RUNTIME_DIR/overview-scratch-second.log"
+readonly FIRST_LOG="$CANOPY_RUNTIME_DIR/overview-scratch-first.log"
+readonly SECOND_LOG="$CANOPY_RUNTIME_DIR/overview-scratch-second.log"
 
 wait_for_count() {
   local want=$1
   for _ in $(seq 60); do
-    [[ $("$UMBRIEL" windows --json | jq 'length') -eq $want ]] && return 0
+    [[ $("$CANOPY" windows --json | jq 'length') -eq $want ]] && return 0
     sleep 0.1
   done
-  echo "expected $want windows, got: $("$UMBRIEL" windows --json)"
+  echo "expected $want windows, got: $("$CANOPY" windows --json)"
   return 1
 }
 
 wait_for_workspace() {
   local title=$1 output=$2 workspace=
   for _ in $(seq 60); do
-    workspace=$("$UMBRIEL" windows --json | jq -r --arg title "$title" '.[] | select(.title == $title) | .workspace')
+    workspace=$("$CANOPY" windows --json | jq -r --arg title "$title" '.[] | select(.title == $title) | .workspace')
     [[ $workspace == "$output":* ]] && return 0
     sleep 0.1
   done
-  echo "window '$title' did not map on $output: $("$UMBRIEL" windows --json)"
+  echo "window '$title' did not map on $output: $("$CANOPY" windows --json)"
   return 1
 }
 
 wait_for_empty_workspace() {
   local title=$1 window= workspace=
   for _ in $(seq 60); do
-    window=$("$UMBRIEL" windows --json | jq -c --arg title "$title" '.[] | select(.title == $title)')
+    window=$("$CANOPY" windows --json | jq -c --arg title "$title" '.[] | select(.title == $title)')
     if [[ -n $window ]]; then
       workspace=$(jq -r '.workspace' <<< "$window")
       [[ -z $workspace ]] && return 0
     fi
     sleep 0.1
   done
-  echo "window '$title' retained workspace '$workspace' after moving to the scratchpad: $("$UMBRIEL" windows --json)"
+  echo "window '$title' retained workspace '$workspace' after moving to the scratchpad: $("$CANOPY" windows --json)"
   return 1
 }
 
 output_origin() {
-  "$UMBRIEL" outputs \
+  "$CANOPY" outputs \
     | awk -v name="$1" '$1 == name { found = 1; next } found && /Position:/ { split($2, p, ","); print p[1], p[2]; exit }'
 }
 
@@ -77,11 +77,11 @@ window_center() {
     return 1
   fi
   read -r window_x window_y window_w window_h < <(
-    "$UMBRIEL" windows --json \
+    "$CANOPY" windows --json \
       | jq -r --arg title "$title" '.[] | select(.title == $title) | "\(.x) \(.y) \(.w) \(.h)"'
   )
   if [[ -z ${window_x:-} || -z ${window_y:-} || -z ${window_w:-} || -z ${window_h:-} ]]; then
-    echo "could not resolve geometry for '$title': $("$UMBRIEL" windows --json)" >&2
+    echo "could not resolve geometry for '$title': $("$CANOPY" windows --json)" >&2
     return 1
   fi
   printf '%d %d\n' "$((window_x - output_x + window_w / 2))" "$((window_y - output_y + window_h / 2))"
@@ -89,7 +89,7 @@ window_center() {
 
 sample_rgb() {
   local image=$1 x=$2 y=$3
-  "$UMBRIEL_PIXEL_PROBE" "$image" mean "20x20+$((x - 10))+$((y - 10))"
+  "$CANOPY_PIXEL_PROBE" "$image" mean "20x20+$((x - 10))+$((y - 10))"
 }
 
 assert_blue() {
@@ -112,12 +112,12 @@ assert_dark() {
 
 capture() {
   local output=$1 name=$2
-  local path="$UMBRIEL_RUNTIME_DIR/$name.png"
+  local path="$CANOPY_RUNTIME_DIR/$name.png"
   grim -o "$output" "$path"
   printf '%s\n' "$path"
 }
 
-cat >> "$UMBRIEL_CONFIG" <<'EOF'
+cat >> "$CANOPY_CONFIG" <<'EOF'
 
 [animation]
 enabled = false
@@ -169,26 +169,26 @@ default_floating = true
 default_floating_size_px = { width = 420, height = 260 }
 default_position = { x = 120, y = 100, anchor = "top_left" }
 EOF
-"$UMBRIEL" msg config-reload > /dev/null
+"$CANOPY" msg config-reload > /dev/null
 
 "$CLIENT" "$FIRST_TITLE" 420 260 > "$FIRST_LOG" 2>&1 &
 wait_for_count 1
 wait_for_workspace "$FIRST_TITLE" "$FIRST_OUTPUT"
 move_pointer_to_output "$FIRST_OUTPUT"
-"$UMBRIEL" msg window-move-to-scratchpad "$FIRST_SCRATCHPAD" > /dev/null
+"$CANOPY" msg window-move-to-scratchpad "$FIRST_SCRATCHPAD" > /dev/null
 wait_for_empty_workspace "$FIRST_TITLE"
 
 "$CLIENT" "$SECOND_TITLE" 420 260 > "$SECOND_LOG" 2>&1 &
 wait_for_count 2
 wait_for_workspace "$SECOND_TITLE" "$SECOND_OUTPUT"
 move_pointer_to_output "$SECOND_OUTPUT"
-"$UMBRIEL" msg window-move-to-scratchpad "$SECOND_SCRATCHPAD" > /dev/null
+"$CANOPY" msg window-move-to-scratchpad "$SECOND_SCRATCHPAD" > /dev/null
 wait_for_empty_workspace "$SECOND_TITLE"
 
 move_pointer_to_output "$FIRST_OUTPUT"
-"$UMBRIEL" msg scratchpad-toggle "$FIRST_SCRATCHPAD" > /dev/null
+"$CANOPY" msg scratchpad-toggle "$FIRST_SCRATCHPAD" > /dev/null
 move_pointer_to_output "$SECOND_OUTPUT"
-"$UMBRIEL" msg scratchpad-toggle "$SECOND_SCRATCHPAD" > /dev/null
+"$CANOPY" msg scratchpad-toggle "$SECOND_SCRATCHPAD" > /dev/null
 sleep 0.1
 
 read -r first_x first_y < <(window_center "$FIRST_TITLE" "$FIRST_OUTPUT")
@@ -199,34 +199,34 @@ second_before=$(capture "$SECOND_OUTPUT" overview-scratch-second-before)
 assert_blue "$FIRST_OUTPUT before overview" "$first_before" "$first_x" "$first_y"
 assert_blue "$SECOND_OUTPUT before overview" "$second_before" "$second_x" "$second_y"
 
-"$UMBRIEL" msg overview-open > /dev/null
+"$CANOPY" msg overview-open > /dev/null
 sleep 0.1
 first_open=$(capture "$FIRST_OUTPUT" overview-scratch-first-open)
 second_open=$(capture "$SECOND_OUTPUT" overview-scratch-second-open)
 assert_dark "$FIRST_OUTPUT after overview-open" "$first_open" "$first_x" "$first_y"
 assert_dark "$SECOND_OUTPUT after overview-open" "$second_open" "$second_x" "$second_y"
 
-if [[ $("$UMBRIEL" windows --json | jq 'length') -ne 2 ]]; then
-  echo "overview-open removed a stored scratchpad window: $("$UMBRIEL" windows --json)"
+if [[ $("$CANOPY" windows --json | jq 'length') -ne 2 ]]; then
+  echo "overview-open removed a stored scratchpad window: $("$CANOPY" windows --json)"
   exit 1
 fi
 
 # Nothing re-enters a scratchpad while the overview covers the screen.
 move_pointer_to_output "$FIRST_OUTPUT"
-first_id=$("$UMBRIEL" windows --json | jq -r --arg t "$FIRST_TITLE" '.[] | select(.title == $t) | .id')
-"$UMBRIEL" msg scratchpad-toggle "$FIRST_SCRATCHPAD" > /dev/null || true
-"$UMBRIEL" msg scratchpad-window-show-next "$FIRST_SCRATCHPAD" > /dev/null || true
-"$UMBRIEL" msg window-focus "$first_id" > /dev/null || true
+first_id=$("$CANOPY" windows --json | jq -r --arg t "$FIRST_TITLE" '.[] | select(.title == $t) | .id')
+"$CANOPY" msg scratchpad-toggle "$FIRST_SCRATCHPAD" > /dev/null || true
+"$CANOPY" msg scratchpad-window-show-next "$FIRST_SCRATCHPAD" > /dev/null || true
+"$CANOPY" msg window-focus "$first_id" > /dev/null || true
 move_pointer_to_output "$SECOND_OUTPUT"
-"$UMBRIEL" msg scratchpad-window-show-previous "$SECOND_SCRATCHPAD" > /dev/null || true
-"$UMBRIEL" settle > /dev/null
-shown=$("$UMBRIEL" windows --json | jq -c '[.[] | select(.scratchpad != "" and .active) | .title]')
+"$CANOPY" msg scratchpad-window-show-previous "$SECOND_SCRATCHPAD" > /dev/null || true
+"$CANOPY" settle > /dev/null
+shown=$("$CANOPY" windows --json | jq -c '[.[] | select(.scratchpad != "" and .active) | .title]')
 if [[ $shown != "[]" ]]; then
   echo "a scratchpad was shown while the overview was open: $shown"
   exit 1
 fi
 
-"$UMBRIEL" msg overview-close > /dev/null
+"$CANOPY" msg overview-close > /dev/null
 sleep 0.1
 first_closed=$(capture "$FIRST_OUTPUT" overview-scratch-first-closed)
 second_closed=$(capture "$SECOND_OUTPUT" overview-scratch-second-closed)
@@ -234,7 +234,7 @@ assert_dark "$FIRST_OUTPUT after overview-close" "$first_closed" "$first_x" "$fi
 assert_dark "$SECOND_OUTPUT after overview-close" "$second_closed" "$second_x" "$second_y"
 
 move_pointer_to_output "$FIRST_OUTPUT"
-"$UMBRIEL" msg scratchpad-toggle "$FIRST_SCRATCHPAD" > /dev/null
+"$CANOPY" msg scratchpad-toggle "$FIRST_SCRATCHPAD" > /dev/null
 sleep 0.1
 first_restored=$(capture "$FIRST_OUTPUT" overview-scratch-first-restored)
 second_still_hidden=$(capture "$SECOND_OUTPUT" overview-scratch-second-still-hidden)
@@ -242,7 +242,7 @@ assert_blue "$FIRST_OUTPUT after its first toggle" "$first_restored" "$first_x" 
 assert_dark "$SECOND_OUTPUT before its first toggle" "$second_still_hidden" "$second_x" "$second_y"
 
 move_pointer_to_output "$SECOND_OUTPUT"
-"$UMBRIEL" msg scratchpad-toggle "$SECOND_SCRATCHPAD" > /dev/null
+"$CANOPY" msg scratchpad-toggle "$SECOND_SCRATCHPAD" > /dev/null
 sleep 0.1
 second_restored=$(capture "$SECOND_OUTPUT" overview-scratch-second-restored)
 assert_blue "$SECOND_OUTPUT after its first toggle" "$second_restored" "$second_x" "$second_y"

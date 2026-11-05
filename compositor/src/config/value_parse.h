@@ -5,7 +5,7 @@
 #include <array>
 #include <string_view>
 
-namespace umbriel {
+namespace canopy {
 
   struct OutputMode {
     int width = 0;
@@ -27,4 +27,4 @@ namespace umbriel {
   // letters, digits, or underscores.
   bool isEnvironmentVariableName(std::string_view name);
 
-} // namespace umbriel
+} // namespace canopy

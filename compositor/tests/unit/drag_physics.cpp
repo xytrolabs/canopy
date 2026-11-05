@@ -6,7 +6,7 @@
 #include <cmath>
 #include <limits>
 
-using umbriel::DragPhysics;
+using canopy::DragPhysics;
 
 namespace {
   // Ticks round(seconds / step) times.
@@ -65,7 +65,7 @@ namespace {
   }
 } // namespace
 
-UMBRIEL_TEST(grabPointStaysPinnedWhileTheSheetMoves) {
+CANOPY_TEST(grabPointStaysPinnedWhileTheSheetMoves) {
   DragPhysics physics;
   physics.begin(400, 300, 0.25F, 0.8F, 1);
   for (int i = 0; i < 10; ++i) {
@@ -79,7 +79,7 @@ UMBRIEL_TEST(grabPointStaysPinnedWhileTheSheetMoves) {
   CHECK(physics.maxDisplacement() > 5.0F);
 }
 
-UMBRIEL_TEST(motionTrailsOppositeToThePointer) {
+CANOPY_TEST(motionTrailsOppositeToThePointer) {
   DragPhysics physics;
   // Off-centre but not a grid vertex: at an exact corner (0, 0) the grab weight there is 1 and the pin
   // alone forces that corner's displacement to zero, so the check below would hold by construction.
@@ -94,7 +94,7 @@ UMBRIEL_TEST(motionTrailsOppositeToThePointer) {
   CHECK_NEAR(sheet[0][0], 0.0F, 0.05F);
 }
 
-UMBRIEL_TEST(displacementStaysBoundedAndTheSheetNeverFoldsUnderExtremeShaking) {
+CANOPY_TEST(displacementStaysBoundedAndTheSheetNeverFoldsUnderExtremeShaking) {
   DragPhysics physics;
   // Off-centre grab, so the two displacement components differ.
   physics.begin(120, 70, 0.25F, 0.5F, 1);
@@ -111,7 +111,7 @@ UMBRIEL_TEST(displacementStaysBoundedAndTheSheetNeverFoldsUnderExtremeShaking) {
   }
 }
 
-UMBRIEL_TEST(aShrinkingRetargetOfADisplacedSheetStaysAContraction) {
+CANOPY_TEST(aShrinkingRetargetOfADisplacedSheetStaysAContraction) {
   // The mirrored run (flip = -1) puts the fold along the anti-diagonal.
   for (const float flip : {1.0F, -1.0F}) {
     const auto row = [flip](float v) { return flip > 0 ? v : 1.0F - v; };
@@ -133,7 +133,7 @@ UMBRIEL_TEST(aShrinkingRetargetOfADisplacedSheetStaysAContraction) {
   }
 }
 
-UMBRIEL_TEST(velocityStaysBoundedWhenAResizeScalesAFastSheet) {
+CANOPY_TEST(velocityStaysBoundedWhenAResizeScalesAFastSheet) {
   DragPhysics physics;
   physics.begin(1000, 1000, 0.5F, 0.5F, 1);
   physics.move(-30, -30);
@@ -150,7 +150,7 @@ UMBRIEL_TEST(velocityStaysBoundedWhenAResizeScalesAFastSheet) {
   CHECK(contracts(physics, 1000 * scale, 1000 * scale));
 }
 
-UMBRIEL_TEST(reGrabbingWhileSettlingKeepsTheSheetAndItsTransition) {
+CANOPY_TEST(reGrabbingWhileSettlingKeepsTheSheetAndItsTransition) {
   DragPhysics physics;
   physics.begin(400, 300, 0.2F, 0.2F, 7);
   for (int i = 0; i < 6; ++i) {
@@ -170,7 +170,7 @@ UMBRIEL_TEST(reGrabbingWhileSettlingKeepsTheSheetAndItsTransition) {
   CHECK(contracts(physics, 400, 300));
 }
 
-UMBRIEL_TEST(settlesAfterReleaseAndWhileHeldStill) {
+CANOPY_TEST(settlesAfterReleaseAndWhileHeldStill) {
   DragPhysics physics;
   physics.begin(400, 300, 0.5F, 0.5F, 1);
   physics.move(60, 20);
@@ -192,7 +192,7 @@ UMBRIEL_TEST(settlesAfterReleaseAndWhileHeldStill) {
   }
 }
 
-UMBRIEL_TEST(integrationIsIndependentOfTheCallerFrameRate) {
+CANOPY_TEST(integrationIsIndependentOfTheCallerFrameRate) {
   DragPhysics slow;
   DragPhysics fast;
   slow.begin(400, 300, 0.3F, 0.3F, 1);
@@ -209,7 +209,7 @@ UMBRIEL_TEST(integrationIsIndependentOfTheCallerFrameRate) {
   }
 }
 
-UMBRIEL_TEST(longPausesSettleImmediatelyAndTransitionIdPassesThrough) {
+CANOPY_TEST(longPausesSettleImmediatelyAndTransitionIdPassesThrough) {
   DragPhysics physics;
   physics.begin(400, 300, 0.5F, 0.5F, 42);
   CHECK_EQ(physics.transitionId(), uint64_t{42});
@@ -221,7 +221,7 @@ UMBRIEL_TEST(longPausesSettleImmediatelyAndTransitionIdPassesThrough) {
   CHECK_EQ(physics.transitionId(), uint64_t{43});
 }
 
-UMBRIEL_TEST(tickIgnoresNonPositiveOrNonFiniteSeconds) {
+CANOPY_TEST(tickIgnoresNonPositiveOrNonFiniteSeconds) {
   DragPhysics neverBegun;
   CHECK(!neverBegun.tick(1.0));
 
@@ -242,7 +242,7 @@ UMBRIEL_TEST(tickIgnoresNonPositiveOrNonFiniteSeconds) {
   }
 }
 
-UMBRIEL_TEST(aBorderedWindowKeepsTheGrabbedCornerUnderThePointer) {
+CANOPY_TEST(aBorderedWindowKeepsTheGrabbedCornerUnderThePointer) {
   // The sheet spans the box the drag slot draws over: a 400x300 window inside a 24 px ring (border plus padding).
   const float boxX = -24, boxY = -24, boxWidth = 448, boxHeight = 348;
   // The pointer holds the window geometry's top-left corner, window-local (0, 0).
@@ -280,7 +280,7 @@ UMBRIEL_TEST(aBorderedWindowKeepsTheGrabbedCornerUnderThePointer) {
   CHECK(contracts(physics, 648, 448));
 }
 
-UMBRIEL_TEST(aReleasedSheetWithDegenerateTuningAlwaysTerminates) {
+CANOPY_TEST(aReleasedSheetWithDegenerateTuningAlwaysTerminates) {
   // Near-zero stiffness cannot pull the sheet home: the released sheet keeps a
   // static offset whose velocity drains away, so without a termination
   // backstop it stays active (and keeps scheduling frames) forever.
@@ -300,7 +300,7 @@ UMBRIEL_TEST(aReleasedSheetWithDegenerateTuningAlwaysTerminates) {
   CHECK(physics.maxDisplacement() == 0.0F);
 }
 
-UMBRIEL_TEST(theStallGuardIgnoresOrdinaryFramesAtAnyRefreshRate) {
+CANOPY_TEST(theStallGuardIgnoresOrdinaryFramesAtAnyRefreshRate) {
   // A 5 Hz output ticks every 200 ms; a 100 ms pause must not settle on
   // those ordinary frames, only on a rendering stall.
   DragPhysics::Tuning tuning{};
@@ -319,7 +319,7 @@ UMBRIEL_TEST(theStallGuardIgnoresOrdinaryFramesAtAnyRefreshRate) {
   CHECK(physics.maxDisplacement() == 0.0F);
 }
 
-UMBRIEL_TEST(aStallBeforeTheFirstTickSettles) {
+CANOPY_TEST(aStallBeforeTheFirstTickSettles) {
   // The gap that opens an episode is a stall candidate too: the guard applies
   // from the very first tick, measured against the output's cadence.
   DragPhysics physics;
@@ -339,7 +339,7 @@ UMBRIEL_TEST(aStallBeforeTheFirstTickSettles) {
   CHECK(!blind.active());
 }
 
-UMBRIEL_TEST(aWakeIntervalNeverStandsInForTheCadence) {
+CANOPY_TEST(aWakeIntervalNeverStandsInForTheCadence) {
   // The interval that wakes the sheet is a partial frame: the motion that
   // initiates it can land 1 ms before a vblank even on a 5 Hz output, and the
   // ordinary 200 ms frame that follows must not read as a stall.
@@ -358,7 +358,7 @@ UMBRIEL_TEST(aWakeIntervalNeverStandsInForTheCadence) {
   CHECK(physics.maxDisplacement() == 0.0F);
 }
 
-UMBRIEL_TEST(aLongCatchUpWhileTheCadenceIsUnknownStaysBounded) {
+CANOPY_TEST(aLongCatchUpWhileTheCadenceIsUnknownStaysBounded) {
   // A tolerated pause (the tuned threshold reaches 5 s) must not integrate
   // its whole gap at 240 Hz on one frame: the catch-up is bounded, and the
   // sheet keeps what the bounded prefix of that pause leaves it with.
@@ -372,7 +372,7 @@ UMBRIEL_TEST(aLongCatchUpWhileTheCadenceIsUnknownStaysBounded) {
   CHECK(physics.maxDisplacement() > 0.25F);
 }
 
-UMBRIEL_TEST(theQuietWindowDoesNotCreditMovingTimeAsQuiet) {
+CANOPY_TEST(theQuietWindowDoesNotCreditMovingTimeAsQuiet) {
   // A released sheet rings slowly (light damping) from a ~0.6 px deformation.
   // At a turning point an end-of-tick sample reads slow (v ≈ 2 px/s), but the
   // gap was spent at up to 7 px/s, well over the settle velocity. Quiet time

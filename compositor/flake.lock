@@ -16,10 +16,10 @@
     "root": {
       "inputs": {
         "nixpkgs": "nixpkgs",
-        "xdg-desktop-portal-umbriel": "xdg-desktop-portal-umbriel"
+        "xdg-desktop-portal-canopy": "xdg-desktop-portal-canopy"
       }
     },
-    "xdg-desktop-portal-umbriel": {
+    "xdg-desktop-portal-canopy": {
       "inputs": {
         "nixpkgs": [
           "nixpkgs"
@@ -29,13 +29,13 @@
         "lastModified": 1793547787,
         "narHash": "sha256-wWrHrvqEnrI0XhizNPdutwNyi+P+qvsMovm1ptlR4gY=",
         "owner": "noctalia-dev",
-        "repo": "xdg-desktop-portal-umbriel",
+        "repo": "xdg-desktop-portal-canopy",
         "rev": "79f087598d596ae8a81dff1036d0ab3b5c446584",
         "type": "github"
       },
       "original": {
         "owner": "noctalia-dev",
-        "repo": "xdg-desktop-portal-umbriel",
+        "repo": "xdg-desktop-portal-canopy",
         "type": "github"
       }
     }

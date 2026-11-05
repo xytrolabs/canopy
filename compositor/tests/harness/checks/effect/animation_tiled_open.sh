@@ -3,19 +3,19 @@
 # moving underneath it. Neither a collapsed opening box nor windows_move shader composition may replace that effect.
 set -euo pipefail
 
-readonly IMAGE="$UMBRIEL_RUNTIME_DIR/tiled-open-shader-box.png"
+readonly IMAGE="$CANOPY_RUNTIME_DIR/tiled-open-shader-box.png"
 
-cat > "$UMBRIEL_RUNTIME_DIR/open.glsl" <<'GLSL'
+cat > "$CANOPY_RUNTIME_DIR/open.glsl" <<'GLSL'
 vec4 animation(vec2 uv) {
-    vec4 source = umbriel_sample(uv);
+    vec4 source = canopy_sample(uv);
     return source.b > 0.5 ? vec4(0.0, 1.0, 0.0, 1.0) : vec4(1.0, 0.0, 1.0, 1.0);
 }
 GLSL
-cat > "$UMBRIEL_RUNTIME_DIR/move.glsl" <<'GLSL'
+cat > "$CANOPY_RUNTIME_DIR/move.glsl" <<'GLSL'
 vec4 animation(vec2 uv) { return vec4(1.0, 0.0, 0.0, 1.0); }
 GLSL
 
-cat >> "$UMBRIEL_CONFIG" <<'EOF'
+cat >> "$CANOPY_CONFIG" <<'EOF'
 
 [colors]
 backdrop = "#000000FF"
@@ -53,13 +53,13 @@ duration_ms = 1000
 curve = "linear"
 effect = "windows_move_move"
 EOF
-"$UMBRIEL" msg config-reload > /dev/null
+"$CANOPY" msg config-reload > /dev/null
 
 spawn() {
   local title=$1
-  FILL_COLOR=0xFF0000FF "$UMBRIEL_UNMAP_CLIENT" "$title" 1200 700 > "$UMBRIEL_RUNTIME_DIR/$title.log" 2>&1 &
+  FILL_COLOR=0xFF0000FF "$CANOPY_UNMAP_CLIENT" "$title" 1200 700 > "$CANOPY_RUNTIME_DIR/$title.log" 2>&1 &
   for _ in $(seq 80); do
-    window=$("$UMBRIEL" windows --json | jq -c --arg title "$title" '.[] | select(.title == $title)')
+    window=$("$CANOPY" windows --json | jq -c --arg title "$title" '.[] | select(.title == $title)')
     [[ -n $window ]] && return 0
     sleep 0.025
   done
@@ -68,7 +68,7 @@ spawn() {
 }
 
 red_pixels() {
-  "$UMBRIEL_PIXEL_PROBE" "$IMAGE" count 'r > 0.8 && g < 0.1 && b < 0.1'
+  "$CANOPY_PIXEL_PROBE" "$IMAGE" count 'r > 0.8 && g < 0.1 && b < 0.1'
 }
 
 sample_center() {
@@ -79,7 +79,7 @@ sample_center() {
   x=$(jq -r '.x + 100' <<< "$json")
   y=$(jq -r '.y + 100' <<< "$json")
   grim "$IMAGE"
-  read -r red green blue < <("$UMBRIEL_PIXEL_PROBE" "$IMAGE" mean "8x8+$((x - 4))+$((y - 4))")
+  read -r red green blue < <("$CANOPY_PIXEL_PROBE" "$IMAGE" mean "8x8+$((x - 4))+$((y - 4))")
   if ! ((red < 40 && green > 200 && blue < 40)); then
     echo "$description did not show its windows_in shader over its final slot: $red $green $blue"
     exit 1
@@ -92,24 +92,24 @@ sample_center() {
 }
 
 spawn tiled-shader-first
-"$UMBRIEL" settle
+"$CANOPY" settle
 
 # Animation time only moves by clock-advance: samples land 150 ms and 600 ms into both 1000 ms timelines.
-"$UMBRIEL" clock-freeze
+"$CANOPY" clock-freeze
 spawn tiled-shader-second
 second=$window
-"$UMBRIEL" clock-advance 150
+"$CANOPY" clock-advance 150
 sample_center "second tiled opener" "$second"
-"$UMBRIEL" clock-advance 450
+"$CANOPY" clock-advance 450
 sample_center "second tiled opener" "$second"
-"$UMBRIEL" clock-advance 1000
-"$UMBRIEL" settle
+"$CANOPY" clock-advance 1000
+"$CANOPY" settle
 
 spawn tiled-shader-third
 third=$window
-"$UMBRIEL" clock-advance 150
+"$CANOPY" clock-advance 150
 sample_center "third tiled opener" "$third"
-"$UMBRIEL" clock-advance 450
+"$CANOPY" clock-advance 450
 sample_center "third tiled opener" "$third"
 
 echo "each tiled opener showed its windows_in shader in its final slot while its neighbours reflowed"

@@ -1,26 +1,26 @@
 #!/usr/bin/env bash
 # A burst of maps keeps cascading after the first diagonal reaches the output boundary.
 set -euo pipefail
-source "$(dirname "$UMBRIEL_HARNESS_LIB")/title_bar.sh"
-cat >>"$UMBRIEL_CONFIG" <<'CONFIG'
+source "$(dirname "$CANOPY_HARNESS_LIB")/title_bar.sh"
+cat >>"$CANOPY_CONFIG" <<'CONFIG'
 [layout]
 mode = "stacking"
 [appearance.title_bar]
 mode = "forced"
 height = 28
 CONFIG
-"$UMBRIEL" msg config-reload >/dev/null
+"$CANOPY" msg config-reload >/dev/null
 for i in $(seq 20); do
-  "$UMBRIEL_FRACTIONAL_CLIENT" "burst-$i" 480 300 >"$UMBRIEL_RUNTIME_DIR/burst-$i.log" 2>&1 &
+  "$CANOPY_FRACTIONAL_CLIENT" "burst-$i" 480 300 >"$CANOPY_RUNTIME_DIR/burst-$i.log" 2>&1 &
 done
 for _ in $(seq 160); do
-  count=$("$UMBRIEL" windows --json | jq '[.[] | select(.title | startswith("burst-"))] | length')
+  count=$("$CANOPY" windows --json | jq '[.[] | select(.title | startswith("burst-"))] | length')
   [[ $count == 20 ]] && break
   sleep 0.025
 done
 [[ $count == 20 ]]
-"$UMBRIEL" settle >/dev/null
-windows=$("$UMBRIEL" windows --json)
+"$CANOPY" settle >/dev/null
+windows=$("$CANOPY" windows --json)
 unique=$(jq '[.[] | select(.title | startswith("burst-")) | [.x, .y]] | unique | length' <<<"$windows")
 [[ $unique == 20 ]] || {
   echo "20 rapid maps produced only $unique distinct origins: $windows"

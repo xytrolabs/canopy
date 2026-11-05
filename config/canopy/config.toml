@@ -200,12 +200,14 @@ opacity      = 0.88
 [dock]
 enabled             = true
 position            = "bottom"
-icon_size           = 44
+icon_size           = 48
 # Room between the icons and the pill's own edge: without it the first and last
-# icon sit on the rounded end and the row looks like it is falling out.
+# icon sit on the rounded end and the row looks like it is falling out. Kept
+# tight on the cross axis so the pill hugs the icons instead of padding them
+# into a tall box (thickness is icon + 2x6 cell + 2x this).
 main_axis_padding   = 20
-cross_axis_padding  = 14
-item_spacing        = 16
+cross_axis_padding  = 8
+item_spacing        = 14
 background_opacity  = 0.80
 compositor_blur     = true
 radius              = 12
@@ -227,7 +229,7 @@ smart_auto_hide     = false
 reserve_space       = false
 layer               = "top"
 active_scale        = 1.0
-inactive_scale      = 0.92
+inactive_scale      = 0.95
 magnification       = false
 active_opacity      = 1.0
 inactive_opacity    = 0.92

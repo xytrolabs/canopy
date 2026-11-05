@@ -1,6 +1,6 @@
 # Overview rendering
 
-This note records rendering and interaction details that are too specific for the main configuration guide but remain part of Umbriel's observable behavior.
+This note records rendering and interaction details that are too specific for the main configuration guide but remain part of Canopy's observable behavior.
 
 ## Live content
 
@@ -40,7 +40,7 @@ Unmap is the one transition that cannot remain live because the client buffer ma
 
 Cards carry the same inner border, outer border, and corner radius as their windows. These values scale with the card. Every surface of a card rounds against the card's content box, the rule live windows use, so a client that draws its corners from a subsurface keeps them rounded in the thumbnail.
 
-Persistent border and window shaders, including inner border overlays, receive dimensions and corner radii before overview zoom. Their pixel-sized details and border light spread therefore shrink with the card. `umbriel_scale` includes both output scale and overview zoom, keeping rounded masks one buffer pixel soft. Close snapshots retain the card's effect scale.
+Persistent border and window shaders, including inner border overlays, receive dimensions and corner radii before overview zoom. Their pixel-sized details and border light spread therefore shrink with the card. `canopy_scale` includes both output scale and overview zoom, keeping rounded masks one buffer pixel soft. Close snapshots retain the card's effect scale.
 
 Each output's overview tree carries a `wlr_scene_tree_set_clip` of that output's logical bounds, the same primitive windows use. It is the only clip a card is subject to: previews step along the output's workspace axis and a strip pushes its cards past the preview across that axis on purpose, so cards, border rings, and workspace backgrounds are contained by that one output clip and none of them trims its own geometry. The dragged card is reparented out to the unclipped overview root so it can span outputs, exactly as a dragged window does.
 

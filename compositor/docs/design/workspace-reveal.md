@@ -8,7 +8,7 @@ The effect registry resolves the workspace preset and supplies time uniforms. `b
 
 Each participating root carries its workspace isolation identity and the transition parameters. At output composition, the capture stack renders each complete scene, filtering out the other workspace while keeping shared strata in their native stacking positions. One shader combines the two full-output textures. Capture neither moves nor enables scene nodes.
 
-`umbriel_sample` reads the outgoing scene and `umbriel_sample_incoming` reads the incoming scene. UVs cover the logical output. `umbriel_workspace_axis` is the signed navigation axis. Progress, reversal, cancellation and the transition seed come from native navigation.
+`canopy_sample` reads the outgoing scene and `canopy_sample_incoming` reads the incoming scene. UVs cover the logical output. `canopy_workspace_axis` is the signed navigation axis. Progress, reversal, cancellation and the transition seed come from native navigation.
 
 ## Blur and capture
 

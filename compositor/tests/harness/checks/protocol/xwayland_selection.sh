@@ -4,13 +4,13 @@
 # paste-time retry. Background reads remain denied and X11 owners remain intact.
 set -euo pipefail
 
-source "$UMBRIEL_HARNESS_LIB"
+source "$CANOPY_HARNESS_LIB"
 
-readonly X_CLIENT="${UMBRIEL_XWAYLAND_SELECTION_CLIENT:-./build-debug/tests/xwayland-selection-client}"
-readonly NATIVE_CLIENT="${UMBRIEL_SEAT_LOG_CLIENT:-./build-debug/tests/seat-log-client}"
-readonly X_LOG="$UMBRIEL_RUNTIME_DIR/xwayland-selection.log"
-readonly NATIVE_LOG="$UMBRIEL_RUNTIME_DIR/selection-native.log"
-readonly X_CONTROL="$UMBRIEL_RUNTIME_DIR/xwayland-selection-control"
+readonly X_CLIENT="${CANOPY_XWAYLAND_SELECTION_CLIENT:-./build-debug/tests/xwayland-selection-client}"
+readonly NATIVE_CLIENT="${CANOPY_SEAT_LOG_CLIENT:-./build-debug/tests/seat-log-client}"
+readonly X_LOG="$CANOPY_RUNTIME_DIR/xwayland-selection.log"
+readonly NATIVE_LOG="$CANOPY_RUNTIME_DIR/selection-native.log"
+readonly X_CONTROL="$CANOPY_RUNTIME_DIR/xwayland-selection-control"
 readonly X_TITLE=xwayland-selection
 readonly NATIVE_TITLE=selection-native
 
@@ -25,41 +25,41 @@ for command in wl-copy wl-paste; do
   fi
 done
 
-cat >> "$UMBRIEL_CONFIG" <<'EOF'
+cat >> "$CANOPY_CONFIG" <<'EOF'
 
 [animation]
 enabled = false
 EOF
-"$UMBRIEL" msg config-reload > /dev/null
+"$CANOPY" msg config-reload > /dev/null
 
 wait_for_window() {
   local title=$1
   for _ in $(seq 80); do
-    if [[ $("$UMBRIEL" windows --json | jq -r --arg title "$title" \
+    if [[ $("$CANOPY" windows --json | jq -r --arg title "$title" \
       '[.[] | select(.title == $title)] | length') == 1 ]]; then
       return 0
     fi
     sleep 0.02
   done
-  echo "$title did not map: $("$UMBRIEL" windows --json)"
+  echo "$title did not map: $("$CANOPY" windows --json)"
   return 1
 }
 
 window_id() {
-  "$UMBRIEL" windows --json | jq -r --arg title "$1" '.[] | select(.title == $title) | .id'
+  "$CANOPY" windows --json | jq -r --arg title "$1" '.[] | select(.title == $title) | .id'
 }
 
 focus_window() {
   local id=$1
-  "$UMBRIEL" msg window-focus "$id" > /dev/null
+  "$CANOPY" msg window-focus "$id" > /dev/null
   for _ in $(seq 60); do
-    if [[ $("$UMBRIEL" windows --json | jq -r --arg id "$id" \
+    if [[ $("$CANOPY" windows --json | jq -r --arg id "$id" \
       '.[] | select(.id == $id) | (.focused and .active)') == true ]]; then
       return 0
     fi
     sleep 0.02
   done
-  echo "$id did not become focused and active: $("$UMBRIEL" windows --json)"
+  echo "$id did not become focused and active: $("$CANOPY" windows --json)"
   return 1
 }
 
@@ -107,7 +107,7 @@ start_native_source() {
   local -a args=(--foreground --type 'text/plain;charset=utf-8')
   [[ $name == primary ]] && args+=(--primary)
   source_sequence=$((source_sequence + 1))
-  local file="$UMBRIEL_RUNTIME_DIR/selection-source-$source_sequence"
+  local file="$CANOPY_RUNTIME_DIR/selection-source-$source_sequence"
   printf '%s' "$payload" > "$file"
   wl-copy "${args[@]}" < "$file" > "$file.log" 2>&1 &
   native_source_pid[$name]=$!
@@ -167,13 +167,13 @@ read_background_pair() {
 await_fullscreen() {
   local expected=$1
   for _ in $(seq 60); do
-    if [[ $("$UMBRIEL" tearing --json | jq -r --arg title "$X_TITLE" \
+    if [[ $("$CANOPY" tearing --json | jq -r --arg title "$X_TITLE" \
       '.surfaces[] | select(.title == $title) | .fullscreen') == "$expected" ]]; then
       return 0
     fi
     sleep 0.02
   done
-  echo "X11 fullscreen did not become $expected: $("$UMBRIEL" tearing --json)"
+  echo "X11 fullscreen did not become $expected: $("$CANOPY" tearing --json)"
   return 1
 }
 

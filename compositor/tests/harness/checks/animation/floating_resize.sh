@@ -6,13 +6,13 @@
 set -euo pipefail
 
 readonly TITLE=floating-resize-animation
-readonly CLIENT="${UMBRIEL_FRACTIONAL_CLIENT:-./build-debug/fractional-client}"
-readonly CLIENT_LOG="$UMBRIEL_RUNTIME_DIR/floating-resize-animation.log"
+readonly CLIENT="${CANOPY_FRACTIONAL_CLIENT:-./build-debug/fractional-client}"
+readonly CLIENT_LOG="$CANOPY_RUNTIME_DIR/floating-resize-animation.log"
 
 # 1000 wide at x=-900 keeps the 75px minimum on screen. Shrinking to 0.2 of the
 # 1280 output (256px) tightens that minimum to 64px, so the origin has to travel
 # to -192 and the visible sliver shrinks from 100px to 64px.
-cat >> "$UMBRIEL_CONFIG" <<'EOF'
+cat >> "$CANOPY_CONFIG" <<'EOF'
 
 [animation]
 duration_ms = 2000
@@ -35,10 +35,10 @@ default_floating = true
 default_floating_size_px = { width = 1000, height = 300 }
 default_position = { x = -900, y = 200, anchor = "top_left" }
 EOF
-"$UMBRIEL" msg config-reload > /dev/null
+"$CANOPY" msg config-reload > /dev/null
 
 ipc_box() {
-  "$UMBRIEL" windows --json \
+  "$CANOPY" windows --json \
     | jq -r --arg title "$TITLE" '.[] | select(.title == $title) | "\(.w)x\(.h)+\(.x)+\(.y)"'
 }
 
@@ -54,14 +54,14 @@ wait_for_box() {
 }
 
 capture_box() {
-  local image="$UMBRIEL_RUNTIME_DIR/$1.png"
+  local image="$CANOPY_RUNTIME_DIR/$1.png"
   grim "$image"
-  "$UMBRIEL_PIXEL_PROBE" "$image" bbox 'r > 0.01 || g > 0.01 || b > 0.01'
+  "$CANOPY_PIXEL_PROBE" "$image" bbox 'r > 0.01 || g > 0.01 || b > 0.01'
 }
 
 "$CLIENT" "$TITLE" 1000 300 > "$CLIENT_LOG" 2>&1 &
 wait_for_box 1000x300+-900+200
-"$UMBRIEL" settle
+"$CANOPY" settle
 
 read -r before_x before_y before_w before_h < <(capture_box before)
 if (( before_x != 0 || before_y != 200 || before_w != 100 || before_h != 300 )); then
@@ -70,11 +70,11 @@ if (( before_x != 0 || before_y != 200 || before_w != 100 || before_h != 300 ));
 fi
 
 # Animation time only moves by clock-advance: samples land at 250 ms and 1250 ms of the 2000 ms linear timeline.
-"$UMBRIEL" clock-freeze
-"$UMBRIEL" msg window-set-primary-extent 0.2 > /dev/null
-"$UMBRIEL" clock-advance 250
+"$CANOPY" clock-freeze
+"$CANOPY" msg window-set-primary-extent 0.2 > /dev/null
+"$CANOPY" clock-advance 250
 read -r first_x first_y first_w first_h < <(capture_box shrink-250ms)
-"$UMBRIEL" clock-advance 1000
+"$CANOPY" clock-advance 1000
 read -r second_x second_y second_w second_h < <(capture_box shrink-1250ms)
 
 # The sliver stays between its start and end widths at every sample. An origin
@@ -89,8 +89,8 @@ if ! (( first_x == 0 && second_x == 0
   exit 1
 fi
 
-"$UMBRIEL" clock-advance 2000
-"$UMBRIEL" settle
+"$CANOPY" clock-advance 2000
+"$CANOPY" settle
 wait_for_box 256x300+-192+200
 read -r after_x after_y after_w after_h < <(capture_box after)
 if (( after_x != 0 || after_y != 200 || after_w != 64 || after_h != 300 )); then

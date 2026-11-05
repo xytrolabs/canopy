@@ -21,7 +21,7 @@
 #include <variant>
 #include <vector>
 
-namespace umbriel {
+namespace canopy {
 
   struct ConfigReloadResult;
 
@@ -143,7 +143,7 @@ namespace umbriel {
     bool operator==(const WorkspaceConfig&) const = default;
   };
 
-  // A user-defined scratchpad. An empty list means that Umbriel provides the
+  // A user-defined scratchpad. An empty list means that Canopy provides the
   // implicit scratchpad named "default" instead.
   struct ScratchpadConfig {
     std::string name;
@@ -154,7 +154,10 @@ namespace umbriel {
 
   // Fully resolved layout config. Owned by each Workspace.
   struct ResolvedLayoutConfig {
-    LayoutMode mode = LayoutMode::Scrolling;
+    // Canopy is a traditional desktop: windows float over each other and the
+    // user places them. Tiling modes stay available by keybind or by setting
+    // layout.mode.
+    LayoutMode mode = LayoutMode::Stacking;
     int gap = 8;
     LayoutStruts struts;
     std::vector<double> extentPresets{1.0 / 3, 0.5, 2.0 / 3};
@@ -657,8 +660,8 @@ namespace umbriel {
   };
 
   struct Config {
-    // Every color Umbriel draws, each an independent literal. `background`
-    // through `error` are the palette Umbriel's own panels paint with: the
+    // Every color Canopy draws, each an independent literal. `background`
+    // through `error` are the palette Canopy's own panels paint with: the
     // cheatsheet, the diagnostics banner, the quit confirmation, and overview
     // badge text.
     struct Colors {
@@ -1006,7 +1009,7 @@ namespace umbriel {
     } hotCorners;
 
     struct Layout {
-      LayoutMode mode = LayoutMode::Scrolling;
+      LayoutMode mode = LayoutMode::Stacking;
       int gap = 8;
       LayoutStruts struts;
       std::vector<double> extentPresets{1.0 / 3, 0.5, 2.0 / 3};
@@ -1292,7 +1295,7 @@ namespace umbriel {
     bool operator==(const Config&) const = default;
   };
 
-  // Palette order shaders see through umbriel_palette_at: accent_primary, accent_secondary, warning, error.
+  // Palette order shaders see through canopy_palette_at: accent_primary, accent_secondary, warning, error.
   inline std::array<std::array<float, 4>, 4> effectPalette(const Config::Colors& colors) {
     return {colors.accentPrimary, colors.accentSecondary, colors.warning, colors.error};
   }
@@ -1306,4 +1309,4 @@ namespace umbriel {
   const std::filesystem::path& configRootPath();
   bool configFileMissing();
   bool configHasMissingIncludes();
-} // namespace umbriel
+} // namespace canopy

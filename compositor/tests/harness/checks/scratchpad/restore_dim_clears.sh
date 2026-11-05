@@ -3,15 +3,15 @@
 # backdrop dim to 0 and refresh the dim/blur nodes, as hiding it through scratchpad-toggle does.
 set -euo pipefail
 
-readonly BEFORE="$UMBRIEL_RUNTIME_DIR/scratchpad-restore-before.png"
-readonly AFTER="$UMBRIEL_RUNTIME_DIR/scratchpad-restore-after.png"
+readonly BEFORE="$CANOPY_RUNTIME_DIR/scratchpad-restore-before.png"
+readonly AFTER="$CANOPY_RUNTIME_DIR/scratchpad-restore-after.png"
 
 sample_corner() {
   # Top-left 20x20, well outside where a centered foot window lands on a 1280x720 output.
-  "$UMBRIEL_PIXEL_PROBE" "$1" mean 20x20+5+5 | awk '{print $1}'
+  "$CANOPY_PIXEL_PROBE" "$1" mean 20x20+5+5 | awk '{print $1}'
 }
 
-cat >> "$UMBRIEL_CONFIG" <<'EOF'
+cat >> "$CANOPY_CONFIG" <<'EOF'
 
 [colors]
 backdrop = "#FFFFFFFF"
@@ -31,12 +31,12 @@ default_floating_size_px = { width = 300, height = 200 }
 [window_rule.match]
 title = "^scratch-"
 EOF
-"$UMBRIEL" msg config-reload > /dev/null
+"$CANOPY" msg config-reload > /dev/null
 
 wait_for_count() {
   local expected=$1 count=
   for _ in $(seq 40); do
-    count=$("$UMBRIEL" windows --json | jq 'length')
+    count=$("$CANOPY" windows --json | jq 'length')
     [[ $count == "$expected" ]] && return 0
     sleep 0.1
   done
@@ -46,15 +46,15 @@ wait_for_count() {
 
 foot --title=scratch-a sh -c 'sleep 120' > /dev/null 2>&1 &
 wait_for_count 1
-"$UMBRIEL" msg window-move-to-scratchpad > /dev/null
+"$CANOPY" msg window-move-to-scratchpad > /dev/null
 
 foot --title=scratch-b sh -c 'sleep 120' > /dev/null 2>&1 &
 wait_for_count 2
-"$UMBRIEL" msg window-move-to-scratchpad > /dev/null
+"$CANOPY" msg window-move-to-scratchpad > /dev/null
 
 # Show both scratchpad windows: the backdrop dims.
-"$UMBRIEL" msg scratchpad-toggle > /dev/null
-"$UMBRIEL" settle
+"$CANOPY" msg scratchpad-toggle > /dev/null
+"$CANOPY" settle
 grim "$BEFORE"
 before=$(sample_corner "$BEFORE")
 if (( before > 200 )); then
@@ -64,8 +64,8 @@ fi
 
 # Restore the first (currently scratchpad-focused) window. One scratchpad window remains, so the
 # dim must stay.
-"$UMBRIEL" msg window-toggle-scratchpad > /dev/null
-"$UMBRIEL" settle
+"$CANOPY" msg window-toggle-scratchpad > /dev/null
+"$CANOPY" settle
 if ! wait_for_count 2; then
   echo "restoring the first window changed the window count unexpectedly"
   exit 1
@@ -73,10 +73,10 @@ fi
 
 # Focus the remaining scratchpad window, then restore it too. The scratchpad is now empty on this
 # output, so the dim must clear.
-"$UMBRIEL" msg scratchpad-focus-next > /dev/null
+"$CANOPY" msg scratchpad-focus-next > /dev/null
 sleep 0.1
-"$UMBRIEL" msg window-toggle-scratchpad > /dev/null
-"$UMBRIEL" settle
+"$CANOPY" msg window-toggle-scratchpad > /dev/null
+"$CANOPY" settle
 
 grim "$AFTER"
 after=$(sample_corner "$AFTER")

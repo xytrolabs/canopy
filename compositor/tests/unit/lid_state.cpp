@@ -2,8 +2,8 @@
 
 #include "check.h"
 
-using umbriel::LidState;
-using umbriel::LidStateCoordinator;
+using canopy::LidState;
+using canopy::LidStateCoordinator;
 
 namespace {
 
@@ -16,7 +16,7 @@ namespace {
 
 } // namespace
 
-UMBRIEL_TEST(initialClosedWaitsForReadinessAndSuppressesOpen) {
+CANOPY_TEST(initialClosedWaitsForReadinessAndSuppressesOpen) {
   LidStateCoordinator coordinator;
   const auto source = coordinator.addSource(LidState::Open);
   coordinator.updateSource(source, LidState::Closed);
@@ -27,7 +27,7 @@ UMBRIEL_TEST(initialClosedWaitsForReadinessAndSuppressesOpen) {
   CHECK(!coordinator.takeTransition().has_value());
 }
 
-UMBRIEL_TEST(initialOpenPublishesAfterReadiness) {
+CANOPY_TEST(initialOpenPublishesAfterReadiness) {
   LidStateCoordinator coordinator;
   const auto source = coordinator.addSource(LidState::Open);
   (void)source;
@@ -37,7 +37,7 @@ UMBRIEL_TEST(initialOpenPublishesAfterReadiness) {
   checkTransition(coordinator.takeTransition(), LidState::Open);
 }
 
-UMBRIEL_TEST(runtimeTransitionsPublishExactlyOnce) {
+CANOPY_TEST(runtimeTransitionsPublishExactlyOnce) {
   LidStateCoordinator coordinator;
   const auto source = coordinator.addSource(LidState::Open);
   coordinator.setReady();
@@ -54,7 +54,7 @@ UMBRIEL_TEST(runtimeTransitionsPublishExactlyOnce) {
   CHECK(!coordinator.takeTransition().has_value());
 }
 
-UMBRIEL_TEST(zeroSourceIntervalPreservesPublishedStateAcrossResume) {
+CANOPY_TEST(zeroSourceIntervalPreservesPublishedStateAcrossResume) {
   LidStateCoordinator coordinator;
   const auto first = coordinator.addSource(LidState::Closed);
   coordinator.setReady();
@@ -74,7 +74,7 @@ UMBRIEL_TEST(zeroSourceIntervalPreservesPublishedStateAcrossResume) {
   checkTransition(coordinator.takeTransition(), LidState::Open);
 }
 
-UMBRIEL_TEST(multipleSourcesRemainClosedUntilEveryLidOpens) {
+CANOPY_TEST(multipleSourcesRemainClosedUntilEveryLidOpens) {
   LidStateCoordinator coordinator;
   const auto first = coordinator.addSource(LidState::Open);
   const auto second = coordinator.addSource(LidState::Open);
@@ -91,7 +91,7 @@ UMBRIEL_TEST(multipleSourcesRemainClosedUntilEveryLidOpens) {
   checkTransition(coordinator.takeTransition(), LidState::Open);
 }
 
-UMBRIEL_TEST(preReadySourcesCoalesceToOneAggregateTransition) {
+CANOPY_TEST(preReadySourcesCoalesceToOneAggregateTransition) {
   LidStateCoordinator coordinator;
   const auto open = coordinator.addSource(LidState::Open);
   const auto closed = coordinator.addSource(LidState::Closed);

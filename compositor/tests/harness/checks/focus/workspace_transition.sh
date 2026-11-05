@@ -7,8 +7,8 @@ set -euo pipefail
 readonly OUTPUT_W=1280
 readonly OUTPUT_H=720
 readonly BTN_LEFT=272
-readonly POINTER="${UMBRIEL_POINTER_CLIENT:-./build-debug/tests/pointer-client}"
-readonly CLIENT="${UMBRIEL_UNMAP_CLIENT:-./build-debug/tests/unmap-client}"
+readonly POINTER="${CANOPY_POINTER_CLIENT:-./build-debug/tests/pointer-client}"
+readonly CLIENT="${CANOPY_UNMAP_CLIENT:-./build-debug/tests/unmap-client}"
 
 # The wrapper survives only to pin the output dimensions every pointer call needs.
 pointer() {
@@ -22,18 +22,18 @@ spawn_client() {
 wait_for_count() {
   local want=$1
   for _ in $(seq 60); do
-    [[ $("$UMBRIEL" windows --json | jq 'length') -eq $want ]] && return 0
+    [[ $("$CANOPY" windows --json | jq 'length') -eq $want ]] && return 0
     sleep 0.1
   done
-  echo "expected $want windows, got: $("$UMBRIEL" windows --json)"
+  echo "expected $want windows, got: $("$CANOPY" windows --json)"
   return 1
 }
 
 active_title() {
-  "$UMBRIEL" windows --json | jq -r '[.[] | select(.active) | .title] | if length == 1 then .[0] else "none" end'
+  "$CANOPY" windows --json | jq -r '[.[] | select(.active) | .title] | if length == 1 then .[0] else "none" end'
 }
 
-cat >> "$UMBRIEL_CONFIG" <<'EOF'
+cat >> "$CANOPY_CONFIG" <<'EOF'
 
 [animation]
 duration_ms = 1
@@ -45,23 +45,23 @@ follows_mouse = true
 [keybinds]
 "Mod+WheelDown" = "workspace-next"
 EOF
-"$UMBRIEL" msg config-reload > /dev/null
+"$CANOPY" msg config-reload > /dev/null
 
 spawn_client "transition-first"
 wait_for_count 1
-"$UMBRIEL" msg workspace-switch 2 > /dev/null
-"$UMBRIEL" settle
+"$CANOPY" msg workspace-switch 2 > /dev/null
+"$CANOPY" settle
 spawn_client "transition-second"
 wait_for_count 2
-"$UMBRIEL" msg workspace-switch 1 > /dev/null
-"$UMBRIEL" settle
+"$CANOPY" msg workspace-switch 1 > /dev/null
+"$CANOPY" settle
 
 # Slow only the transition under test. The setup switches stay fast so this check does not spend twenty seconds waiting
 # for animations that are unrelated to the assertion.
-sed -i 's/duration_ms = 1/duration_ms = 10000/' "$UMBRIEL_CONFIG"
-"$UMBRIEL" msg config-reload > /dev/null
+sed -i 's/duration_ms = 1/duration_ms = 10000/' "$CANOPY_CONFIG"
+"$CANOPY" msg config-reload > /dev/null
 
-windows=$("$UMBRIEL" windows --json)
+windows=$("$CANOPY" windows --json)
 first_x=$(jq -r '.[] | select(.title == "transition-first") | (.x + .w / 2 | round)' <<< "$windows")
 first_y=$(jq -r '.[] | select(.title == "transition-first") | (.y + .h / 2 | round)' <<< "$windows")
 pointer move "$first_x" "$first_y"
@@ -70,7 +70,7 @@ pointer move "$first_x" "$first_y"
 # cannot masquerade as the transition hit-test failure.
 pointer mod logo notch 1 mod none
 if [[ $(active_title) != transition-second ]]; then
-  echo "Mod+WheelDown did not focus workspace 2: $("$UMBRIEL" windows --json)"
+  echo "Mod+WheelDown did not focus workspace 2: $("$CANOPY" windows --json)"
   exit 1
 fi
 
@@ -78,7 +78,7 @@ fi
 # interactive and switch back to workspace 1.
 pointer click "$BTN_LEFT"
 if [[ $(active_title) != transition-second ]]; then
-  echo "outgoing transition view stole focus after a click: $("$UMBRIEL" windows --json)"
+  echo "outgoing transition view stole focus after a click: $("$CANOPY" windows --json)"
   exit 1
 fi
 
@@ -87,47 +87,47 @@ fi
 # every presentation path has to carry both slide offset components.
 # ---------------------------------------------------------------------------
 
-readonly SHOT="$UMBRIEL_RUNTIME_DIR/transition-axis.png"
+readonly SHOT="$CANOPY_RUNTIME_DIR/transition-axis.png"
 
 spawn_sized() {
   "$CLIENT" "$1" "$2" "$3" > /dev/null 2>&1 &
 }
 
 active_workspace() {
-  "$UMBRIEL" workspaces --json | jq -r '[.[] | select(.active) | .name] | if length == 1 then .[0] else "none" end'
+  "$CANOPY" workspaces --json | jq -r '[.[] | select(.active) | .name] | if length == 1 then .[0] else "none" end'
 }
 
 # Tiled windows report their tile origin, floating ones their own position, and both report the client's own buffer
 # size. The harness client keeps the size it was spawned with, so every window below is spawned smaller than the box
 # it is given and its reported box is exactly what it paints.
 box_of() {
-  "$UMBRIEL" windows --json | jq -r --arg t "$1" '.[] | select(.title == $t) | "\(.x) \(.y) \(.w) \(.h)"'
+  "$CANOPY" windows --json | jq -r --arg t "$1" '.[] | select(.title == $t) | "\(.x) \(.y) \(.w) \(.h)"'
 }
 
 id_of() {
-  "$UMBRIEL" windows --json | jq -r --arg t "$1" '.[] | select(.title == $t) | .id'
+  "$CANOPY" windows --json | jq -r --arg t "$1" '.[] | select(.title == $t) | .id'
 }
 
 # Mean blue of a 20x20 patch. The harness client paints 0x5577AA, the backdrop is black, so a patch is either client
 # content (blue well above 100) or uncovered output (blue at 0).
 sample_blue() {
-  "$UMBRIEL_PIXEL_PROBE" "$SHOT" mean "20x20+$1+$2" | awk '{ print $3 }'
+  "$CANOPY_PIXEL_PROBE" "$SHOT" mean "20x20+$1+$2" | awk '{ print $3 }'
 }
 
 # Brightest blue inside a crop geometry: any client pixel in the region answers well above 100, an empty region
 # answers 0. A region tolerates the eased slide passing through it instead of pinning one displacement.
 region_blue() {
-  "$UMBRIEL_PIXEL_PROBE" "$SHOT" max "$1" | awk '{ print $3 }'
+  "$CANOPY_PIXEL_PROBE" "$SHOT" max "$1" | awk '{ print $3 }'
 }
 
 fast_animations() {
-  sed -i 's/^duration_ms = 10000$/duration_ms = 1/' "$UMBRIEL_CONFIG"
-  "$UMBRIEL" msg config-reload > /dev/null
+  sed -i 's/^duration_ms = 10000$/duration_ms = 1/' "$CANOPY_CONFIG"
+  "$CANOPY" msg config-reload > /dev/null
 }
 
 slow_animations() {
-  sed -i 's/^duration_ms = 1$/duration_ms = 10000/' "$UMBRIEL_CONFIG"
-  "$UMBRIEL" msg config-reload > /dev/null
+  sed -i 's/^duration_ms = 1$/duration_ms = 10000/' "$CANOPY_CONFIG"
+  "$CANOPY" msg config-reload > /dev/null
 }
 
 # A workspace switch finishes the live slide before it starts its own, so a pass through the neighbouring workspace
@@ -136,12 +136,12 @@ settle_to() {
   local target=$1 via=3
   [[ $target == 3 ]] && via=4
   fast_animations
-  "$UMBRIEL" msg workspace-switch "$via" > /dev/null
-  "$UMBRIEL" msg workspace-switch "$target" > /dev/null
-  "$UMBRIEL" settle
+  "$CANOPY" msg workspace-switch "$via" > /dev/null
+  "$CANOPY" msg workspace-switch "$target" > /dev/null
+  "$CANOPY" settle
 }
 
-cat >> "$UMBRIEL_CONFIG" <<'EOF'
+cat >> "$CANOPY_CONFIG" <<'EOF'
 
 [colors]
 backdrop = "#000000FF"
@@ -173,18 +173,18 @@ EOF
 # This reload lands while the vertical slide above is still running: an axis change settles it and keeps the workspace
 # the switch already committed to.
 fast_animations
-"$UMBRIEL" settle
+"$CANOPY" settle
 if [[ $(active_workspace) != 2 ]]; then
-  echo "the axis reload dropped the committed workspace: $("$UMBRIEL" workspaces --json)"
+  echo "the axis reload dropped the committed workspace: $("$CANOPY" workspaces --json)"
   exit 1
 fi
 
 # Horizontal workspaces scroll vertically, so a tiled window sits at the strip's left gap, centred on the scrolling
 # axis. Its rendered pixels are exactly the box the IPC reports.
-"$UMBRIEL" msg workspace-switch 3 > /dev/null
+"$CANOPY" msg workspace-switch 3 > /dev/null
 spawn_sized axis-tiled 600 300
 wait_for_count 3
-"$UMBRIEL" settle
+"$CANOPY" settle
 read -r tiled_x tiled_y tiled_w tiled_h <<< "$(box_of axis-tiled)"
 if ((tiled_y < 60 || tiled_w < 200 || tiled_h < 100)); then
   echo "the vertical strip did not leave room around its tile: $(box_of axis-tiled)"
@@ -207,9 +207,9 @@ fi
 # Each slow slide below runs on a frozen animation clock and is sampled 500 ms into its 10000 ms timeline; the clock
 # resumes before the fast switches that bring every workspace back to rest.
 slow_animations
-"$UMBRIEL" clock-freeze
-"$UMBRIEL" msg workspace-switch 4 > /dev/null
-"$UMBRIEL" clock-advance 500
+"$CANOPY" clock-freeze
+"$CANOPY" msg workspace-switch 4 > /dev/null
+"$CANOPY" clock-advance 500
 grim "$SHOT"
 slide_near=$(sample_blue "$tile_near" "$tile_row")
 slide_far=$(sample_blue "$tile_far" "$tile_row")
@@ -232,21 +232,21 @@ fi
 pointer move "$tile_near" "$tile_row"
 pointer click "$BTN_LEFT"
 if [[ $(active_workspace) != 4 ]]; then
-  echo "the outgoing horizontal transition view stole its workspace back: $("$UMBRIEL" workspaces --json)"
+  echo "the outgoing horizontal transition view stole its workspace back: $("$CANOPY" workspaces --json)"
   exit 1
 fi
 
 # Floating content travels with its workspace, a pinned window never does.
-"$UMBRIEL" clock-resume
+"$CANOPY" clock-resume
 settle_to 4
 spawn_sized axis-float 200 200
 wait_for_count 4
 spawn_sized axis-pinned 200 200
 wait_for_count 5
-"$UMBRIEL" settle
-"$UMBRIEL" msg window-focus-warp "$(id_of axis-pinned)" > /dev/null
-"$UMBRIEL" msg window-toggle-pinned > /dev/null
-"$UMBRIEL" settle
+"$CANOPY" settle
+"$CANOPY" msg window-focus-warp "$(id_of axis-pinned)" > /dev/null
+"$CANOPY" msg window-toggle-pinned > /dev/null
+"$CANOPY" settle
 read -r float_x float_y float_w float_h <<< "$(box_of axis-float)"
 read -r pin_x pin_y pin_w _ <<< "$(box_of axis-pinned)"
 float_inside_y=$((float_y + 60))
@@ -270,9 +270,9 @@ fi
 
 # Backwards along the axis: workspace 3 is left of workspace 4, so its content leaves to the right.
 slow_animations
-"$UMBRIEL" clock-freeze
-"$UMBRIEL" msg workspace-switch 3 > /dev/null
-"$UMBRIEL" clock-advance 500
+"$CANOPY" clock-freeze
+"$CANOPY" msg workspace-switch 3 > /dev/null
+"$CANOPY" clock-advance 500
 grim "$SHOT"
 slide_float_right=$(sample_blue "$float_right" "$float_inside_y")
 slide_pin_inside=$(sample_blue "$pin_x" "$pin_inside")
@@ -291,14 +291,14 @@ if ((slide_pin_right > 10)); then
 fi
 
 # A fullscreen window covers its output exactly, so its own right edge uncovers as it travels.
-"$UMBRIEL" clock-resume
+"$CANOPY" clock-resume
 settle_to 3
 spawn_sized axis-fullscreen "$OUTPUT_W" "$OUTPUT_H"
 wait_for_count 6
-"$UMBRIEL" settle
-"$UMBRIEL" msg window-focus-warp "$(id_of axis-fullscreen)" > /dev/null
-"$UMBRIEL" msg window-toggle-fullscreen > /dev/null
-"$UMBRIEL" settle
+"$CANOPY" settle
+"$CANOPY" msg window-focus-warp "$(id_of axis-fullscreen)" > /dev/null
+"$CANOPY" msg window-toggle-fullscreen > /dev/null
+"$CANOPY" settle
 grim "$SHOT"
 rest_full=$(sample_blue 1240 400)
 if ((rest_full < 100)); then
@@ -306,9 +306,9 @@ if ((rest_full < 100)); then
   exit 1
 fi
 slow_animations
-"$UMBRIEL" clock-freeze
-"$UMBRIEL" msg workspace-switch 4 > /dev/null
-"$UMBRIEL" clock-advance 500
+"$CANOPY" clock-freeze
+"$CANOPY" msg workspace-switch 4 > /dev/null
+"$CANOPY" clock-advance 500
 grim "$SHOT"
 slide_full_left=$(sample_blue 20 400)
 slide_full_right=$(sample_blue 1240 400)
@@ -320,23 +320,23 @@ if ((slide_full_left < 100)); then
   echo "the outgoing fullscreen window left the output instead of sliding: blue=$slide_full_left at x=20"
   exit 1
 fi
-"$UMBRIEL" clock-resume
+"$CANOPY" clock-resume
 settle_to 3
-"$UMBRIEL" msg window-focus-warp "$(id_of axis-fullscreen)" > /dev/null
-"$UMBRIEL" msg window-toggle-fullscreen > /dev/null
-"$UMBRIEL" settle
+"$CANOPY" msg window-focus-warp "$(id_of axis-fullscreen)" > /dev/null
+"$CANOPY" msg window-toggle-fullscreen > /dev/null
+"$CANOPY" settle
 
 # Reloading the axis mid-transition: the committed workspace stays, both offsets are settled to zero, and the next
 # switch travels on the new axis.
 slow_animations
-"$UMBRIEL" clock-freeze
-"$UMBRIEL" msg workspace-switch 4 > /dev/null
-"$UMBRIEL" clock-advance 500
-sed -i 's/^workspace_axis = "horizontal"$/workspace_axis = "vertical"/' "$UMBRIEL_CONFIG"
-"$UMBRIEL" msg config-reload > /dev/null
-"$UMBRIEL" clock-advance 500
+"$CANOPY" clock-freeze
+"$CANOPY" msg workspace-switch 4 > /dev/null
+"$CANOPY" clock-advance 500
+sed -i 's/^workspace_axis = "horizontal"$/workspace_axis = "vertical"/' "$CANOPY_CONFIG"
+"$CANOPY" msg config-reload > /dev/null
+"$CANOPY" clock-advance 500
 if [[ $(active_workspace) != 4 ]]; then
-  echo "the mid-transition axis reload dropped the committed workspace: $("$UMBRIEL" workspaces --json)"
+  echo "the mid-transition axis reload dropped the committed workspace: $("$CANOPY" workspaces --json)"
   exit 1
 fi
 grim "$SHOT"
@@ -360,8 +360,8 @@ if ((settled_below > 10 || settled_above > 10)); then
 fi
 
 # Vertical workspaces again: workspace 3 is above workspace 4, so its content leaves downwards, not sideways.
-"$UMBRIEL" msg workspace-switch 3 > /dev/null
-"$UMBRIEL" clock-advance 800
+"$CANOPY" msg workspace-switch 3 > /dev/null
+"$CANOPY" clock-advance 800
 grim "$SHOT"
 next_below=$(region_blue "$band_below")
 next_right=$(region_blue "$band_right")
@@ -376,17 +376,17 @@ fi
 
 # Settling a live slide follows the layout effect of the reload, not the axis value: a reload that only widens the
 # layout gap has to leave the transition at rest as well.
-"$UMBRIEL" clock-resume
+"$CANOPY" clock-resume
 settle_to 3
 slow_animations
-"$UMBRIEL" clock-freeze
-"$UMBRIEL" msg workspace-switch 4 > /dev/null
-"$UMBRIEL" clock-advance 500
-sed -i 's/^gap = 8$/gap = 24/' "$UMBRIEL_CONFIG"
-"$UMBRIEL" msg config-reload > /dev/null
-"$UMBRIEL" clock-advance 500
+"$CANOPY" clock-freeze
+"$CANOPY" msg workspace-switch 4 > /dev/null
+"$CANOPY" clock-advance 500
+sed -i 's/^gap = 8$/gap = 24/' "$CANOPY_CONFIG"
+"$CANOPY" msg config-reload > /dev/null
+"$CANOPY" clock-advance 500
 if [[ $(active_workspace) != 4 ]]; then
-  echo "the mid-transition gap reload dropped the committed workspace: $("$UMBRIEL" workspaces --json)"
+  echo "the mid-transition gap reload dropped the committed workspace: $("$CANOPY" workspaces --json)"
   exit 1
 fi
 grim "$SHOT"

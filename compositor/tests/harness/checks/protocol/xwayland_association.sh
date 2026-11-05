@@ -4,14 +4,14 @@
 # A first Wayland buffer can commit before the corresponding X11 association.
 # Require the association itself to map it, without a later client repaint.
 set -euo pipefail
-source "$UMBRIEL_HARNESS_LIB"
+source "$CANOPY_HARNESS_LIB"
 
-readonly CLIENT="$UMBRIEL_XWAYLAND_ASSOCIATION_CLIENT"
-readonly PROXY_LOG="$UMBRIEL_XWAYLAND_ASSOCIATION_LOG"
-readonly PROXY_CONTROL="$UMBRIEL_XWAYLAND_ASSOCIATION_CONTROL"
+readonly CLIENT="$CANOPY_XWAYLAND_ASSOCIATION_CLIENT"
+readonly PROXY_LOG="$CANOPY_XWAYLAND_ASSOCIATION_LOG"
+readonly PROXY_CONTROL="$CANOPY_XWAYLAND_ASSOCIATION_CONTROL"
 declare -A CLIENT_FDS=() CLIENT_PIDS=() CLIENT_LOGS=() CLIENT_WINDOWS=()
 
-cat >> "$UMBRIEL_CONFIG" <<'CONFIG'
+cat >> "$CANOPY_CONFIG" <<'CONFIG'
 
 [animation]
 enabled = false
@@ -20,7 +20,7 @@ enabled = false
 match.title = "^xwayland-association-"
 default_floating = true
 CONFIG
-"$UMBRIEL" msg config-reload > /dev/null
+"$CANOPY" msg config-reload > /dev/null
 
 wait_line() {
   local file=$1 pattern=$2 label=$3
@@ -37,8 +37,8 @@ wait_line() {
 
 start_client() {
   local name=$1 width=$2 height=$3 mode=${4:-managed} fd
-  local fifo="$UMBRIEL_RUNTIME_DIR/association-$name.control"
-  CLIENT_LOGS[$name]="$UMBRIEL_RUNTIME_DIR/association-$name.log"
+  local fifo="$CANOPY_RUNTIME_DIR/association-$name.control"
+  CLIENT_LOGS[$name]="$CANOPY_RUNTIME_DIR/association-$name.log"
   mkfifo "$fifo"
   exec {fd}<>"$fifo"
   CLIENT_FDS[$name]=$fd
@@ -74,13 +74,13 @@ expect_view() {
   local name=$1 expected=$2
   for _ in $(seq 100); do
     local count
-    count=$("$UMBRIEL" windows --json | jq --arg title "xwayland-association-$name" \
+    count=$("$CANOPY" windows --json | jq --arg title "xwayland-association-$name" \
       '[.[] | select(.title == $title and .xwayland and .visible)] | length')
     [[ $count == "$expected" ]] && return 0
     sleep 0.02
   done
   echo "$name expected $expected visible Xwayland view(s)"
-  "$UMBRIEL" windows --json
+  "$CANOPY" windows --json
   return 1
 }
 
@@ -117,30 +117,30 @@ delayed_case() {
   # Each unique initial buffer size identifies an applied wl_surface buffer
   # while the X11 association is still withheld. Polling the actual import
   # avoids assuming a fixed delay is sufficient on a loaded machine.
-  wait_line "$UMBRIEL_LOG" "Created GL FBO for buffer ${width}x${height}$" 'first buffer before association'
+  wait_line "$CANOPY_LOG" "Created GL FBO for buffer ${width}x${height}$" 'first buffer before association'
   expect_state "$name" before_association "map_state=2 listed=false stacked=$stacked"
   expect_view "$name" 0
-  before=$(grep -c "mapping buffered X11 window=$window on association" "$UMBRIEL_LOG" || true)
+  before=$(grep -c "mapping buffered X11 window=$window on association" "$CANOPY_LOG" || true)
   printf 'release %s\n' "$window" > "$PROXY_CONTROL"
   wait_line "$PROXY_LOG" "released window=$window events=1$" 'association release'
   expect_state "$name" associated "map_state=2 listed=true stacked=$stacked"
   expect_view "$name" "$view_count"
-  wait_line "$UMBRIEL_LOG" "mapping buffered X11 window=$window on association$" 'buffered association catch-up'
-  after=$(grep -c "mapping buffered X11 window=$window on association" "$UMBRIEL_LOG" || true)
+  wait_line "$CANOPY_LOG" "mapping buffered X11 window=$window on association$" 'buffered association catch-up'
+  after=$(grep -c "mapping buffered X11 window=$window on association" "$CANOPY_LOG" || true)
   if ((after != before + 1)); then
     echo "$name expected one buffered association, got $((after - before))"
     return 1
   fi
   if [[ $mode == unmanaged ]]; then
-    local image="$UMBRIEL_RUNTIME_DIR/association-$name.png" pixel
+    local image="$CANOPY_RUNTIME_DIR/association-$name.png" pixel
     grim -o HEADLESS-1 "$image"
-    pixel=$("$UMBRIEL_PIXEL_PROBE" "$image" pixel 70 70)
+    pixel=$("$CANOPY_PIXEL_PROBE" "$image" pixel 70 70)
     if [[ $pixel != '48 96 144' ]]; then
       echo "$name did not draw its committed buffer: $pixel"
       return 1
     fi
   fi
-  "$UMBRIEL" settle > /dev/null
+  "$CANOPY" settle > /dev/null
   [[ $mode == unmanaged ]] && return 0
 
   # The same managed X window can withdraw and create a new Wayland surface.

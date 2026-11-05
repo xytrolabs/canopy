@@ -11,7 +11,7 @@ readonly OUTPUT_H=720
 readonly BORDER=2
 readonly GAP=8
 readonly BAR=24
-readonly POINTER="${UMBRIEL_POINTER_CLIENT:-./build-debug/tests/pointer-client}"
+readonly POINTER="${CANOPY_POINTER_CLIENT:-./build-debug/tests/pointer-client}"
 
 pointer() {
   "$POINTER" "$OUTPUT_W" "$OUTPUT_H" "$@"
@@ -24,7 +24,7 @@ spawn_client() {
 wait_for_windows() {
   local expected=$1 count=
   for _ in $(seq 60); do
-    count=$("$UMBRIEL" windows --json | jq 'length')
+    count=$("$CANOPY" windows --json | jq 'length')
     [[ $count == "$expected" ]] && return 0
     sleep 0.1
   done
@@ -35,7 +35,7 @@ wait_for_windows() {
 wait_for_shown() {
   local shown=$1 windows=
   for _ in $(seq 50); do
-    windows=$("$UMBRIEL" windows --json)
+    windows=$("$CANOPY" windows --json)
     if jq -e --arg shown "$shown" '
       map(select(.title == $shown and .tabbed and (.tab_hidden | not) and .active)) | length == 1
     ' <<< "$windows" > /dev/null; then
@@ -51,7 +51,7 @@ wait_for_shown() {
 # the tabs' border. tab_gap is 0 here, so the slots split the bar evenly.
 slot_center() {
   local index=$1 count=$2 windows
-  windows=$("$UMBRIEL" windows --json)
+  windows=$("$CANOPY" windows --json)
   jq -r --argjson index "$index" --argjson count "$count" --argjson border "$BORDER" --argjson gap "$GAP" \
     --argjson bar "$BAR" '
     map(select(.tabbed and (.tab_hidden | not)))[0]
@@ -60,7 +60,7 @@ slot_center() {
   ' <<< "$windows"
 }
 
-cat >> "$UMBRIEL_CONFIG" <<'EOF'
+cat >> "$CANOPY_CONFIG" <<'EOF'
 
 [layout.tabs]
 default_display = "tabbed"
@@ -73,7 +73,7 @@ tab_gap = 0
 match.title = "^tab-"
 default_scrolling_column = "tabs"
 EOF
-"$UMBRIEL" msg config-reload > /dev/null
+"$CANOPY" msg config-reload > /dev/null
 
 spawn_client tab-a
 wait_for_windows 1
@@ -81,32 +81,32 @@ spawn_client tab-b
 wait_for_windows 2
 spawn_client tab-c
 wait_for_windows 3
-"$UMBRIEL" settle
+"$CANOPY" settle
 wait_for_shown tab-c
 
 read -r x y <<< "$(slot_center 0 3)"
 pointer move "$x" "$y" click "$BTN_LEFT"
-"$UMBRIEL" settle
+"$CANOPY" settle
 wait_for_shown tab-a
 
 pointer move "$x" "$y" notch 1
-"$UMBRIEL" settle
+"$CANOPY" settle
 wait_for_shown tab-b
 
 read -r x y <<< "$(slot_center 2 3)"
 pointer move "$x" "$y" click "$BTN_MIDDLE"
 wait_for_windows 2
-"$UMBRIEL" settle
-if [[ $("$UMBRIEL" windows --json | jq '[.[] | select(.title == "tab-c")] | length') != 0 ]]; then
-  echo "expected a middle click on its slot to close tab-c: $("$UMBRIEL" windows --json)"
+"$CANOPY" settle
+if [[ $("$CANOPY" windows --json | jq '[.[] | select(.title == "tab-c")] | length') != 0 ]]; then
+  echo "expected a middle click on its slot to close tab-c: $("$CANOPY" windows --json)"
   exit 1
 fi
 
 # Drag tab-b, now the second of two, out past the right end of the strip.
 read -r x y <<< "$(slot_center 1 2)"
 pointer move "$x" "$y" press "$BTN_LEFT" move "$((x + 40))" "$((y + 200))" move 1270 360 release "$BTN_LEFT"
-"$UMBRIEL" settle
-windows=$("$UMBRIEL" windows --json)
+"$CANOPY" settle
+windows=$("$CANOPY" windows --json)
 if ! jq -e '
   [.[] | select(.title == "tab-a")][0] as $a
   | [.[] | select(.title == "tab-b")][0] as $b
@@ -121,27 +121,27 @@ spawn_client tab-d
 wait_for_windows 3
 spawn_client tab-e
 wait_for_windows 4
-"$UMBRIEL" msg window-move-down > /dev/null
-"$UMBRIEL" msg column-toggle-tabbed > /dev/null
-"$UMBRIEL" msg column-focus-last > /dev/null
-"$UMBRIEL" settle
-read -r sx sy <<< "$("$UMBRIEL" windows --json | jq -r '
+"$CANOPY" msg window-move-down > /dev/null
+"$CANOPY" msg column-toggle-tabbed > /dev/null
+"$CANOPY" msg column-focus-last > /dev/null
+"$CANOPY" settle
+read -r sx sy <<< "$("$CANOPY" windows --json | jq -r '
   .[] | select(.title == "tab-b")
   | "\(.x + (.w / 2 | floor)) \(.y - 2 - 8 - 12)"
 ')"
-source "$UMBRIEL_HARNESS_LIB"
-"$UMBRIEL" clock-freeze
+source "$CANOPY_HARNESS_LIB"
+"$CANOPY" clock-freeze
 pointer_hold "$OUTPUT_W" "$OUTPUT_H" move "$sx" "$sy" press "$BTN_LEFT" \
   move "$((sx + 40))" "$((sy + 200))" -- release "$BTN_LEFT"
-"$UMBRIEL" clock-advance 5000
-read -r tx ty <<< "$("$UMBRIEL" windows --json | jq -r '
+"$CANOPY" clock-advance 5000
+read -r tx ty <<< "$("$CANOPY" windows --json | jq -r '
   .[] | select(.title == "tab-e")
   | "\(.x + (.w / 4 | floor)) \(.y - 2 - 8 - 12)"
 ')"
 pointer move "$tx" "$ty"
 pointer_release
-"$UMBRIEL" clock-advance 5000
-windows=$("$UMBRIEL" windows --json)
+"$CANOPY" clock-advance 5000
+windows=$("$CANOPY" windows --json)
 if ! jq -e '
   [.[] | select(.title == "tab-b")][0] as $dropped
   | [.[] | select(.title == "tab-e")][0] as $lower

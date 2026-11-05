@@ -9,7 +9,7 @@ extern "C" {
 #include <wlr/util/box.h>
 }
 
-namespace umbriel {
+namespace canopy {
 
   class Server;
   class View;
@@ -90,4 +90,4 @@ namespace umbriel {
   // when the drag was cancelled, else back home without `view`, showing the tab before it as a closed tab would.
   void landTabGroup(View& view, const LiftedTabGroup& lifted, bool closing);
 
-} // namespace umbriel
+} // namespace canopy

@@ -88,7 +88,7 @@ namespace {
   }
 
   bool createWindowBuffer(State& state) {
-    Buffer buffer = createBuffer(state, state.width, state.height, "umbriel-wayland-cursor-window");
+    Buffer buffer = createBuffer(state, state.width, state.height, "canopy-wayland-cursor-window");
     if (buffer.resource == nullptr) {
       destroyBuffer(buffer);
       return false;
@@ -124,7 +124,7 @@ namespace {
     state.cursorHeight = static_cast<int>(image.height);
     state.cursorHotspotX = static_cast<int>(image.hotspot_x);
     state.cursorHotspotY = static_cast<int>(image.hotspot_y);
-    state.cursorBuffer = createBuffer(state, state.cursorWidth, state.cursorHeight, "umbriel-wayland-cursor-image");
+    state.cursorBuffer = createBuffer(state, state.cursorWidth, state.cursorHeight, "canopy-wayland-cursor-image");
     if (state.cursorBuffer.resource == nullptr) {
       destroyBuffer(state.cursorBuffer);
       wlr_xcursor_theme_destroy(theme);

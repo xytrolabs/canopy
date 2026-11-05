@@ -10,9 +10,9 @@ from pathlib import Path
 from typing import Any
 
 
-COMMENT_MARKER = "<!-- umbriel-pr-template-enforcement -->"
+COMMENT_MARKER = "<!-- canopy-pr-template-enforcement -->"
 TEMPLATE_URL = (
-    "https://github.com/noctalia-dev/umbriel/blob/main/.github/PULL_REQUEST_TEMPLATE.md"
+    "https://github.com/xytrolabs/canopy/blob/main/.github/PULL_REQUEST_TEMPLATE.md"
 )
 # Only structure that states an obligation is required. Sections that merely offer
 # context (Related Issue, Screenshots / Videos, Manual Coverage, Additional Notes)
@@ -144,7 +144,7 @@ def github_request(
             "Accept": "application/vnd.github+json",
             "Authorization": f"Bearer {token}",
             "Content-Type": "application/json",
-            "User-Agent": "umbriel-pr-template-enforcement",
+            "User-Agent": "canopy-pr-template-enforcement",
             "X-GitHub-Api-Version": "2022-11-28",
         },
     )

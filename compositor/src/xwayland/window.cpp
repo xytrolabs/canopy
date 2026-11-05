@@ -10,7 +10,7 @@
 #include <algorithm>
 #include <array>
 
-namespace umbriel {
+namespace canopy {
 
   namespace {
 
@@ -236,4 +236,4 @@ namespace umbriel {
     }
   }
 
-} // namespace umbriel
+} // namespace canopy

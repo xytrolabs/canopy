@@ -3,18 +3,18 @@
 # click. The popup's grab must bring the keyboard to that layer, without dismissing the popup, so Escape reaches the
 # menu. wlroots never moves focus for an xdg_popup grab itself.
 set -euo pipefail
-source "$UMBRIEL_HARNESS_LIB"
+source "$CANOPY_HARNESS_LIB"
 
 readonly OUTPUT_W=1280
 readonly OUTPUT_H=720
 readonly LEFT_BUTTON=272
 readonly ESCAPE=1
-readonly POINTER="${UMBRIEL_POINTER_CLIENT:-./build-debug/tests/pointer-client}"
-readonly OBSERVER="${UMBRIEL_SEAT_LOG_CLIENT:-./build-debug/tests/seat-log-client}"
-readonly LAYER_CLIENT="${UMBRIEL_LAYER_CLIENT:-./build-debug/tests/layer-client}"
-readonly WINDOW_LOG="$UMBRIEL_RUNTIME_DIR/layer-popup-window.log"
-readonly PANEL_LOG="$UMBRIEL_RUNTIME_DIR/layer-popup-panel.log"
-readonly KEYBOARD_LOG="$UMBRIEL_RUNTIME_DIR/layer-popup-keyboard.log"
+readonly POINTER="${CANOPY_POINTER_CLIENT:-./build-debug/tests/pointer-client}"
+readonly OBSERVER="${CANOPY_SEAT_LOG_CLIENT:-./build-debug/tests/seat-log-client}"
+readonly LAYER_CLIENT="${CANOPY_LAYER_CLIENT:-./build-debug/tests/layer-client}"
+readonly WINDOW_LOG="$CANOPY_RUNTIME_DIR/layer-popup-window.log"
+readonly PANEL_LOG="$CANOPY_RUNTIME_DIR/layer-popup-panel.log"
+readonly KEYBOARD_LOG="$CANOPY_RUNTIME_DIR/layer-popup-keyboard.log"
 
 if [[ ! -x $POINTER || ! -x $OBSERVER || ! -x $LAYER_CLIENT ]]; then
   echo "layer popup focus helpers are not available"

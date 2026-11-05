@@ -8,7 +8,7 @@
 
 struct wlr_scene_tree;
 
-namespace umbriel {
+namespace canopy {
   class Server;
 
   // Modal confirmation panel. Rendering only: key and button handling live in
@@ -51,4 +51,4 @@ namespace umbriel {
     SurfaceShadow m_shadow;
   };
 
-} // namespace umbriel
+} // namespace canopy

@@ -9,46 +9,46 @@ spawn_client() {
 
 wait_for_windows() {
   for _ in $(seq 60); do
-    [[ $("$UMBRIEL" windows --json | jq 'length') == "$1" ]] && return 0
+    [[ $("$CANOPY" windows --json | jq 'length') == "$1" ]] && return 0
     sleep 0.1
   done
-  echo "expected $1 window(s): $("$UMBRIEL" windows --json)"
+  echo "expected $1 window(s): $("$CANOPY" windows --json)"
   return 1
 }
 
-cat >> "$UMBRIEL_CONFIG" <<'EOF'
+cat >> "$CANOPY_CONFIG" <<'EOF'
 
 [animation]
 enabled = false
 EOF
-"$UMBRIEL" msg config-reload > /dev/null
+"$CANOPY" msg config-reload > /dev/null
 
 spawn_client tab-a
 wait_for_windows 1
 spawn_client tab-b
 wait_for_windows 2
-"$UMBRIEL" msg window-consume-left > /dev/null
-"$UMBRIEL" msg column-toggle-tabbed > /dev/null
-"$UMBRIEL" msg column-focus-tab 1 > /dev/null
-"$UMBRIEL" msg window-set-primary-extent 0.5 > /dev/null
-"$UMBRIEL" settle
+"$CANOPY" msg window-consume-left > /dev/null
+"$CANOPY" msg column-toggle-tabbed > /dev/null
+"$CANOPY" msg column-focus-tab 1 > /dev/null
+"$CANOPY" msg window-set-primary-extent 0.5 > /dev/null
+"$CANOPY" settle
 
-box() { "$UMBRIEL" windows --json | jq -c --arg title "$1" '.[] | select(.title == $title) | [.x, .y, .w, .h]'; }
+box() { "$CANOPY" windows --json | jq -c --arg title "$1" '.[] | select(.title == $title) | [.x, .y, .w, .h]'; }
 group=$(box tab-a)
 
-"$UMBRIEL" msg window-toggle-maximize-to-edges > /dev/null
-"$UMBRIEL" settle
+"$CANOPY" msg window-toggle-maximize-to-edges > /dev/null
+"$CANOPY" settle
 maximized=$(box tab-a)
 
-"$UMBRIEL" msg column-focus-tab-next > /dev/null
-"$UMBRIEL" settle
+"$CANOPY" msg column-focus-tab-next > /dev/null
+"$CANOPY" settle
 if [[ $(box tab-b) != "$group" ]]; then
   echo "expected tab-b in the group's box $group, got $(box tab-b)"
   exit 1
 fi
 
-"$UMBRIEL" msg column-focus-tab-previous > /dev/null
-"$UMBRIEL" settle
+"$CANOPY" msg column-focus-tab-previous > /dev/null
+"$CANOPY" settle
 if [[ $(box tab-a) != "$maximized" ]]; then
   echo "expected tab-a maximized again in $maximized, got $(box tab-a)"
   exit 1

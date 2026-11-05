@@ -4,14 +4,14 @@
 # Observe actual output, overview, and window-capture pixels across shape-only
 # transitions; ARGB transparency and the input region are separate controls.
 set -euo pipefail
-source "$UMBRIEL_HARNESS_LIB"
+source "$CANOPY_HARNESS_LIB"
 
-readonly CLIENT="$UMBRIEL_XWAYLAND_SHAPE_CLIENT"
-readonly SCALE=${UMBRIEL_XWAYLAND_SHAPE_SCALE:-1}
-readonly OUTPUT_IMAGE="$UMBRIEL_RUNTIME_DIR/xwayland-shape-output.png"
-readonly WINDOW_IMAGE="$UMBRIEL_RUNTIME_DIR/xwayland-shape-window.png"
+readonly CLIENT="$CANOPY_XWAYLAND_SHAPE_CLIENT"
+readonly SCALE=${CANOPY_XWAYLAND_SHAPE_SCALE:-1}
+readonly OUTPUT_IMAGE="$CANOPY_RUNTIME_DIR/xwayland-shape-output.png"
+readonly WINDOW_IMAGE="$CANOPY_RUNTIME_DIR/xwayland-shape-window.png"
 
-cat >> "$UMBRIEL_CONFIG" <<CONFIG
+cat >> "$CANOPY_CONFIG" <<CONFIG
 
 [animation]
 enabled = false
@@ -48,16 +48,16 @@ default_floating = true
 default_floating_size_px = { width = $((600 / SCALE)), height = $((400 / SCALE)) }
 default_position = { x = 100, y = 100, anchor = "top_left" }
 CONFIG
-"$UMBRIEL" msg config-reload > /dev/null
-"$UMBRIEL" settle > /dev/null
+"$CANOPY" msg config-reload > /dev/null
+"$CANOPY" settle > /dev/null
 
 start_client() {
   mode=$1
   local suffix=$2
   shift 2
   title="xwayland-shape-$mode-$suffix"
-  CLIENT_LOG="$UMBRIEL_RUNTIME_DIR/$title.log"
-  local fifo="$UMBRIEL_RUNTIME_DIR/$title.fifo"
+  CLIENT_LOG="$CANOPY_RUNTIME_DIR/$title.log"
+  local fifo="$CANOPY_RUNTIME_DIR/$title.fifo"
   mkfifo "$fifo"
   exec {CLIENT_FD}<> "$fifo"
   "$CLIENT" "$title" "$mode" "$@" <&"$CLIENT_FD" > "$CLIENT_LOG" 2>&1 &
@@ -70,7 +70,7 @@ start_client() {
   if [[ $mode == managed ]]; then
     local window=
     for _ in $(seq 80); do
-      window=$("$UMBRIEL" windows --json | jq -c --arg title "$title" '.[] | select(.title == $title)')
+      window=$("$CANOPY" windows --json | jq -c --arg title "$title" '.[] | select(.title == $title)')
       [[ -n $window ]] && break
       sleep 0.025
     done
@@ -93,7 +93,7 @@ stop_client() {
   printf 'quit\n' >&"$CLIENT_FD"
   wait "$client_pid"
   exec {CLIENT_FD}>&-
-  "$UMBRIEL" settle > /dev/null
+  "$CANOPY" settle > /dev/null
 }
 
 request() {
@@ -101,7 +101,7 @@ request() {
   count=$(events "$CLIENT_LOG" "done $command ")
   printf '%s\n' "$command" >&"$CLIENT_FD"
   await_lines "$CLIENT_LOG" "done $command " "$((count + 1))" 0.025
-  "$UMBRIEL" settle > /dev/null
+  "$CANOPY" settle > /dev/null
 }
 
 output_matches() {
@@ -120,7 +120,7 @@ output_matches() {
       px=$((320 + px / 2))
       py=$((240 + py / 2))
     fi
-    rgb=$("$UMBRIEL_PIXEL_PROBE" "$OUTPUT_IMAGE" pixel "$px" "$py")
+    rgb=$("$CANOPY_PIXEL_PROBE" "$OUTPUT_IMAGE" pixel "$px" "$py")
     pixels+=" $sample=$rgb;"
     expected='0 255 0'
     if [[ $sample == left && $left_visible == 1 || $sample == right && $right_visible == 1 || $sample == expanded ]]; then
@@ -134,7 +134,7 @@ expect_capture() {
   local label=$1 left_visible=$2 right_visible=$3 sample px py rgb expected
   [[ -n $window_id ]] || return 0
   timeout 10 grim -T "$window_id" "$WINDOW_IMAGE"
-  [[ $("$UMBRIEL_PIXEL_PROBE" "$WINDOW_IMAGE" size) == "${capture_width}x${capture_height}" ]] || {
+  [[ $("$CANOPY_PIXEL_PROBE" "$WINDOW_IMAGE" size) == "${capture_width}x${capture_height}" ]] || {
     echo "$label: window capture no longer spans the native ${capture_width}x${capture_height} client"
     exit 1
   }
@@ -146,7 +146,7 @@ expect_capture() {
   fi
   for sample in "${samples[@]}"; do
     read -r px py sample <<< "$sample"
-    rgb=$("$UMBRIEL_PIXEL_PROBE" "$WINDOW_IMAGE" pixel "$px" "$py")
+    rgb=$("$CANOPY_PIXEL_PROBE" "$WINDOW_IMAGE" pixel "$px" "$py")
     expected='0 0 0'
     if [[ $sample == left && $left_visible == 1 || $sample == right && $right_visible == 1 || $sample == expanded ]]; then
       expected='255 0 0'
@@ -188,15 +188,15 @@ for mode in managed unmanaged; do
   expect_state 'bounding shape present before map' 1 1
 
   if [[ $mode == managed ]]; then
-    "$UMBRIEL" msg overview-open > /dev/null
-    "$UMBRIEL" settle > /dev/null
+    "$CANOPY" msg overview-open > /dev/null
+    "$CANOPY" settle > /dev/null
     expect_state 'initial overview mirror' 1 1 1
     request 'shape left'
     expect_state 'shape-only update in overview' 1 0 1
     request 'shape both'
     expect_state 'restored overview mirror' 1 1 1
-    "$UMBRIEL" msg overview-close > /dev/null
-    "$UMBRIEL" settle > /dev/null
+    "$CANOPY" msg overview-close > /dev/null
+    "$CANOPY" settle > /dev/null
   fi
 
   # Shrinking does not repaint or emit expose events. The old right-hand widget
@@ -223,12 +223,12 @@ for mode in managed unmanaged; do
   request 'shape clear'
   request resize
   await_lines "$CLIENT_LOG" 'resized 800x500' 1
-  "$UMBRIEL" settle > /dev/null
+  "$CANOPY" settle > /dev/null
   expanded=1
   capture_width=800
   capture_height=500
   if [[ $mode == managed ]]; then
-    window=$("$UMBRIEL" windows --json | jq -c --arg id "$window_id" '.[] | select(.id == $id)')
+    window=$("$CANOPY" windows --json | jq -c --arg id "$window_id" '.[] | select(.id == $id)')
     read -r x y width height < <(jq -r '"\(.x) \(.y) \(.w) \(.h)"' <<< "$window")
     if ((width * SCALE != capture_width || height * SCALE != capture_height)); then
       echo "clearing the shape then resizing did not update native geometry: $window"
@@ -245,9 +245,9 @@ expect_fullscreen_cutout() {
   local label=$1 expected=$2 matched=0 hole widget outside
   for _ in $(seq 80); do
     grim -o HEADLESS-1 "$OUTPUT_IMAGE"
-    hole=$("$UMBRIEL_PIXEL_PROBE" "$OUTPUT_IMAGE" pixel 300 300)
-    widget=$("$UMBRIEL_PIXEL_PROBE" "$OUTPUT_IMAGE" pixel 100 200)
-    outside=$("$UMBRIEL_PIXEL_PROBE" "$OUTPUT_IMAGE" pixel 900 300)
+    hole=$("$CANOPY_PIXEL_PROBE" "$OUTPUT_IMAGE" pixel 300 300)
+    widget=$("$CANOPY_PIXEL_PROBE" "$OUTPUT_IMAGE" pixel 100 200)
+    outside=$("$CANOPY_PIXEL_PROBE" "$OUTPUT_IMAGE" pixel 900 300)
     if [[ $hole == "$expected" && $widget == '255 0 0' && $outside == '0 255 0' ]]; then
       matched=1
       break
@@ -267,10 +267,10 @@ start_client managed fullscreen-background unshaped
 background_pid=$client_pid
 background_fd=$CLIENT_FD
 start_client managed fullscreen-foreground
-"$UMBRIEL" msg window-focus "$window_id" > /dev/null
-"$UMBRIEL" msg window-toggle-fullscreen > /dev/null
+"$CANOPY" msg window-focus "$window_id" > /dev/null
+"$CANOPY" msg window-toggle-fullscreen > /dev/null
 for _ in $(seq 80); do
-  window=$("$UMBRIEL" windows --json | jq -c --arg id "$window_id" '.[] | select(.id == $id)')
+  window=$("$CANOPY" windows --json | jq -c --arg id "$window_id" '.[] | select(.id == $id)')
   if jq -e --argjson scale "$SCALE" \
     '.fullscreen and .x == 0 and .y == 0 and .w * $scale == 1280 and .h * $scale == 960' <<< "$window" > /dev/null; then
     break
@@ -282,7 +282,7 @@ if ! jq -e --argjson scale "$SCALE" \
   echo "shaped foreground did not enter fullscreen: $window"
   exit 1
 fi
-"$UMBRIEL" settle > /dev/null
+"$CANOPY" settle > /dev/null
 expect_fullscreen_cutout 'fullscreen shape reveals the window behind it' '255 0 0'
 request 'shape clear'
 expect_fullscreen_cutout 'removing the shape restores the opaque fullscreen backdrop' '0 255 0'

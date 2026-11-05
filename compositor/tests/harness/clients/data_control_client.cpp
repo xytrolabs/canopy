@@ -20,7 +20,7 @@
 
 namespace {
   constexpr std::string_view kMimeType = "text/plain;charset=utf-8";
-  constexpr std::string_view kPayload = "umbriel legacy data-control clipboard payload";
+  constexpr std::string_view kPayload = "canopy legacy data-control clipboard payload";
 
   struct State;
 

@@ -13,7 +13,7 @@
 #include "server/server.h"
 #include "view/view.h"
 extern "C" {
-#include <umbrielfx/render/effect.h>
+#include <canopyfx/render/effect.h>
 }
 #include "view/view_internal.h"
 // clang-format off
@@ -26,7 +26,7 @@ extern "C" {
 #include "workspace/workspace.h"
 #include "xwayland/xwayland.h"
 
-namespace umbriel {
+namespace canopy {
   namespace {
     constexpr Logger kLog("view");
   } // namespace
@@ -799,7 +799,7 @@ namespace umbriel {
       parameters.transition_id = m_dragPhysics.transitionId();
       parameters.expand = dragPhysicsExpand();
       if (fx_uniform* sheet =
-              fx_parameters_add_uniform(&parameters, "umbriel_deformation", FX_UNIFORM_VEC2, DragPhysics::kPoints)) {
+              fx_parameters_add_uniform(&parameters, "canopy_deformation", FX_UNIFORM_VEC2, DragPhysics::kPoints)) {
         const DragPhysics::Sheet displacement = m_dragPhysics.normalizedDisplacement();
         for (int i = 0; i < DragPhysics::kPoints; ++i) {
           sheet->floats[i * 2] = displacement[i][0];
@@ -842,7 +842,7 @@ namespace umbriel {
           .gate = gate != nullptr ? *gate : ownGate,
           .scale = scale,
           .seconds = m_effects.configured() && output != nullptr ? output->effectSeconds() : 0.0F,
-#ifdef UMBRIEL_HARNESS
+#ifdef CANOPY_HARNESS
           .clockAdvancing = !m_server->animationClockFrozen(),
 #endif
           .output = output,
@@ -1057,7 +1057,7 @@ namespace umbriel {
       return kInvalidCloseSnapshot;
     }
     wlr_scene_node_set_position(&snap->node, m_presentedBox.x, m_presentedBox.y);
-    if (!umbrielfx_scene_node_share_capture_policy(&snap->node, &m_sceneTree->node)) {
+    if (!canopyfx_scene_node_share_capture_policy(&snap->node, &m_sceneTree->node)) {
       wlr_scene_node_destroy(&snap->node);
       return kInvalidCloseSnapshot;
     }
@@ -1252,4 +1252,4 @@ namespace umbriel {
     syncModalShade();
     layoutAttachments();
   }
-} // namespace umbriel
+} // namespace canopy

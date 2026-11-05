@@ -1,5 +1,5 @@
 name: Bug Report
-description: Report a bug, crash, or regression in Umbriel
+description: Report a bug, crash, or regression in Canopy
 title: "[BUG] "
 labels: ["bug"]
 
@@ -14,7 +14,7 @@ body:
 
         For bar, launcher, notification, or widget issues, please use
         [noctalia](https://github.com/noctalia-dev/noctalia). For screen sharing or portal screenshots, please use
-        [xdg-desktop-portal-umbriel](https://github.com/noctalia-dev/xdg-desktop-portal-umbriel).
+        [xdg-desktop-portal-canopy](https://github.com/noctalia-dev/xdg-desktop-portal-canopy).
 
   - type: textarea
     id: description
@@ -37,11 +37,11 @@ body:
         4. See ...
 
   - type: input
-    id: umbriel-version
+    id: canopy-version
     attributes:
-      label: Umbriel version
-      description: Paste `umbriel --version` if you can.
-      placeholder: "umbriel 0.1.0 (c8adc515af29)"
+      label: Canopy version
+      description: Paste `canopy --version` if you can.
+      placeholder: "canopy 0.1.0 (c8adc515af29)"
 
   - type: input
     id: regression
@@ -108,8 +108,8 @@ body:
       label: Logs, errors, or backtraces
       description: |
         If available, paste relevant output here. Useful sources include:
-        - `$XDG_CACHE_HOME/umbriel/umbriel.log` (or `~/.cache/umbriel/umbriel.log`)
-        - `journalctl --user -u umbriel.service -b` for managed systemd sessions
+        - `$XDG_CACHE_HOME/canopy/canopy.log` (or `~/.cache/canopy/canopy.log`)
+        - `journalctl --user -u canopywc.service -b` for managed systemd sessions
         - Terminal output when running the binary directly
 
         Large outputs can be attached as a file.

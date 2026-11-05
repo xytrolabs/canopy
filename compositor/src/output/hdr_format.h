@@ -6,7 +6,7 @@
 #include <optional>
 #include <utility>
 
-namespace umbriel {
+namespace canopy {
 
   template <typename Probe> std::optional<uint32_t> selectHdrRenderFormat(uint32_t currentFormat, Probe&& accepts) {
     std::array candidates{
@@ -24,4 +24,4 @@ namespace umbriel {
     return std::nullopt;
   }
 
-} // namespace umbriel
+} // namespace canopy

@@ -3,34 +3,34 @@
 # affordance. Releasing it must give the client's own cursor back from what the
 # compositor recorded, without a pointer leave and enter round trip.
 set -euo pipefail
-source "$UMBRIEL_HARNESS_LIB"
+source "$CANOPY_HARNESS_LIB"
 
 readonly OUTPUT_W=1280
 readonly OUTPUT_H=720
-readonly POINTER="${UMBRIEL_POINTER_CLIENT:-./build-debug/tests/pointer-client}"
-readonly BEFORE="$UMBRIEL_RUNTIME_DIR/mod-cursor-before.png"
-readonly DURING="$UMBRIEL_RUNTIME_DIR/mod-cursor-during.png"
-readonly AFTER="$UMBRIEL_RUNTIME_DIR/mod-cursor-after.png"
-readonly PREVIOUS="$UMBRIEL_RUNTIME_DIR/mod-cursor-previous.png"
+readonly POINTER="${CANOPY_POINTER_CLIENT:-./build-debug/tests/pointer-client}"
+readonly BEFORE="$CANOPY_RUNTIME_DIR/mod-cursor-before.png"
+readonly DURING="$CANOPY_RUNTIME_DIR/mod-cursor-during.png"
+readonly AFTER="$CANOPY_RUNTIME_DIR/mod-cursor-after.png"
+readonly PREVIOUS="$CANOPY_RUNTIME_DIR/mod-cursor-previous.png"
 
 if [[ ! -x $POINTER ]] || ! command -v foot > /dev/null; then
   echo "cursor helpers are not available"
   exit 1
 fi
 
-cat >> "$UMBRIEL_CONFIG" <<'EOF'
+cat >> "$CANOPY_CONFIG" <<'EOF'
 
 [animation]
 duration_ms = 1
 curve = "linear"
 EOF
-"$UMBRIEL" msg config-reload > /dev/null
+"$CANOPY" msg config-reload > /dev/null
 
 foot --config=/dev/null --title=mod-cursor sh -c 'sleep 120' > /dev/null 2>&1 &
 
 window=''
 for _ in $(seq 60); do
-  window=$("$UMBRIEL" windows --json | jq -c '.[] | select(.title == "mod-cursor")')
+  window=$("$CANOPY" windows --json | jq -c '.[] | select(.title == "mod-cursor")')
   [[ -n $window ]] && break
   sleep 0.1
 done
@@ -43,7 +43,7 @@ y=$(jq -r '(.y + .h / 2 | round)' <<< "$window")
 crop="48x48+$x+$y"
 same_cursor() {
   local changed
-  read -r _ changed < <("$UMBRIEL_PIXEL_PROBE" "$1" diff "$2" "$crop")
+  read -r _ changed < <("$CANOPY_PIXEL_PROBE" "$1" diff "$2" "$crop")
   ((changed == 0))
 }
 
@@ -65,10 +65,10 @@ if same_cursor "$BEFORE" "$DURING"; then
 fi
 
 pointer_release
-"$UMBRIEL" settle
+"$CANOPY" settle
 grim -c "$AFTER"
 if ! same_cursor "$BEFORE" "$AFTER"; then
-  echo "releasing mod did not restore the client cursor: difference $("$UMBRIEL_PIXEL_PROBE" "$BEFORE" diff "$AFTER" "$crop")"
+  echo "releasing mod did not restore the client cursor: difference $("$CANOPY_PIXEL_PROBE" "$BEFORE" diff "$AFTER" "$crop")"
   exit 1
 fi
 

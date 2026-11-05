@@ -1,8 +1,8 @@
 # Portal input capture
 
-Umbriel owns input interception, approval, barrier geometry, and the EIS server. `xdg-desktop-portal-umbriel` implements `org.freedesktop.impl.portal.InputCapture` version 2, which the standard desktop portal frontend exposes to applications. The portal passes the approved EIS connection FD to the application; it does not process input events or require libeis at runtime.
+Canopy owns input interception, approval, barrier geometry, and the EIS server. `xdg-desktop-portal-canopy` implements `org.freedesktop.impl.portal.InputCapture` version 2, which the standard desktop portal frontend exposes to applications. The portal passes the approved EIS connection FD to the application; it does not process input events or require libeis at runtime.
 
-The private `umbriel_input_capture_v1` Wayland protocol provides version 2 of the compositor bridge. This version is independent of the public D-Bus portal version. Its XML lives in both repositories and must stay identical. It transports session control, logical zones, barrier results, activation IDs, permission grants, and the EIS FD. Input events use standard EI rather than this Wayland protocol. The portal requires bridge version 2; version 1 bridge clients retain session-only approval.
+The private `canopy_input_capture_v1` Wayland protocol provides version 2 of the compositor bridge. This version is independent of the public D-Bus portal version. Its XML lives in both repositories and must stay identical. It transports session control, logical zones, barrier results, activation IDs, permission grants, and the EIS FD. Input events use standard EI rather than this Wayland protocol. The portal requires bridge version 2; version 1 bridge clients retain session-only approval.
 
 ## Supported scope
 
@@ -14,7 +14,7 @@ Permission persistence supports modes 0, 1, and 2 through the standard frontend 
 
 Creating a control session grants no input access. `Start` requests a compositor-owned confirmation unless it restores a valid grant. Only backend keyboard input can approve it: Enter allows once, and physical R remembers only when the client requested persistence. Wayland virtual-keyboard and EI-emulated events cannot approve capture. Labels in the compositor prompt are explicitly requester-supplied, so a direct host client cannot bypass approval by claiming a portal or application name. Security-context clients cannot see the bridge by default.
 
-The compositor owns opaque 256-bit grant credentials, separate from the frontend's public restore tokens. Grants check the exact application identifier, including empty identifiers, and the maximum approved capability mask. Restore consumes and replaces the credential; failed identity, capability, or persistence upgrades leave it unchanged. A valid mode-zero restore consumes the stored grant and allows only the current session. Frontend tokens are translated into backend restore data tagged `umbriel-input-capture`, implementation version 1.
+The compositor owns opaque 256-bit grant credentials, separate from the frontend's public restore tokens. Grants check the exact application identifier, including empty identifiers, and the maximum approved capability mask. Restore consumes and replaces the credential; failed identity, capability, or persistence upgrades leave it unchanged. A valid mode-zero restore consumes the stored grant and allows only the current session. Frontend tokens are translated into backend restore data tagged `canopy-input-capture`, implementation version 1.
 
 Mode-one grants stay in memory and belong to an application instance within the portal's Wayland connection. The portal derives that instance from the standard session path and expires it when its original D-Bus peer disappears, including after its old capture session closed. Bridge disconnect also expires its transient grants. Mode-two grants use an owned 0700 state directory and an atomic 0600 JSON store. Durable transactions refresh the store under a nonblocking lock, preventing replay across compositor instances. Malformed, insecure, or unavailable stores cannot silently create remembered permission.
 
@@ -42,16 +42,16 @@ The relative EI pointer publishes one logical region per enabled output, with th
 
 ## Dependencies and verification
 
-Umbriel retains its existing `libeis-1.0 >= 1.3` requirement. The capture implementation compiles against the 1.3 header. The portal daemon adds no runtime library dependency; its integration client uses test-only `libei-1.0 >= 1.3` alongside its existing sdbus-c++ dependency.
+Canopy retains its existing `libeis-1.0 >= 1.3` requirement. The capture implementation compiles against the 1.3 header. The portal daemon adds no runtime library dependency; its integration client uses test-only `libei-1.0 >= 1.3` alongside its existing sdbus-c++ dependency.
 
 The integration runner also requires `dbus-daemon` and `dbus-send` from the `dbus` package, using their existing D-Bus 1 tool interface with no additional version minimum or pkg-config linkage. Both development shells include these test tools. Supply the `xdg-desktop-portal` frontend executable explicitly when it is outside `PATH`.
 
 `tests/unit/input_capture_geometry.cpp` covers logical coordinates, shared and exposed edges, inclusive pixel endpoints, single-pixel corners, unclipped crossings, and one-event motion across outputs. Mutation checks remove or reverse those rules and must fail the corresponding assertions.
 
-`tests/input_capture.sh` starts a private D-Bus, the actual portal backend, frontend and permission store, an EI receiver, a local Wayland observer, and a real Umbriel Server with backend-boundary keyboard and pointer devices. It verifies physical approval and virtual-keyboard rejection, asynchronous activation, event routing, held-state cleanup, stale releases, connection reuse, emergency escape, absolute deltas, lock-screen exclusion, monitor changes, and session teardown. It also checks EI region geometry, pointer replacement after hotplug, negative output positions, mixed scales, local monitor crossings, and capture on all four exterior sides. Its persistence checks cover both grant lifetimes, allow-once behavior, unrelated programs and empty identifiers, replay and escalation rejection, durable restart, and active revocation. It does not use the host's input devices, compositor, session services, or permission store.
+`tests/input_capture.sh` starts a private D-Bus, the actual portal backend, frontend and permission store, an EI receiver, a local Wayland observer, and a real Canopy Server with backend-boundary keyboard and pointer devices. It verifies physical approval and virtual-keyboard rejection, asynchronous activation, event routing, held-state cleanup, stale releases, connection reuse, emergency escape, absolute deltas, lock-screen exclusion, monitor changes, and session teardown. It also checks EI region geometry, pointer replacement after hotplug, negative output positions, mixed scales, local monitor crossings, and capture on all four exterior sides. Its persistence checks cover both grant lifetimes, allow-once behavior, unrelated programs and empty identifiers, replay and escalation rejection, durable restart, and active revocation. It does not use the host's input devices, compositor, session services, or permission store.
 
 Run it after building both repositories, passing the portal frontend executable when it is outside `PATH`:
 
 ```sh
-bash tests/input_capture.sh ./build-debug ../xdg-desktop-portal-umbriel/build-debug /path/to/xdg-desktop-portal
+bash tests/input_capture.sh ./build-debug ../xdg-desktop-portal-canopy/build-debug /path/to/xdg-desktop-portal
 ```

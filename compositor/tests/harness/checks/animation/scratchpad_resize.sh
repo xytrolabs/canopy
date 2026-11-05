@@ -5,10 +5,10 @@
 set -euo pipefail
 
 readonly TITLE=scratchpad-resize-animation
-readonly CLIENT="${UMBRIEL_FRACTIONAL_CLIENT:-./build-debug/tests/fractional-client}"
-readonly CLIENT_LOG="$UMBRIEL_RUNTIME_DIR/scratchpad-resize-animation.log"
+readonly CLIENT="${CANOPY_FRACTIONAL_CLIENT:-./build-debug/tests/fractional-client}"
+readonly CLIENT_LOG="$CANOPY_RUNTIME_DIR/scratchpad-resize-animation.log"
 
-cat >> "$UMBRIEL_CONFIG" <<'EOF'
+cat >> "$CANOPY_CONFIG" <<'EOF'
 
 [animation]
 duration_ms = 2000
@@ -34,10 +34,10 @@ default_floating = true
 default_floating_size_px = { width = 1000, height = 300 }
 default_position = { x = 100, y = 200, anchor = "top_left" }
 EOF
-"$UMBRIEL" msg config-reload > /dev/null
+"$CANOPY" msg config-reload > /dev/null
 
 ipc_box() {
-  "$UMBRIEL" windows --json \
+  "$CANOPY" windows --json \
     | jq -r --arg title "$TITLE" '.[] | select(.title == $title) | "\(.w)x\(.h)+\(.x)+\(.y)"'
 }
 
@@ -53,18 +53,18 @@ wait_for_box() {
 }
 
 capture_box() {
-  local image="$UMBRIEL_RUNTIME_DIR/$1.png"
+  local image="$CANOPY_RUNTIME_DIR/$1.png"
   grim "$image"
-  "$UMBRIEL_PIXEL_PROBE" "$image" bbox 'r > 0.01 || g > 0.01 || b > 0.01'
+  "$CANOPY_PIXEL_PROBE" "$image" bbox 'r > 0.01 || g > 0.01 || b > 0.01'
 }
 
 "$CLIENT" "$TITLE" 1000 300 > "$CLIENT_LOG" 2>&1 &
 wait_for_box 1000x300+100+200
 
-"$UMBRIEL" msg window-move-to-scratchpad > /dev/null
+"$CANOPY" msg window-move-to-scratchpad > /dev/null
 wait_for_box 1000x300+100+200
-"$UMBRIEL" msg scratchpad-toggle > /dev/null
-"$UMBRIEL" settle
+"$CANOPY" msg scratchpad-toggle > /dev/null
+"$CANOPY" settle
 
 read -r before_x before_y before_w before_h < <(capture_box before)
 if ((before_x != 100 || before_y != 200 || before_w != 1000 || before_h != 300)); then
@@ -73,11 +73,11 @@ if ((before_x != 100 || before_y != 200 || before_w != 1000 || before_h != 300))
 fi
 
 # Animation time only moves by clock-advance; advancing 2000 ms finishes the 2000 ms timeline.
-"$UMBRIEL" clock-freeze
-"$UMBRIEL" msg window-set-primary-extent 0.2 > /dev/null
-"$UMBRIEL" clock-advance 250
+"$CANOPY" clock-freeze
+"$CANOPY" msg window-set-primary-extent 0.2 > /dev/null
+"$CANOPY" clock-advance 250
 read -r first_x first_y first_w first_h < <(capture_box resize-250ms)
-"$UMBRIEL" clock-advance 1000
+"$CANOPY" clock-advance 1000
 read -r second_x second_y second_w second_h < <(capture_box resize-1250ms)
 
 if ! ((first_x == 100 && second_x == 100
@@ -88,8 +88,8 @@ if ! ((first_x == 100 && second_x == 100
   exit 1
 fi
 
-"$UMBRIEL" clock-advance 2000
-"$UMBRIEL" settle
+"$CANOPY" clock-advance 2000
+"$CANOPY" settle
 wait_for_box 256x300+100+200
 read -r after_x after_y after_w after_h < <(capture_box after)
 if ((after_x != 100 || after_y != 200 || after_w != 256 || after_h != 300)); then
@@ -97,10 +97,10 @@ if ((after_x != 100 || after_y != 200 || after_w != 256 || after_h != 300)); the
   exit 1
 fi
 
-"$UMBRIEL" msg window-toggle-maximize > /dev/null
-"$UMBRIEL" clock-advance 250
+"$CANOPY" msg window-toggle-maximize > /dev/null
+"$CANOPY" clock-advance 250
 read -r max_first_x max_first_y max_first_w max_first_h < <(capture_box maximize-250ms)
-"$UMBRIEL" clock-advance 1000
+"$CANOPY" clock-advance 1000
 read -r max_second_x max_second_y max_second_w max_second_h < <(capture_box maximize-1250ms)
 
 if ! ((100 > max_first_x && max_first_x > max_second_x && max_second_x > 0
@@ -111,8 +111,8 @@ if ! ((100 > max_first_x && max_first_x > max_second_x && max_second_x > 0
   exit 1
 fi
 
-"$UMBRIEL" clock-advance 2000
-"$UMBRIEL" settle
+"$CANOPY" clock-advance 2000
+"$CANOPY" settle
 wait_for_box 1264x704+8+8
 read -r max_after_x max_after_y max_after_w max_after_h < <(capture_box maximize-after)
 if ((max_after_x != 8 || max_after_y != 8 || max_after_w != 1264 || max_after_h != 704)); then

@@ -1,5 +1,5 @@
 name: Feature Request
-description: Propose an addition or change that fits Umbriel's scope
+description: Propose an addition or change that fits Canopy's scope
 title: "[FEATURE] "
 labels: ["enhancement"]
 
@@ -10,8 +10,8 @@ body:
         Thanks for sharing an idea. You do not need to arrive with a complete design: explaining the problem you run
         into is the most useful place to start.
 
-        Umbriel focuses on improving the compositor features it already has. It is not currently adding tiling layouts,
-        desktop shell components, or plugins. The [scope guide](https://github.com/noctalia-dev/umbriel/blob/main/SCOPE.md)
+        Canopy focuses on improving the compositor features it already has. It is not currently adding tiling layouts,
+        desktop shell components, or plugins. The [scope guide](https://github.com/xytrolabs/canopy/blob/main/SCOPE.md)
         explains those boundaries in more detail.
 
         Not sure whether an idea fits? Ask in [Discord](https://discord.noctalia.dev). Early discussion is welcome, and
@@ -22,7 +22,7 @@ body:
     attributes:
       label: What problem would this solve?
       description: Describe the situation you run into and how it affects you.
-      placeholder: When I ..., Umbriel ..., so I end up ...
+      placeholder: When I ..., Canopy ..., so I end up ...
     validations:
       required: true
 
@@ -42,13 +42,13 @@ body:
       description: If you have an idea for how it could work, share it here. Configuration sketches, actions, and
         mockups are all useful, but none are required.
       placeholder: |
-        Perhaps Umbriel could ...
+        Perhaps Canopy could ...
 
   - type: textarea
     id: attempts
     attributes:
       label: What have you tried?
-      description: Tell us about relevant configuration, window or layer rules, keybinds, submaps, or `umbriel msg`
+      description: Tell us about relevant configuration, window or layer rules, keybinds, submaps, or `canopy msg`
         actions you have already explored.
       placeholder: |
         I tried ..., but ...
@@ -57,7 +57,7 @@ body:
     id: area
     attributes:
       label: Area
-      description: Which part of Umbriel seems most relevant?
+      description: Which part of Canopy seems most relevant?
       options:
         - Existing layout behavior (scrolling, dwindle, master)
         - Floating, pinned, or fullscreen windows

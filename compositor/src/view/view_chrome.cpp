@@ -11,7 +11,7 @@
 #include "server/server.h"
 #include "view/view.h"
 extern "C" {
-#include <umbrielfx/render/effect.h>
+#include <canopyfx/render/effect.h>
 }
 #include "scene/ssd_frame.h"
 #include "scene/tab_label_cache.h"
@@ -24,7 +24,7 @@ extern "C" {
 #include "workspace/workspace.h"
 #include "xwayland/xwayland.h"
 
-namespace umbriel {
+namespace canopy {
   int View::titleBarHeight() const {
     if (!wantsTitleBar(m_titleBarMode.value_or(config().appearance.titleBar.mode))
         || scheduledFullscreen()
@@ -300,7 +300,7 @@ namespace umbriel {
   }
 
   void View::updateBlur(int contentWidth, int contentHeight) {
-    UMBRIEL_ZONE("View::updateBlur");
+    CANOPY_ZONE("View::updateBlur");
     if (m_ssdFrame != nullptr) {
       m_ssdFrame->setBlurOptions(blurOptions());
       m_ssdFrame->setAlphas(chromeAlpha(), blurAlpha());
@@ -338,7 +338,7 @@ namespace umbriel {
   }
 
   void View::updateShadow(int contentWidth, int contentHeight) {
-    UMBRIEL_ZONE("View::updateShadow");
+    CANOPY_ZONE("View::updateShadow");
     const int borderTotal = borderInset();
     m_decoration.updateShadow(
         contentWidth, contentHeight, borderTotal, decorated() ? m_decoration.cornerRadius() : 0, titleBarHeight()
@@ -428,4 +428,4 @@ namespace umbriel {
     reloadBackdropColor();
     syncModalShade();
   }
-} // namespace umbriel
+} // namespace canopy

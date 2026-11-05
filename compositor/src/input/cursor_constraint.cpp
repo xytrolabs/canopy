@@ -9,7 +9,7 @@
 #include "wlr.h"
 #include "xwayland/xwayland.h"
 
-namespace umbriel {
+namespace canopy {
 
   void Cursor::handleNewConstraint(wlr_pointer_constraint_v1* constraint) {
     wlr_surface* focused = m_server->seat()->wlr()->pointer_state.focused_surface;
@@ -233,4 +233,4 @@ namespace umbriel {
     return xwayland != nullptr ? xwayland->surfaceScale(surface) : 1.0;
   }
 
-} // namespace umbriel
+} // namespace canopy

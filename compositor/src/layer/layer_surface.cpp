@@ -2,7 +2,7 @@
 
 #include "scene/effect_registry.h"
 extern "C" {
-#include <umbrielfx/render/effect.h>
+#include <canopyfx/render/effect.h>
 }
 
 #include "config/resolve.h"
@@ -18,7 +18,7 @@ extern "C" {
 #include <algorithm>
 #include <cstdlib>
 
-namespace umbriel {
+namespace canopy {
 
   namespace {
     constexpr Logger kLog("layer");
@@ -586,4 +586,4 @@ namespace umbriel {
     new Popup(popup, m_popupTree);
   }
 
-} // namespace umbriel
+} // namespace canopy

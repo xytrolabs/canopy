@@ -1,15 +1,15 @@
 # Real XTEST connections and native input observations shared by the EIS integration checks.
-source "$UMBRIEL_HARNESS_LIB"
+source "$CANOPY_HARNESS_LIB"
 
-readonly XTEST_CLIENT="${UMBRIEL_XWAYLAND_INPUT_CLIENT:-./build-debug/tests/xwayland-input-client}"
-readonly EI_PEER_CLIENT="${UMBRIEL_EI_PEER_CLIENT:-./build-debug/tests/ei-peer-client}"
-readonly NATIVE_CLIENT="${UMBRIEL_SEAT_LOG_CLIENT:-./build-debug/tests/seat-log-client}"
+readonly XTEST_CLIENT="${CANOPY_XWAYLAND_INPUT_CLIENT:-./build-debug/tests/xwayland-input-client}"
+readonly EI_PEER_CLIENT="${CANOPY_EI_PEER_CLIENT:-./build-debug/tests/ei-peer-client}"
+readonly NATIVE_CLIENT="${CANOPY_SEAT_LOG_CLIENT:-./build-debug/tests/seat-log-client}"
 declare -A EIS_INPUT_FDS=() EIS_INPUT_PIDS=() EIS_INPUT_LOGS=()
 
 eis_start() {
   local id=$1 name=$2 fd
-  local fifo="$UMBRIEL_RUNTIME_DIR/xtest-$id.fifo"
-  EIS_INPUT_LOGS[$id]="$UMBRIEL_RUNTIME_DIR/xtest-$id.log"
+  local fifo="$CANOPY_RUNTIME_DIR/xtest-$id.fifo"
+  EIS_INPUT_LOGS[$id]="$CANOPY_RUNTIME_DIR/xtest-$id.log"
   mkfifo "$fifo"
   exec {fd}<> "$fifo"
   EIS_INPUT_FDS[$id]=$fd
@@ -40,19 +40,19 @@ eis_stop() {
 
 eis_permission() {
   local decision=$1 name=$2 count=${3:-1}
-  await_events "$UMBRIEL_LOG" ".*input permission $decision .*app='$name'" "$count" "$name permission $decision"
+  await_events "$CANOPY_LOG" ".*input permission $decision .*app='$name'" "$count" "$name permission $decision"
 }
 
 eis_approve() {
   local id=$1 name=$2
   eis_send "$id" 'tap 30'
   eis_permission requested "$name"
-  "$UMBRIEL_POINTER_CLIENT" 1280 720 keyboard-only tap 28 > /dev/null
+  "$CANOPY_POINTER_CLIENT" 1280 720 keyboard-only tap 28 > /dev/null
   eis_permission granted "$name"
 }
 
 eis_window() {
-  "$UMBRIEL" windows --json | jq -c --arg title "$1" '.[] | select(.title == $title)'
+  "$CANOPY" windows --json | jq -c --arg title "$1" '.[] | select(.title == $title)'
 }
 
 eis_wait_window() {
@@ -61,7 +61,7 @@ eis_wait_window() {
     [[ -n $(eis_window "$title") ]] && return 0
     sleep 0.05
   done
-  echo "native window $title never mapped: $("$UMBRIEL" windows --json)"
+  echo "native window $title never mapped: $("$CANOPY" windows --json)"
   return 1
 }
 
@@ -71,14 +71,14 @@ eis_wait_active() {
     [[ $(eis_window "$title" | jq -r .active) == true ]] && return 0
     sleep 0.05
   done
-  echo "native window $title never became active: $("$UMBRIEL" windows --json)"
+  echo "native window $title never became active: $("$CANOPY" windows --json)"
   return 1
 }
 
 # Find only Xwayland's inherited endpoint in this check's process group. The compositor may double-fork Xwayland,
 # so direct child enumeration is insufficient; no process or socket from the user's session is considered.
 eis_socket() {
-  python3 - "$UMBRIEL_RUNTIME_DIR/instance.pgid" <<'PY'
+  python3 - "$CANOPY_RUNTIME_DIR/instance.pgid" <<'PY'
 import pathlib
 import sys
 

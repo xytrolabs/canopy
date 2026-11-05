@@ -2,7 +2,7 @@
 
 #include <algorithm>
 
-namespace umbriel {
+namespace canopy {
 
   namespace {
 
@@ -81,4 +81,4 @@ namespace umbriel {
     return unique->enabled;
   }
 
-} // namespace umbriel
+} // namespace canopy

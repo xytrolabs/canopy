@@ -5,7 +5,7 @@
 #include <cmath>
 #include <cstdint>
 
-namespace umbriel {
+namespace canopy {
 
   namespace {
     struct Edge {
@@ -136,4 +136,4 @@ namespace umbriel {
     return nearest;
   }
 
-} // namespace umbriel
+} // namespace canopy

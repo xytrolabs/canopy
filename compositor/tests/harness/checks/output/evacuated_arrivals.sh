@@ -4,12 +4,12 @@
 # adopts its destination, while a pending launch keeps an emptied refuge alive.
 set -euo pipefail
 
-readonly CLIENT="$UMBRIEL_UNMAP_CLIENT"
-readonly START_FIFO="$UMBRIEL_RUNTIME_DIR/evacuated-arrival-start"
-readonly TOKEN_FILE="$UMBRIEL_RUNTIME_DIR/evacuated-arrival-token"
-readonly PENDING_LOG="$UMBRIEL_RUNTIME_DIR/evacuated-arrival-pending.log"
+readonly CLIENT="$CANOPY_UNMAP_CLIENT"
+readonly START_FIFO="$CANOPY_RUNTIME_DIR/evacuated-arrival-start"
+readonly TOKEN_FILE="$CANOPY_RUNTIME_DIR/evacuated-arrival-token"
+readonly PENDING_LOG="$CANOPY_RUNTIME_DIR/evacuated-arrival-pending.log"
 
-cat >> "$UMBRIEL_CONFIG" <<'EOF'
+cat >> "$CANOPY_CONFIG" <<'EOF'
 
 [animation]
 enabled = false
@@ -20,17 +20,17 @@ workspaces = ["origin"]
 [output.HEADLESS-2]
 workspaces = ["local", "stay"]
 EOF
-"$UMBRIEL" msg config-reload > /dev/null
+"$CANOPY" msg config-reload > /dev/null
 
 field() {
-  "$UMBRIEL" windows --json | jq -r --arg title "$1" --arg field "$2" \
+  "$CANOPY" windows --json | jq -r --arg title "$1" --arg field "$2" \
     '.[] | select(.title == $title) | .[$field]'
 }
 
 wait_for_window() {
   local title=$1 state=
   for _ in $(seq 60); do
-    state=$("$UMBRIEL" windows --json)
+    state=$("$CANOPY" windows --json)
     jq -e --arg title "$title" 'any(.[]; .title == $title)' <<< "$state" > /dev/null && return 0
     sleep 0.05
   done
@@ -42,13 +42,13 @@ spawn() {
   local title=$1 selector=$2 place=${3:-true} id
   local -a words
   read -ra words <<< "$selector"
-  "$UMBRIEL" msg workspace-switch "${words[@]}" > /dev/null
-  "$CLIENT" "$title" 800 600 > "$UMBRIEL_RUNTIME_DIR/$title.log" 2>&1 &
+  "$CANOPY" msg workspace-switch "${words[@]}" > /dev/null
+  "$CLIENT" "$title" 800 600 > "$CANOPY_RUNTIME_DIR/$title.log" 2>&1 &
   wait_for_window "$title"
   if [[ $place == true ]]; then
     id=$(field "$title" id)
-    "$UMBRIEL" msg window-focus "$id" > /dev/null
-    "$UMBRIEL" msg window-move-to-workspace "${words[@]}" > /dev/null
+    "$CANOPY" msg window-focus "$id" > /dev/null
+    "$CANOPY" msg window-move-to-workspace "${words[@]}" > /dev/null
   fi
 }
 
@@ -56,35 +56,35 @@ spawn retained 'origin --output HEADLESS-1'
 spawn moved-out 'origin --output HEADLESS-1'
 spawn local 'local --output HEADLESS-2'
 readonly LOCAL_HOME="$(field local workspace)"
-"$UMBRIEL" output-destroy HEADLESS-1 > /dev/null
-"$UMBRIEL" settle
+"$CANOPY" output-destroy HEADLESS-1 > /dev/null
+"$CANOPY" settle
 readonly REFUGE="$(field retained workspace)"
-readonly INDEX="$("$UMBRIEL" workspaces --json | jq -r --arg id "$REFUGE" '.[] | select(.id == $id) | .index')"
+readonly INDEX="$("$CANOPY" workspaces --json | jq -r --arg id "$REFUGE" '.[] | select(.id == $id) | .index')"
 if [[ $REFUGE != HEADLESS-2:* || $REFUGE == "$LOCAL_HOME" || $(field moved-out workspace) != "$REFUGE" ]]; then
-  echo "source windows did not enter a shared temporary workspace: $("$UMBRIEL" windows --json)"
+  echo "source windows did not enter a shared temporary workspace: $("$CANOPY" windows --json)"
   exit 1
 fi
 
 spawn newcomer "$INDEX --output HEADLESS-2" false
 if [[ $(field newcomer workspace) != "$REFUGE" ]]; then
-  echo "new window did not map in the selected temporary workspace: $("$UMBRIEL" windows --json)"
+  echo "new window did not map in the selected temporary workspace: $("$CANOPY" windows --json)"
   exit 1
 fi
-"$UMBRIEL" msg window-focus "$(field moved-out id)" > /dev/null
-"$UMBRIEL" msg window-move-to-workspace stay --output HEADLESS-2 > /dev/null
-"$UMBRIEL" settle
+"$CANOPY" msg window-focus "$(field moved-out id)" > /dev/null
+"$CANOPY" msg window-move-to-workspace stay --output HEADLESS-2 > /dev/null
+"$CANOPY" settle
 readonly MOVED_HOME="$(field moved-out workspace)"
 if [[ $MOVED_HOME != HEADLESS-2:* || $MOVED_HOME == "$REFUGE" ]]; then
-  echo "explicit move did not leave the temporary workspace: $("$UMBRIEL" windows --json)"
+  echo "explicit move did not leave the temporary workspace: $("$CANOPY" windows --json)"
   exit 1
 fi
 
 # Capture a launch while the temporary workspace still exists, but keep its
 # client from connecting until the original output has reclaimed every window.
-"$UMBRIEL" msg workspace-switch "$INDEX" --output HEADLESS-2 > /dev/null
+"$CANOPY" msg workspace-switch "$INDEX" --output HEADLESS-2 > /dev/null
 mkfifo "$START_FIFO"
 exec {start_fd}<>"$START_FIFO"
-"$UMBRIEL" msg spawn \
+"$CANOPY" msg spawn \
   "printf '%s\n' \"\$XDG_ACTIVATION_TOKEN\" > '$TOKEN_FILE'; read -r _ < '$START_FIFO'; exec '$CLIENT' pending-arrival 800 600 > '$PENDING_LOG' 2>&1" \
   > /dev/null
 for _ in $(seq 60); do
@@ -96,10 +96,10 @@ if [[ ! -s $TOKEN_FILE ]]; then
   exit 1
 fi
 
-"$UMBRIEL" output-create HEADLESS-1 > /dev/null
-"$UMBRIEL" settle
-windows=$("$UMBRIEL" windows --json)
-workspaces=$("$UMBRIEL" workspaces --json)
+"$CANOPY" output-create HEADLESS-1 > /dev/null
+"$CANOPY" settle
+windows=$("$CANOPY" windows --json)
+workspaces=$("$CANOPY" workspaces --json)
 if ! jq -e --arg moved "$MOVED_HOME" --arg local "$LOCAL_HOME" '
   ([.[] | select(.title == "retained" or .title == "newcomer") | .workspace] | unique) as $returned |
   ($returned | length) == 1 and ($returned[0] | startswith("HEADLESS-1:")) and
@@ -119,9 +119,9 @@ fi
 printf 'start\n' >&"$start_fd"
 wait_for_window pending-arrival
 for _ in $(seq 60); do
-  "$UMBRIEL" settle
-  windows=$("$UMBRIEL" windows --json)
-  workspaces=$("$UMBRIEL" workspaces --json)
+  "$CANOPY" settle
+  windows=$("$CANOPY" windows --json)
+  workspaces=$("$CANOPY" workspaces --json)
   if jq -e 'any(.[]; .title == "pending-arrival" and (.workspace | startswith("HEADLESS-1:")))' \
       <<< "$windows" > /dev/null && \
       jq -e 'length == 3 and all(.[]; .named)' <<< "$workspaces" > /dev/null; then

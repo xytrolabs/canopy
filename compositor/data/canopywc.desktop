@@ -1,0 +1,7 @@
+[Desktop Entry]
+Name=Canopy
+Comment=Canopy Wayland Compositor
+Exec=start-canopywc
+TryExec=canopywc
+Type=Application
+DesktopNames=Canopy

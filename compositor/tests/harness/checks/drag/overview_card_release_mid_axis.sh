@@ -5,7 +5,7 @@
 # pointer at the panned position (world space), and the dropped window keeps keyboard focus.
 set -euo pipefail
 
-source "$UMBRIEL_HARNESS_LIB"
+source "$CANOPY_HARNESS_LIB"
 
 readonly BTN_LEFT=272
 readonly OUTPUT_W=1280
@@ -19,7 +19,7 @@ window_x() {
   jq -r --arg title "$1" '.[] | select(.title == $title) | .x' <<< "$2"
 }
 
-cat >> "$UMBRIEL_CONFIG" <<'EOF'
+cat >> "$CANOPY_CONFIG" <<'EOF'
 
 [layout.scrolling]
 default_extent_fraction = 0.5
@@ -32,28 +32,28 @@ zoom = 0.5
 scroll_factor_horizontal = 1.0
 scroll_factor_vertical = 1.0
 EOF
-"$UMBRIEL" msg config-reload > /dev/null
+"$CANOPY" msg config-reload > /dev/null
 
 for id in $(seq 1 4); do
   spawn_client "$id"
   for _ in $(seq 60); do
-    [[ $("$UMBRIEL" windows --json | jq 'length') -eq $id ]] && break
+    [[ $("$CANOPY" windows --json | jq 'length') -eq $id ]] && break
     sleep 0.25
   done
 done
-"$UMBRIEL" msg column-focus-first > /dev/null
-"$UMBRIEL" settle
+"$CANOPY" msg column-focus-first > /dev/null
+"$CANOPY" settle
 
-windows=$("$UMBRIEL" windows --json)
+windows=$("$CANOPY" windows --json)
 start_x=$(jq -r '.[] | select(.title == "card-release-1") | (.x + .w / 2 | round)' <<< "$windows")
 start_y=$(jq -r '.[] | select(.title == "card-release-1") | (.y + .h / 2 | round)' <<< "$windows")
 # Overview zoom 0.5: centered preview at origin 320,180, half scale.
 press_x=$((320 + start_x / 2))
 press_y=$((180 + start_y / 2))
 
-"$UMBRIEL_POINTER_CLIENT" "$OUTPUT_W" "$OUTPUT_H" move 640 360
-"$UMBRIEL" msg overview-open > /dev/null
-"$UMBRIEL" settle
+"$CANOPY_POINTER_CLIENT" "$OUTPUT_W" "$OUTPUT_H" move 640 360
+"$CANOPY" msg overview-open > /dev/null
+"$CANOPY" settle
 
 # Card drag (plain press past the drag threshold); the first hold lands after the threshold, so the
 # post-detach position is the baseline. Then the finger pan runs and the button releases BEFORE the
@@ -62,9 +62,9 @@ pointer_hold "$OUTPUT_W" "$OUTPUT_H" \
   move "$press_x" "$press_y" press "$BTN_LEFT" move $((press_x + 30)) "$press_y" \
   -- axis horizontal 150 pause 200 mark panned hold release "$BTN_LEFT" axis-stop horizontal
 
-before_x=$(window_x card-release-4 "$("$UMBRIEL" windows --json)")
+before_x=$(window_x card-release-4 "$("$CANOPY" windows --json)")
 pointer_step panned
-after_x=$(window_x card-release-4 "$("$UMBRIEL" windows --json)")
+after_x=$(window_x card-release-4 "$("$CANOPY" windows --json)")
 if (( after_x >= before_x - 50 )); then
   echo "RED: axis travel during a held card drag did not pan the strip: card-release-4 x $before_x -> $after_x"
   pointer_release
@@ -73,9 +73,9 @@ fi
 
 # The release runs the remaining steps (button release, then the axis-stop frame).
 pointer_release
-"$UMBRIEL" settle
+"$CANOPY" settle
 
-windows=$("$UMBRIEL" windows --json)
+windows=$("$CANOPY" windows --json)
 focused=$(jq -r '.[] | select(.focused == true) | .title' <<< "$windows")
 moved_x=$(window_x card-release-1 "$windows")
 moved_w=$(jq -r '.[] | select(.title == "card-release-1") | .w' <<< "$windows")

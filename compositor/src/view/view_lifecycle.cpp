@@ -16,7 +16,7 @@
 #include "server/server.h"
 #include "view/view.h"
 extern "C" {
-#include <umbrielfx/render/effect.h>
+#include <canopyfx/render/effect.h>
 }
 #include "view/size_hints.h"
 #include "view/view_internal.h"
@@ -30,7 +30,7 @@ extern "C" {
 #include "workspace/workspace.h"
 #include "xwayland/xwayland.h"
 
-namespace umbriel {
+namespace canopy {
   namespace {
     constexpr Logger kLog("view");
     // Distance the built-in windows_in "slide" style starts an opener below its resting position.
@@ -850,7 +850,7 @@ namespace umbriel {
   }
 
   void View::handleCommit(bool reconfigureOpeningState) {
-    UMBRIEL_ZONE("View::handleCommit");
+    CANOPY_ZONE("View::handleCommit");
     // Client transparency can change on any commit. An unmap commit reaches here after handleUnmap hid the backdrop.
     if (m_mapped) {
       m_presentation.setFullscreenOpaque(fullscreenOpaque());
@@ -1182,4 +1182,4 @@ namespace umbriel {
     }
     m_server->removeView(this);
   }
-} // namespace umbriel
+} // namespace canopy

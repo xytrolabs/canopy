@@ -7,7 +7,7 @@ struct wlr_cursor_shape_manager_v1;
 struct wlr_seat;
 struct wlr_seat_client;
 
-namespace umbriel {
+namespace canopy {
 
   class Server;
   class ToplevelDragManager;
@@ -64,4 +64,4 @@ namespace umbriel {
     wl_listener m_dragDestroy{};
   };
 
-} // namespace umbriel
+} // namespace canopy

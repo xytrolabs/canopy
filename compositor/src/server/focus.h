@@ -7,7 +7,7 @@
 
 struct wlr_surface;
 
-namespace umbriel {
+namespace canopy {
 
   class LayerSurface;
   class Output;
@@ -121,4 +121,4 @@ namespace umbriel {
   // that remembered focus.
   View* focusedWindow(Server& server);
 
-} // namespace umbriel
+} // namespace canopy

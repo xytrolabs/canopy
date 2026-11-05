@@ -12,7 +12,7 @@
 #include <utility>
 #include <vector>
 
-namespace umbriel {
+namespace canopy {
 
   namespace {
 
@@ -523,4 +523,4 @@ namespace umbriel {
     return request;
   }
 
-} // namespace umbriel
+} // namespace canopy

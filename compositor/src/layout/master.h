@@ -12,7 +12,7 @@ extern "C" {
 #include <wlr/util/box.h>
 }
 
-namespace umbriel {
+namespace canopy {
 
   class View;
 
@@ -139,4 +139,4 @@ namespace umbriel {
     bool m_geometryStale = true;
   };
 
-} // namespace umbriel
+} // namespace canopy

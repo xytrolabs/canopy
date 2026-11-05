@@ -22,7 +22,7 @@
 #include <utility>
 #include <vector>
 
-namespace umbriel {
+namespace canopy {
 
   namespace {
 
@@ -431,4 +431,4 @@ namespace umbriel {
 
   registry::Field<Config> inputTable() { return registry::table("input", &Config::input, inputFields()); }
 
-} // namespace umbriel
+} // namespace canopy

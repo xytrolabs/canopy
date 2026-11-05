@@ -2,7 +2,7 @@
 # Closing the focused window while the overview is open focuses its nearest predecessor. The overview keeps the focus chrome while it owns the seat, so an unmap must move the workspace's focused view immediately: the card border is what shows where each row will land, and a dead focused view leaves no card highlighted until zoom-out happens to refocus. The closed window is closed through unmap-client, which unmaps on the close request without destroying the surface, so Server::removeView's destroy-time refocus can never mask a missing unmap-time reassignment.
 set -euo pipefail
 
-readonly UNMAP_CLIENT="${UMBRIEL_UNMAP_CLIENT:-./build-debug/tests/unmap-client}"
+readonly UNMAP_CLIENT="${CANOPY_UNMAP_CLIENT:-./build-debug/tests/unmap-client}"
 
 spawn_survivor() {
   local title=$1
@@ -12,12 +12,12 @@ spawn_survivor() {
 wait_for_windows() {
   local want=$1
   for _ in $(seq 40); do
-    if [[ $("$UMBRIEL" windows --json | jq 'length') -eq $want ]]; then
+    if [[ $("$CANOPY" windows --json | jq 'length') -eq $want ]]; then
       return 0
     fi
     sleep 0.1
   done
-  echo "expected $want window(s), got $("$UMBRIEL" windows --json | jq 'length'): $("$UMBRIEL" windows --json)"
+  echo "expected $want window(s), got $("$CANOPY" windows --json | jq 'length'): $("$CANOPY" windows --json)"
   return 1
 }
 
@@ -28,7 +28,7 @@ wait_for_windows 1
 spawn_survivor "overview-refocus-adjacent"
 wait_for_windows 2
 
-CLIENT_LOG="$UMBRIEL_RUNTIME_DIR/unmap-client.log"
+CLIENT_LOG="$CANOPY_RUNTIME_DIR/unmap-client.log"
 "$UNMAP_CLIENT" > "$CLIENT_LOG" 2>&1 &
 UNMAP_PID=$!
 
@@ -42,23 +42,23 @@ if ! grep -q '^mapped$' "$CLIENT_LOG"; then
 fi
 wait_for_windows 3
 
-unmap_id=$("$UMBRIEL" windows --json | jq -r '.[] | select(.title == "unmap-client") | .id')
-adjacent_id=$("$UMBRIEL" windows --json | jq -r '.[] | select(.title == "overview-refocus-adjacent") | .id')
+unmap_id=$("$CANOPY" windows --json | jq -r '.[] | select(.title == "unmap-client") | .id')
+adjacent_id=$("$CANOPY" windows --json | jq -r '.[] | select(.title == "overview-refocus-adjacent") | .id')
 if [[ -z $unmap_id || -z $adjacent_id ]]; then
-  echo "could not resolve the closing and adjacent window ids: $("$UMBRIEL" windows --json)"
+  echo "could not resolve the closing and adjacent window ids: $("$CANOPY" windows --json)"
   exit 1
 fi
 
 # The user-visible precondition: the newest window owns the focus.
-if [[ $("$UMBRIEL" windows --json | jq -r --arg id "$unmap_id" '.[] | select(.id == $id) | .focused') != true ]]; then
+if [[ $("$CANOPY" windows --json | jq -r --arg id "$unmap_id" '.[] | select(.id == $id) | .focused') != true ]]; then
   echo "newly spawned unmap-client is not focused before the close"
   exit 1
 fi
 
-"$UMBRIEL" msg overview-open > /dev/null
-"$UMBRIEL" settle
+"$CANOPY" msg overview-open > /dev/null
+"$CANOPY" settle
 
-"$UMBRIEL" msg window-close "$unmap_id" > /dev/null
+"$CANOPY" msg window-close "$unmap_id" > /dev/null
 for _ in $(seq 40); do
   grep -q '^unmapped$' "$CLIENT_LOG" && break
   sleep 0.1
@@ -75,20 +75,20 @@ fi
 # Focus must move to the adjacent predecessor while the overview is still open.
 focused=""
 for _ in $(seq 40); do
-  focused=$("$UMBRIEL" windows --json | jq -r --arg id "$adjacent_id" '.[] | select(.id == $id) | .focused')
+  focused=$("$CANOPY" windows --json | jq -r --arg id "$adjacent_id" '.[] | select(.id == $id) | .focused')
   [[ $focused == true ]] && break
   sleep 0.1
 done
 if [[ $focused != true ]]; then
-  echo "adjacent predecessor is not focused after closing the focused window in the overview: $("$UMBRIEL" windows --json)"
+  echo "adjacent predecessor is not focused after closing the focused window in the overview: $("$CANOPY" windows --json)"
   exit 1
 fi
 
 # Zooming back in must land on the same window and keep it focused.
-"$UMBRIEL" msg overview-close > /dev/null
-"$UMBRIEL" settle
-if [[ $("$UMBRIEL" windows --json | jq -r --arg id "$adjacent_id" '.[] | select(.id == $id) | .focused') != true ]]; then
-  echo "adjacent predecessor lost focus after zooming out of the overview: $("$UMBRIEL" windows --json)"
+"$CANOPY" msg overview-close > /dev/null
+"$CANOPY" settle
+if [[ $("$CANOPY" windows --json | jq -r --arg id "$adjacent_id" '.[] | select(.id == $id) | .focused') != true ]]; then
+  echo "adjacent predecessor lost focus after zooming out of the overview: $("$CANOPY" windows --json)"
   exit 1
 fi
 

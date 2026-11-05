@@ -2,7 +2,7 @@
 
 #include <cstdint>
 
-namespace umbriel {
+namespace canopy {
   bool cursorPlaneAdvance(CursorPlaneState* state, CursorPlaneState now, CursorPlaneState* previous) {
     *previous = *state;
 
@@ -47,4 +47,4 @@ namespace umbriel {
 
     return result;
   }
-} // namespace umbriel
+} // namespace canopy

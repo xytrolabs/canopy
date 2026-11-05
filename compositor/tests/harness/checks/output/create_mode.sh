@@ -6,7 +6,7 @@
 set -euo pipefail
 
 current_mode() {
-  "$UMBRIEL" outputs --json |
+  "$CANOPY" outputs --json |
     jq -r --arg name "$1" \
       '.[] | select(.name == $name) | .modes[] | select(.current)
         | "\(.width)x\(.height)@\(.refresh_mhz)"'
@@ -23,15 +23,15 @@ wait_for_mode() {
   return 1
 }
 
-created=$("$UMBRIEL" output-create stream 400x300@50)
+created=$("$CANOPY" output-create stream 400x300@50)
 if [[ $created != stream ]]; then
   echo "output-create printed '$created', expected 'stream'"
   exit 1
 fi
 wait_for_mode stream 400x300@50000
 
-"$UMBRIEL" output-create plain 640x360 > /dev/null
+"$CANOPY" output-create plain 640x360 > /dev/null
 wait_for_mode plain 640x360@0
 
-"$UMBRIEL" output-create default > /dev/null
+"$CANOPY" output-create default > /dev/null
 wait_for_mode default 1280x720@0

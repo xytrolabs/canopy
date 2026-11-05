@@ -6,7 +6,7 @@ This setup needs Sunshine and `jq`.
 
 ## Session script
 
-Sunshine runs a command before a stream starts and another after it ends. Save this as `~/.config/sunshine/umbriel-output.sh` and make it executable:
+Sunshine runs a command before a stream starts and another after it ends. Save this as `~/.config/sunshine/canopy-output.sh` and make it executable:
 
 ```sh
 #!/bin/sh
@@ -16,8 +16,8 @@ name=sunshine
 
 case "$1" in
     create)
-        umbriel output-destroy "$name" >/dev/null 2>&1 || true
-        umbriel output-create "$name" \
+        canopywc output-destroy "$name" >/dev/null 2>&1 || true
+        canopywc output-create "$name" \
             "${SUNSHINE_CLIENT_WIDTH:-1920}x${SUNSHINE_CLIENT_HEIGHT:-1080}@${SUNSHINE_CLIENT_FPS:-60}" >/dev/null
         ;;
     remove)
@@ -25,7 +25,7 @@ case "$1" in
         # go away, so they do not flash onto a physical monitor.
         i=0
         while [ "$i" -lt 25 ]; do
-            left="$(umbriel windows --json |
+            left="$(canopywc windows --json |
                 jq --arg out "$name:" '[.[] | select(.workspace | startswith($out))] | length')"
             [ "$left" = 0 ] && break
             sleep 0.2
@@ -33,21 +33,21 @@ case "$1" in
         done
         # Move what is left to the focused workspace of another output, so it
         # does not return to the next session's output (see below).
-        target="$(umbriel workspaces --json |
+        target="$(canopy workspaces --json |
             jq -r --arg out "$name" '[.[] | select(.output != $out and .active)]
                 | (map(select(.focused)) + .) | first | "\(.name)/\(.output)" // empty')"
-        for id in $(umbriel windows --json |
+        for id in $(canopywc windows --json |
             jq -r --arg out "$name:" '.[] | select(.workspace | startswith($out)) | .id'); do
             [ -n "$target" ] || break
-            umbriel msg window-focus "$id"
-            umbriel msg window-move-to-workspace-silent "$target"
+            canopywc msg window-focus "$id"
+            canopywc msg window-move-to-workspace-silent "$target"
         done
-        umbriel output-destroy "$name" >/dev/null 2>&1 || true
+        canopywc output-destroy "$name" >/dev/null 2>&1 || true
         ;;
 esac
 ```
 
-Destroying an output moves its windows to another output, as when a monitor is unplugged, and Umbriel remembers the output as their home: when an output with the same name appears again, they move back to it. That is right for a monitor that returns after suspend, but it would pull a terminal that once opened on the stream onto every later stream. An explicit move, like the one above, drops that memory.
+Destroying an output moves its windows to another output, as when a monitor is unplugged, and Canopy remembers the output as their home: when an output with the same name appears again, they move back to it. That is right for a monitor that returns after suspend, but it would pull a terminal that once opened on the stream onto every later stream. An explicit move, like the one above, drops that memory.
 
 ## Sunshine configuration
 
@@ -56,7 +56,7 @@ In `~/.config/sunshine/sunshine.conf`, capture through wlr-screencopy, select th
 ```ini
 capture = wlr
 output_name = sunshine
-global_prep_cmd = [{"do":"/home/user/.config/sunshine/umbriel-output.sh create","undo":"/home/user/.config/sunshine/umbriel-output.sh remove"}]
+global_prep_cmd = [{"do":"/home/user/.config/sunshine/canopy-output.sh create","undo":"/home/user/.config/sunshine/canopy-output.sh remove"}]
 ```
 
 Replace `/home/user` with your home directory. Restart Sunshine after editing `sunshine.conf` or `apps.json`; it reads both only at startup.
@@ -86,7 +86,7 @@ In Sunshine's `apps.json`, launch Big Picture and close it when the session ends
 }
 ```
 
-Closing Big Picture makes Steam map its main window again. A new window takes focus by default, and Steam's may switch a physical monitor to its workspace. To keep focus where it was, give that window `default_focused = false` only for the length of a session: include a file that the script fills in `create` and empties in `remove`, then reload with `umbriel msg config-reload`.
+Closing Big Picture makes Steam map its main window again. A new window takes focus by default, and Steam's may switch a physical monitor to its workspace. To keep focus where it was, give that window `default_focused = false` only for the length of a session: include a file that the script fills in `create` and empties in `remove`, then reload with `canopywc msg config-reload`.
 
 ## Games
 

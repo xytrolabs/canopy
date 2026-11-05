@@ -3,23 +3,23 @@
 # not, and untabbing the column resumes every tab.
 set -euo pipefail
 
-readonly CLIENT="${UMBRIEL_UNMAP_CLIENT:-./build-debug/tests/unmap-client}"
+readonly CLIENT="${CANOPY_UNMAP_CLIENT:-./build-debug/tests/unmap-client}"
 
 accepts() {
-  if ! out=$("$UMBRIEL" msg "$@" 2>&1); then
+  if ! out=$("$CANOPY" msg "$@" 2>&1); then
     echo "expected '$*' to be accepted, got: $out"
     return 1
   fi
 }
 
 spawn_client() {
-  LOG_SUSPENDED=1 "$CLIENT" "$1" 400 300 > "$UMBRIEL_RUNTIME_DIR/$1.log" 2>&1 &
+  LOG_SUSPENDED=1 "$CLIENT" "$1" 400 300 > "$CANOPY_RUNTIME_DIR/$1.log" 2>&1 &
 }
 
 wait_for_windows() {
   local expected=$1 count=
   for _ in $(seq 60); do
-    count=$("$UMBRIEL" windows --json | jq 'length')
+    count=$("$CANOPY" windows --json | jq 'length')
     [[ $count == "$expected" ]] && return 0
     sleep 0.1
   done
@@ -30,7 +30,7 @@ wait_for_windows() {
 # The last suspended-state line a client printed, or "resumed" before it printed any.
 last_state() {
   local state
-  state=$(grep -E '^(suspended|resumed)$' "$UMBRIEL_RUNTIME_DIR/$1.log" | tail -n 1) || true
+  state=$(grep -E '^(suspended|resumed)$' "$CANOPY_RUNTIME_DIR/$1.log" | tail -n 1) || true
   echo "${state:-resumed}"
 }
 
@@ -40,23 +40,23 @@ wait_for_state() {
     [[ $(last_state "$title") == "$expected" ]] && return 0
     sleep 0.1
   done
-  echo "expected $title to be $expected, got $(last_state "$title"): $(< "$UMBRIEL_RUNTIME_DIR/$title.log")"
+  echo "expected $title to be $expected, got $(last_state "$title"): $(< "$CANOPY_RUNTIME_DIR/$title.log")"
   return 1
 }
 
-cat >> "$UMBRIEL_CONFIG" <<'EOF'
+cat >> "$CANOPY_CONFIG" <<'EOF'
 
 [[window_rule]]
 match.title = "^tab-"
 default_scrolling_column = "tabs"
 EOF
-"$UMBRIEL" msg config-reload > /dev/null
+"$CANOPY" msg config-reload > /dev/null
 
 spawn_client tab-a
 wait_for_windows 1
 spawn_client tab-b
 wait_for_windows 2
-"$UMBRIEL" settle
+"$CANOPY" settle
 
 # Stacked, both show.
 wait_for_state tab-a resumed

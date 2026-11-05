@@ -6,9 +6,9 @@ extern "C" {
 #include <wlr/util/box.h>
 }
 
-using namespace umbriel;
+using namespace canopy;
 
-UMBRIEL_TEST(insertedViewsAreNeverMembers) {
+CANOPY_TEST(insertedViewsAreNeverMembers) {
   auto layout = createLayout(LayoutMode::Stacking);
   View* view = reinterpret_cast<View*>(uintptr_t{0x1000});
   layout->insertView(view, 0);
@@ -21,7 +21,7 @@ UMBRIEL_TEST(insertedViewsAreNeverMembers) {
   CHECK_EQ(layout->targetBox(view).width, 0);
 }
 
-UMBRIEL_TEST(captureRestoresOnlyStackingSnapshots) {
+CANOPY_TEST(captureRestoresOnlyStackingSnapshots) {
   StackingLayout layout;
   const auto capture = layout.captureState();
   CHECK(capture.snapshot != nullptr);

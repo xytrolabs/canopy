@@ -1,9 +1,9 @@
-# Umbriel starting configuration
+# Canopy compositor starting configuration
 #
-# Copy this file to ~/.config/umbriel/config.toml. Most changes apply when the
-# file is saved. Check edits with `umbriel config validate`.
+# Copy this file to ~/.config/canopywc/config.toml. Most changes apply when
+# the file is saved. Check edits with `canopywc config validate`.
 #
-# Complete reference: https://docs.noctalia.dev/umbriel/
+# Complete reference: https://github.com/xytrolabs/canopy/blob/main/compositor/docs/user/index.md
 #
 # Commented settings below are examples, not built-in defaults.
 
@@ -11,7 +11,7 @@
 # Includes
 
 # Optional split configuration
-# https://docs.noctalia.dev/umbriel/configuration/#include
+# https://github.com/xytrolabs/canopy/blob/main/compositor/docs/user/configuration.md#include
 [include]
 files = []
 
@@ -21,17 +21,17 @@ files = []
 # ==============================================================================
 # General
 # Optional session examples. XWayland support is enabled by default.
-# https://docs.noctalia.dev/umbriel/configuration/#general
+# https://github.com/xytrolabs/canopy/blob/main/compositor/docs/user/configuration.md#general
 #
 [general]
-# autostart = ["noctalia", "kitty"]
+# autostart = ["canopy", "kitty"]
 # xwayland = false
 # Sharp X11 apps and games on scaled outputs; they see physical resolutions.
 # xwayland_native_resolution = true
-# Umbriel announces the X11 interface scale and cursor theme through XSETTINGS.
+# Canopy announces the X11 interface scale and cursor theme through XSETTINGS.
 # Turn this off to run your own manager, such as xsettingsd.
 # xwayland_xsettings = false
-# Select the monitor X11 games use as primary, using a connector or monitor identity from `umbriel outputs`.
+# Select the monitor X11 games use as primary, using a connector or monitor identity from `canopy outputs`.
 # xwayland_primary_output = "DP-1"
 # NVIDIA outputs without explicit synchronization wait for GPU rendering by default.
 # Disable this workaround if it causes stuttering or frame drops.
@@ -43,27 +43,27 @@ files = []
 # Lid events
 # Remove the laptop panel from the desktop while the lid is closed, then
 # restore it when the lid opens. Replace eDP-1 with the name from
-# `umbriel outputs`.
-# https://docs.noctalia.dev/umbriel/configuration/#events
+# `canopy outputs`.
+# https://github.com/xytrolabs/canopy/blob/main/compositor/docs/user/configuration.md#events
 #
 # [events]
-# lid_close = "umbriel msg output-disable eDP-1"
-# lid_open = "umbriel msg output-enable eDP-1"
+# lid_close = "canopy msg output-disable eDP-1"
+# lid_open = "canopy msg output-enable eDP-1"
 
 # ==============================================================================
 # Screencast
 # By default, the first target-changing action during an active share asks for
 # confirmation. Disable that protection only if immediate keybind changes are
 # preferred.
-# https://docs.noctalia.dev/umbriel/configuration/#screencast
+# https://github.com/xytrolabs/canopy/blob/main/compositor/docs/user/configuration.md#screencast
 #
 # [screencast]
 # disable_dynamic_confirmation = true
 
 # ==============================================================================
 # Outputs
-# Outputs are machine-specific. Run `umbriel outputs` to find names and modes.
-# https://docs.noctalia.dev/umbriel/outputs/
+# Outputs are machine-specific. Run `canopy outputs` to find names and modes.
+# https://github.com/xytrolabs/canopy/blob/main/compositor/docs/user/outputs.md
 #
 # [output.DP-1]
 # mode = "2560x1440@144"
@@ -76,7 +76,7 @@ files = []
 # ==============================================================================
 # Appearance
 # Blur uses a smaller radius than the built-in default.
-# https://docs.noctalia.dev/umbriel/appearance/
+# https://github.com/xytrolabs/canopy/blob/main/compositor/docs/user/appearance.md
 #
 [appearance.blur]
 radius = 3
@@ -115,16 +115,16 @@ radius = 3
 # Every effect is off until a preset is selected; border and window effects
 # scale with overview zoom. Include a bundled preset (adjust /usr for the
 # package prefix), then select it by name.
-# https://docs.noctalia.dev/umbriel/effects/
+# https://github.com/xytrolabs/canopy/blob/main/compositor/docs/user/effects.md
 #
 # [include]
-# files = ["/usr/share/umbriel/effects/border/pulse/effect.toml"]
-# For a cursor tail, include /usr/share/umbriel/effects/cursor/trail/effect.toml
+# files = ["/usr/share/canopy/effects/border/pulse/effect.toml"]
+# For a cursor tail, include /usr/share/canopy/effects/cursor/trail/effect.toml
 # and set cursor = "trail" in [effects].
-# For audio-reactive borders, include /usr/share/umbriel/effects/border/audio/effect.toml
+# For audio-reactive borders, include /usr/share/canopy/effects/border/audio/effect.toml
 # and set border = "audio" in [effects].
-# Enable Noctalia's Umbriel audio provider in its shell settings, or supply an
-# external effect-audio v2 producer with 64 spectrum bands. Umbriel does not capture audio.
+# Enable Noctalia's Canopy audio provider in its shell settings, or supply an
+# external effect-audio v2 producer with 64 spectrum bands. Canopy does not capture audio.
 # Pools accept matching presets defined/included separately. This one-member
 # example uses the bundled pulse preset; add other border names to choose.
 #
@@ -144,13 +144,13 @@ radius = 3
 # just the focused one (overview cards included).
 # border_unfocused = true
 # For a screen effect only while an output is shared (a portal screen share or a
-# screenshot), include /usr/share/umbriel/effects/screen/vignette/effect.toml and
+# screenshot), include /usr/share/canopy/effects/screen/vignette/effect.toml and
 # set screen_cast = "vignette" in [effects]; add in_capture = true for viewers to see it.
 
 # ==============================================================================
 # Input
 # Enable NumLock for the first physical keyboard; later devices inherit current locks.
-# https://docs.noctalia.dev/umbriel/input/
+# https://github.com/xytrolabs/canopy/blob/main/compositor/docs/user/input.md
 #
 # [input]
 #
@@ -173,28 +173,28 @@ numlock_toggle = true
 # Keybinds
 # Defining this table replaces the built-in bind set, so every active bind that
 # should remain available is listed here.
-# Syntax: https://docs.noctalia.dev/umbriel/keybinds/
-# Actions: https://docs.noctalia.dev/umbriel/actions/
+# Syntax: https://github.com/xytrolabs/canopy/blob/main/compositor/docs/user/keybinds.md
+# Actions: https://github.com/xytrolabs/canopy/blob/main/compositor/docs/user/actions.md
 [keybinds]
 
 # Applications and session
 "Mod+Return" = { action = "spawn kitty", repeat = false }
-"Mod" = "spawn noctalia msg panel-toggle launcher"
+"Mod" = "spawn canopy msg panel-toggle launcher"
 "Mod+Q" = { action = "window-close", repeat = false }
 "Mod+Escape" = "session-quit"
 "Mod+Shift+Escape" = { action = "shortcuts-inhibit-toggle", allow_when_inhibited = true, repeat = false }
 
 # Media, volume and brightness keys from any input device, routed through the
 # Noctalia shell so its OSDs show. Safe while the session is locked.
-# https://docs.noctalia.dev/noctalia/compositor-settings/umbriel
-"XF86AudioRaiseVolume" = { action = "spawn noctalia msg volume-up", allow_when_locked = true }
-"XF86AudioLowerVolume" = { action = "spawn noctalia msg volume-down", allow_when_locked = true }
-"XF86AudioMute" = { action = "spawn noctalia msg volume-mute", allow_when_locked = true, repeat = false }
-"XF86AudioPlay" = { action = "spawn noctalia msg media toggle", allow_when_locked = true, repeat = false }
-"XF86AudioNext" = { action = "spawn noctalia msg media next", allow_when_locked = true }
-"XF86AudioPrev" = { action = "spawn noctalia msg media previous", allow_when_locked = true }
-"XF86MonBrightnessUp" = { action = "spawn noctalia msg brightness-up", allow_when_locked = true }
-"XF86MonBrightnessDown" = { action = "spawn noctalia msg brightness-down", allow_when_locked = true }
+# https://github.com/xytrolabs/canopy/blob/main/compositor/docs/user/keybinds.md
+"XF86AudioRaiseVolume" = { action = "spawn canopy msg volume-up", allow_when_locked = true }
+"XF86AudioLowerVolume" = { action = "spawn canopy msg volume-down", allow_when_locked = true }
+"XF86AudioMute" = { action = "spawn canopy msg volume-mute", allow_when_locked = true, repeat = false }
+"XF86AudioPlay" = { action = "spawn canopy msg media toggle", allow_when_locked = true, repeat = false }
+"XF86AudioNext" = { action = "spawn canopy msg media next", allow_when_locked = true }
+"XF86AudioPrev" = { action = "spawn canopy msg media previous", allow_when_locked = true }
+"XF86MonBrightnessUp" = { action = "spawn canopy msg brightness-up", allow_when_locked = true }
+"XF86MonBrightnessDown" = { action = "spawn canopy msg brightness-down", allow_when_locked = true }
 
 # Focus and movement
 "Mod+Left" = "window-focus-left"
@@ -269,12 +269,15 @@ numlock_toggle = true
 
 # ==============================================================================
 # Layout
+# Canopy ships stacking: it is a traditional desktop, not a tiler. Switch to
+# "scrolling", "dwindle" or "master" for the tiling layouts, or per workspace
+# with the workspace-set-layout action.
+# https://github.com/xytrolabs/canopy/blob/main/compositor/docs/user/layout.md
+[layout]
+mode = "stacking" # "scrolling", "dwindle", "master", or "stacking".
 # New scrolling-layout windows start at half the output width. Without this
 # setting, each application chooses its starting width. Stacked columns retain
 # their most recently focused row when focus leaves and later returns.
-# https://docs.noctalia.dev/umbriel/layout/
-[layout]
-# mode = "scrolling" # "scrolling", "dwindle", "master", or "stacking".
 extent_presets = [0.333, 0.5, 0.667]
 
 # What a tiled window's own maximize button does: "column" fills the column,
@@ -313,7 +316,7 @@ default_extent_fraction = 0.5
 # ==============================================================================
 # Window rules
 # Rules combine in order, with later values overriding earlier ones.
-# https://docs.noctalia.dev/umbriel/window-rules/
+# https://github.com/xytrolabs/canopy/blob/main/compositor/docs/user/window-rules.md
 
 # Blur windows over the cached wallpaper blur. Set blur_optimized = false to
 # include overlapping windows behind them, at a GPU cost on every frame that
@@ -322,12 +325,12 @@ default_extent_fraction = 0.5
 blur = true
 
 [[window_rule]]
-match.app_id = "^dev.noctalia.Noctalia$"
+match.app_id = "^dev\\.canopy\\.(Canopy|Noctalia)$"
 default_floating = true
 default_floating_size_px = { width = 1020, height = 900 }
 
 [[window_rule]]
-match.app_id = "^dev.noctalia.UmbrielSharePicker$"
+match.app_id = "^dev\\.canopy\\.Canopy\\.Annotator$"
 default_floating = true
 default_floating_size_px = { width = 800, height = 600 }
 
@@ -407,9 +410,9 @@ default_pinned = true
 
 # ==============================================================================
 # Layer rules
-# https://docs.noctalia.dev/umbriel/layer-rules/
+# https://github.com/xytrolabs/canopy/blob/main/compositor/docs/user/layer-rules.md
 [[layer_rule]]
-match.namespace = "^noctalia-(bar-[^\"]+|notification|dock|panel|attached-panel|osd|desktop-widget-[^\"]*)$"
+match.namespace = "^canopy-(bar-[^\"]+|notification|dock|panel|attached-panel|osd|desktop-widget-[^\"]*)$"
 blur = true
 blur_ignore_alpha = 0.5
 blur_popups = true
@@ -418,15 +421,15 @@ blur_popups = true
 # live content behind them. The bar and desktop widgets sit on the wallpaper and
 # keep the cached wallpaper blur.
 [[layer_rule]]
-match.namespace = "^noctalia-(notification|dock|panel|attached-panel|osd)$"
+match.namespace = "^canopy-(notification|dock|panel|attached-panel|osd)$"
 blur_optimized = false
 
 # ==============================================================================
 # Overview
 # Built-in overview and animation values are used. The top-left hot corner opens
 # the overview after a short delay.
-# Overview: https://docs.noctalia.dev/umbriel/workspaces-overview/
-# Animation: https://docs.noctalia.dev/umbriel/animation/
+# Overview: https://github.com/xytrolabs/canopy/blob/main/compositor/docs/user/workspaces-overview.md
+# Animation: https://github.com/xytrolabs/canopy/blob/main/compositor/docs/user/animation.md
 [hot_corners.top_left]
 enabled = true
 delay_ms = 500

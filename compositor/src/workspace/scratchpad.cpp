@@ -19,7 +19,7 @@
 #include <set>
 #include <utility>
 
-namespace umbriel {
+namespace canopy {
 
   namespace {
     constexpr std::string_view kImplicitScratchpad = "default";
@@ -1485,4 +1485,4 @@ namespace umbriel {
     return restored;
   }
 
-} // namespace umbriel
+} // namespace canopy

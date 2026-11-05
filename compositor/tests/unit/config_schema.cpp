@@ -1,4 +1,4 @@
-// `umbriel config schema` prints what the registry declares. Values a declaration states by hand, rather than taking
+// `canopy config schema` prints what the registry declares. Values a declaration states by hand, rather than taking
 // from the field it reads, must agree with the reader.
 
 #include "check.h"
@@ -14,19 +14,19 @@
 #include <unistd.h>
 #include <vector>
 
-using umbriel::registry::Descriptions;
-using umbriel::registry::KeyDescription;
+using canopy::registry::Descriptions;
+using canopy::registry::KeyDescription;
 
 namespace {
 
   const std::filesystem::path& configPath() {
     static const std::filesystem::path path =
-        std::filesystem::temp_directory_path() / ("umbriel-config-schema-" + std::to_string(getpid()) + ".toml");
+        std::filesystem::temp_directory_path() / ("canopy-config-schema-" + std::to_string(getpid()) + ".toml");
     return path;
   }
 
   struct Loaded {
-    umbriel::Config config;
+    canopy::Config config;
     std::vector<std::string> messages;
   };
 
@@ -35,9 +35,9 @@ namespace {
       std::ofstream out(configPath());
       out << document;
     }
-    umbriel::loadConfig(configPath().c_str());
-    Loaded loaded{.config = umbriel::config(), .messages = {}};
-    for (const auto& diagnostic : umbriel::configDiagnostics()) {
+    canopy::loadConfig(configPath().c_str());
+    Loaded loaded{.config = canopy::config(), .messages = {}};
+    for (const auto& diagnostic : canopy::configDiagnostics()) {
       loaded.messages.push_back(diagnostic.message);
     }
     std::filesystem::remove(configPath());
@@ -118,8 +118,8 @@ namespace {
 } // namespace
 
 // Every stated default, written into a config, draws no diagnostic and loads as the built-in value.
-UMBRIEL_TEST(statedDefaultsLoadAsTheBuiltInValues) {
-  const Descriptions builtIn = umbriel::registry::describeConfig(umbriel::Config{});
+CANOPY_TEST(statedDefaultsLoadAsTheBuiltInValues) {
+  const Descriptions builtIn = canopy::registry::describeConfig(canopy::Config{});
   toml::table document;
   int written = 0;
   for (const KeyDescription& key : builtIn) {
@@ -147,13 +147,13 @@ UMBRIEL_TEST(statedDefaultsLoadAsTheBuiltInValues) {
 
   const Loaded loaded = load(document);
   if (!loaded.messages.empty()) {
-    umbriel::test::reportFailure(__FILE__, __LINE__, "stated defaults draw diagnostics:" + joined(loaded.messages));
+    canopy::test::reportFailure(__FILE__, __LINE__, "stated defaults draw diagnostics:" + joined(loaded.messages));
   }
-  const Descriptions reloaded = umbriel::registry::describeConfig(loaded.config);
+  const Descriptions reloaded = canopy::registry::describeConfig(loaded.config);
   CHECK_EQ(reloaded.size(), builtIn.size());
   for (size_t index = 0; index < builtIn.size() && index < reloaded.size(); ++index) {
     if (reloaded[index].defaultValue != builtIn[index].defaultValue) {
-      umbriel::test::reportFailure(
+      canopy::test::reportFailure(
           __FILE__, __LINE__,
           std::format(
               "{} states {} but loads as {}", builtIn[index].path, builtIn[index].defaultValue.dump(),
@@ -164,17 +164,17 @@ UMBRIEL_TEST(statedDefaultsLoadAsTheBuiltInValues) {
   }
   // A default a declaration states by hand is checked by the config it loads into, not by describing that config
   // back through the same declaration. Colors are compared above: a built-in color is not an exact n/255.
-  umbriel::Config withDefaults = loaded.config;
-  const umbriel::Config empty = load(toml::table{}).config;
+  canopy::Config withDefaults = loaded.config;
+  const canopy::Config empty = load(toml::table{}).config;
   withDefaults.colors = empty.colors;
   CHECK(withDefaults == empty);
 }
 
 // The JSON a tool caches by revision: fixed root keys, one entry per path in sorted order, integer bounds for integer
 // keys, and no default where a key has none.
-UMBRIEL_TEST(jsonIsSortedAndTyped) {
+CANOPY_TEST(jsonIsSortedAndTyped) {
   const auto json = nlohmann::ordered_json::parse(
-      umbriel::configSchemaJson(umbriel::registry::describeConfig(umbriel::Config{}), "0.1.0", std::nullopt)
+      canopy::configSchemaJson(canopy::registry::describeConfig(canopy::Config{}), "0.1.0", std::nullopt)
   );
   std::vector<std::string> roots;
   for (const auto& [key, value] : json.items()) {
@@ -187,12 +187,12 @@ UMBRIEL_TEST(jsonIsSortedAndTyped) {
   for (const auto& option : json["options"]) {
     const std::string path = option["path"];
     if (!(previous < path)) {
-      umbriel::test::reportFailure(__FILE__, __LINE__, std::format("{} is out of order or repeated", path));
+      canopy::test::reportFailure(__FILE__, __LINE__, std::format("{} is out of order or repeated", path));
     }
     previous = path;
     for (const char* bound : {"min", "max"}) {
       if (option["type"] == "int" && option.contains(bound) && !option[bound].is_number_integer()) {
-        umbriel::test::reportFailure(__FILE__, __LINE__, std::format("{} has a non-integer {}", path, bound));
+        canopy::test::reportFailure(__FILE__, __LINE__, std::format("{} has a non-integer {}", path, bound));
       }
     }
     if (path == "input.touchpad.natural_scroll") {
@@ -204,14 +204,14 @@ UMBRIEL_TEST(jsonIsSortedAndTyped) {
 }
 
 // Every value a key lists is one its reader accepts without complaint.
-UMBRIEL_TEST(listedValuesAreAccepted) {
+CANOPY_TEST(listedValuesAreAccepted) {
   const auto shaderPath = configPath().string() + ".glsl";
   {
     std::ofstream shader(shaderPath);
-    shader << "vec4 animation(vec2 uv) { return umbriel_sample(uv); }";
+    shader << "vec4 animation(vec2 uv) { return canopy_sample(uv); }";
   }
   int tried = 0;
-  for (const KeyDescription& key : umbriel::registry::describeConfig(umbriel::Config{})) {
+  for (const KeyDescription& key : canopy::registry::describeConfig(canopy::Config{})) {
     for (const std::string_view value : key.values) {
       std::string concrete;
       // A string array lists the values its entries may take.
@@ -229,7 +229,7 @@ UMBRIEL_TEST(listedValuesAreAccepted) {
       ++tried;
       for (const std::string& message : loaded.messages) {
         if (message.contains(concrete)) {
-          umbriel::test::reportFailure(
+          canopy::test::reportFailure(
               __FILE__, __LINE__, std::format(R"({} = "{}" is listed but rejected: {})", key.path, value, message)
           );
         }
@@ -240,8 +240,8 @@ UMBRIEL_TEST(listedValuesAreAccepted) {
   CHECK(tried > 50);
 }
 
-UMBRIEL_TEST(outputSdrTransferSchemaListsCanonicalValuesAndDefault) {
-  const auto descriptions = umbriel::registry::describeConfig(umbriel::Config{});
+CANOPY_TEST(outputSdrTransferSchemaListsCanonicalValuesAndDefault) {
+  const auto descriptions = canopy::registry::describeConfig(canopy::Config{});
   bool found = false;
   for (const auto& key : descriptions) {
     if (key.path == "output.<name>.sdr_transfer") {
@@ -254,8 +254,8 @@ UMBRIEL_TEST(outputSdrTransferSchemaListsCanonicalValuesAndDefault) {
   CHECK(found);
 }
 
-UMBRIEL_TEST(effectPoolSchemaReportsMembersPoliciesAndRequiredKind) {
-  const auto descriptions = umbriel::registry::describeConfig(umbriel::Config{});
+CANOPY_TEST(effectPoolSchemaReportsMembersPoliciesAndRequiredKind) {
+  const auto descriptions = canopy::registry::describeConfig(canopy::Config{});
   bool kind = false;
   bool choose = false;
   bool selection = false;
@@ -283,7 +283,7 @@ int main() {
   return RUN_TESTS();
 }
 
-UMBRIEL_TEST(pointerConfinementBooleanParsesAndReloads) {
+CANOPY_TEST(pointerConfinementBooleanParsesAndReloads) {
   const auto enabled = load(toml::parse("[[window_rule]]\nconfine_pointer = true\n"));
   CHECK(enabled.messages.empty());
   CHECK(enabled.config.windowRules.at(0).confinePointer.value_or(false));
@@ -296,7 +296,7 @@ UMBRIEL_TEST(pointerConfinementBooleanParsesAndReloads) {
   CHECK(std::ranges::any_of(invalid.messages, [](const auto& message) { return message.contains("confine_pointer"); }));
 }
 
-UMBRIEL_TEST(shortcutsInhibitionRuleParsesAndParticipatesInReloads) {
+CANOPY_TEST(shortcutsInhibitionRuleParsesAndParticipatesInReloads) {
   const auto enabled = load(toml::parse("[[window_rule]]\nallow_shortcuts_inhibit = true\n"));
   CHECK(enabled.messages.empty());
   CHECK(enabled.config.windowRules.at(0).allowShortcutsInhibit.value_or(false));

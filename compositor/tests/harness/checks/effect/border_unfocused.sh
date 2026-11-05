@@ -3,17 +3,17 @@
 # border preset, focused or not. effect/border.sh owns the focused-only default path.
 set -euo pipefail
 
-source "$UMBRIEL_HARNESS_LIB"
+source "$CANOPY_HARNESS_LIB"
 
-readonly IMAGE="$UMBRIEL_RUNTIME_DIR/effect-border-unfocused.png"
-cat > "$UMBRIEL_RUNTIME_DIR/focused-ring.glsl" <<'GLSL'
+readonly IMAGE="$CANOPY_RUNTIME_DIR/effect-border-unfocused.png"
+cat > "$CANOPY_RUNTIME_DIR/focused-ring.glsl" <<'GLSL'
 vec4 border(vec2 uv) { return vec4(1.0, 0.0, 0.0, 1.0); }
 GLSL
-cat > "$UMBRIEL_RUNTIME_DIR/unfocused-ring.glsl" <<'GLSL'
+cat > "$CANOPY_RUNTIME_DIR/unfocused-ring.glsl" <<'GLSL'
 vec4 border(vec2 uv) { return vec4(0.0, 1.0, 0.0, 1.0); }
 GLSL
 
-cat >> "$UMBRIEL_CONFIG" <<'EOF'
+cat >> "$CANOPY_CONFIG" <<'EOF'
 
 [animation]
 enabled = false
@@ -54,20 +54,20 @@ border_effect = "focused-ring"
 match.is_focused = false
 border_effect = "unfocused-ring"
 EOF
-"$UMBRIEL" msg config-reload > /dev/null
+"$CANOPY" msg config-reload > /dev/null
 
 spawn() {
-  FILL_COLOR=0xFF0000FF "$UMBRIEL_UNMAP_CLIENT" "$1" 300 200 > "$UMBRIEL_RUNTIME_DIR/$1.log" 2>&1 &
+  FILL_COLOR=0xFF0000FF "$CANOPY_UNMAP_CLIENT" "$1" 300 200 > "$CANOPY_RUNTIME_DIR/$1.log" 2>&1 &
   await_window "$1"
 }
-red_at() { "$UMBRIEL_PIXEL_PROBE" "$IMAGE" count 'r > 0.9 && g < 0.1 && b < 0.1' "$1"; }
-green_at() { "$UMBRIEL_PIXEL_PROBE" "$IMAGE" count 'g > 0.9 && r < 0.1 && b < 0.2' "$1"; }
+red_at() { "$CANOPY_PIXEL_PROBE" "$IMAGE" count 'r > 0.9 && g < 0.1 && b < 0.1' "$1"; }
+green_at() { "$CANOPY_PIXEL_PROBE" "$IMAGE" count 'g > 0.9 && r < 0.1 && b < 0.2' "$1"; }
 
 spawn border-unfocused-one
-"$UMBRIEL" settle > /dev/null
+"$CANOPY" settle > /dev/null
 read -r x1 y1 w1 _ < <(window_by_title border-unfocused-one | jq -r '"\(.x) \(.y) \(.w) \(.h)"')
 spawn border-unfocused-two
-"$UMBRIEL" settle > /dev/null
+"$CANOPY" settle > /dev/null
 read -r x2 y2 w2 _ < <(window_by_title border-unfocused-two | jq -r '"\(.x) \(.y) \(.w) \(.h)"')
 grim "$IMAGE"
 # The last-spawned window is focused: its padding paints the focused preset.
@@ -91,16 +91,16 @@ fi
 # The workspace row is the output box scaled by zoom (0.5) and centered, so a
 # window at (x,y) lands at (row_x + x/2, row_y + y/2) and its padding band
 # scales to 12 px (4 px ring + 20 px padding at half zoom).
-out_size=$("$UMBRIEL" outputs | awk '/Usable area:/ {split($3, a, /[x+]/); print a[1], a[2]; exit}')
+out_size=$("$CANOPY" outputs | awk '/Usable area:/ {split($3, a, /[x+]/); print a[1], a[2]; exit}')
 read -r out_w out_h <<< "$out_size"
 if [[ -z $out_w || -z $out_h ]]; then
-  echo "could not read the output size from: $("$UMBRIEL" outputs)"
+  echo "could not read the output size from: $("$CANOPY" outputs)"
   exit 1
 fi
 row_x=$(((out_w - out_w / 2) / 2))
 row_y=$(((out_h - out_h / 2) / 2))
-"$UMBRIEL" msg overview-open > /dev/null
-"$UMBRIEL" settle > /dev/null
+"$CANOPY" msg overview-open > /dev/null
+"$CANOPY" settle > /dev/null
 grim "$IMAGE"
 if (( $(green_at "2x2+$((row_x + x1 / 2 + w1 / 4))+$((row_y + y1 / 2 - 6))") < 4 )); then
   echo "overview card of the unfocused window paints no preset"

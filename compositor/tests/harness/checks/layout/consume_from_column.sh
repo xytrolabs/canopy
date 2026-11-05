@@ -5,7 +5,7 @@
 set -euo pipefail
 
 accepts() {
-  if ! out=$("$UMBRIEL" msg "$@" 2>&1); then
+  if ! out=$("$CANOPY" msg "$@" 2>&1); then
     echo "expected '$*' to be accepted, got: $out"
     return 1
   fi
@@ -18,7 +18,7 @@ spawn_client() {
 wait_for_windows() {
   local want=$1 count=
   for _ in $(seq 60); do
-    count=$("$UMBRIEL" windows --json | jq 'length')
+    count=$("$CANOPY" windows --json | jq 'length')
     [[ $count == "$want" ]] && return 0
     sleep 0.1
   done
@@ -27,15 +27,15 @@ wait_for_windows() {
 }
 
 field_of() {
-  "$UMBRIEL" windows --json | jq -r --arg title "harness-$1" --arg field "$2" '.[] | select(.title == $title) | .[$field]'
+  "$CANOPY" windows --json | jq -r --arg title "harness-$1" --arg field "$2" '.[] | select(.title == $title) | .[$field]'
 }
 
 focus_of() {
-  "$UMBRIEL" windows --json | jq -r '.[] | select(.active) | .title'
+  "$CANOPY" windows --json | jq -r '.[] | select(.active) | .title'
 }
 
-printf '\n[layout.scrolling]\ndefault_extent_fraction = 0.5\ncenter_focused = "never"\n' >> "$UMBRIEL_CONFIG"
-"$UMBRIEL" msg config-reload > /dev/null
+printf '\n[layout.scrolling]\ndefault_extent_fraction = 0.5\ncenter_focused = "never"\n' >> "$CANOPY_CONFIG"
+"$CANOPY" msg config-reload > /dev/null
 
 spawn_client a
 wait_for_windows 1
@@ -45,24 +45,24 @@ spawn_client c
 wait_for_windows 3
 spawn_client d
 wait_for_windows 4
-"$UMBRIEL" settle
+"$CANOPY" settle
 
 # Give the first column a different extent, so a pull that took the source's width instead of the focused column's
 # would show up below.
-"$UMBRIEL" msg window-focus-left > /dev/null
-"$UMBRIEL" msg window-focus-left > /dev/null
-"$UMBRIEL" msg window-focus-left > /dev/null
-"$UMBRIEL" settle
+"$CANOPY" msg window-focus-left > /dev/null
+"$CANOPY" msg window-focus-left > /dev/null
+"$CANOPY" msg window-focus-left > /dev/null
+"$CANOPY" settle
 if [[ $(focus_of) != harness-a ]]; then
   echo "expected harness-a focused, got $(focus_of)"
   exit 1
 fi
 accepts window-set-primary-extent 0.333
-"$UMBRIEL" settle
+"$CANOPY" settle
 
 # Focus b, the second column, so both sides have a column to pull from.
-"$UMBRIEL" msg window-focus-right > /dev/null
-"$UMBRIEL" settle
+"$CANOPY" msg window-focus-right > /dev/null
+"$CANOPY" settle
 if [[ $(focus_of) != harness-b ]]; then
   echo "expected harness-b focused, got $(focus_of)"
   exit 1
@@ -76,31 +76,31 @@ fi
 
 # From the left: a joins b's column directly below it, takes that column's width, and focus does not follow it.
 accepts window-consume-from-left
-"$UMBRIEL" settle
+"$CANOPY" settle
 if [[ $(field_of a x) != "$(field_of b x)" ]] || (($(field_of a y) <= $(field_of b y))); then
-  echo "expected harness-a below harness-b in the same column: $("$UMBRIEL" windows --json)"
+  echo "expected harness-a below harness-b in the same column: $("$CANOPY" windows --json)"
   exit 1
 fi
 if [[ $(field_of b w) != "$focused_width" || $(field_of a w) != "$focused_width" ]]; then
-  echo "expected the pulled window to take the focused column's width $focused_width: $("$UMBRIEL" windows --json)"
+  echo "expected the pulled window to take the focused column's width $focused_width: $("$CANOPY" windows --json)"
   exit 1
 fi
 if [[ $(focus_of) != harness-b ]]; then
   echo "expected focus to stay on harness-b, got $(focus_of)"
   exit 1
 fi
-if [[ $("$UMBRIEL" windows --json | jq '[.[].x] | unique | length') != 3 ]]; then
-  echo "expected three columns after the pull: $("$UMBRIEL" windows --json)"
+if [[ $("$CANOPY" windows --json | jq '[.[].x] | unique | length') != 3 ]]; then
+  echo "expected three columns after the pull: $("$CANOPY" windows --json)"
   exit 1
 fi
 
 # From the right: the anchor is the focused row, so c lands between b and a rather than at the column's end.
 accepts window-consume-from-right
-"$UMBRIEL" settle
+"$CANOPY" settle
 if [[ $(field_of c x) != "$(field_of b x)" ]] \
   || (($(field_of c y) <= $(field_of b y))) \
   || (($(field_of c y) >= $(field_of a y))); then
-  echo "expected harness-c between harness-b and harness-a: $("$UMBRIEL" windows --json)"
+  echo "expected harness-c between harness-b and harness-a: $("$CANOPY" windows --json)"
   exit 1
 fi
 if [[ $(focus_of) != harness-b ]]; then
@@ -111,10 +111,10 @@ fi
 # Tabbing the column makes its rows one group showing the focused window; the next window pulled in becomes another tab,
 # at the end of the group by default, and the shown tab stays.
 accepts column-toggle-tabbed
-"$UMBRIEL" settle
+"$CANOPY" settle
 accepts window-consume-from-right
-"$UMBRIEL" settle
-windows=$("$UMBRIEL" windows --json)
+"$CANOPY" settle
+windows=$("$CANOPY" windows --json)
 if ! jq -e '
   length == 4
   and (map(select(.tabbed)) | length) == 4
@@ -129,10 +129,10 @@ fi
 
 # The master layout pulls the neighboring area's window instead of a neighboring column's.
 accepts workspace-set-layout master
-"$UMBRIEL" settle
+"$CANOPY" settle
 spawn_client e
 wait_for_windows 5
-"$UMBRIEL" settle
+"$CANOPY" settle
 if [[ $(focus_of) != harness-e ]]; then
   echo "expected the new window focused in the master layout, got $(focus_of)"
   exit 1
@@ -140,10 +140,10 @@ fi
 ex=$(field_of e x)
 ey=$(field_of e y)
 # The master area is the leftmost one, and holds the window the pull should bring over.
-master_title=$("$UMBRIEL" windows --json | jq -r 'sort_by(.x) | .[0].title')
+master_title=$("$CANOPY" windows --json | jq -r 'sort_by(.x) | .[0].title')
 accepts window-consume-from-left
-"$UMBRIEL" settle
-windows=$("$UMBRIEL" windows --json)
+"$CANOPY" settle
+windows=$("$CANOPY" windows --json)
 if ! jq -e --arg title "$master_title" --argjson ex "$ex" --argjson ey "$ey" '
   ([.[].x] | unique | length) == 1
   and ((.[] | select(.title == $title) | .y) > $ey)
@@ -159,12 +159,12 @@ fi
 
 # A dwindle leaf holds one window, so there is nothing to pull and the tree must not move.
 accepts workspace-set-layout dwindle
-"$UMBRIEL" settle
-before=$("$UMBRIEL" windows --json | jq -c 'sort_by(.title) | map({title, x, y, w, h})')
+"$CANOPY" settle
+before=$("$CANOPY" windows --json | jq -c 'sort_by(.title) | map({title, x, y, w, h})')
 accepts window-consume-from-left
 accepts window-consume-from-right
-"$UMBRIEL" settle
-after=$("$UMBRIEL" windows --json | jq -c 'sort_by(.title) | map({title, x, y, w, h})')
+"$CANOPY" settle
+after=$("$CANOPY" windows --json | jq -c 'sort_by(.title) | map({title, x, y, w, h})')
 if [[ $before != "$after" ]]; then
   echo "expected dwindle to leave every window where it was: before=$before after=$after"
   exit 1

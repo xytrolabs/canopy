@@ -5,15 +5,15 @@
 # limit, a workspace transfer is rejected without changing either output.
 set -euo pipefail
 
-readonly BASELINE="$(< "$UMBRIEL_CONFIG")"
+readonly BASELINE="$(< "$CANOPY_CONFIG")"
 
 write_config() {
-  printf '%s\n%s\n' "$BASELINE" "$1" > "$UMBRIEL_CONFIG"
-  "$UMBRIEL" msg config-reload > /dev/null
+  printf '%s\n%s\n' "$BASELINE" "$1" > "$CANOPY_CONFIG"
+  "$CANOPY" msg config-reload > /dev/null
 }
 
 names_on() {
-  "$UMBRIEL" workspaces --json |
+  "$CANOPY" workspaces --json |
     jq -r --arg out "$1" '[.[] | select(.output == $out)] | sort_by(.index) | map(.name) | join(" ")'
 }
 
@@ -30,17 +30,17 @@ expect_names() {
 wait_for_windows() {
   local want=$1
   for _ in $(seq 60); do
-    [[ $("$UMBRIEL" windows --json | jq 'length') -eq $want ]] && return 0
+    [[ $("$CANOPY" windows --json | jq 'length') -eq $want ]] && return 0
     sleep 0.1
   done
-  echo "expected $want windows, got: $("$UMBRIEL" windows --json)"
+  echo "expected $want windows, got: $("$CANOPY" windows --json)"
   exit 1
 }
 
 workspace_index_of_window() {
   local workspace_id
-  workspace_id=$("$UMBRIEL" windows --json | jq -r '.[0].workspace')
-  "$UMBRIEL" workspaces --json | jq -r --arg id "$workspace_id" '.[] | select(.id == $id) | .index'
+  workspace_id=$("$CANOPY" windows --json | jq -r '.[0].workspace')
+  "$CANOPY" workspaces --json | jq -r --arg id "$workspace_id" '.[] | select(.id == $id) | .index'
 }
 
 # A reload reaches each group through its own output projection, so the neighbour's inventory is the control here.
@@ -50,7 +50,7 @@ expect_names HEADLESS-1 "1 2 3" "floor applied on reload"
 expect_names HEADLESS-2 "1" "floor scoped to its output"
 
 # The floor is not a ceiling: occupying the last workspace still appends a trailing empty one.
-"$UMBRIEL" msg workspace-switch 3 --output HEADLESS-1 > /dev/null
+"$CANOPY" msg workspace-switch 3 --output HEADLESS-1 > /dev/null
 foot --title=min-workspaces-view sh -c 'sleep 120' > /dev/null 2>&1 &
 wait_for_windows 1
 expect_names HEADLESS-1 "1 2 3 4" "trailing empty above the floor"
@@ -59,8 +59,8 @@ if [[ $(workspace_index_of_window) != "3" ]]; then
   exit 1
 fi
 
-window_id=$("$UMBRIEL" windows --json | jq -r '.[0].id')
-"$UMBRIEL" msg window-close "$window_id" > /dev/null
+window_id=$("$CANOPY" windows --json | jq -r '.[0].id')
+"$CANOPY" msg window-close "$window_id" > /dev/null
 wait_for_windows 0
 expect_names HEADLESS-1 "1 2 3" "pruning stops at the floor"
 
@@ -93,31 +93,31 @@ position = [1280, 0]
 [[window_rule]]
 match.title = "^workspace-limit-source$"
 default_output = "HEADLESS-2"'
-"$UMBRIEL" msg workspace-switch 64 --output HEADLESS-1 > /dev/null
+"$CANOPY" msg workspace-switch 64 --output HEADLESS-1 > /dev/null
 foot --title=workspace-limit-view sleep 120 > /dev/null 2>&1 &
 wait_for_windows 1
 expect_names HEADLESS-1 "$(seq -s ' ' 64)" "trailing empty respects the limit"
 [[ $(workspace_index_of_window) == 64 ]]
-"$UMBRIEL" msg window-move-to-workspace 1 --output HEADLESS-1 > /dev/null
+"$CANOPY" msg window-move-to-workspace 1 --output HEADLESS-1 > /dev/null
 expect_names HEADLESS-1 "$(seq -s ' ' 64)" "leading empty respects the limit"
 [[ $(workspace_index_of_window) == 1 ]]
-"$UMBRIEL" msg window-move-to-workspace 64 --output HEADLESS-1 > /dev/null
+"$CANOPY" msg window-move-to-workspace 64 --output HEADLESS-1 > /dev/null
 foot --title=workspace-limit-source sleep 120 > /dev/null 2>&1 &
 wait_for_windows 2
-before_transfer=$("$UMBRIEL" windows --json)
+before_transfer=$("$CANOPY" windows --json)
 source_id=$(jq -r '.[] | select(.title == "workspace-limit-source") | .id' <<< "$before_transfer")
 source_workspace=$(jq -r '.[] | select(.title == "workspace-limit-source") | .workspace' <<< "$before_transfer")
 if [[ $source_workspace != HEADLESS-2:* ]]; then
   echo "workspace transfer source did not map on HEADLESS-2: $before_transfer"
   exit 1
 fi
-"$UMBRIEL" msg window-focus-warp "$source_id" > /dev/null
-if "$UMBRIEL" msg workspace-move-to-output-left > /dev/null 2>&1; then
+"$CANOPY" msg window-focus-warp "$source_id" > /dev/null
+if "$CANOPY" msg workspace-move-to-output-left > /dev/null 2>&1; then
   echo "workspace transfer exceeded the output limit"
   exit 1
 fi
 expect_names HEADLESS-1 "$(seq -s ' ' 64)" "workspace transfer respects the limit"
-if [[ $("$UMBRIEL" windows --json | jq -r --arg id "$source_id" '.[] | select(.id == $id) | .workspace') != "$source_workspace" ]]; then
+if [[ $("$CANOPY" windows --json | jq -r --arg id "$source_id" '.[] | select(.id == $id) | .workspace') != "$source_workspace" ]]; then
   echo "rejected transfer moved its source window"
   exit 1
 fi

@@ -8,7 +8,7 @@
 #include <cmath>
 #include <utility>
 
-namespace umbriel {
+namespace canopy {
 
   namespace {
 
@@ -329,4 +329,4 @@ namespace umbriel {
     }
   }
 
-} // namespace umbriel
+} // namespace canopy

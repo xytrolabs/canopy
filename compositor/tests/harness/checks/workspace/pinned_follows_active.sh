@@ -3,11 +3,11 @@
 # workspace, cannot be parked on a hidden workspace, and unpins onto the workspace on screen.
 set -euo pipefail
 
-msg() { "$UMBRIEL" msg "$@" > /dev/null; }
-window() { "$UMBRIEL" windows --json | jq -c --arg title "$1" '.[] | select(.title == $title)'; }
-active_id() { "$UMBRIEL" workspaces --json | jq -r '.[] | select(.output == "HEADLESS-1" and .active) | .id'; }
+msg() { "$CANOPY" msg "$@" > /dev/null; }
+window() { "$CANOPY" windows --json | jq -c --arg title "$1" '.[] | select(.title == $title)'; }
+active_id() { "$CANOPY" workspaces --json | jq -r '.[] | select(.output == "HEADLESS-1" and .active) | .id'; }
 spawn() {
-  "$UMBRIEL_UNMAP_CLIENT" "$1" 300 200 > "$UMBRIEL_RUNTIME_DIR/$1.log" 2>&1 &
+  "$CANOPY_UNMAP_CLIENT" "$1" 300 200 > "$CANOPY_RUNTIME_DIR/$1.log" 2>&1 &
   for _ in $(seq 60); do
     [[ -n $(window "$1") ]] && return
     sleep 0.05
@@ -17,13 +17,13 @@ spawn() {
 }
 on_active() {
   local title=$1 snapshot
-  "$UMBRIEL" settle
+  "$CANOPY" settle
   snapshot=$(window "$title")
   jq -e --arg id "$(active_id)" '.workspace == $id and .visible' <<< "$snapshot" > /dev/null \
     || { echo "$title is not on the active workspace $(active_id): $snapshot"; exit 1; }
 }
 
-cat >> "$UMBRIEL_CONFIG" <<'CONFIG'
+cat >> "$CANOPY_CONFIG" <<'CONFIG'
 [animation]
 enabled = false
 [[workspace]]
@@ -43,12 +43,12 @@ on_active pinned
 # The pinned window follows each switch, and the empty trailing workspace stays the only sentinel.
 msg workspace-next
 on_active pinned
-before=$("$UMBRIEL" workspaces --json | jq length)
+before=$("$CANOPY" workspaces --json | jq length)
 msg workspace-next || true
 on_active pinned
-[[ $("$UMBRIEL" workspaces --json | jq length) == "$before" ]] \
-  || { echo "a pinned window made the trailing sentinel occupied: $("$UMBRIEL" workspaces --json)"; exit 1; }
-"$UMBRIEL" workspaces --json | jq -e --arg id "$(active_id)" \
+[[ $("$CANOPY" workspaces --json | jq length) == "$before" ]] \
+  || { echo "a pinned window made the trailing sentinel occupied: $("$CANOPY" workspaces --json)"; exit 1; }
+"$CANOPY" workspaces --json | jq -e --arg id "$(active_id)" \
   '.[] | select(.id == $id) | (.occupied | not) and .window_count == 0' > /dev/null
 
 # A pinned window cannot be parked on a hidden workspace.

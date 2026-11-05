@@ -5,21 +5,21 @@
 # per identity, and opening effects, which wait for the title to settle.
 set -euo pipefail
 
-readonly CLIENT="${UMBRIEL_UNMAP_CLIENT:-./build-debug/unmap-client}"
-readonly DIM_LOG="$UMBRIEL_RUNTIME_DIR/dim-blank-title.log"
-readonly FLOAT_LOG="$UMBRIEL_RUNTIME_DIR/float-blank-title.log"
-readonly TAG_LOG="$UMBRIEL_RUNTIME_DIR/blank-tag.log"
-readonly DIM_FIFO="$UMBRIEL_RUNTIME_DIR/dim-blank-title-control"
-readonly FLOAT_FIFO="$UMBRIEL_RUNTIME_DIR/float-blank-title-control"
-readonly BEFORE_SHOT="$UMBRIEL_RUNTIME_DIR/dim-blank-title-before.png"
-readonly AFTER_SHOT="$UMBRIEL_RUNTIME_DIR/dim-blank-title-after.png"
+readonly CLIENT="${CANOPY_UNMAP_CLIENT:-./build-debug/unmap-client}"
+readonly DIM_LOG="$CANOPY_RUNTIME_DIR/dim-blank-title.log"
+readonly FLOAT_LOG="$CANOPY_RUNTIME_DIR/float-blank-title.log"
+readonly TAG_LOG="$CANOPY_RUNTIME_DIR/blank-tag.log"
+readonly DIM_FIFO="$CANOPY_RUNTIME_DIR/dim-blank-title-control"
+readonly FLOAT_FIFO="$CANOPY_RUNTIME_DIR/float-blank-title-control"
+readonly BEFORE_SHOT="$CANOPY_RUNTIME_DIR/dim-blank-title-before.png"
+readonly AFTER_SHOT="$CANOPY_RUNTIME_DIR/dim-blank-title-after.png"
 
 if [[ ! -x $CLIENT ]]; then
   echo "unmap-client is not built"
   exit 1
 fi
 
-cat >> "$UMBRIEL_CONFIG" <<'EOF'
+cat >> "$CANOPY_CONFIG" <<'EOF'
 
 [animation]
 enabled = false
@@ -48,12 +48,12 @@ default_floating = true
 match.xdg_tag = "^$"
 default_floating = true
 EOF
-"$UMBRIEL" msg config-reload > /dev/null
+"$CANOPY" msg config-reload > /dev/null
 
 await_window() {
   local filter=$1 message=$2 windows=
   for _ in $(seq 80); do
-    windows=$("$UMBRIEL" windows --json)
+    windows=$("$CANOPY" windows --json)
     jq -e "$filter" <<< "$windows" > /dev/null && return 0
     sleep 0.05
   done
@@ -66,10 +66,10 @@ await_window() {
 window_green() {
   local shot=$1 visual_width visual_height visual_x visual_y green
   read -r visual_x visual_y visual_width visual_height < <(
-    "$UMBRIEL_PIXEL_PROBE" "$shot" bbox '!(r < 0.01 && g > 0.99 && b < 0.01)'
+    "$CANOPY_PIXEL_PROBE" "$shot" bbox '!(r < 0.01 && g > 0.99 && b < 0.01)'
   )
   read -r _ green _ < <(
-    "$UMBRIEL_PIXEL_PROBE" "$shot" mean "20x20+$((visual_x + visual_width / 2 - 10))+$((visual_y + visual_height / 2 - 10))"
+    "$CANOPY_PIXEL_PROBE" "$shot" mean "20x20+$((visual_x + visual_width / 2 - 10))+$((visual_y + visual_height / 2 - 10))"
   )
   echo "$green"
 }
@@ -80,7 +80,7 @@ exec {dim_fd}<>"$DIM_FIFO"
 env APP_ID=dim-blank-title NO_TITLE=1 TITLE_AFTER_MAP= \
   "$CLIENT" dim-blank-title 800 600 <&"$dim_fd" > "$DIM_LOG" 2>&1 &
 await_window 'length == 1 and .[0].app_id == "dim-blank-title"' "titleless window did not map" || exit 1
-"$UMBRIEL" settle
+"$CANOPY" settle
 grim "$BEFORE_SHOT"
 before_green=$(window_green "$BEFORE_SHOT")
 

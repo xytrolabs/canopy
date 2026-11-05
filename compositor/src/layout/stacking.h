@@ -2,7 +2,7 @@
 
 #include "layout/layout.h"
 
-namespace umbriel {
+namespace canopy {
   class StackingLayout final : public Layout {
   public:
     LayoutMode mode() const override { return LayoutMode::Stacking; }
@@ -35,4 +35,4 @@ namespace umbriel {
     const std::vector<Column>& columns() const override;
     bool isFullWidth(int) const override { return false; }
   };
-} // namespace umbriel
+} // namespace canopy

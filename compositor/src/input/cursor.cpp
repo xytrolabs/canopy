@@ -37,7 +37,7 @@
 #include "workspace/workspace.h"
 #include "xwayland/xwayland.h"
 
-namespace umbriel {
+namespace canopy {
 
   namespace {
     constexpr Logger kLog("cursor");
@@ -416,19 +416,19 @@ namespace umbriel {
     if (!corner.enabled || !corner.action) {
       return nullptr;
     }
-    const Output* umbrielOutput = m_server->outputFromWlr(output);
+    const Output* canopyOutput = m_server->outputFromWlr(output);
     View* focused = View::fromSurface(seat->keyboard_state.focused_surface);
     // Corner handling precedes pointer-output refocus. Use the destination's remembered focus when the seat is
     // elsewhere, including click-to-focus sessions where crossing outputs does not move keyboard focus at all.
-    if (umbrielOutput != nullptr && (focused == nullptr || focused->currentOutput() != umbrielOutput)) {
-      const WorkspaceGroup* group = umbrielOutput->workspaceGroup();
+    if (canopyOutput != nullptr && (focused == nullptr || focused->currentOutput() != canopyOutput)) {
+      const WorkspaceGroup* group = canopyOutput->workspaceGroup();
       const Workspace* workspace = group != nullptr ? group->active() : nullptr;
       focused = workspace != nullptr ? workspace->focusedView() : nullptr;
     }
     if (focused != nullptr
         && focused->mapped()
         && focused->onActiveWorkspace()
-        && focused->currentOutput() == umbrielOutput
+        && focused->currentOutput() == canopyOutput
         && (focused->layoutFullscreen() || focused->currentFullscreen())) {
       return nullptr;
     }
@@ -896,7 +896,7 @@ namespace umbriel {
       m_activeXcursorManager = nullptr;
       m_activeXcursorName.clear();
     }
-    // wlroots paces a visible raw surface. When Umbriel has detached it for a
+    // wlroots paces a visible raw surface. When Canopy has detached it for a
     // compositor override or cursor hiding, complete Xwayland's callback here.
     if (m_compositorOwnsCursor || m_cursorHidden) {
       finishClientCursorFrame();
@@ -988,7 +988,7 @@ namespace umbriel {
     m_activeXcursorName = name;
   }
 
-#ifdef UMBRIEL_HARNESS
+#ifdef CANOPY_HARNESS
   std::string_view Cursor::clientCursorSourceForTest() const {
     if (!m_clientCursorKnown) {
       return "none";
@@ -3722,4 +3722,4 @@ namespace umbriel {
     grab->workspace->markArrange(false);
   }
 
-} // namespace umbriel
+} // namespace canopy

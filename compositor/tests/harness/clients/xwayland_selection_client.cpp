@@ -120,8 +120,8 @@ namespace {
         {&state.atoms.clipboard, "CLIPBOARD"},
         {&state.atoms.targets, "TARGETS"},
         {&state.atoms.utf8String, "UTF8_STRING"},
-        {&state.atoms.clipboardProperty, "_UMBRIEL_CLIPBOARD_READ"},
-        {&state.atoms.primaryProperty, "_UMBRIEL_PRIMARY_READ"},
+        {&state.atoms.clipboardProperty, "_CANOPY_CLIPBOARD_READ"},
+        {&state.atoms.primaryProperty, "_CANOPY_PRIMARY_READ"},
         {&state.atoms.netWmName, "_NET_WM_NAME"},
         {&state.atoms.netWmState, "_NET_WM_STATE"},
         {&state.atoms.netWmStateFullscreen, "_NET_WM_STATE_FULLSCREEN"},
@@ -181,7 +181,7 @@ namespace {
         state.connection, XCB_PROP_MODE_REPLACE, state.window, state.atoms.netWmName, state.atoms.utf8String, 8,
         static_cast<uint32_t>(title.size()), title.data()
     );
-    const std::string wmClass = std::string(title) + '\0' + "UmbrielXwaylandSelection" + '\0';
+    const std::string wmClass = std::string(title) + '\0' + "CanopyXwaylandSelection" + '\0';
     xcb_change_property(
         state.connection, XCB_PROP_MODE_REPLACE, state.window, XCB_ATOM_WM_CLASS, XCB_ATOM_STRING, 8,
         static_cast<uint32_t>(wmClass.size()), wmClass.data()

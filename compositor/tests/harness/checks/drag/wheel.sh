@@ -8,7 +8,7 @@ readonly OUTPUT_W=1280
 readonly OUTPUT_H=720
 readonly DROP_X=630
 readonly DROP_Y=360
-readonly POINTER="${UMBRIEL_POINTER_CLIENT:-./build-debug/tests/pointer-client}"
+readonly POINTER="${CANOPY_POINTER_CLIENT:-./build-debug/tests/pointer-client}"
 
 pointer() {
   "$POINTER" "$OUTPUT_W" "$OUTPUT_H" "$@"
@@ -18,7 +18,7 @@ spawn_client() {
   foot --title="drag-wheel-$1" sh -c 'sleep 120' > /dev/null 2>&1 &
 }
 
-cat >> "$UMBRIEL_CONFIG" <<'EOF'
+cat >> "$CANOPY_CONFIG" <<'EOF'
 
 [layout.scrolling]
 default_extent_fraction = 0.5
@@ -27,23 +27,23 @@ default_extent_fraction = 0.5
 "Mod+WheelUp" = "window-focus-left"
 "Mod+WheelDown" = "window-focus-right"
 EOF
-"$UMBRIEL" msg config-reload > /dev/null
+"$CANOPY" msg config-reload > /dev/null
 
 for id in $(seq 1 6); do
   spawn_client "$id"
   for _ in $(seq 60); do
-    [[ $("$UMBRIEL" windows --json | jq 'length') -eq $id ]] && break
+    [[ $("$CANOPY" windows --json | jq 'length') -eq $id ]] && break
     sleep 0.25
   done
 done
-"$UMBRIEL" settle
+"$CANOPY" settle
 
 for _ in $(seq 1 5); do
-  "$UMBRIEL" msg window-focus-left > /dev/null
+  "$CANOPY" msg window-focus-left > /dev/null
 done
-"$UMBRIEL" settle
+"$CANOPY" settle
 
-windows=$("$UMBRIEL" windows --json)
+windows=$("$CANOPY" windows --json)
 if [[ $(jq -r '.[] | select(.focused) | .title' <<< "$windows") != drag-wheel-1 ]]; then
   echo "expected the first column to be focused: $windows"
   exit 1
@@ -57,9 +57,9 @@ for _ in $(seq 1 5); do
 done
 commands+=(release "$BTN_LEFT" mod none)
 pointer "${commands[@]}"
-"$UMBRIEL" settle
+"$CANOPY" settle
 
-windows=$("$UMBRIEL" windows --json)
+windows=$("$CANOPY" windows --json)
 source_x=$(jq -r '.[] | select(.title == "drag-wheel-1") | .x' <<< "$windows")
 left_x=$(jq -r '.[] | select(.title == "drag-wheel-3") | .x' <<< "$windows")
 right_x=$(jq -r '.[] | select(.title == "drag-wheel-4") | .x' <<< "$windows")

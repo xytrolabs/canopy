@@ -1,6 +1,6 @@
 # Appearance
 
-Configure Umbriel's colors, window decorations, blur, and shadows.
+Configure Canopy's colors, window decorations, blur, and shadows.
 
 ## Colors
 
@@ -22,7 +22,7 @@ Colors use `#RRGGBB` or `#RRGGBBAA`.
 
 | Key                | Description                                                             |
 | ------------------ | ----------------------------------------------------------------------- |
-| `background`       | Background for Umbriel panels and banners.                              |
+| `background`       | Background for Canopy panels and banners.                              |
 | `text_primary`     | Primary text.                                                           |
 | `text_muted`       | Secondary help and status text.                                         |
 | `accent_primary`   | Titles, key chords, and primary emphasis.                               |
@@ -150,7 +150,7 @@ Choose a title bar mode:
 
 | Mode           | Behavior                                                                                   |
 | -------------- | ------------------------------------------------------------------------------------------ |
-| `"off"`        | Hide Umbriel's title bar (the default).                                                    |
+| `"off"`        | Hide Canopy's title bar (the default).                                                    |
 | `"negotiated"` | Show for Wayland windows only when decoration negotiation selects server-side decorations. |
 | `"on"`         | Follow client decoration preferences; show when no preference is known.                    |
 | `"forced"`     | Show regardless of client preference.                                                      |
@@ -187,9 +187,9 @@ match.is_dialog = true
 title_bar_buttons = ["close"]
 ```
 
-Application-drawn headerbars, tab strips, and custom controls remain part of the application content. To avoid duplicate title bars, select the application's native or system title bar option where available. `prefer_no_csd = true` still advertises Umbriel's preference to applications that support decoration negotiation.
+Application-drawn headerbars, tab strips, and custom controls remain part of the application content. To avoid duplicate title bars, select the application's native or system title bar option where available. `prefer_no_csd = true` still advertises Canopy's preference to applications that support decoration negotiation.
 
-Drag empty title bar space with the left button to move a window without a modifier, or double-click it to toggle maximize. Click a button to minimize, maximize/restore, or close the window. Buttons activate on release inside the same button. Floating windows also have modifier-free resize grips around their borders and corners, including when the Umbriel title bar is hidden. This also applies to individually floated windows in tiling layouts. Application content keeps its normal pointer behavior.
+Drag empty title bar space with the left button to move a window without a modifier, or double-click it to toggle maximize. Click a button to minimize, maximize/restore, or close the window. Buttons activate on release inside the same button. Floating windows also have modifier-free resize grips around their borders and corners, including when the Canopy title bar is hidden. This also applies to individually floated windows in tiling layouts. Application content keeps its normal pointer behavior.
 
 Enabled buttons show a pointing cursor on hover. Their colors lighten against dark title bars and darken against light ones; pressing makes them darker again. Disabled maximize buttons keep the arrow cursor and do not highlight.
 

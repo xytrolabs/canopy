@@ -7,7 +7,7 @@
 #include "wlr.h"
 #include "xwayland/xwayland.h"
 
-namespace umbriel {
+namespace canopy {
 
   namespace {
 
@@ -87,7 +87,7 @@ namespace umbriel {
     for (unsigned depth = 0; parent != nullptr && depth < 64; ++depth, parent = parent->parent) {
       for (const auto& view : m_server.views()) {
         if (view != nullptr && view->xwaylandSurface() == parent) {
-          (void)umbrielfx_scene_node_set_capture_excluded(
+          (void)canopyfx_scene_node_set_capture_excluded(
               &m_tree->node, m_captureBlockedBeforePopup || view->captureBlocked()
           );
           return;
@@ -101,7 +101,7 @@ namespace umbriel {
     for (const auto& view : m_server.views()) {
       blocked |= view != nullptr && view->xwaylandSurface() != nullptr && view->captureBlocked();
     }
-    (void)umbrielfx_scene_node_set_capture_excluded(&m_tree->node, blocked);
+    (void)canopyfx_scene_node_set_capture_excluded(&m_tree->node, blocked);
   }
 
   void XwaylandUnmanaged::onSetGeometry(wl_listener* listener, void* /*data*/) {
@@ -204,4 +204,4 @@ namespace umbriel {
     syncPosition();
   }
 
-} // namespace umbriel
+} // namespace canopy

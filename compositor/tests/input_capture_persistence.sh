@@ -72,7 +72,7 @@ send quit
 wait "$PERSIST_PID"
 
 for _ in $(seq 200); do
-  "$UMBRIEL" input-capture-permissions --json > "$RUNTIME/transient-permissions.json"
+  "$CANOPY" input-capture-permissions --json > "$RUNTIME/transient-permissions.json"
   if jq -e 'all(.[]; .persist_mode != 1)' "$RUNTIME/transient-permissions.json" > /dev/null; then break; fi
   sleep 0.025
 done
@@ -110,7 +110,7 @@ reject_private_restore() {
   await_events "$PRIVATE_PERSIST_LOG" 'started .*status=1' 1 "untrusted restore requires consent: $label"
   finish_private_persistence_client
 }
-private_persistence_client named 'org.umbriel.test.receiver'
+private_persistence_client named 'org.canopy.test.receiver'
 private_send 'start 2 2'
 wait_confirmation
 physical 'tap 19'
@@ -119,7 +119,7 @@ await_events "$PRIVATE_PERSIST_LOG" 'started .*status=0 capabilities=2' 1 "remem
 private_send "save-grant $RUNTIME/grant-original.token"
 await_events "$PRIVATE_PERSIST_LOG" grant-saved 1 "original compositor grant saved"
 finish_private_persistence_client
-private_persistence_client rotated 'org.umbriel.test.receiver' "$RUNTIME/grant-original.token"
+private_persistence_client rotated 'org.canopy.test.receiver' "$RUNTIME/grant-original.token"
 private_send 'start 2 2'
 await_events "$PRIVATE_PERSIST_LOG" 'started .*status=0 capabilities=2' 1 "generic application restored"
 no_confirmation 'generic application grant restore'
@@ -130,28 +130,28 @@ if cmp -s "$RUNTIME/grant-original.token" "$RUNTIME/grant-current.token"; then
   echo 'restoring a compositor grant did not rotate its credential'
   exit 1
 fi
-reject_private_restore replay 'org.umbriel.test.receiver' "$RUNTIME/grant-original.token" 2
-reject_private_restore other-application 'org.umbriel.test.other' "$RUNTIME/grant-current.token" 2
-reject_private_restore expanded-capabilities 'org.umbriel.test.receiver' "$RUNTIME/grant-current.token" 3
+reject_private_restore replay 'org.canopy.test.receiver' "$RUNTIME/grant-original.token" 2
+reject_private_restore other-application 'org.canopy.test.other' "$RUNTIME/grant-current.token" 2
+reject_private_restore expanded-capabilities 'org.canopy.test.receiver' "$RUNTIME/grant-current.token" 3
 python3 - "$RUNTIME/grant-current.token" "$RUNTIME/grant-tampered.token" << 'PY'
 import pathlib
 import sys
 value = pathlib.Path(sys.argv[1]).read_text().strip()
 pathlib.Path(sys.argv[2]).write_text(('0' if value[0] != '0' else '1') + value[1:] + '\n')
 PY
-reject_private_restore tampered 'org.umbriel.test.receiver' "$RUNTIME/grant-tampered.token" 2
-private_persistence_client unchanged 'org.umbriel.test.receiver' "$RUNTIME/grant-current.token"
+reject_private_restore tampered 'org.canopy.test.receiver' "$RUNTIME/grant-tampered.token" 2
+private_persistence_client unchanged 'org.canopy.test.receiver' "$RUNTIME/grant-current.token"
 private_send 'start 2 2'
 await_events "$PRIVATE_PERSIST_LOG" 'started .*status=0 capabilities=2' 1 "rejected attempts do not consume a valid grant"
 no_confirmation 'valid grant after rejected restore attempts'
 private_send "save-grant $RUNTIME/grant-once.token"
 await_events "$PRIVATE_PERSIST_LOG" grant-saved 1 "grant saved before a one-time restoration"
-known_id=$("$UMBRIEL" input-capture-permissions --json | jq -er '.[] | select(.application == "org.umbriel.test.receiver") | .id')
+known_id=$("$CANOPY" input-capture-permissions --json | jq -er '.[] | select(.application == "org.canopy.test.receiver") | .id')
 finish_private_persistence_client
 
 # Restoring a remembered grant for mode zero consumes its stored credential.
 # Revocation by the known permission ID must still stop that active session.
-private_persistence_client restored-once 'org.umbriel.test.receiver' "$RUNTIME/grant-once.token"
+private_persistence_client restored-once 'org.canopy.test.receiver' "$RUNTIME/grant-once.token"
 private_send 'start 2 0'
 await_events "$PRIVATE_PERSIST_LOG" 'started .*status=0 capabilities=2' 1 "one-time restoration of a remembered grant"
 assert_count "$PRIVATE_PERSIST_LOG" 'grant request=' 0
@@ -164,7 +164,7 @@ private_send "barrier 51 $once_x $once_y $once_x $((once_y + once_h - 1))" enabl
 await_events "$PRIVATE_PERSIST_LOG" 'barriers .*status=0' 1 "one-time restored exterior barrier"
 physical "at $((once_x + 1)) $((once_y + once_h / 2))" 'move -20 0'
 await_events "$PRIVATE_PERSIST_LOG" activated 1 "one-time restored session became active"
-"$UMBRIEL" input-capture-revoke "$known_id" > "$RUNTIME/revoke-consumed.log"
+"$CANOPY" input-capture-revoke "$known_id" > "$RUNTIME/revoke-consumed.log"
 await_events "$PRIVATE_PERSIST_LOG" closed 1 "known permission ID revokes a consumed grant's active session"
 no_confirmation 'revoked one-time restored session'
 if ! grep '^status ' "$RUNTIME/compositor.log" | tail -1 | grep -q 'active=0'; then
@@ -175,7 +175,7 @@ finish_private_persistence_client
 
 # A transient bridge grant remains usable within its issuing scope, then
 # expires when the frontend reports that the requesting app peer disappeared.
-private_persistence_client transient-scope 'org.umbriel.test.transient'
+private_persistence_client transient-scope 'org.canopy.test.transient'
 private_send 'start 3 1'
 wait_confirmation
 physical 'tap 19'
@@ -245,7 +245,7 @@ PORTAL_PID=$!
 PIDS+=("$PORTAL_PID")
 for _ in $(seq 200); do
   if dbus-send --session --print-reply --dest=org.freedesktop.DBus /org/freedesktop/DBus \
-    org.freedesktop.DBus.NameHasOwner string:org.freedesktop.impl.portal.desktop.umbriel 2> /dev/null | grep -q 'boolean true'; then break; fi
+    org.freedesktop.DBus.NameHasOwner string:org.freedesktop.impl.portal.desktop.canopy 2> /dev/null | grep -q 'boolean true'; then break; fi
   sleep 0.025
 done
 persistence_client after-restart
@@ -262,8 +262,8 @@ await_events "$PERSIST_LOG" 'barriers failed=0' 1 "remembered capture barrier"
 await_events "$PERSIST_LOG" 'requested enable' 1 "remembered capture enabled"
 physical "at $((persistent_x + 1)) $((persistent_y + persistent_h / 2))" 'move -20 0'
 await_events "$PERSIST_LOG" activated 1 "remembered session captures input"
-"$UMBRIEL" input-capture-permissions --json > "$RUNTIME/permissions.json"
-python3 - "$RUNTIME/permissions.json" "$XDG_STATE_HOME/umbriel/input-capture-permissions.json" << 'PY'
+"$CANOPY" input-capture-permissions --json > "$RUNTIME/permissions.json"
+python3 - "$RUNTIME/permissions.json" "$XDG_STATE_HOME/canopy/input-capture-permissions.json" << 'PY'
 import pathlib
 import sys
 listing = pathlib.Path(sys.argv[1]).read_text()
@@ -285,7 +285,7 @@ stored_tokens = list(tokens(stored))
 assert stored_tokens, 'no durable grants were stored'
 assert all(token not in listing for token in stored_tokens), 'permission inspection leaked a restore credential'
 PY
-"$UMBRIEL" input-capture-revoke all > "$RUNTIME/revoke.log"
+"$CANOPY" input-capture-revoke all > "$RUNTIME/revoke.log"
 for _ in $(seq 200); do
   before=$(events "$RUNTIME/compositor.log" status)
   physical status

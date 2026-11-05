@@ -8,15 +8,15 @@ readonly OUTPUT_W=1280
 readonly OUTPUT_H=720
 readonly KEY_1=2
 readonly KEY_2=3
-readonly POINTER="${UMBRIEL_POINTER_CLIENT:-./build-debug/tests/pointer-client}"
-readonly INPUT_METHOD="${UMBRIEL_INPUT_METHOD_CLIENT:-./build-debug/tests/input-method-client}"
-readonly OBSERVER="${UMBRIEL_SEAT_LOG_CLIENT:-./build-debug/tests/seat-log-client}"
-readonly TEXT_LOG="$UMBRIEL_RUNTIME_DIR/text-input-window.log"
-readonly PLAIN_LOG="$UMBRIEL_RUNTIME_DIR/plain-window.log"
-readonly INPUT_METHOD_LOG="$UMBRIEL_RUNTIME_DIR/input-method-lifecycle.log"
-readonly DRIVER_LOG="$UMBRIEL_RUNTIME_DIR/input-method-driver.log"
+readonly POINTER="${CANOPY_POINTER_CLIENT:-./build-debug/tests/pointer-client}"
+readonly INPUT_METHOD="${CANOPY_INPUT_METHOD_CLIENT:-./build-debug/tests/input-method-client}"
+readonly OBSERVER="${CANOPY_SEAT_LOG_CLIENT:-./build-debug/tests/seat-log-client}"
+readonly TEXT_LOG="$CANOPY_RUNTIME_DIR/text-input-window.log"
+readonly PLAIN_LOG="$CANOPY_RUNTIME_DIR/plain-window.log"
+readonly INPUT_METHOD_LOG="$CANOPY_RUNTIME_DIR/input-method-lifecycle.log"
+readonly DRIVER_LOG="$CANOPY_RUNTIME_DIR/input-method-driver.log"
 
-cat >> "$UMBRIEL_CONFIG" <<'EOF'
+cat >> "$CANOPY_CONFIG" <<'EOF'
 
 [animation]
 duration_ms = 1
@@ -26,25 +26,25 @@ curve = "linear"
 "Mod+1" = "workspace-switch 1"
 "Mod+2" = "workspace-switch 2"
 EOF
-"$UMBRIEL" msg config-reload > /dev/null
+"$CANOPY" msg config-reload > /dev/null
 
 wait_for_count() {
   local want=$1
   for _ in $(seq 80); do
-    [[ $("$UMBRIEL" windows --json | jq 'length') -eq $want ]] && return 0
+    [[ $("$CANOPY" windows --json | jq 'length') -eq $want ]] && return 0
     sleep 0.05
   done
-  echo "expected $want windows, got: $("$UMBRIEL" windows --json)"
+  echo "expected $want windows, got: $("$CANOPY" windows --json)"
   return 1
 }
 
 wait_for_active() {
   local title=$1
   for _ in $(seq 80); do
-    [[ $("$UMBRIEL" windows --json | jq -r '[.[] | select(.active) | .title] | first // "none"') == "$title" ]] && return 0
+    [[ $("$CANOPY" windows --json | jq -r '[.[] | select(.active) | .title] | first // "none"') == "$title" ]] && return 0
     sleep 0.05
   done
-  echo "expected '$title' active, got: $("$UMBRIEL" windows --json)"
+  echo "expected '$title' active, got: $("$CANOPY" windows --json)"
   return 1
 }
 
@@ -75,11 +75,11 @@ wait_for_stable_log() {
 }
 
 coproc IDLE_DRIVER {
-  "$POINTER" "$OUTPUT_W" "$OUTPUT_H" keyboard-only mod none mark idle-keyboard-ready hold > "$UMBRIEL_RUNTIME_DIR/idle-keyboard.log" 2>&1
+  "$POINTER" "$OUTPUT_W" "$OUTPUT_H" keyboard-only mod none mark idle-keyboard-ready hold > "$CANOPY_RUNTIME_DIR/idle-keyboard.log" 2>&1
 }
 readonly IDLE_DRIVER_PID
 readonly IDLE_DRIVER_INPUT=${IDLE_DRIVER[1]}
-wait_for_log_count "$UMBRIEL_RUNTIME_DIR/idle-keyboard.log" '^idle-keyboard-ready$' 1
+wait_for_log_count "$CANOPY_RUNTIME_DIR/idle-keyboard.log" '^idle-keyboard-ready$' 1
 
 ENABLE_TEXT_INPUT=1 LOG_MODIFIERS=1 "$OBSERVER" text-input-window > "$TEXT_LOG" 2>&1 &
 wait_for_count 1

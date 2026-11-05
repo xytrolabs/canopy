@@ -17,7 +17,7 @@
 #include <variant>
 #include <vector>
 
-namespace umbriel {
+namespace canopy {
 
   inline constexpr size_t kMaxWorkspaces = 64;
 
@@ -402,7 +402,7 @@ namespace umbriel {
   struct ActionSpec {
     std::string_view name;  // e.g. "spawn", "workspace-switch", "window-close"
     std::string_view param; // "" for simple, "<cmd...>" / "<workspace> [--output <output>]" for parameterized
-    // One line, no trailing period. `umbriel msg --help` and docs/user/actions.md render it verbatim, and a unit test
+    // One line, no trailing period. `canopy msg --help` and docs/user/actions.md render it verbatim, and a unit test
     // fails when the doc table and this table disagree.
     std::string_view summary;
     KeybindAction action;
@@ -413,7 +413,7 @@ namespace umbriel {
   // case-insensitive.
   uint32_t mouseButtonFromName(std::string_view name);
 
-  // Canonical name for an evdev BTN_* code, or nullptr for a button Umbriel does not name.
+  // Canonical name for an evdev BTN_* code, or nullptr for a button Canopy does not name.
   const char* mouseButtonName(uint32_t button);
 
   // The BTN_* code binds store for a pressed button. Mice report their thumb buttons as either BTN_SIDE/BTN_EXTRA or
@@ -431,7 +431,7 @@ namespace umbriel {
   // raw rest of the string as its command.
   bool parseAction(std::string_view value, Keybind& output);
 
-  // The same grammar over words that are already split, as `umbriel msg` receives them. `words[0]` is the action name;
+  // The same grammar over words that are already split, as `canopy msg` receives them. `words[0]` is the action name;
   // a `spawn` command is the remaining words joined with spaces.
   bool parseActionWords(std::span<const std::string> words, Keybind& output);
 
@@ -465,4 +465,4 @@ namespace umbriel {
   // The binds used when no config file supplies any.
   std::vector<Keybind> defaultKeybinds();
 
-} // namespace umbriel
+} // namespace canopy

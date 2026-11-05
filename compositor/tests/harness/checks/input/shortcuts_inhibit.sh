@@ -2,29 +2,29 @@
 # A focused client may inhibit ordinary compositor keyboard shortcuts while an
 # explicitly exempt escape binding remains available to the user.
 set -euo pipefail
-source "$UMBRIEL_HARNESS_LIB"
+source "$CANOPY_HARNESS_LIB"
 
 readonly OUTPUT_W=1280
 readonly OUTPUT_H=720
 readonly KEY_1=2
 readonly KEY_2=3
 readonly KEY_ESC=1
-readonly POINTER="${UMBRIEL_POINTER_CLIENT:-./build-debug/tests/pointer-client}"
-readonly OBSERVER="${UMBRIEL_SEAT_LOG_CLIENT:-./build-debug/tests/seat-log-client}"
-readonly CLIENT_LOG="$UMBRIEL_RUNTIME_DIR/shortcuts-inhibit.log"
-readonly OTHER_LOG="$UMBRIEL_RUNTIME_DIR/shortcuts-other.log"
+readonly POINTER="${CANOPY_POINTER_CLIENT:-./build-debug/tests/pointer-client}"
+readonly OBSERVER="${CANOPY_SEAT_LOG_CLIENT:-./build-debug/tests/seat-log-client}"
+readonly CLIENT_LOG="$CANOPY_RUNTIME_DIR/shortcuts-inhibit.log"
+readonly OTHER_LOG="$CANOPY_RUNTIME_DIR/shortcuts-other.log"
 
-cat >> "$UMBRIEL_CONFIG" <<'EOF'
+cat >> "$CANOPY_CONFIG" <<'EOF'
 
 [keybinds]
 "Mod+1" = "workspace-set-layout master"
 "Mod+2" = { action = "workspace-set-layout dwindle", allow_when_inhibited = true }
 "Mod+Escape" = { action = "shortcuts-inhibit-toggle", allow_when_inhibited = true, repeat = false }
 EOF
-"$UMBRIEL" msg config-reload > /dev/null
+"$CANOPY" msg config-reload > /dev/null
 
 focused_layout() {
-  "$UMBRIEL" workspaces --json | jq -r '.[] | select(.focused) | .layout'
+  "$CANOPY" workspaces --json | jq -r '.[] | select(.focused) | .layout'
 }
 
 wait_for() {
@@ -39,7 +39,7 @@ wait_for() {
 
 INHIBIT_SHORTCUTS=1 "$OBSERVER" shortcuts-inhibit > "$CLIENT_LOG" 2>&1 &
 inhibitor_pid=$!
-wait_for "the test window" '[[ $("$UMBRIEL" windows --json | jq length) == 1 ]]'
+wait_for "the test window" '[[ $("$CANOPY" windows --json | jq length) == 1 ]]'
 wait_for "the inhibitor to activate" 'grep -q "shortcuts-inhibitor active" "$CLIENT_LOG"'
 
 # The ordinary bind is suppressed and both key event halves reach the client.
@@ -91,7 +91,7 @@ if ((presses != 2 || releases != 2)); then
   exit 1
 fi
 
-"$UMBRIEL" msg workspace-set-layout scrolling > /dev/null
+"$CANOPY" msg workspace-set-layout scrolling > /dev/null
 "$POINTER" "$OUTPUT_W" "$OUTPUT_H" \
   mod logo key-press "$KEY_1" tap "$KEY_ESC" key-release "$KEY_1" mod none
 wait_for "reactivation during a held compositor key" '[[ $(grep -c "shortcuts-inhibitor active" "$CLIENT_LOG") == 3 ]]'
@@ -108,10 +108,10 @@ fi
 
 # An inhibitor is relevant only while its exact surface holds keyboard focus.
 "$OBSERVER" shortcuts-other > "$OTHER_LOG" 2>&1 &
-wait_for "the uninhibited test window" '[[ $("$UMBRIEL" windows --json | jq length) == 2 ]]'
+wait_for "the uninhibited test window" '[[ $("$CANOPY" windows --json | jq length) == 2 ]]'
 wait_for "the uninhibited surface to gain focus" \
-  '[[ $("$UMBRIEL" windows --json | jq -r '\''.[] | select(.focused) | .title'\'') == shortcuts-other ]]'
-"$UMBRIEL" msg workspace-set-layout scrolling > /dev/null
+  '[[ $("$CANOPY" windows --json | jq -r '\''.[] | select(.focused) | .title'\'') == shortcuts-other ]]'
+"$CANOPY" msg workspace-set-layout scrolling > /dev/null
 "$POINTER" "$OUTPUT_W" "$OUTPUT_H" mod logo tap "$KEY_1" mod none
 wait_for "the inhibitor to become irrelevant off focus" '[[ $(focused_layout) == master ]]'
 if grep -q "keyboard-key code=$KEY_1" "$OTHER_LOG"; then
@@ -121,17 +121,17 @@ fi
 
 # Destroying the inhibitor client leaves ordinary shortcut handling intact.
 kill "$inhibitor_pid"
-wait_for "the inhibitor window to close" '[[ $("$UMBRIEL" windows --json | jq length) == 1 ]]'
-"$UMBRIEL" msg workspace-set-layout scrolling > /dev/null
+wait_for "the inhibitor window to close" '[[ $("$CANOPY" windows --json | jq length) == 1 ]]'
+"$CANOPY" msg workspace-set-layout scrolling > /dev/null
 "$POINTER" "$OUTPUT_W" "$OUTPUT_H" mod logo tap "$KEY_1" mod none
 wait_for "shortcuts after inhibitor destruction" '[[ $(focused_layout) == master ]]'
 
 # Window policy controls client requests, including objects already created.
-readonly RULE_CONFIG="$UMBRIEL_RUNTIME_DIR/shortcuts-rule.toml"
-readonly RULE_LOG="$UMBRIEL_RUNTIME_DIR/shortcuts-rule.log"
-readonly RULE_CONTROL="$UMBRIEL_RUNTIME_DIR/shortcuts-rule-control"
+readonly RULE_CONFIG="$CANOPY_RUNTIME_DIR/shortcuts-rule.toml"
+readonly RULE_LOG="$CANOPY_RUNTIME_DIR/shortcuts-rule.log"
+readonly RULE_CONTROL="$CANOPY_RUNTIME_DIR/shortcuts-rule-control"
 readonly KEY_MARKER=4
-cat >> "$UMBRIEL_CONFIG" <<EOF
+cat >> "$CANOPY_CONFIG" <<EOF
 
 [include]
 files = ["$RULE_CONFIG"]
@@ -151,7 +151,7 @@ EOF
       printf 'allow_shortcuts_inhibit = %s\n' "$policy" >> "$RULE_CONFIG"
     fi
   fi
-  "$UMBRIEL" msg config-reload > /dev/null
+  "$CANOPY" msg config-reload > /dev/null
 }
 
 rule_control() {
@@ -177,7 +177,7 @@ rule_shortcut() {
   presses=$(events "$log" "keyboard-key code=$KEY_1 state=pressed")
   releases=$(events "$log" "keyboard-key code=$KEY_1 state=released")
   markers=$(events "$log" "keyboard-key code=$KEY_MARKER state=released")
-  "$UMBRIEL" msg workspace-set-layout scrolling > /dev/null
+  "$CANOPY" msg workspace-set-layout scrolling > /dev/null
   "$POINTER" "$OUTPUT_W" "$OUTPUT_H" keyboard-only mod logo tap "$KEY_1" mod none tap "$KEY_MARKER"
   await_events "$log" "keyboard-key code=$KEY_MARKER state=released" "$((markers + 1))"
   if [[ $(focused_layout) != "$expected_layout" ]] \
@@ -194,10 +194,10 @@ mkfifo "$RULE_CONTROL"
 exec {rule_fd}<> "$RULE_CONTROL"
 SEAT_LOG_APP_ID=shortcuts-rule SHORTCUTS_INHIBIT_CONTROL=1 INHIBIT_SHORTCUTS=1 \
   "$OBSERVER" shortcuts-rule <&"$rule_fd" > "$RULE_LOG" 2>&1 &
-wait_for "the rule-controlled window" '[[ $("$UMBRIEL" windows --json | jq length) == 2 ]]'
-rule_id=$("$UMBRIEL" windows --json | jq -r '.[] | select(.title == "shortcuts-rule") | .id')
-other_id=$("$UMBRIEL" windows --json | jq -r '.[] | select(.title == "shortcuts-other") | .id')
-"$UMBRIEL" msg window-focus "$rule_id" > /dev/null
+wait_for "the rule-controlled window" '[[ $("$CANOPY" windows --json | jq length) == 2 ]]'
+rule_id=$("$CANOPY" windows --json | jq -r '.[] | select(.title == "shortcuts-rule") | .id')
+other_id=$("$CANOPY" windows --json | jq -r '.[] | select(.title == "shortcuts-other") | .id')
+"$CANOPY" msg window-focus "$rule_id" > /dev/null
 rule_protocol 0 0
 rule_shortcut master 0
 
@@ -210,7 +210,7 @@ rule_protocol 1 1
 rule_shortcut master 0
 rule_policy true
 rule_protocol 2 1
-"$UMBRIEL" msg shortcuts-inhibit-toggle > /dev/null
+"$CANOPY" msg shortcuts-inhibit-toggle > /dev/null
 rule_protocol 2 2
 rule_policy false
 rule_policy true
@@ -219,32 +219,32 @@ rule_shortcut master 0
 
 # A rule change must not undo the user's manual escape, while explicit manual
 # passthrough remains available even when client requests are denied.
-"$UMBRIEL" msg shortcuts-inhibit-toggle > /dev/null
+"$CANOPY" msg shortcuts-inhibit-toggle > /dev/null
 rule_protocol 3 2
 rule_policy false
 rule_protocol 3 3
-"$UMBRIEL" msg shortcuts-inhibit-toggle > /dev/null
+"$CANOPY" msg shortcuts-inhibit-toggle > /dev/null
 rule_protocol 3 3
 rule_shortcut scrolling 1
-"$UMBRIEL" msg shortcuts-inhibit-toggle > /dev/null
+"$CANOPY" msg shortcuts-inhibit-toggle > /dev/null
 rule_shortcut master 0
-"$UMBRIEL" msg shortcuts-inhibit-toggle > /dev/null
+"$CANOPY" msg shortcuts-inhibit-toggle > /dev/null
 rule_policy true
 rule_protocol 4 3
-"$UMBRIEL" msg shortcuts-inhibit-toggle > /dev/null
+"$CANOPY" msg shortcuts-inhibit-toggle > /dev/null
 rule_protocol 4 4
 rule_shortcut master 0
 
 # State selectors follow focus, and removing the rule restores normal admission.
-"$UMBRIEL" msg shortcuts-inhibit-toggle > /dev/null
+"$CANOPY" msg shortcuts-inhibit-toggle > /dev/null
 rule_protocol 5 4
 rule_policy focused
 rule_protocol 5 5
 rule_shortcut master 0
-"$UMBRIEL" msg window-focus "$other_id" > /dev/null
+"$CANOPY" msg window-focus "$other_id" > /dev/null
 rule_protocol 6 5
 rule_shortcut master 0 "$OTHER_LOG"
-"$UMBRIEL" msg window-focus "$rule_id" > /dev/null
+"$CANOPY" msg window-focus "$rule_id" > /dev/null
 rule_protocol 6 6
 rule_shortcut master 0
 rule_policy omitted

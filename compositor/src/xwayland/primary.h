@@ -10,7 +10,7 @@
 
 struct wlr_xwayland;
 
-namespace umbriel {
+namespace canopy {
 
   // Publishes a stable RandR primary on the XWM connection, without keeping the lazy Xwayland alive or waiting for
   // X11 replies in the Wayland event loop.
@@ -62,4 +62,4 @@ namespace umbriel {
     std::chrono::steady_clock::time_point m_requested;
   };
 
-} // namespace umbriel
+} // namespace canopy

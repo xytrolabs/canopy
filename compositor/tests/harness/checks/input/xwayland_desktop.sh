@@ -4,15 +4,15 @@
 # Steam-style XTEST input reaches native windows through EIS, including scaled logical outputs, relative motion,
 # pointer clicks, ordinary keyboard input, and compositor shortcuts. A second connection reuses session consent.
 set -euo pipefail
-source "$UMBRIEL_REPO/tests/harness/eis_lib.sh"
+source "$CANOPY_REPO/tests/harness/eis_lib.sh"
 
 readonly FIRST_TITLE=eis-desktop-first
 readonly SECOND_TITLE=eis-desktop-second
-readonly FIRST_LOG="$UMBRIEL_RUNTIME_DIR/eis-desktop-first.log"
-readonly SECOND_LOG="$UMBRIEL_RUNTIME_DIR/eis-desktop-second.log"
-readonly APP=umbriel-xtest-desktop
+readonly FIRST_LOG="$CANOPY_RUNTIME_DIR/eis-desktop-first.log"
+readonly SECOND_LOG="$CANOPY_RUNTIME_DIR/eis-desktop-second.log"
+readonly APP=canopy-xtest-desktop
 
-cat >> "$UMBRIEL_CONFIG" <<'CONFIG'
+cat >> "$CANOPY_CONFIG" <<'CONFIG'
 
 [animation]
 enabled = false
@@ -42,13 +42,13 @@ default_output = "HEADLESS-1"
 match.title = "^eis-desktop-second$"
 default_output = "HEADLESS-2"
 CONFIG
-"$UMBRIEL" msg config-reload > /dev/null
+"$CANOPY" msg config-reload > /dev/null
 "$NATIVE_CLIENT" "$FIRST_TITLE" > "$FIRST_LOG" 2>&1 &
 eis_wait_window "$FIRST_TITLE"
 "$NATIVE_CLIENT" "$SECOND_TITLE" > "$SECOND_LOG" 2>&1 &
 eis_wait_window "$SECOND_TITLE"
 eis_wait_active "$SECOND_TITLE"
-"$UMBRIEL" settle > /dev/null
+"$CANOPY" settle > /dev/null
 
 eis_start first "$APP"
 eis_approve first "$APP"
@@ -83,7 +83,7 @@ for _ in $(seq 60); do
   sleep 0.05
 done
 if [[ $(eis_window "$SECOND_TITLE" | jq -r .floating) != true ]]; then
-  echo "emulated Ctrl+F8 did not run the compositor shortcut: $("$UMBRIEL" windows --json)"
+  echo "emulated Ctrl+F8 did not run the compositor shortcut: $("$CANOPY" windows --json)"
   exit 1
 fi
 eis_send first 'tap 32'
@@ -95,8 +95,8 @@ eis_stop first
 eis_start second "$APP"
 eis_send second 'tap 33'
 await_events "$SECOND_LOG" 'keyboard-key code=33 state=pressed' 1 "typing after a consented reconnect"
-if [[ $(events "$UMBRIEL_LOG" ".*input permission requested .*app='$APP'") -ne 1 ]]; then
-  echo "the consented application prompted again: $(cat "$UMBRIEL_LOG")"
+if [[ $(events "$CANOPY_LOG" ".*input permission requested .*app='$APP'") -ne 1 ]]; then
+  echo "the consented application prompted again: $(cat "$CANOPY_LOG")"
   exit 1
 fi
 eis_stop second

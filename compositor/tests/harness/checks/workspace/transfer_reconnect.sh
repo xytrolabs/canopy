@@ -3,14 +3,14 @@
 # A transferred name and layout must be recreated when its new output returns.
 set -euo pipefail
 
-readonly BASELINE="$(< "$UMBRIEL_CONFIG")"
-readonly WORKSPACE="${UMBRIEL_WORKSPACE_CLIENT:-./build-debug/tests/workspace-client}"
-readonly FOREIGN="${UMBRIEL_FOREIGN_TOPLEVEL_CLIENT:-./build-debug/tests/foreign-toplevel-client}"
-msg() { "$UMBRIEL" msg "$@" > /dev/null; }
-state() { "$UMBRIEL" workspaces --json; }
-window_id() { "$UMBRIEL" windows --json | jq -r --arg title "$1" '.[] | select(.title == $title) | .id'; }
+readonly BASELINE="$(< "$CANOPY_CONFIG")"
+readonly WORKSPACE="${CANOPY_WORKSPACE_CLIENT:-./build-debug/tests/workspace-client}"
+readonly FOREIGN="${CANOPY_FOREIGN_TOPLEVEL_CLIENT:-./build-debug/tests/foreign-toplevel-client}"
+msg() { "$CANOPY" msg "$@" > /dev/null; }
+state() { "$CANOPY" workspaces --json; }
+window_id() { "$CANOPY" windows --json | jq -r --arg title "$1" '.[] | select(.title == $title) | .id'; }
 spawn() {
-  "$UMBRIEL_UNMAP_CLIENT" "$1" 300 200 > "$UMBRIEL_RUNTIME_DIR/$1.log" 2>&1 &
+  "$CANOPY_UNMAP_CLIENT" "$1" 300 200 > "$CANOPY_RUNTIME_DIR/$1.log" 2>&1 &
   for _ in $(seq 60); do
     [[ -n $(window_id "$1") ]] && return
     sleep 0.05
@@ -18,12 +18,12 @@ spawn() {
   echo "window $1 did not map"; exit 1
 }
 geometry() {
-  "$UMBRIEL" windows --json | jq -c '[.[] | {title, x, y, w, h, floating, pinned}] | sort_by(.title)'
+  "$CANOPY" windows --json | jq -c '[.[] | {title, x, y, w, h, floating, pinned}] | sort_by(.title)'
 }
 
 for inventory in fixed dynamic fixed-anonymous dynamic-anonymous; do
-  printf '%s\n' "$BASELINE" > "$UMBRIEL_CONFIG"
-  cat >> "$UMBRIEL_CONFIG" <<'CONFIG'
+  printf '%s\n' "$BASELINE" > "$CANOPY_CONFIG"
+  cat >> "$CANOPY_CONFIG" <<'CONFIG'
 [animation]
 enabled = false
 [output.HEADLESS-1]
@@ -39,7 +39,7 @@ output = "HEADLESS-1"
 layout.mode = "dwindle"
 CONFIG
   if [[ $inventory == dynamic* ]]; then
-    sed -i '/^workspaces = /d' "$UMBRIEL_CONFIG"
+    sed -i '/^workspaces = /d' "$CANOPY_CONFIG"
   fi
   selector=WORK
   named=true
@@ -48,7 +48,7 @@ CONFIG
     selector=2
     [[ $inventory == dynamic* ]] && selector=1
     sed -i -e 's/workspaces = \["BEFORE", "WORK", "AFTER"\]/workspaces = 3/' \
-      -e "s/name = \"WORK\"/index = $selector/" "$UMBRIEL_CONFIG"
+      -e "s/name = \"WORK\"/index = $selector/" "$CANOPY_CONFIG"
   fi
   msg config-reload
   msg workspace-switch "$selector" --output "HEADLESS-1"
@@ -61,9 +61,9 @@ CONFIG
   msg window-toggle-pinned
   msg window-focus "$(window_id reconnect-tile-one)"
   msg workspace-move-to-output-next
-  "$UMBRIEL" settle
+  "$CANOPY" settle
   expected=$(geometry)
-  original=$("$UMBRIEL" windows --json | jq -r '.[] | select(.title == "reconnect-tile-one") | .workspace')
+  original=$("$CANOPY" windows --json | jq -r '.[] | select(.title == "reconnect-tile-one") | .workspace')
   index=$(state | jq --arg id "$original" '.[] | select(.id == $id) | .index')
 
   layout=dwindle
@@ -73,24 +73,24 @@ CONFIG
     if [[ $cycle == 3 ]]; then
       msg window-focus-warp "$(window_id reconnect-tile-one)"
       msg workspace-set-layout master
-      "$UMBRIEL" settle
+      "$CANOPY" settle
       layout=master
       override=true
       expected=$(geometry)
     fi
-    "$UMBRIEL" output-destroy HEADLESS-2 > /dev/null
-    "$UMBRIEL" settle
+    "$CANOPY" output-destroy HEADLESS-2 > /dev/null
+    "$CANOPY" settle
     if [[ $cycle == 3 ]]; then
-      printf '\n[animation.windows_move]\nduration_ms = 123\n' >> "$UMBRIEL_CONFIG"
+      printf '\n[animation.windows_move]\nduration_ms = 123\n' >> "$CANOPY_CONFIG"
     elif [[ $cycle == 4 ]]; then
-      printf '\n[layout]\ngap = 12\n' >> "$UMBRIEL_CONFIG"
+      printf '\n[layout]\ngap = 12\n' >> "$CANOPY_CONFIG"
       layout=scrolling
       override=false
     fi
     if (( cycle > 1 )); then msg config-reload; fi
-    "$UMBRIEL" output-create HEADLESS-2 > /dev/null
-    "$UMBRIEL" settle
-    restored=$("$UMBRIEL" windows --json | jq -r '.[] | select(.title == "reconnect-tile-one") | .workspace')
+    "$CANOPY" output-create HEADLESS-2 > /dev/null
+    "$CANOPY" settle
+    restored=$("$CANOPY" windows --json | jq -r '.[] | select(.title == "reconnect-tile-one") | .workspace')
     if ! state | jq -e --arg id "$restored" --argjson index "$index" --argjson named "$named" \
       --arg layout "$layout" --argjson override "$override" '
       any(.[]; .id == $id and .output == "HEADLESS-2" and .named == $named
@@ -102,7 +102,7 @@ CONFIG
       exit 1
     fi
     # The pinned window stayed on its output when the workspace moved.
-    "$UMBRIEL" windows --json | jq -e --arg id "$restored" '
+    "$CANOPY" windows --json | jq -e --arg id "$restored" '
       length == 4
       and all(.[]; if .title == "reconnect-pin" then .pinned and .output == "HEADLESS-1"
                    else .workspace == $id and .output == "HEADLESS-2" end)' > /dev/null
@@ -119,9 +119,9 @@ CONFIG
     msg window-close "$(window_id "$title")"
   done
   for _ in $(seq 60); do
-    [[ $("$UMBRIEL" windows --json | jq length) == 0 ]] && break
+    [[ $("$CANOPY" windows --json | jq length) == 0 ]] && break
     sleep 0.05
   done
-  [[ $("$UMBRIEL" windows --json | jq length) == 0 ]]
+  [[ $("$CANOPY" windows --json | jq length) == 0 ]]
 done
 echo "transferred names, layouts and windows survive repeated output recreation; pinned windows stay on their output"

@@ -3,19 +3,19 @@
 # Logical UVs must survive fractional scale and rotation. An overview shader
 # samples the result of the window shader, and neither may bleed to its neighbour.
 set -euo pipefail
-cat > "$UMBRIEL_RUNTIME_DIR/fixture-1.glsl" <<'GLSL'
+cat > "$CANOPY_RUNTIME_DIR/fixture-1.glsl" <<'GLSL'
 vec4 animation(vec2 uv) { return uv.x < 0.5 ? vec4(1.0,0.0,0.0,1.0) : vec4(0.0,0.0,1.0,1.0); }
 GLSL
-cat > "$UMBRIEL_RUNTIME_DIR/fixture-2.glsl" <<'GLSL'
-vec4 animation(vec2 uv) { vec4 c = umbriel_sample(uv); return vec4(0.0,c.r,0.0,c.a); }
+cat > "$CANOPY_RUNTIME_DIR/fixture-2.glsl" <<'GLSL'
+vec4 animation(vec2 uv) { vec4 c = canopy_sample(uv); return vec4(0.0,c.r,0.0,c.a); }
 GLSL
-cat > "$UMBRIEL_RUNTIME_DIR/fixture-3.glsl" <<'GLSL'
+cat > "$CANOPY_RUNTIME_DIR/fixture-3.glsl" <<'GLSL'
 this is not GLSL
 GLSL
-readonly BASE="$UMBRIEL_RUNTIME_DIR/composition-base.toml"
-readonly IMAGE="$UMBRIEL_RUNTIME_DIR/composition.png"
-cp "$UMBRIEL_CONFIG" "$BASE"
-cat >> "$UMBRIEL_CONFIG" <<'EOF'
+readonly BASE="$CANOPY_RUNTIME_DIR/composition-base.toml"
+readonly IMAGE="$CANOPY_RUNTIME_DIR/composition.png"
+cp "$CANOPY_CONFIG" "$BASE"
+cat >> "$CANOPY_CONFIG" <<'EOF'
 
 [output."HEADLESS-1"]
 scale = 1.25
@@ -37,60 +37,60 @@ shader = "fixture-2.glsl"
 [animation.overview]
 effect = "overview_fixture_2"
 EOF
-"$UMBRIEL" msg config-reload > /dev/null
+"$CANOPY" msg config-reload > /dev/null
 # Animation time only moves by clock-advance: the window's opening shader starts at the frozen instant, the
 # orientation sample lands 120 ms in, and the overview sample halfway through the overview's 4000 ms timeline, while
 # the window's own opening shader is still running.
-"$UMBRIEL" clock-freeze
-"$UMBRIEL_UNMAP_CLIENT" shader-composition 700 700 > "$UMBRIEL_RUNTIME_DIR/client.log" 2>&1 &
+"$CANOPY" clock-freeze
+"$CANOPY_UNMAP_CLIENT" shader-composition 700 700 > "$CANOPY_RUNTIME_DIR/client.log" 2>&1 &
 for _ in $(seq 80); do
-  window=$("$UMBRIEL" windows --json | jq -c '.[] | select(.title == "shader-composition")')
+  window=$("$CANOPY" windows --json | jq -c '.[] | select(.title == "shader-composition")')
   [[ -n $window ]] && break
   sleep 0.025
 done
 [[ -n $window ]]
 home=$(jq -r '.workspace | split(":")[0]' <<< "$window")
 if [[ $home == HEADLESS-1 ]]; then neighbour=HEADLESS-2; else neighbour=HEADLESS-1; fi
-"$UMBRIEL" clock-advance 120
+"$CANOPY" clock-advance 120
 grim -s 1 -o "$home" "$IMAGE"
 # The client may still be resizing toward its layout target. Locate its drawn
 # rectangle, then test orientation within that actual intermediate frame.
-read -r x y width height < <("$UMBRIEL_PIXEL_PROBE" "$IMAGE" bbox 'r > 0.01 || g > 0.01 || b > 0.01')
+read -r x y width height < <("$CANOPY_PIXEL_PROBE" "$IMAGE" bbox 'r > 0.01 || g > 0.01 || b > 0.01')
 left=$((x + width / 4))
 right=$((x + 3 * width / 4))
 middle=$((y + height / 2))
-read -r red _ blue < <("$UMBRIEL_PIXEL_PROBE" "$IMAGE" mean "4x4+$left+$middle")
+read -r red _ blue < <("$CANOPY_PIXEL_PROBE" "$IMAGE" mean "4x4+$left+$middle")
 if ! (( red > 220 && blue < 30 )); then
   echo "logical left side was not red on rotated/scaled output: $red $blue"
   exit 1
 fi
-read -r red _ blue < <("$UMBRIEL_PIXEL_PROBE" "$IMAGE" mean "4x4+$right+$middle")
+read -r red _ blue < <("$CANOPY_PIXEL_PROBE" "$IMAGE" mean "4x4+$right+$middle")
 if ! (( blue > 220 && red < 30 )); then
   echo "logical right side was not blue on rotated/scaled output: $red $blue"
   exit 1
 fi
-"$UMBRIEL" msg overview-open > /dev/null
-"$UMBRIEL" clock-advance 2000
+"$CANOPY" msg overview-open > /dev/null
+"$CANOPY" clock-advance 2000
 grim -s 1 -o "$home" "$IMAGE"
-green=$("$UMBRIEL_PIXEL_PROBE" "$IMAGE" count 'g > 0.9 && r < 0.1 && b < 0.1')
+green=$("$CANOPY_PIXEL_PROBE" "$IMAGE" count 'g > 0.9 && r < 0.1 && b < 0.1')
 if (( green < 1000 )); then
   echo "outer shader did not sample the inner window effect: $green green pixels"
   exit 1
 fi
 grim -s 1 -o "$neighbour" "$IMAGE"
-green=$("$UMBRIEL_PIXEL_PROBE" "$IMAGE" count 'g > 0.9 && r < 0.1 && b < 0.1')
+green=$("$CANOPY_PIXEL_PROBE" "$IMAGE" count 'g > 0.9 && r < 0.1 && b < 0.1')
 if (( green > 10 )); then
   echo "window effect escaped to neighbouring output: $green green pixels"
   exit 1
 fi
-"$UMBRIEL" msg overview-close > /dev/null
-"$UMBRIEL" clock-advance 8000
-"$UMBRIEL" settle
+"$CANOPY" msg overview-close > /dev/null
+"$CANOPY" clock-advance 8000
+"$CANOPY" settle
 
 # An invalid program must produce a labelled compiler error and leave the
 # compositor able to map another client through its built-in animation.
-cat "$BASE" > "$UMBRIEL_CONFIG"
-cat >> "$UMBRIEL_CONFIG" <<'EOF'
+cat "$BASE" > "$CANOPY_CONFIG"
+cat >> "$CANOPY_CONFIG" <<'EOF'
 
 [effects.preset.windows_in_fixture_3]
 kind = "animation"
@@ -98,14 +98,14 @@ shader = "fixture-3.glsl"
 [animation.windows_in]
 effect = "windows_in_fixture_3"
 EOF
-"$UMBRIEL" msg config-reload > /dev/null
-if ! grep -q "effect preset 'windows_in_fixture_3' (animation) failed to compile; rendering plainly" "$UMBRIEL_LOG"; then
+"$CANOPY" msg config-reload > /dev/null
+if ! grep -q "effect preset 'windows_in_fixture_3' (animation) failed to compile; rendering plainly" "$CANOPY_LOG"; then
   echo "invalid GLSL did not produce the expected fallback diagnostic"
   exit 1
 fi
-"$UMBRIEL_UNMAP_CLIENT" shader-fallback 700 700 > "$UMBRIEL_RUNTIME_DIR/fallback.log" 2>&1 &
+"$CANOPY_UNMAP_CLIENT" shader-fallback 700 700 > "$CANOPY_RUNTIME_DIR/fallback.log" 2>&1 &
 for _ in $(seq 60); do
-  if "$UMBRIEL" windows --json | jq -e '.[] | select(.title == "shader-fallback")' > /dev/null; then
+  if "$CANOPY" windows --json | jq -e '.[] | select(.title == "shader-fallback")' > /dev/null; then
     echo "rotated/scaled UVs, nested sampling, containment, and invalid-source fallback verified"
     exit 0
   fi

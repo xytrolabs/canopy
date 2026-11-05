@@ -15,7 +15,7 @@ concurrency:
 
 jobs:
   waiting:
-    if: ${{ github.repository == 'noctalia-dev/umbriel' && !github.event.issue.pull_request }}
+    if: ${{ github.repository == 'noctalia-dev/canopy' && !github.event.issue.pull_request }}
     runs-on: ubuntu-latest
     steps:
       # A reply from the reporter clears the waiting labels, so the daily stale pass does not
@@ -103,7 +103,7 @@ jobs:
                 addProjectV2ItemById(input:{projectId:$project,contentId:$content}) { item { id } }
               }`, { project: projectId, content: issue.node_id });
               item = { id: added.addProjectV2ItemById.item.id, status: null };
-              updates.push(option('Component', 'Umbriel'), option('Kind', 'Issue'));
+              updates.push(option('Component', 'Canopy'), option('Kind', 'Issue'));
             } else if (target === 'Reviewing' && item.status?.name !== 'Waiting') {
               return;
             }

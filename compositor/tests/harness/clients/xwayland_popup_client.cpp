@@ -509,7 +509,7 @@ int main(int argc, char** argv) {
   state.gc = xcb_generate_id(state.connection);
   check(state, xcb_create_gc_checked(state.connection, state.gc, state.window, XCB_GC_FOREGROUND, &color));
   setTitle(state, state.window, argv[1]);
-  constexpr char wmClass[] = "umbriel-xwayland-popup\0UmbrielXwaylandPopup\0";
+  constexpr char wmClass[] = "canopy-xwayland-popup\0CanopyXwaylandPopup\0";
   check(
       state,
       xcb_change_property_checked(

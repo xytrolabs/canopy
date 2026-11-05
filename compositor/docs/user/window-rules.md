@@ -37,7 +37,7 @@ match.app_id = ["^mpv$", "^celluloid$"]
 window_effect = "scanlines"
 ```
 
-Run `umbriel windows` to inspect current application IDs, titles, tags, and content types, or `umbriel focused-window` for the focused window only. Prefer `app_id` for placement because titles often change.
+Run `canopywc windows` to inspect current application IDs, titles, tags, and content types, or `canopy focused-window` for the focused window only. Prefer `app_id` for placement because titles often change.
 
 State selectors update while the window is open. Opening settings are resolved before a rule's own state changes take effect, so a rule cannot select on the floating or pinned state that it creates.
 
@@ -58,7 +58,7 @@ State selectors update while the window is open. Opening settings are resolved b
 | `default_scrolling_column_order` | Set order inside a named scrolling column.                                                                      |
 | `default_column_display`         | Show the column the window opens in as `"tabbed"` or `"normal"`.                                                |
 
-These values apply once when a window opens. Umbriel checks opening rules again when the first post-map title arrives and when the effective content type first changes from `none` to a non-`none` type. This covers applications that publish their initial identity late, including Wine and Proton rendering children. Each selected opening value applies at most once across those checks, so one identity signal cannot replay it over a later compositor action. Later identity changes refresh only the settings that update while a window is open.
+These values apply once when a window opens. Canopy checks opening rules again when the first post-map title arrives and when the effective content type first changes from `none` to a non-`none` type. This covers applications that publish their initial identity late, including Wine and Proton rendering children. Each selected opening value applies at most once across those checks, so one identity signal cannot replay it over a later compositor action. Later identity changes refresh only the settings that update while a window is open.
 
 Named `default_workspace` targets remain valid when their output is unavailable and their workspace has been evacuated. Combining a name with `default_output` can select that original output's evacuated workspace, including when another workspace on the receiving output has the same name. Missing or ambiguous targets keep the normal placement fallback.
 
@@ -66,7 +66,7 @@ A `default_maximize` rule opens the window at the full column width. [`client_ma
 
 Dialogs float by default. Use `default_floating = false` in a matching rule to force one into the layout.
 
-X11 windows marked as notifications, popup menus, dropdowns, tooltips, or other client-placed popups bypass window rules, including broad application rules that force tiling or maximize. Persistent torn-off menus marked `_NET_WM_WINDOW_TYPE_MENU` remain managed and follow window rules unless they request override-redirect. If an application publishes its popup type or override-redirect flag after opening, Umbriel switches it to popup handling immediately, restores its client-requested position and size, and clears maximize and fullscreen state. These popups do not appear in `umbriel windows`.
+X11 windows marked as notifications, popup menus, dropdowns, tooltips, or other client-placed popups bypass window rules, including broad application rules that force tiling or maximize. Persistent torn-off menus marked `_NET_WM_WINDOW_TYPE_MENU` remain managed and follow window rules unless they request override-redirect. If an application publishes its popup type or override-redirect flag after opening, Canopy switches it to popup handling immediately, restores its client-requested position and size, and clears maximize and fullscreen state. These popups do not appear in `canopywc windows`.
 
 Windows marked `_NET_WM_WINDOW_TYPE_NOTIFICATION` keep their client-requested position and size from their first visible frame, even without override-redirect, and do not take keyboard focus. They need no placement rule, including when another rule makes the application's ordinary windows floating or maximized. If an existing popup changes its type to a notification, keyboard focus returns to the active window.
 
@@ -78,7 +78,7 @@ Some Wine and Proton native Wayland builds expose context menus as untitled, unp
 PROTON_ENABLE_WAYLAND=0 PROTON_USE_WAYLAND=0 %command%
 ```
 
-Restart the application after changing its driver. Its main window should then report `xwayland: true` in `umbriel windows --json`. The plain-text listing uses `-` as a placeholder for an empty title; matching the literal `-` does not select an untitled window. `match.title = "^$"` matches a client-supplied empty title, including these native Wayland menus, but rules cannot supply their missing popup anchor.
+Restart the application after changing its driver. Its main window should then report `xwayland: true` in `canopywc windows --json`. The plain-text listing uses `-` as a placeholder for an empty title; matching the literal `-` does not select an untitled window. `match.title = "^$"` matches a client-supplied empty title, including these native Wayland menus, but rules cannot supply their missing popup anchor.
 
 A modal dialog [attaches to its parent](layout.md#dialogs) and ignores the settings above, since it goes wherever its parent goes. `attach_to_parent = false` keeps it an ordinary window that these settings place. It is checked again whenever the rules change, so a reload detaches or attaches open dialogs.
 
@@ -182,7 +182,7 @@ Add `default_column_display = "tabbed"` to keep such a column as [tabs](layout.m
 | Key                       | Description                                                                                                                                                                                                                                                            |
 | ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `opacity`                 | Surface opacity from 0.0 to 1.0.                                                                                                                                                                                                                                       |
-| `blur`                    | Enable or disable window blur, including translucent Umbriel title bars.                                                                                                                                                                                               |
+| `blur`                    | Enable or disable window blur, including translucent Canopy title bars.                                                                                                                                                                                               |
 | `blur_popups`             | Apply blur to descendant XDG popups.                                                                                                                                                                                                                                   |
 | `blur_ignore_alpha`       | Skip blur below an alpha threshold.                                                                                                                                                                                                                                    |
 | `blur_optimized`          | Override the global optimized-blur choice.                                                                                                                                                                                                                             |
@@ -243,7 +243,7 @@ border_color_unfocused = "#5C4A2AFF"
 
 ### Decoration
 
-An omitted `title_bar` inherits `[appearance.title_bar] mode`. An explicit `title_bar = "on"` follows the client's decoration preference, or shows Umbriel's bar if no preference is known. Use `"negotiated"` to show it only when Wayland decoration negotiation selects server-side decorations, `"forced"` to force a bar, or `"off"` to hide it. Both `"on"` and `"negotiated"` follow managed Xwayland windows' decoration hints. Rules override every global mode: `"forced"` can enable a bar with global `"off"`, and `"on"` can honor CSD requests with global `"forced"`. A later matching `"on"` or `"negotiated"` rule replaces an earlier override with its corresponding decoration policy. Changes apply to existing windows, including state-based rules and config reloads. Fullscreen and tiled tab groups still suppress the bar.
+An omitted `title_bar` inherits `[appearance.title_bar] mode`. An explicit `title_bar = "on"` follows the client's decoration preference, or shows Canopy's bar if no preference is known. Use `"negotiated"` to show it only when Wayland decoration negotiation selects server-side decorations, `"forced"` to force a bar, or `"off"` to hide it. Both `"on"` and `"negotiated"` follow managed Xwayland windows' decoration hints. Rules override every global mode: `"forced"` can enable a bar with global `"off"`, and `"on"` can honor CSD requests with global `"forced"`. A later matching `"on"` or `"negotiated"` rule replaces an earlier override with its corresponding decoration policy. Changes apply to existing windows, including state-based rules and config reloads. Fullscreen and tiled tab groups still suppress the bar.
 
 ```toml
 [[window_rule]]
@@ -270,9 +270,9 @@ The matcher also accepts `false` and updates when an existing window enters or l
 
 Changing title bar presence adjusts tiled content space and maximized floating content sizes. Border-only overrides below keep layout spacing unchanged.
 
-`border_width`, `outer_border_width`, `corner_radius`, and `shadow` change what Umbriel draws around the windows a rule matches. Layout spacing keeps using the global border widths, so a rule never moves other windows: a thinner border leaves its gap empty, and a thicker one draws into the gap. The shadow's softness, offsets, and color stay global.
+`border_width`, `outer_border_width`, `corner_radius`, and `shadow` change what Canopy draws around the windows a rule matches. Layout spacing keeps using the global border widths, so a rule never moves other windows: a thinner border leaves its gap empty, and a thicker one draws into the gap. The shadow's softness, offsets, and color stay global.
 
-An application that draws its own rounded corners and shadow looks best without Umbriel's:
+An application that draws its own rounded corners and shadow looks best without Canopy's:
 
 ```toml
 [[window_rule]]
@@ -401,7 +401,7 @@ match.app_id = "^virt-manager$"
 allow_shortcuts_inhibit = false
 ```
 
-Use the application's ID reported by `umbriel windows --json`. The default is `true`, and a later matching rule can allow requests again with `allow_shortcuts_inhibit = true`.
+Use the application's ID reported by `canopywc windows --json`. The default is `true`, and a later matching rule can allow requests again with `allow_shortcuts_inhibit = true`.
 
 This setting controls client-requested inhibition. Reloading the configuration or changing which rules match also updates existing client inhibitors. The [manual passthrough toggle](keybinds.md#keyboard-shortcuts-inhibition) remains available as an explicit override, even when the rule denies client requests. If you use the toggle to deactivate an inhibitor, rule changes preserve that choice until you toggle it again or the client creates a new inhibitor.
 
@@ -415,7 +415,7 @@ match.app_id = "^obs$"
 background_render = true
 ```
 
-A matching window is not suspended while hidden and receives frame callbacks at its output's refresh rate, so it keeps running as if it were shown. Umbriel still does not draw it. This costs the CPU and GPU time the application spends drawing in the background. Reloading the configuration updates open windows.
+A matching window is not suspended while hidden and receives frame callbacks at its output's refresh rate, so it keeps running as if it were shown. Canopy still does not draw it. This costs the CPU and GPU time the application spends drawing in the background. Reloading the configuration updates open windows.
 
 ### Capture protection
 
@@ -427,7 +427,7 @@ match.app_id = "^private-app$"
 block_capture = true
 ```
 
-Use the application ID from `umbriel windows --json`. Reloading updates existing windows. The last matching rule that sets `block_capture` wins; `false` removes that window's own protection. A protected parent also protects its popups and transients, even if a child has an explicit `false` rule.
+Use the application ID from `canopywc windows --json`. Reloading updates existing windows. The last matching rule that sets `block_capture` wins; `false` removes that window's own protection. A protected parent also protects its popups and transients, even if a child has an explicit `false` rule.
 
 Output and region captures show the content underneath, including its ongoing updates. No black rectangle replaces the window. Scrolling, dwindle, master, and stacking layouts are supported, including floating windows above tiles. A protected tile keeps its allocation; neighboring windows do not reflow. Protection does not change local visibility, input, focus, or geometry.
 
@@ -435,6 +435,6 @@ Direct window capture is refused. Enabling protection stops existing sessions fo
 
 Protection also covers decorations, shadows, overview cards, and closing images, regardless of `effects.in_capture`. A capture that cannot be composed safely fails while local display rendering continues. Protected captures redraw the complete output and can cost more GPU time and memory.
 
-X11 transients with a known owner inherit its protection. When an X11 popup has no reliable parent, Umbriel conservatively excludes it while any X11 window is protected; this can also hide unrelated X11 menus and notifications from capture. A protected window that changes into an unmanaged popup keeps its protection until it becomes managed again.
+X11 transients with a known owner inherit its protection. When an X11 popup has no reliable parent, Canopy conservatively excludes it while any X11 window is protected; this can also hide unrelated X11 menus and notifications from capture. A protected window that changes into an unmanaged popup keeps its protection until it becomes managed again.
 
 Raw `zwlr_export_dmabuf_manager_v1` export is not advertised because it would bypass the filtered composition. Use screencopy or image-copy capture clients instead, including image-copy clients with DMA-BUF destinations.

@@ -5,7 +5,7 @@
 #include <cstdint>
 #include <functional>
 
-namespace umbriel {
+namespace canopy {
 
   enum class GammaOutputMode : uint8_t {
     Sdr,
@@ -24,4 +24,4 @@ namespace umbriel {
   // with an explicit clear as the safe fallback if preparing it fails.
   [[nodiscard]] bool stageGammaForOutputMode(GammaOutputMode mode, const GammaTransitionOps& ops);
 
-} // namespace umbriel
+} // namespace canopy

@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 # Global off/on/forced are defaults; explicit rules override them in existing and opening windows.
 set -euo pipefail
-source "$(dirname "$UMBRIEL_HARNESS_LIB")/title_bar.sh"
+source "$(dirname "$CANOPY_HARNESS_LIB")/title_bar.sh"
 title_bar_config
-cat >> "$UMBRIEL_CONFIG" <<'CONFIG'
+cat >> "$CANOPY_CONFIG" <<'CONFIG'
 [[window_rule]]
 match.title = "^mode-force-on$"
 title_bar = "forced"
@@ -15,17 +15,17 @@ match.title = "^mode-on-"
 title_bar = "on"
 CONFIG
 set_mode() {
-  sed -i '/^\[appearance.title_bar\]$/ { n; s/mode = "[^"]*"/mode = "'"$1"'"/; }' "$UMBRIEL_CONFIG"
-  "$UMBRIEL" msg config-reload > /dev/null
+  sed -i '/^\[appearance.title_bar\]$/ { n; s/mode = "[^"]*"/mode = "'"$1"'"/; }' "$CANOPY_CONFIG"
+  "$CANOPY" msg config-reload > /dev/null
 }
 spawn_mode_client() {
   local title=$1
   shift
-  env LOG_CONFIGURES=1 "$@" "$UMBRIEL_FRACTIONAL_CLIENT" "$title" 480 300 > "$UMBRIEL_RUNTIME_DIR/$title.log" 2>&1 &
+  env LOG_CONFIGURES=1 "$@" "$CANOPY_FRACTIONAL_CLIENT" "$title" 480 300 > "$CANOPY_RUNTIME_DIR/$title.log" 2>&1 &
 }
 initial_height() {
   local first
-  first=$(rg -m 1 '^configure ' "$UMBRIEL_RUNTIME_DIR/$1.log")
+  first=$(rg -m 1 '^configure ' "$CANOPY_RUNTIME_DIR/$1.log")
   [[ ${first##*x} == "$2" ]] || { echo "$1: expected initial height $2, got $first"; return 1; }
 }
 
@@ -44,7 +44,7 @@ title_bar_wait_field mode-force-on title_bar true
 title_bar_wait_field mode-on-ssd title_bar true
 initial_height mode-force-on 676
 initial_height mode-inherit-ssd 704
-"$UMBRIEL" settle > /dev/null
+"$CANOPY" settle > /dev/null
 before=$(title_bar_window mode-inherit-csd)
 
 set_mode forced
@@ -53,7 +53,7 @@ for title in mode-inherit-csd mode-inherit-ssd mode-no-preference mode-force-on 
 done
 title_bar_wait_field mode-force-off title_bar false
 title_bar_wait_field mode-on-csd title_bar false
-"$UMBRIEL" settle > /dev/null
+"$CANOPY" settle > /dev/null
 after=$(title_bar_window mode-inherit-csd)
 [[ $(jq -r .h <<< "$after") == $(($(jq -r .h <<< "$before") - 28)) ]]
 [[ $(jq -r .y <<< "$after") == $(($(jq -r .y <<< "$before") + 28)) ]]
@@ -74,8 +74,8 @@ set_mode forced
 spawn_mode_client ssd-float-mode XDG_DECORATION=client
 title_bar_wait_field ssd-float-mode title_bar true
 id=$(title_bar_window ssd-float-mode | jq -r .id)
-"$UMBRIEL" msg window-focus "$id" > /dev/null
-"$UMBRIEL" msg window-toggle-maximize > /dev/null
+"$CANOPY" msg window-focus "$id" > /dev/null
+"$CANOPY" msg window-toggle-maximize > /dev/null
 title_bar_wait_box ssd-float-mode 1264x676+8+36
 set_mode off
 title_bar_wait_field ssd-float-mode title_bar false

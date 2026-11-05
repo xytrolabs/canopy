@@ -3,11 +3,11 @@
 # paints a full-window blue subsurface so a protruding corner is directly visible.
 set -euo pipefail
 
-readonly CLIENT="${UMBRIEL_SUBSURFACE_CLIENT:-./build-debug/tests/subsurface-client}"
-readonly CLIENT_LOG="$UMBRIEL_RUNTIME_DIR/subsurface-border-client.log"
-readonly SCREENSHOT="$UMBRIEL_RUNTIME_DIR/subsurface-border.png"
+readonly CLIENT="${CANOPY_SUBSURFACE_CLIENT:-./build-debug/tests/subsurface-client}"
+readonly CLIENT_LOG="$CANOPY_RUNTIME_DIR/subsurface-border-client.log"
+readonly SCREENSHOT="$CANOPY_RUNTIME_DIR/subsurface-border.png"
 
-cat >> "$UMBRIEL_CONFIG" <<'EOF'
+cat >> "$CANOPY_CONFIG" <<'EOF'
 
 [animation]
 duration_ms = 1
@@ -23,7 +23,7 @@ border_width = 1
 outer_border_width = 8
 corner_radius = 12
 EOF
-"$UMBRIEL" msg config-reload > /dev/null
+"$CANOPY" msg config-reload > /dev/null
 
 "$CLIENT" subsurface-border 640 480 animate > "$CLIENT_LOG" 2>&1 &
 for _ in $(seq 60); do
@@ -34,11 +34,11 @@ if ! grep -q '^mapped$' "$CLIENT_LOG"; then
   echo "subsurface border client never mapped: $(cat "$CLIENT_LOG")"
   exit 1
 fi
-"$UMBRIEL" settle
+"$CANOPY" settle
 
-window=$("$UMBRIEL" windows --json | jq -c '.[] | select(.title == "subsurface-border")')
+window=$("$CANOPY" windows --json | jq -c '.[] | select(.title == "subsurface-border")')
 if [[ -z $window ]]; then
-  echo "subsurface border client was not registered: $("$UMBRIEL" windows --json)"
+  echo "subsurface border client was not registered: $("$CANOPY" windows --json)"
   exit 1
 fi
 x=$(jq -r '.x' <<< "$window")
@@ -46,7 +46,7 @@ y=$(jq -r '.y' <<< "$window")
 
 grim -o HEADLESS-1 "$SCREENSHOT"
 sample() {
-  "$UMBRIEL_PIXEL_PROBE" "$SCREENSHOT" pixel "$1" "$2"
+  "$CANOPY_PIXEL_PROBE" "$SCREENSHOT" pixel "$1" "$2"
 }
 
 # The configured 12 px outer radius stays fixed around both color bands. Smooth

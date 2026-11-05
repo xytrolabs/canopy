@@ -4,7 +4,7 @@
 #include <optional>
 #include <span>
 
-namespace umbriel {
+namespace canopy {
 
   struct OutputBox {
     int x;
@@ -31,4 +31,4 @@ namespace umbriel {
   // than on the order they were plugged in. With two outputs every non-zero step selects the other one.
   std::optional<size_t> cyclicOutputIndex(std::span<const OutputBox> boxes, size_t reference, int step);
 
-} // namespace umbriel
+} // namespace canopy

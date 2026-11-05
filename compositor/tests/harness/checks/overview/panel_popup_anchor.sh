@@ -2,10 +2,10 @@
 # Release-driven panel menus are dispatched at wl_pointer.frame. A final release over a panel in overview must keep
 # its pointer position valid until that frame, while releasing an implicit grab over the inert desktop clears it.
 set -euo pipefail
-source "$UMBRIEL_HARNESS_LIB"
+source "$CANOPY_HARNESS_LIB"
 
-readonly LAYER="${UMBRIEL_LAYER_CLIENT:-./build-debug/tests/layer-client}"
-readonly POINTER="${UMBRIEL_POINTER_CLIENT:-./build-debug/tests/pointer-client}"
+readonly LAYER="${CANOPY_LAYER_CLIENT:-./build-debug/tests/layer-client}"
+readonly POINTER="${CANOPY_POINTER_CLIENT:-./build-debug/tests/pointer-client}"
 readonly OUTPUT_W=1280
 readonly OUTPUT_H=720
 readonly LEFT_BUTTON=272
@@ -15,7 +15,7 @@ if [[ ! -x $LAYER || ! -x $POINTER ]]; then
   exit 1
 fi
 
-cat >> "$UMBRIEL_CONFIG" <<'EOF'
+cat >> "$CANOPY_CONFIG" <<'EOF'
 
 [animation]
 enabled = false
@@ -29,12 +29,12 @@ enabled = false
 [overview]
 background_blur = false
 EOF
-"$UMBRIEL" msg config-reload > /dev/null
+"$CANOPY" msg config-reload > /dev/null
 
 start_panel() {
   local phase=$1
   shift
-  PANEL_LOG="$UMBRIEL_RUNTIME_DIR/$phase.log"
+  PANEL_LOG="$CANOPY_RUNTIME_DIR/$phase.log"
   "$LAYER" HEADLESS-1 40 popup-on-release "$@" > "$PANEL_LOG" 2>&1 &
   PANEL_PID=$!
   await_events "$PANEL_LOG" ready 1 "$phase panel"
@@ -43,7 +43,7 @@ start_panel() {
 stop_panel() {
   kill "$PANEL_PID"
   wait "$PANEL_PID" 2>/dev/null || true
-  "$UMBRIEL" settle
+  "$CANOPY" settle
 }
 
 check_menu() {
@@ -62,10 +62,10 @@ check_menu() {
     exit 1
   fi
 
-  "$UMBRIEL" settle
-  local image="$UMBRIEL_RUNTIME_DIR/$phase.png" bx by bw bh
+  "$CANOPY" settle
+  local image="$CANOPY_RUNTIME_DIR/$phase.png" bx by bw bh
   grim "$image"
-  read -r bx by bw bh < <("$UMBRIEL_PIXEL_PROBE" "$image" bbox 'r > 0.95 && g > 0.6 && g < 0.75 && b < 0.05')
+  read -r bx by bw bh < <("$CANOPY_PIXEL_PROBE" "$image" bbox 'r > 0.95 && g > 0.6 && g < 0.75 && b < 0.05')
   if ((bx != x || by != y + 1 || bw != 80 || bh != 80)); then
     echo "$phase rendered its popup at $bx,$by ${bw}x$bh, expected $x,$((y + 1)) 80x80"
     exit 1
@@ -77,8 +77,8 @@ check_menu() {
 start_panel desktop
 check_menu desktop 1160 20
 
-"$UMBRIEL" msg overview-open > /dev/null
-"$UMBRIEL" settle
+"$CANOPY" msg overview-open > /dev/null
+"$CANOPY" settle
 start_panel overview-top
 check_menu overview-top 1160 20
 

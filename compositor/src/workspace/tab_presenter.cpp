@@ -11,7 +11,7 @@
 #include <algorithm>
 #include <string_view>
 
-namespace umbriel {
+namespace canopy {
 
   namespace {
 
@@ -332,4 +332,4 @@ namespace umbriel {
     return ref->column->views[ref->group->first + static_cast<size_t>(target)];
   }
 
-} // namespace umbriel
+} // namespace canopy

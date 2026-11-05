@@ -6,7 +6,7 @@
 
 struct wlr_xwayland_surface;
 
-namespace umbriel {
+namespace canopy {
 
   class Server;
   class View;
@@ -72,4 +72,4 @@ namespace umbriel {
     wl_listener m_requestConfigure{};
   };
 
-} // namespace umbriel
+} // namespace canopy

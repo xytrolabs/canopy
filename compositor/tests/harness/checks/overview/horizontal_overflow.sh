@@ -4,10 +4,10 @@
 # above and below it while the neighbouring workspace previews step along X.
 set -euo pipefail
 
-readonly CLIENT="${UMBRIEL_UNMAP_CLIENT:-./build-debug/tests/unmap-client}"
-readonly POINTER="${UMBRIEL_POINTER_CLIENT:-./build-debug/tests/pointer-client}"
-readonly SCREENSHOT="$UMBRIEL_RUNTIME_DIR/horizontal-overview-overflow.png"
-readonly VERTICAL_SHOT="$UMBRIEL_RUNTIME_DIR/vertical-overview-overflow.png"
+readonly CLIENT="${CANOPY_UNMAP_CLIENT:-./build-debug/tests/unmap-client}"
+readonly POINTER="${CANOPY_POINTER_CLIENT:-./build-debug/tests/pointer-client}"
+readonly SCREENSHOT="$CANOPY_RUNTIME_DIR/horizontal-overview-overflow.png"
+readonly VERTICAL_SHOT="$CANOPY_RUNTIME_DIR/vertical-overview-overflow.png"
 readonly BTN_LEFT=272
 # The overview zoom below scales the 1280x720 output to a 640x360 preview centred on both axes.
 readonly PREVIEW_X=320
@@ -24,21 +24,21 @@ spawn_client() {
 sample_blue() {
   local image=$1 x=$2 y=$3
   local blue
-  read -r _ _ blue < <("$UMBRIEL_PIXEL_PROBE" "$image" mean "20x20+$x+$y")
+  read -r _ _ blue < <("$CANOPY_PIXEL_PROBE" "$image" mean "20x20+$x+$y")
   echo "$blue"
 }
 
 wait_for_count() {
   local want=$1
   for _ in $(seq 60); do
-    [[ $("$UMBRIEL" windows --json | jq 'length') -eq $want ]] && return 0
+    [[ $("$CANOPY" windows --json | jq 'length') -eq $want ]] && return 0
     sleep 0.1
   done
-  echo "expected $want windows, got: $("$UMBRIEL" windows --json)"
+  echo "expected $want windows, got: $("$CANOPY" windows --json)"
   return 1
 }
 
-cat >> "$UMBRIEL_CONFIG" <<'EOF'
+cat >> "$CANOPY_CONFIG" <<'EOF'
 
 [animation.overview]
 duration_ms = 1000
@@ -59,7 +59,7 @@ corner_radius = 0
 [overview]
 zoom = 0.5
 EOF
-"$UMBRIEL" msg config-reload > /dev/null
+"$CANOPY" msg config-reload > /dev/null
 
 spawn_client horizontal-overflow-first
 wait_for_count 1
@@ -68,15 +68,15 @@ wait_for_count 2
 spawn_client horizontal-overflow-third
 wait_for_count 3
 
-first_id=$("$UMBRIEL" windows --json | jq -r '.[] | select(.title == "horizontal-overflow-first") | .id')
+first_id=$("$CANOPY" windows --json | jq -r '.[] | select(.title == "horizontal-overflow-first") | .id')
 if [[ -z $first_id ]]; then
-  echo "could not resolve the first horizontal column: $("$UMBRIEL" windows --json)"
+  echo "could not resolve the first horizontal column: $("$CANOPY" windows --json)"
   exit 1
 fi
-"$UMBRIEL" msg window-focus "$first_id" > /dev/null
-"$UMBRIEL" settle
-"$UMBRIEL" msg overview-open > /dev/null
-"$UMBRIEL" settle
+"$CANOPY" msg window-focus "$first_id" > /dev/null
+"$CANOPY" settle
+"$CANOPY" msg overview-open > /dev/null
+"$CANOPY" settle
 grim "$SCREENSHOT"
 blue=$(sample_blue "$SCREENSHOT" 1090 350)
 if (( blue < 80 )); then
@@ -84,31 +84,31 @@ if (( blue < 80 )); then
   exit 1
 fi
 
-"$UMBRIEL" msg overview-close > /dev/null
-"$UMBRIEL" settle
+"$CANOPY" msg overview-close > /dev/null
+"$CANOPY" settle
 
 # Arrange the workspaces horizontally: the strip turns vertical, so the same three columns now stack downwards past the
 # output's bottom edge instead of past its right edge.
-cat >> "$UMBRIEL_CONFIG" <<'EOF'
+cat >> "$CANOPY_CONFIG" <<'EOF'
 
 [output."HEADLESS-1"]
 workspaces = 3
 workspace_axis = "horizontal"
 EOF
-"$UMBRIEL" msg config-reload > /dev/null
+"$CANOPY" msg config-reload > /dev/null
 
 # A client on the neighbouring workspace makes its preview identifiable by colour: the shared black workspace
 # background cannot be told apart from the backdrop.
-"$UMBRIEL" msg workspace-switch 2 > /dev/null
+"$CANOPY" msg workspace-switch 2 > /dev/null
 spawn_client horizontal-overflow-neighbour
 wait_for_count 4
-"$UMBRIEL" settle
-"$UMBRIEL" msg workspace-switch 1 > /dev/null
-"$UMBRIEL" msg column-focus-first > /dev/null
-"$UMBRIEL" settle
+"$CANOPY" settle
+"$CANOPY" msg workspace-switch 1 > /dev/null
+"$CANOPY" msg column-focus-first > /dev/null
+"$CANOPY" settle
 
 strip_windows() {
-  "$UMBRIEL" windows --json |
+  "$CANOPY" windows --json |
     jq '[.[] | select(.title | startswith("horizontal-overflow-")) | select(.title != "horizontal-overflow-neighbour")]'
 }
 
@@ -119,11 +119,11 @@ for _ in $(seq 30); do
   sleep 0.1
 done
 if ((vertical_rows != 3)); then
-  echo "the scrolling strip never stacked its columns vertically: $("$UMBRIEL" windows --json)"
+  echo "the scrolling strip never stacked its columns vertically: $("$CANOPY" windows --json)"
   exit 1
 fi
 
-windows=$("$UMBRIEL" windows --json)
+windows=$("$CANOPY" windows --json)
 # A later column reaches past the output's bottom edge, so the only part of its card the overview can show is the
 # stretch below the preview. Sample the middle of exactly that stretch.
 read -r overhang_title overhang_x overhang_y < <(
@@ -153,8 +153,8 @@ if ((neighbour_x <= 970 || neighbour_x >= 1250 || neighbour_y <= 190 || neighbou
   exit 1
 fi
 
-"$UMBRIEL" msg overview-open > /dev/null
-"$UMBRIEL" settle
+"$CANOPY" msg overview-open > /dev/null
+"$CANOPY" settle
 grim "$VERTICAL_SHOT"
 
 overhang_blue=$(sample_blue "$VERTICAL_SHOT" $((overhang_x - 10)) $((overhang_y - 10)))
@@ -174,7 +174,7 @@ fi
 "$POINTER" 1280 720 move "$overhang_x" "$overhang_y" press "$BTN_LEFT" release "$BTN_LEFT"
 active=""
 for _ in $(seq 30); do
-  active=$("$UMBRIEL" windows --json | jq -r '.[] | select(.active) | .title')
+  active=$("$CANOPY" windows --json | jq -r '.[] | select(.active) | .title')
   [[ $active == "$overhang_title" ]] && break
   sleep 0.1
 done
@@ -182,8 +182,8 @@ if [[ $active != "$overhang_title" ]]; then
   echo "clicking the card overhanging below the preview did not activate $overhang_title, active is '$active'"
   exit 1
 fi
-if [[ $("$UMBRIEL" windows --json | jq 'length') -ne 4 ]]; then
-  echo "the click below the preview did not land on a card: $("$UMBRIEL" windows --json)"
+if [[ $("$CANOPY" windows --json | jq 'length') -ne 4 ]]; then
+  echo "the click below the preview did not land on a card: $("$CANOPY" windows --json)"
   exit 1
 fi
 

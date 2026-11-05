@@ -2,7 +2,7 @@
 
 `BackendManager` filters GPUs before wlroots opens their KMS nodes and gives `Server` the selected backend, session, and renderer factory.
 
-Without exclusions, Umbriel uses `wlr_backend_autocreate()` and `fx_renderer_create()`. The policy does not apply to nested Wayland, X11, or headless backends.
+Without exclusions, Canopy uses `wlr_backend_autocreate()` and `fx_renderer_create()`. The policy does not apply to nested Wayland, X11, or headless backends.
 
 Either path then adds an empty headless backend to the multi-backend, unless one is already there, so `output-create` can add virtual outputs to any session.
 
@@ -23,4 +23,4 @@ Configuration errors that could hide exclusions stop startup. The [configuration
 
 ## Verification
 
-The [contributor guide](../../CONTRIBUTING.md#umbrielfx) describes simulated backend tests, EGL ABI checks, and hardware renderer checks. Physical VFIO transitions require testing in a dedicated native session.
+The [contributor guide](../../CONTRIBUTING.md#canopyfx) describes simulated backend tests, EGL ABI checks, and hardware renderer checks. Physical VFIO transitions require testing in a dedicated native session.

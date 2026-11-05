@@ -9,7 +9,7 @@ let
   inherit (lib.options) mkEnableOption mkOption;
   inherit (lib.lists) optional;
 
-  cfg = config.programs.umbriel;
+  cfg = config.programs.canopy;
   tomlFormat = pkgs.formats.toml { };
   generateToml =
     name: value:
@@ -24,18 +24,18 @@ in
   imports = [
     (mkRemovedOptionModule [
       "programs"
-      "umbriel"
+      "canopy"
       "validateConfig"
-    ] "Build-time validation was removed. Umbriel reports configuration errors at runtime.")
+    ] "Build-time validation was removed. Canopy reports configuration errors at runtime.")
   ];
 
-  options.programs.umbriel = {
-    enable = mkEnableOption "Umbriel, a Wayland compositor built on wlroots";
+  options.programs.canopy = {
+    enable = mkEnableOption "Canopy, a Wayland compositor built on wlroots";
 
     package = mkOption {
       type = lib.types.nullOr lib.types.package;
       default = null;
-      description = "The umbriel package to install.";
+      description = "The canopy package to install.";
     };
     settings = mkOption {
       type =
@@ -48,15 +48,15 @@ in
 
       default = null;
       description = ''
-        Configuration written to {file}`$XDG_CONFIG_HOME/umbriel/config.toml`.
-        Leave null to use the configuration packaged with Umbriel.
+        Configuration written to {file}`$XDG_CONFIG_HOME/canopy/config.toml`.
+        Leave null to use the configuration packaged with Canopy.
 
         Can be written as:
           - A Nix attrset (converted to TOML via nixpkgs' tomlFormat)
           - A raw TOML string
           - A path to a `.toml` file
 
-        See {file}`examples/config.toml` in the Umbriel repository for every available option.
+        See {file}`examples/config.toml` in the Canopy repository for every available option.
       '';
       example = lib.literalExpression ''
         {
@@ -77,7 +77,7 @@ in
     packages = optional (cfg.package != null) cfg.package;
 
     xdg.config.files = mkIf (cfg.settings != null) {
-      "umbriel/config.toml".source = generateToml "umbriel-config.toml" cfg.settings;
+      "canopy/config.toml".source = generateToml "canopy-config.toml" cfg.settings;
     };
   };
 

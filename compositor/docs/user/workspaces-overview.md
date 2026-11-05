@@ -53,7 +53,7 @@ The current output follows the cursor. Output-changing actions move the cursor t
 
 Normal `[keybinds]` remain active in the overview. Directional focus actions select neighboring cards, and workspace or output actions keep their normal fallback behavior.
 
-Shortcut badges provide direct, unmodified key sequences for visible window cards. When there are more cards than keys, Umbriel creates multi-key labels. Backspace removes the last key from a pending sequence. Escape clears the sequence first and closes the overview when no sequence is pending.
+Shortcut badges provide direct, unmodified key sequences for visible window cards. When there are more cards than keys, Canopy creates multi-key labels. Backspace removes the last key from a pending sequence. Escape clears the sequence first and closes the overview when no sequence is pending.
 
 Set `shortcuts = false` to disable badges. A normal keybind takes precedence over a badge. `shortcut_keys` must contain at least two unique printable ASCII characters.
 

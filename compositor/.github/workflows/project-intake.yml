@@ -37,7 +37,7 @@ jobs:
           script: |
             const projectId = 'PVT_kwDODYBPq84BmIDl';
             const { owner, repo } = context.repo;
-            if (owner !== 'noctalia-dev' || repo !== 'umbriel') throw new Error('Unexpected intake repository');
+            if (owner !== 'noctalia-dev' || repo !== 'canopy') throw new Error('Unexpected intake repository');
             const data = await github.graphql(`query($id:ID!) {
               node(id:$id) { ... on ProjectV2 {
                 fields(first:100) { nodes {
@@ -53,7 +53,7 @@ jobs:
               if (!option) throw new Error(`Missing project field/option: ${name}/${label}`);
               return { fieldId: field.id, value: { singleSelectOptionId: option.id } };
             }
-            for (const [field, option] of [['Component', 'Umbriel'], ['Kind', 'Issue'], ['Kind', 'PR'], ['Status', 'Inbox']]) fieldOption(field, option);
+            for (const [field, option] of [['Component', 'Canopy'], ['Kind', 'Issue'], ['Kind', 'PR'], ['Status', 'Inbox']]) fieldOption(field, option);
             const members = new Map();
             let cursor = null;
             do {
@@ -90,7 +90,7 @@ jobs:
               let item = members.get(subject.id);
               if (item?.isArchived) { core.info(`Preserving archived card ${item.id}`); continue; }
               const current = new Map((item?.fieldValues.nodes || []).filter(v => v.field).map(v => [v.field.name, v.name]));
-              for (const [name, desired] of [['Component', 'Umbriel'], ['Kind', subject.kind]]) {
+              for (const [name, desired] of [['Component', 'Canopy'], ['Kind', subject.kind]]) {
                 if (current.has(name) && current.get(name) !== desired) throw new Error(`Conflicting ${name} on ${item.id}`);
               }
               const added = !item;
@@ -101,7 +101,7 @@ jobs:
                 item = result.addProjectV2ItemById.item;
                 members.set(subject.id, item);
               }
-              for (const [name, desired] of [['Component', 'Umbriel'], ['Kind', subject.kind], ['Status', 'Inbox']]) {
+              for (const [name, desired] of [['Component', 'Canopy'], ['Kind', subject.kind], ['Status', 'Inbox']]) {
                 if (current.has(name) && (name !== 'Status' || !added)) continue;
                 await github.graphql(`mutation($input:UpdateProjectV2ItemFieldValueInput!) {
                   updateProjectV2ItemFieldValue(input:$input) { __typename }
@@ -114,7 +114,7 @@ jobs:
                 } } }
               } } }`, { id: item.id });
               const values = new Map(verified.node.fieldValues.nodes.filter(v => v.field).map(v => [v.field.name, v.name]));
-              if (verified.node.content.id !== subject.id || values.get('Component') !== 'Umbriel' || values.get('Kind') !== subject.kind) throw new Error(`Intake verification failed for ${item.id}`);
+              if (verified.node.content.id !== subject.id || values.get('Component') !== 'Canopy' || values.get('Kind') !== subject.kind) throw new Error(`Intake verification failed for ${item.id}`);
               if ((added || !current.has('Status')) && values.get('Status') !== 'Inbox') throw new Error(`Inbox verification failed for ${item.id}`);
               core.info(`${added ? 'Added' : 'Verified'} ${subject.kind}: ${item.id}`);
             }

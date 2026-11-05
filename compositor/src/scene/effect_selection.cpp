@@ -3,7 +3,7 @@
 #include <algorithm>
 #include <iterator>
 
-namespace umbriel {
+namespace canopy {
 
   namespace {
     void assign(EffectSlot& slot, const EffectPool& pool, std::string name) {
@@ -241,4 +241,4 @@ namespace umbriel {
     return std::nullopt;
   }
 
-} // namespace umbriel
+} // namespace canopy

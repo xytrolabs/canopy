@@ -1,21 +1,21 @@
-# Unit tests. Each entry is [name, test sources, extra dependencies]. Every test gets umbriel_pure_dep; add umbriel_core_dep to the third field for a test that
+# Unit tests. Each entry is [name, test sources, extra dependencies]. Every test gets canopy_pure_dep; add canopy_core_dep to the third field for a test that
 # needs compositor code. Either way a test never lists or recompiles a source.
 unit_tests = [
   ['overview-navigation', ['unit/overview_navigation.cpp'], []],
   ['gesture-physics', ['unit/gesture_physics.cpp'], []],
-  ['overview-preview-geometry', ['unit/overview_preview_geometry.cpp'], [umbriel_core_dep]],
+  ['overview-preview-geometry', ['unit/overview_preview_geometry.cpp'], [canopy_core_dep]],
   ['presented-crop', ['unit/presented_crop.cpp'], []],
   ['scene-node', ['unit/scene_node.cpp'], []],
   ['scene-clip', ['unit/scene_clip.cpp'], [wayland_server_dep]],
-  ['xwayland-outputs', ['unit/xwayland_outputs.cpp'], [umbriel_core_dep]],
+  ['xwayland-outputs', ['unit/xwayland_outputs.cpp'], [canopy_core_dep]],
   ['xwayland-xsettings', ['unit/xwayland_xsettings.cpp'], []],
-  ['presentation', ['unit/presentation.cpp'], [umbriel_core_dep]],
-  ['animation', ['unit/animation.cpp'], [umbriel_core_dep]],
-  ['application-scope', ['unit/application_scope.cpp'], [umbriel_core_dep], [], ['-Wl,--wrap=umbrielCloseRange']],
+  ['presentation', ['unit/presentation.cpp'], [canopy_core_dep]],
+  ['animation', ['unit/animation.cpp'], [canopy_core_dep]],
+  ['application-scope', ['unit/application_scope.cpp'], [canopy_core_dep], [], ['-Wl,--wrap=canopyCloseRange']],
   ['shader-source', ['unit/shader_source.cpp'], []],
   ['effects', ['unit/effects.cpp'], []],
   ['effect-selection', ['unit/effect_selection.cpp'], []],
-  ['window-opacity-blur', ['unit/window_opacity_blur.cpp'], [umbriel_core_dep]],
+  ['window-opacity-blur', ['unit/window_opacity_blur.cpp'], [canopy_core_dep]],
   ['value-parse', ['unit/value_parse.cpp'], []],
   ['keybind-parse', ['unit/keybind_parse.cpp'], []],
   ['lid-state', ['unit/lid_state.cpp'], []],
@@ -25,8 +25,8 @@ unit_tests = [
   ['keyboard-leds', ['unit/keyboard_leds.cpp'], [wayland_server_dep]],
   ['keyboard-state', ['unit/keyboard_state.cpp'], [wayland_server_dep]],
   ['input-capture-geometry', ['unit/input_capture_geometry.cpp'], []],
-  ['input-capture-permissions', ['unit/input_capture_permissions.cpp'], [umbriel_core_dep]],
-  ['eis-socket', ['unit/eis_socket.cpp'], [umbriel_core_dep, wayland_server_dep]],
+  ['input-capture-permissions', ['unit/input_capture_permissions.cpp'], [canopy_core_dep]],
+  ['eis-socket', ['unit/eis_socket.cpp'], [canopy_core_dep, wayland_server_dep]],
   ['surface-layouts', ['unit/surface_layouts.cpp'], []],
   ['shortcuts-inhibit', ['unit/shortcuts_inhibit.cpp'], []],
   ['shortcut-keysym', ['unit/shortcut_keysym.cpp'], []],
@@ -40,8 +40,8 @@ unit_tests = [
   ['output-hdr-transition', ['unit/output_hdr_transition.cpp'], []],
   ['output-format-sequence', ['unit/output_format_sequence.cpp'], []],
   ['output-gamma-transition', ['unit/output_gamma_transition.cpp'], []],
-  ['hdr-metadata', ['unit/hdr_metadata.cpp'], [umbriel_core_dep]],
-  ['color-description', ['unit/color_description.cpp'], [umbriel_core_dep]],
+  ['hdr-metadata', ['unit/hdr_metadata.cpp'], [canopy_core_dep]],
+  ['color-description', ['unit/color_description.cpp'], [canopy_core_dep]],
   ['hdr-format', ['unit/hdr_format.cpp'], []],
   ['sdr-format', ['unit/sdr_format.cpp'], []],
   ['layout-struts', ['unit/layout_struts.cpp'], []],
@@ -55,7 +55,7 @@ unit_tests = [
   ['shortcut-labels', ['unit/shortcut_labels.cpp'], []],
   ['border-ring', ['unit/border_ring.cpp'], []],
   ['ssd-frame-geometry', ['unit/ssd_frame_geometry.cpp'], []],
-  ['title-bar-icon', ['unit/title_bar_icon.cpp'], [umbriel_core_dep]],
+  ['title-bar-icon', ['unit/title_bar_icon.cpp'], [canopy_core_dep]],
   ['floating', ['unit/floating.cpp'], []],
   ['window-region', ['unit/window_region.cpp'], []],
   ['drag-physics', ['unit/drag_physics.cpp'], []],
@@ -64,21 +64,21 @@ unit_tests = [
   ['deferred-unfullscreen', ['unit/deferred_unfullscreen.cpp'], []],
   ['config-section', ['unit/config_section.cpp'], []],
   ['config-change', ['unit/config_change.cpp'], []],
-  ['config-schema', ['unit/config_schema.cpp'], [umbriel_core_dep]],
+  ['config-schema', ['unit/config_schema.cpp'], [canopy_core_dep]],
   [
     'config-load',
     ['unit/config_load.cpp'],
-    [umbriel_core_dep],
+    [canopy_core_dep],
     [
-      '-DUMBRIEL_EXAMPLE_CONFIG="' + meson.project_source_root() / 'examples/config.toml' + '"',
-      '-DUMBRIEL_SOURCE_ROOT="' + meson.project_source_root() + '"',
+      '-DCANOPY_EXAMPLE_CONFIG="' + meson.project_source_root() / 'examples/config.toml' + '"',
+      '-DCANOPY_SOURCE_ROOT="' + meson.project_source_root() + '"',
     ],
   ],
   ['allocator-policy', ['unit/allocator_policy.cpp'], []],
   ['drm-policy', ['unit/drm_policy.cpp'], []],
-  ['config-watcher', ['unit/config_watcher.cpp'], [umbriel_core_dep]],
-  ['action-registry', ['unit/action_registry.cpp'], [umbriel_core_dep]],
-  ['ipc-commands', ['unit/ipc_commands.cpp'], [umbriel_core_dep]],
+  ['config-watcher', ['unit/config_watcher.cpp'], [canopy_core_dep]],
+  ['action-registry', ['unit/action_registry.cpp'], [canopy_core_dep]],
+  ['ipc-commands', ['unit/ipc_commands.cpp'], [canopy_core_dep]],
   ['config-resolve', ['unit/config_resolve.cpp'], []],
   # Reads docs/user/actions.md from the source tree: the doc's tables are generated from the same spec strings the CLI
   # prints, so the compiled table and the page cannot drift apart unnoticed.
@@ -86,7 +86,7 @@ unit_tests = [
     'docs-actions',
     ['unit/docs_actions.cpp'],
     [],
-    ['-DUMBRIEL_DOCS_ACTIONS_MD="' + meson.project_source_root() / 'docs/user/actions.md' + '"'],
+    ['-DCANOPY_DOCS_ACTIONS_MD="' + meson.project_source_root() / 'docs/user/actions.md' + '"'],
   ],
 ]
 
@@ -94,13 +94,13 @@ if native_drm_policy_supported
   # Meson enables 64-bit file offsets; glibc redirects stat to stat64.
   stat_symbol = is_glibc ? 'stat64' : 'stat'
   unit_tests += [
-    ['backend-manager', ['unit/backend_manager.cpp'], [umbriel_core_dep], [], ['-Wl,--wrap=' + stat_symbol]],
+    ['backend-manager', ['unit/backend_manager.cpp'], [canopy_core_dep], [], ['-Wl,--wrap=' + stat_symbol]],
   ]
 endif
 
 if wlr_has_drm_backend
   unit_tests += [
-    ['drm-lease', ['unit/drm_lease.cpp'], [umbriel_core_dep]],
+    ['drm-lease', ['unit/drm_lease.cpp'], [canopy_core_dep]],
   ]
 endif
 
@@ -113,7 +113,7 @@ foreach unit_test : unit_tests
     unit_test[0] + '-test',
     unit_test[1],
     include_directories: include_directories('unit'),
-    dependencies: [umbriel_pure_dep] + unit_test[2],
+    dependencies: [canopy_pure_dep] + unit_test[2],
     cpp_args: unit_test_args,
     link_args: unit_test_link_args,
   )
@@ -125,7 +125,7 @@ endforeach
 test(
   'validate-config',
   find_program('validate_config.sh'),
-  args: [umbriel],
+  args: [canopywc],
 )
 
 # Harness helper, not a unit test: drives virtual pointer and modifier input against a running compositor. The headless backend has no input devices, so protocol
@@ -525,7 +525,7 @@ capture_client = executable(
 input_capture_compositor = executable(
   'input-capture-compositor',
   ['harness/clients/input_capture_compositor.cpp'],
-  dependencies: [umbriel_core_dep],
+  dependencies: [canopy_core_dep],
 )
 input_capture_client = executable(
   'input-capture-client',

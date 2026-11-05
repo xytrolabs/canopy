@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
 # How to write a check (waits, the animation clock, pixel analysis, stress runs) is in CONTRIBUTING.md, "Tests".
-# Boots one contained headless Umbriel per check in checks/, runs the check, kills everything it spawned, and asserts
+# Boots one contained headless Canopy per check in checks/, runs the check, kills everything it spawned, and asserts
 # that instance exited cleanly. One instance per check is what makes a failure local: a check starts from the default
 # config with no windows, no overview, and workspace 1 focused, so it asserts behaviour instead of maintaining hygiene
 # for whatever runs next.
-# Containment matters. A stock Umbriel start runs its built-in autostarts, and
+# Containment matters. A stock Canopy start runs its built-in autostarts, and
 # `dbus-update-activation-environment --systemd` would repoint the *caller's* session-wide WAYLAND_DISPLAY and
-# UMBRIEL_SOCKET at this throwaway instance. Unsetting DBUS_SESSION_BUS_ADDRESS makes both autostarts fail harmlessly.
+# CANOPY_SOCKET at this throwaway instance. Unsetting DBUS_SESSION_BUS_ADDRESS makes both autostarts fail harmlessly.
 # DBUS_SYSTEM_BUS_ADDRESS points at no bus, so the host's systemd-localed keymap never reaches an instance.
-# Usage: check.sh <path-to-umbriel-binary> [name-fragment ...] [-j N|--jobs N] [-v|--verbose] [-l|--list]
+# Usage: check.sh <path-to-canopy-binary> [name-fragment ...] [-j N|--jobs N] [-v|--verbose] [-l|--list]
 # A check's name is its path under checks/ without `.sh`, such as `overview/wheel`. Each name fragment selects every
 # check whose name contains it, so `overview/` selects a topic and several fragments run several checks. Without a
 # fragment the whole suite runs. A failing check keeps its runtime directory (compositor and client logs) and prints it.
@@ -19,7 +19,7 @@
 
 set -euo pipefail
 
-BINARY=${1:?usage: check.sh <umbriel-binary> [name-fragment ...] [-v] [-l]}
+BINARY=${1:?usage: check.sh <canopy-binary> [name-fragment ...] [-v] [-l]}
 shift
 
 FILTERS=()
@@ -61,10 +61,10 @@ if ((JOBS == 0)); then
 fi
 
 HARNESS_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
-# CHECK_DIR substitutes another directory of checks. Checks reach repository files through UMBRIEL_REPO.
+# CHECK_DIR substitutes another directory of checks. Checks reach repository files through CANOPY_REPO.
 CHECKS_DIR=${CHECK_DIR:-$HARNESS_DIR/checks}
-export UMBRIEL_REPO
-UMBRIEL_REPO=$(cd "$HARNESS_DIR/../.." && pwd)
+export CANOPY_REPO
+CANOPY_REPO=$(cd "$HARNESS_DIR/../.." && pwd)
 
 # A check that never returns would otherwise hang the suite with no output. The
 # cap is per check and generous: the slowest checks drive two-second animations.
@@ -125,8 +125,8 @@ if ((${#SELECTED[@]} == 0)); then
   exit 1
 fi
 
-# A fixed sleep ties a check to machine load. Animation timing belongs on `umbriel clock-freeze`/`clock-advance`, end
-# states on `umbriel settle`, and client state on a poll; a sleep that is genuinely about real time says why.
+# A fixed sleep ties a check to machine load. Animation timing belongs on `canopy clock-freeze`/`clock-advance`, end
+# states on `canopy settle`, and client state on a poll; a sleep that is genuinely about real time says why.
 sleep_violations=$(
   for name in "${SELECTED[@]}"; do
     printf '%s\n' "$CHECKS_DIR/$name.sh"
@@ -157,43 +157,43 @@ fi
 # Keeping this resolution here makes every build mode consistent without each
 # recipe having to export a matching set of paths.
 CLIENT_DIR=$BINARY_DIR/tests
-export UMBRIEL_POINTER_CLIENT="$CLIENT_DIR/pointer-client"
-export UMBRIEL_POINTER_MODIFIERS_CLIENT="$CLIENT_DIR/pointer-modifiers-client"
-export UMBRIEL_KEYBOARD_KEYMAP_CLIENT="$CLIENT_DIR/keyboard-keymap-client"
-export UMBRIEL_INPUT_METHOD_CLIENT="$CLIENT_DIR/input-method-client"
-export UMBRIEL_DRAG_CLIENT="$CLIENT_DIR/drag-client"
-export UMBRIEL_LAYER_CLIENT="$CLIENT_DIR/layer-client"
-export UMBRIEL_GLOBAL_CLIENT="$CLIENT_DIR/global-client"
-export UMBRIEL_DATA_CONTROL_CLIENT="$CLIENT_DIR/data-control-client"
-export UMBRIEL_WORKSPACE_CLIENT="$CLIENT_DIR/workspace-client"
-export UMBRIEL_FOREIGN_TOPLEVEL_CLIENT="$CLIENT_DIR/foreign-toplevel-client"
-export UMBRIEL_UNMAP_CLIENT="$CLIENT_DIR/unmap-client"
-export UMBRIEL_POPUP_CLIENT="$CLIENT_DIR/popup-client"
-export UMBRIEL_IDLE_INHIBIT_CLIENT="$CLIENT_DIR/idle-inhibit-client"
-export UMBRIEL_LOCK_CLIENT="$CLIENT_DIR/lock-client"
-export UMBRIEL_SUBSURFACE_CLIENT="$CLIENT_DIR/subsurface-client"
-export UMBRIEL_FRACTIONAL_CLIENT="$CLIENT_DIR/fractional-client"
-export UMBRIEL_SYNCOBJ_CLIENT="$CLIENT_DIR/syncobj-client"
-export UMBRIEL_SECURITY_CONTEXT_CLIENT="$CLIENT_DIR/security-context-client"
-export UMBRIEL_SEAT_LOG_CLIENT="$CLIENT_DIR/seat-log-client"
-export UMBRIEL_COLOR_FEEDBACK_CLIENT="$CLIENT_DIR/color-feedback-client"
-export UMBRIEL_XWAYLAND_FOCUS_CLIENT="$CLIENT_DIR/xwayland-focus-client"
-export UMBRIEL_XWAYLAND_OUTPUT_CLIENT="$CLIENT_DIR/xwayland-output-client"
-export UMBRIEL_XWAYLAND_ASSOCIATION_CLIENT="$CLIENT_DIR/xwayland-association-client"
-export UMBRIEL_XWAYLAND_DIALOG_CLIENT="$CLIENT_DIR/xwayland-dialog-client"
-export UMBRIEL_XWAYLAND_POPUP_CLIENT="$CLIENT_DIR/xwayland-popup-client"
-export UMBRIEL_XWAYLAND_INPUT_CLIENT="$CLIENT_DIR/xwayland-input-client"
-export UMBRIEL_EI_PEER_CLIENT="$CLIENT_DIR/ei-peer-client"
-export UMBRIEL_XWAYLAND_SELECTION_CLIENT="$CLIENT_DIR/xwayland-selection-client"
-export UMBRIEL_XWAYLAND_SHAPE_CLIENT="$CLIENT_DIR/xwayland-shape-client"
-export UMBRIEL_XWAYLAND_CURSOR_CLIENT="$CLIENT_DIR/xwayland-cursor-client"
-export UMBRIEL_XSETTINGS_CLIENT="$CLIENT_DIR/xsettings-client"
-export UMBRIEL_WAYLAND_CURSOR_CLIENT="$CLIENT_DIR/wayland-cursor-client"
-export UMBRIEL_OUTPUT_MANAGEMENT_CLIENT="$CLIENT_DIR/output-management-client"
-export UMBRIEL_PIXEL_PROBE="$CLIENT_DIR/pixel-probe"
-export UMBRIEL_CAPTURE_CLIENT="$CLIENT_DIR/capture-client"
-export UMBRIEL_HARNESS_LIB="$HARNESS_DIR/lib.sh"
-export UMBRIEL=$BINARY
+export CANOPY_POINTER_CLIENT="$CLIENT_DIR/pointer-client"
+export CANOPY_POINTER_MODIFIERS_CLIENT="$CLIENT_DIR/pointer-modifiers-client"
+export CANOPY_KEYBOARD_KEYMAP_CLIENT="$CLIENT_DIR/keyboard-keymap-client"
+export CANOPY_INPUT_METHOD_CLIENT="$CLIENT_DIR/input-method-client"
+export CANOPY_DRAG_CLIENT="$CLIENT_DIR/drag-client"
+export CANOPY_LAYER_CLIENT="$CLIENT_DIR/layer-client"
+export CANOPY_GLOBAL_CLIENT="$CLIENT_DIR/global-client"
+export CANOPY_DATA_CONTROL_CLIENT="$CLIENT_DIR/data-control-client"
+export CANOPY_WORKSPACE_CLIENT="$CLIENT_DIR/workspace-client"
+export CANOPY_FOREIGN_TOPLEVEL_CLIENT="$CLIENT_DIR/foreign-toplevel-client"
+export CANOPY_UNMAP_CLIENT="$CLIENT_DIR/unmap-client"
+export CANOPY_POPUP_CLIENT="$CLIENT_DIR/popup-client"
+export CANOPY_IDLE_INHIBIT_CLIENT="$CLIENT_DIR/idle-inhibit-client"
+export CANOPY_LOCK_CLIENT="$CLIENT_DIR/lock-client"
+export CANOPY_SUBSURFACE_CLIENT="$CLIENT_DIR/subsurface-client"
+export CANOPY_FRACTIONAL_CLIENT="$CLIENT_DIR/fractional-client"
+export CANOPY_SYNCOBJ_CLIENT="$CLIENT_DIR/syncobj-client"
+export CANOPY_SECURITY_CONTEXT_CLIENT="$CLIENT_DIR/security-context-client"
+export CANOPY_SEAT_LOG_CLIENT="$CLIENT_DIR/seat-log-client"
+export CANOPY_COLOR_FEEDBACK_CLIENT="$CLIENT_DIR/color-feedback-client"
+export CANOPY_XWAYLAND_FOCUS_CLIENT="$CLIENT_DIR/xwayland-focus-client"
+export CANOPY_XWAYLAND_OUTPUT_CLIENT="$CLIENT_DIR/xwayland-output-client"
+export CANOPY_XWAYLAND_ASSOCIATION_CLIENT="$CLIENT_DIR/xwayland-association-client"
+export CANOPY_XWAYLAND_DIALOG_CLIENT="$CLIENT_DIR/xwayland-dialog-client"
+export CANOPY_XWAYLAND_POPUP_CLIENT="$CLIENT_DIR/xwayland-popup-client"
+export CANOPY_XWAYLAND_INPUT_CLIENT="$CLIENT_DIR/xwayland-input-client"
+export CANOPY_EI_PEER_CLIENT="$CLIENT_DIR/ei-peer-client"
+export CANOPY_XWAYLAND_SELECTION_CLIENT="$CLIENT_DIR/xwayland-selection-client"
+export CANOPY_XWAYLAND_SHAPE_CLIENT="$CLIENT_DIR/xwayland-shape-client"
+export CANOPY_XWAYLAND_CURSOR_CLIENT="$CLIENT_DIR/xwayland-cursor-client"
+export CANOPY_XSETTINGS_CLIENT="$CLIENT_DIR/xsettings-client"
+export CANOPY_WAYLAND_CURSOR_CLIENT="$CLIENT_DIR/wayland-cursor-client"
+export CANOPY_OUTPUT_MANAGEMENT_CLIENT="$CLIENT_DIR/output-management-client"
+export CANOPY_PIXEL_PROBE="$CLIENT_DIR/pixel-probe"
+export CANOPY_CAPTURE_CLIENT="$CLIENT_DIR/capture-client"
+export CANOPY_HARNESS_LIB="$HARNESS_DIR/lib.sh"
+export CANOPY=$BINARY
 
 # Live instance state. The EXIT trap reaches for these, so they stay declared
 # even before the first check boots.
@@ -367,7 +367,7 @@ EOF
 
 # A check that needs a second monitor declares it in its header and the harness boots that instance accordingly.
 # Everything else gets one output, which is what most geometry assertions are written against. A check that needs
-# monitors to come and go uses `umbriel output-create` and `umbriel output-destroy` on top of what it declares here.
+# monitors to come and go uses `canopy output-create` and `canopy output-destroy` on top of what it declares here.
 # A real session has a keyboard from the start, and a headless one has none until a virtual keyboard arrives; without
 # one the seat's keyboard capability also drops between helper runs, so clients bind wl_keyboard late and miss keys.
 # Each instance therefore gets a keyboard-only helper before its check runs, which stays connected through teardown. A
@@ -401,7 +401,7 @@ check_config_watch() {
 
 check_xcursor_theme() {
   if sed -n '2,12p' "$CHECKS_DIR/$1.sh" | grep -q '^# harness: xcursor-theme=true'; then
-    echo umbriel-harness
+    echo canopy-harness
   fi
 }
 
@@ -472,7 +472,7 @@ PY
 start_keyboard() {
   local log=$RUNTIME_DIR/keyboard.log
   XDG_RUNTIME_DIR="$RUNTIME_DIR" WAYLAND_DISPLAY=wayland-0 \
-    "$UMBRIEL_POINTER_CLIENT" 1 1 keyboard-only mod none mark ready pause 86400000 > "$log" 2>&1 &
+    "$CANOPY_POINTER_CLIENT" 1 1 keyboard-only mod none mark ready pause 86400000 > "$log" 2>&1 &
   KEYBOARD_PID=$!
   local waited=0
   until grep -q '^ready$' "$log" 2>/dev/null; do
@@ -510,12 +510,12 @@ start_instance() {
   local xwayland_proxy=$4
   local config_watch=$5
   # sockaddr_un caps paths at 108 bytes and the compositor appends
-  # "/umbriel-wayland-0.sock" (23) to XDG_RUNTIME_DIR, so keep the root short. A
+  # "/canopy-wayland-0.sock" (23) to XDG_RUNTIME_DIR, so keep the root short. A
   # long path makes wl_display_add_socket fail and the boot abort.
   RUNTIME_DIR=$(mktemp -d /tmp/umv.XXXXXXXX)
   local log=$RUNTIME_DIR/compositor.log
   local config=$RUNTIME_DIR/config.toml
-  local socket=$RUNTIME_DIR/umbriel-wayland-0.sock
+  local socket=$RUNTIME_DIR/canopy-wayland-0.sock
   if [[ -n $cursor_theme ]]; then
     export XCURSOR_PATH="$RUNTIME_DIR/icons"
     export XCURSOR_THEME=$cursor_theme
@@ -533,12 +533,12 @@ start_instance() {
       return 1
     fi
     mkfifo "$RUNTIME_DIR/xwayland-association.control"
-    export UMBRIEL_XWAYLAND_ASSOCIATION_LOG="$RUNTIME_DIR/xwayland-association.log"
-    export UMBRIEL_XWAYLAND_ASSOCIATION_CONTROL="$RUNTIME_DIR/xwayland-association.control"
+    export CANOPY_XWAYLAND_ASSOCIATION_LOG="$RUNTIME_DIR/xwayland-association.log"
+    export CANOPY_XWAYLAND_ASSOCIATION_CONTROL="$RUNTIME_DIR/xwayland-association.control"
     xwayland_environment=(
       "WLR_XWAYLAND=$HARNESS_DIR/clients/xwayland_association_proxy.py"
-      "UMBRIEL_XWAYLAND_REAL_BINARY=$real_xwayland"
-      "UMBRIEL_WLR_DEBUG=1"
+      "CANOPY_XWAYLAND_REAL_BINARY=$real_xwayland"
+      "CANOPY_WLR_DEBUG=1"
     )
   fi
 
@@ -553,7 +553,7 @@ start_instance() {
     DBUS_SYSTEM_BUS_ADDRESS="unix:path=$RUNTIME_DIR/no-system-bus" \
     XDG_RUNTIME_DIR="$RUNTIME_DIR" \
     WLR_BACKENDS=headless \
-    UMBRIEL_CONFIG_WATCH="$config_watch" \
+    CANOPY_CONFIG_WATCH="$config_watch" \
     WLR_LIBINPUT_NO_DEVICES=1 \
     WLR_HEADLESS_OUTPUTS="$outputs" \
     bash -c 'echo $$ > "$1"; shift; exec "$@"' _ "$pgid_file" \
@@ -579,16 +579,16 @@ start_instance() {
     waited_ms=$((waited_ms + 5))
   done
 
-  export UMBRIEL_SOCKET=$socket
-  export UMBRIEL_RUNTIME_DIR=$RUNTIME_DIR
-  export UMBRIEL_LOG=$log
-  export UMBRIEL_CONFIG=$config
-  UMBRIEL_HARNESS_DISPLAY=
+  export CANOPY_SOCKET=$socket
+  export CANOPY_RUNTIME_DIR=$RUNTIME_DIR
+  export CANOPY_LOG=$log
+  export CANOPY_CONFIG=$config
+  CANOPY_HARNESS_DISPLAY=
   if [[ $xwayland != false ]]; then
     local display_waited_ms=0
-    while [[ -z $UMBRIEL_HARNESS_DISPLAY ]]; do
-      UMBRIEL_HARNESS_DISPLAY=$(sed -n 's/.*Xwayland listening on DISPLAY=\([^ ]*\).*/\1/p' "$log" | tail -1)
-      [[ -n $UMBRIEL_HARNESS_DISPLAY ]] && break
+    while [[ -z $CANOPY_HARNESS_DISPLAY ]]; do
+      CANOPY_HARNESS_DISPLAY=$(sed -n 's/.*Xwayland listening on DISPLAY=\([^ ]*\).*/\1/p' "$log" | tail -1)
+      [[ -n $CANOPY_HARNESS_DISPLAY ]] && break
       if ! kill -0 "$SERVER_PID" 2>/dev/null || ((display_waited_ms >= 10000)); then
         BOOT_ERROR="Xwayland display was not published during boot"$'\n'"$(< "$log")"
         return 1
@@ -597,7 +597,7 @@ start_instance() {
       display_waited_ms=$((display_waited_ms + 5))
     done
   fi
-  export UMBRIEL_HARNESS_DISPLAY
+  export CANOPY_HARNESS_DISPLAY
   return 0
 }
 
@@ -607,7 +607,7 @@ attach_idle_ipc_client() {
   # A refused connection is a legitimate outcome here (a check may have taken
   # its own instance down), so the client's traceback belongs in the runtime
   # directory next to the compositor log, not in the suite's output.
-  python3 - "$UMBRIEL_SOCKET" "$ready" > "$RUNTIME_DIR/ipc-idle.log" 2>&1 << 'PY' &
+  python3 - "$CANOPY_SOCKET" "$ready" > "$RUNTIME_DIR/ipc-idle.log" 2>&1 << 'PY' &
 import pathlib
 import socket
 import sys
@@ -664,7 +664,7 @@ stop_instance() {
   reap_instance_group
 
   if [[ $status -ne 0 ]]; then
-    STOP_ERROR="compositor exited with status $status at teardown, expected 0"$'\n'"$(tail -5 "$UMBRIEL_LOG")"
+    STOP_ERROR="compositor exited with status $status at teardown, expected 0"$'\n'"$(tail -5 "$CANOPY_LOG")"
     return 1
   fi
   if ((!attached)); then
@@ -678,7 +678,7 @@ stop_instance() {
 # it spawned. Output goes to a file because a command substitution cannot own a
 # background job.
 # The body runs pointed at its own instance, not at the session that started the
-# suite. This is not a convenience: only IPC subcommands honour UMBRIEL_SOCKET,
+# suite. This is not a convenience: only IPC subcommands honour CANOPY_SOCKET,
 # while every helper client is a Wayland client that resolves XDG_RUNTIME_DIR
 # and WAYLAND_DISPLAY, so an inherited session environment silently points it
 # at the developer's live compositor.
@@ -686,8 +686,8 @@ run_check_body() {
   local name=$1 output_file=$2
   local pgid_file=$RUNTIME_DIR/check.pgid
   local -a display_environment=()
-  if [[ -n ${UMBRIEL_HARNESS_DISPLAY:-} ]]; then
-    display_environment+=("DISPLAY=$UMBRIEL_HARNESS_DISPLAY")
+  if [[ -n ${CANOPY_HARNESS_DISPLAY:-} ]]; then
+    display_environment+=("DISPLAY=$CANOPY_HARNESS_DISPLAY")
   fi
   setsid env -u DISPLAY -u DBUS_SESSION_BUS_ADDRESS "${display_environment[@]}" \
     DBUS_SYSTEM_BUS_ADDRESS="unix:path=$RUNTIME_DIR/no-system-bus" \

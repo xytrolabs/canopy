@@ -4,11 +4,11 @@
 # later replacement refreshes dynamic rules without replaying opening behavior.
 set -euo pipefail
 
-readonly CLIENT="${UMBRIEL_UNMAP_CLIENT:-./build-debug/tests/unmap-client}"
-readonly CLIENT_LOG="$UMBRIEL_RUNTIME_DIR/xdg-tag-client.log"
-readonly CONTROL_FIFO="$UMBRIEL_RUNTIME_DIR/xdg-tag-control"
-readonly BEFORE_SHOT="$UMBRIEL_RUNTIME_DIR/xdg-tag-before.png"
-readonly AFTER_SHOT="$UMBRIEL_RUNTIME_DIR/xdg-tag-after.png"
+readonly CLIENT="${CANOPY_UNMAP_CLIENT:-./build-debug/tests/unmap-client}"
+readonly CLIENT_LOG="$CANOPY_RUNTIME_DIR/xdg-tag-client.log"
+readonly CONTROL_FIFO="$CANOPY_RUNTIME_DIR/xdg-tag-control"
+readonly BEFORE_SHOT="$CANOPY_RUNTIME_DIR/xdg-tag-before.png"
+readonly AFTER_SHOT="$CANOPY_RUNTIME_DIR/xdg-tag-after.png"
 CLIENT_PID=
 
 if [[ ! -x $CLIENT ]]; then
@@ -16,7 +16,7 @@ if [[ ! -x $CLIENT ]]; then
   exit 1
 fi
 
-cat >> "$UMBRIEL_CONFIG" <<'EOF'
+cat >> "$CANOPY_CONFIG" <<'EOF'
 
 [animation]
 enabled = false
@@ -44,7 +44,7 @@ match.xdg_tag = "^game-launcher$"
 default_floating = true
 opacity = 0.9
 EOF
-"$UMBRIEL" msg config-reload > /dev/null
+"$CANOPY" msg config-reload > /dev/null
 
 mkfifo "$CONTROL_FIFO"
 exec {control_fd}<>"$CONTROL_FIFO"
@@ -71,7 +71,7 @@ fi
 
 windows=
 for _ in $(seq 80); do
-  windows=$("$UMBRIEL" windows --json)
+  windows=$("$CANOPY" windows --json)
   jq -e '
     length == 1
     and .[0].app_id == "xdg-tag-client"
@@ -89,16 +89,16 @@ if ! jq -e '
   echo "initial xdg tag or opening rule was not applied: $windows"
   exit 1
 fi
-if ! "$UMBRIEL" windows | grep -Fq '[xdg_tag=game-launcher]'; then
-  echo "human-readable window output did not expose the xdg tag: $("$UMBRIEL" windows)"
+if ! "$CANOPY" windows | grep -Fq '[xdg_tag=game-launcher]'; then
+  echo "human-readable window output did not expose the xdg tag: $("$CANOPY" windows)"
   exit 1
 fi
 
-"$UMBRIEL" settle
+"$CANOPY" settle
 grim "$BEFORE_SHOT"
-IFS=x read -r image_width image_height < <("$UMBRIEL_PIXEL_PROBE" "$BEFORE_SHOT" size)
+IFS=x read -r image_width image_height < <("$CANOPY_PIXEL_PROBE" "$BEFORE_SHOT" size)
 read -r visual_x visual_y visual_width visual_height < <(
-  "$UMBRIEL_PIXEL_PROBE" "$BEFORE_SHOT" bbox '!(r < 0.01 && g > 0.99 && b < 0.01)'
+  "$CANOPY_PIXEL_PROBE" "$BEFORE_SHOT" bbox '!(r < 0.01 && g > 0.99 && b < 0.01)'
 )
 sample_x=$((visual_x + visual_width / 2))
 sample_y=$((visual_y + visual_height / 2))
@@ -107,12 +107,12 @@ if ((visual_width == 0 || sample_x < 0 || sample_x >= image_width || sample_y < 
   exit 1
 fi
 read -r _ before_green _ < <(
-  "$UMBRIEL_PIXEL_PROBE" "$BEFORE_SHOT" mean "20x20+$((sample_x - 10))+$((sample_y - 10))"
+  "$CANOPY_PIXEL_PROBE" "$BEFORE_SHOT" mean "20x20+$((sample_x - 10))+$((sample_y - 10))"
 )
 
 printf 'u' >&"$control_fd"
 for _ in $(seq 80); do
-  windows=$("$UMBRIEL" windows --json)
+  windows=$("$CANOPY" windows --json)
   if grep -q '^xdg-tag-updated$' "$CLIENT_LOG" \
       && jq -e '
         length == 1
@@ -132,15 +132,15 @@ if ! grep -q '^xdg-tag-updated$' "$CLIENT_LOG" \
   echo "post-map xdg tag did not reach IPC or replayed an opening rule: $windows; client log: $(< "$CLIENT_LOG")"
   exit 1
 fi
-if ! "$UMBRIEL" windows | grep -Fq '[xdg_tag=game-running]'; then
-  echo "human-readable window output did not refresh the xdg tag: $("$UMBRIEL" windows)"
+if ! "$CANOPY" windows | grep -Fq '[xdg_tag=game-running]'; then
+  echo "human-readable window output did not refresh the xdg tag: $("$CANOPY" windows)"
   exit 1
 fi
 
-"$UMBRIEL" settle
+"$CANOPY" settle
 grim "$AFTER_SHOT"
 read -r _ after_green _ < <(
-  "$UMBRIEL_PIXEL_PROBE" "$AFTER_SHOT" mean "20x20+$((sample_x - 10))+$((sample_y - 10))"
+  "$CANOPY_PIXEL_PROBE" "$AFTER_SHOT" mean "20x20+$((sample_x - 10))+$((sample_y - 10))"
 )
 if ((after_green < before_green + 30)); then
   echo "post-map xdg tag did not replace the old tag or apply dynamic opacity: green $before_green -> $after_green"

@@ -7,7 +7,7 @@
 #include <string>
 #include <vector>
 
-namespace umbriel::configmerge {
+namespace canopy::configmerge {
 
   struct EffectDeclaration {
     std::string name;
@@ -29,4 +29,4 @@ namespace umbriel::configmerge {
   MergeResult mergeWithIncludes(const std::filesystem::path& rootFile);
   void deepMerge(toml::table& base, toml::table&& overlay);
 
-} // namespace umbriel::configmerge
+} // namespace canopy::configmerge

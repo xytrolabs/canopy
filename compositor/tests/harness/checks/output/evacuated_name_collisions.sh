@@ -4,7 +4,7 @@
 # and a native declaration use the same name. Saved homes disambiguate them.
 set -euo pipefail
 
-readonly BASELINE="$(< "$UMBRIEL_CONFIG")"
+readonly BASELINE="$(< "$CANOPY_CONFIG")"
 readonly SETTINGS='
 [animation]
 enabled = false
@@ -35,21 +35,21 @@ match.title = "^route-unique$"
 default_workspace = "unique"'
 
 write_config() {
-  printf '%s\n%s\n' "$BASELINE" "$SETTINGS" > "$UMBRIEL_CONFIG"
+  printf '%s\n%s\n' "$BASELINE" "$SETTINGS" > "$CANOPY_CONFIG"
   if [[ $1 == native ]]; then
-    cat >> "$UMBRIEL_CONFIG" <<'EOF'
+    cat >> "$CANOPY_CONFIG" <<'EOF'
 
 [[workspace]]
 output = "HEADLESS-3"
 name = "shared"
 EOF
   fi
-  "$UMBRIEL" msg config-reload > /dev/null
-  "$UMBRIEL" settle
+  "$CANOPY" msg config-reload > /dev/null
+  "$CANOPY" settle
 }
 
 field() {
-  "$UMBRIEL" windows --json | jq -r --arg title "$1" --arg field "$2" \
+  "$CANOPY" windows --json | jq -r --arg title "$1" --arg field "$2" \
     '.[] | select(.title == $title) | .[$field]'
 }
 
@@ -57,20 +57,20 @@ spawn() {
   local title=$1 selector=$2 count=$3 place=${4:-true} id
   local -a words
   read -ra words <<< "$selector"
-  "$UMBRIEL" msg workspace-switch "${words[@]}" > /dev/null
-  "$UMBRIEL_UNMAP_CLIENT" "$title" 800 600 > "$UMBRIEL_RUNTIME_DIR/$title.log" 2>&1 &
+  "$CANOPY" msg workspace-switch "${words[@]}" > /dev/null
+  "$CANOPY_UNMAP_CLIENT" "$title" 800 600 > "$CANOPY_RUNTIME_DIR/$title.log" 2>&1 &
   for _ in $(seq 60); do
-    [[ $("$UMBRIEL" windows --json | jq 'length') == "$count" ]] && break
+    [[ $("$CANOPY" windows --json | jq 'length') == "$count" ]] && break
     sleep 0.05
   done
   id=$(field "$title" id)
   if [[ -z $id ]]; then
-    echo "window '$title' did not map: $(< "$UMBRIEL_RUNTIME_DIR/$title.log")"
+    echo "window '$title' did not map: $(< "$CANOPY_RUNTIME_DIR/$title.log")"
     return 1
   fi
   if [[ $place == true ]]; then
-    "$UMBRIEL" msg window-focus "$id" > /dev/null
-    "$UMBRIEL" msg window-move-to-workspace "${words[@]}" > /dev/null
+    "$CANOPY" msg window-focus "$id" > /dev/null
+    "$CANOPY" msg window-move-to-workspace "${words[@]}" > /dev/null
   fi
 }
 
@@ -78,8 +78,8 @@ expect_selected() {
   local selector=$1 expected=$2 workspaces
   local -a words
   read -ra words <<< "$selector"
-  "$UMBRIEL" msg workspace-switch "${words[@]}" > /dev/null
-  workspaces=$("$UMBRIEL" workspaces --json)
+  "$CANOPY" msg workspace-switch "${words[@]}" > /dev/null
+  workspaces=$("$CANOPY" workspaces --json)
   if ! jq -e --arg expected "$expected" 'any(.[]; .id == $expected and .focused)' \
       <<< "$workspaces" > /dev/null; then
     echo "selector '$selector' did not focus workspace $expected: $workspaces"
@@ -91,7 +91,7 @@ expect_ambiguous() {
   local selector=$1 response
   local -a words
   read -ra words <<< "$selector"
-  if response=$("$UMBRIEL" msg workspace-switch "${words[@]}" 2>&1); then
+  if response=$("$CANOPY" msg workspace-switch "${words[@]}" 2>&1); then
     echo "ambiguous refugee name '$selector' unexpectedly selected a workspace"
     return 1
   fi
@@ -103,7 +103,7 @@ expect_ambiguous() {
 
 expect_refuges() {
   local phase=$1 workspaces
-  workspaces=$("$UMBRIEL" workspaces --json)
+  workspaces=$("$CANOPY" workspaces --json)
   if [[ $FIRST == "$SECOND" || $FIRST == "$LOCAL" || $SECOND == "$LOCAL" ]] || \
       ! jq -e --arg first "$FIRST" --arg second "$SECOND" --arg unique "$UNIQUE" --arg local "$LOCAL" '
         any(.[]; .id == $first and .output == "HEADLESS-3" and .name == "shared" and .named) and
@@ -121,24 +121,24 @@ expect_refuges() {
 
 scratchpad_round_trip() {
   local title=$1 expected=$2 pruned=${3:-false} actual workspaces
-  "$UMBRIEL" msg window-focus "$(field "$title" id)" > /dev/null
-  "$UMBRIEL" msg window-move-to-scratchpad > /dev/null
-  "$UMBRIEL" settle
-  if [[ $pruned == true ]] && "$UMBRIEL" workspaces --json | \
+  "$CANOPY" msg window-focus "$(field "$title" id)" > /dev/null
+  "$CANOPY" msg window-move-to-scratchpad > /dev/null
+  "$CANOPY" settle
+  if [[ $pruned == true ]] && "$CANOPY" workspaces --json | \
       jq -e --arg expected "$expected" 'any(.[]; .id == $expected)' > /dev/null; then
     echo "last-view scratchpad admission did not prune its emptied refugee"
     return 1
   fi
-  "$UMBRIEL" msg window-focus "$(field "$title" id)" > /dev/null
-  "$UMBRIEL" msg window-restore-from-scratchpad > /dev/null
-  "$UMBRIEL" settle
+  "$CANOPY" msg window-focus "$(field "$title" id)" > /dev/null
+  "$CANOPY" msg window-restore-from-scratchpad > /dev/null
+  "$CANOPY" settle
   actual=$(field "$title" workspace)
-  workspaces=$("$UMBRIEL" workspaces --json)
+  workspaces=$("$CANOPY" workspaces --json)
   if [[ $pruned == false && $actual != "$expected" ]] || \
       [[ $actual == "$native" ]] || ! jq -e --arg id "$actual" \
         'any(.[]; .id == $id and .output == "HEADLESS-3" and .name == "shared" and .named)' \
         <<< "$workspaces" > /dev/null; then
-    echo "scratchpad return for '$title' chose a same-name native or unrelated refugee: $("$UMBRIEL" windows --json) $workspaces"
+    echo "scratchpad return for '$title' chose a same-name native or unrelated refugee: $("$CANOPY" windows --json) $workspaces"
     return 1
   fi
 }
@@ -151,9 +151,9 @@ spawn second 'shared --output HEADLESS-2' 4
 spawn local 'local --output HEADLESS-3' 5
 readonly LOCAL="$(field local workspace)"
 
-"$UMBRIEL" output-destroy HEADLESS-2 > /dev/null
-"$UMBRIEL" output-destroy HEADLESS-1 > /dev/null
-"$UMBRIEL" settle
+"$CANOPY" output-destroy HEADLESS-2 > /dev/null
+"$CANOPY" output-destroy HEADLESS-1 > /dev/null
+"$CANOPY" settle
 readonly FIRST="$(field first workspace)"
 SECOND="$(field second workspace)"
 readonly UNIQUE="$(field unique workspace)"
@@ -170,16 +170,16 @@ expect_ambiguous shared
 spawn route-shared 'local --output HEADLESS-3' 6 false
 spawn route-unique 'local --output HEADLESS-3' 7 false
 if [[ $(field route-shared workspace) != "$FIRST" || $(field route-unique workspace) != "$UNIQUE" ]]; then
-  echo "opening rules did not resolve the displaced named workspaces: $("$UMBRIEL" windows --json)"
+  echo "opening rules did not resolve the displaced named workspaces: $("$CANOPY" windows --json)"
   exit 1
 fi
 
 write_config native
 expect_refuges add-native-declaration
-native=$("$UMBRIEL" workspaces --json | jq -r --arg first "$FIRST" --arg second "$SECOND" \
+native=$("$CANOPY" workspaces --json | jq -r --arg first "$FIRST" --arg second "$SECOND" \
   '.[] | select(.output == "HEADLESS-3" and .name == "shared" and .id != $first and .id != $second) | .id')
 if [[ -z $native || $native == *$'\n'* ]]; then
-  echo "same-name native declaration did not get one independent workspace: $("$UMBRIEL" workspaces --json)"
+  echo "same-name native declaration did not get one independent workspace: $("$CANOPY" workspaces --json)"
   exit 1
 fi
 expect_selected shared "$native"
@@ -193,23 +193,23 @@ write_config refugees
 expect_refuges remove-native-declaration
 expect_ambiguous shared
 expect_ambiguous 'shared --output HEADLESS-3'
-if "$UMBRIEL" workspaces --json | jq -e --arg native "$native" 'any(.[]; .id == $native)' > /dev/null; then
+if "$CANOPY" workspaces --json | jq -e --arg native "$native" 'any(.[]; .id == $native)' > /dev/null; then
   echo "removed native declaration survived as a duplicate named member"
   exit 1
 fi
 
-"$UMBRIEL" msg window-focus "$(field first id)" > /dev/null
-"$UMBRIEL" msg window-move-to-scratchpad > /dev/null
-"$UMBRIEL" output-create HEADLESS-1 > /dev/null
-"$UMBRIEL" msg window-focus "$(field first id)" > /dev/null
-"$UMBRIEL" msg window-restore-from-scratchpad > /dev/null
+"$CANOPY" msg window-focus "$(field first id)" > /dev/null
+"$CANOPY" msg window-move-to-scratchpad > /dev/null
+"$CANOPY" output-create HEADLESS-1 > /dev/null
+"$CANOPY" msg window-focus "$(field first id)" > /dev/null
+"$CANOPY" msg window-restore-from-scratchpad > /dev/null
 if [[ $(field first workspace) != "$(field first-peer workspace)" ]]; then
-  echo "scratchpad return ignored the original workspace after its output reconnected: $("$UMBRIEL" windows --json)"
+  echo "scratchpad return ignored the original workspace after its output reconnected: $("$CANOPY" windows --json)"
   exit 1
 fi
-"$UMBRIEL" output-create HEADLESS-2 > /dev/null
-"$UMBRIEL" settle
-windows=$("$UMBRIEL" windows --json)
+"$CANOPY" output-create HEADLESS-2 > /dev/null
+"$CANOPY" settle
+windows=$("$CANOPY" windows --json)
 if ! jq -e --arg local "$LOCAL" '
   all(.[];
     if .title == "local" then .workspace == $local

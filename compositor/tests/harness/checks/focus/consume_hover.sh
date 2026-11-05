@@ -2,9 +2,9 @@
 # Consume and expel can replace the window beneath a stationary pointer. The first motion inside the new window
 # must refresh focus, while rearranging the columns alone must preserve the action's focused window.
 set -euo pipefail
-source "$UMBRIEL_HARNESS_LIB"
+source "$CANOPY_HARNESS_LIB"
 
-cat >> "$UMBRIEL_CONFIG" <<'EOF'
+cat >> "$CANOPY_CONFIG" <<'EOF'
 [layout]
 mode = "scrolling"
 [layout.scrolling]
@@ -15,18 +15,18 @@ enabled = false
 [input.focus]
 follows_mouse = true
 EOF
-"$UMBRIEL" msg config-reload > /dev/null
+"$CANOPY" msg config-reload > /dev/null
 
 window() {
-  "$UMBRIEL" windows --json | jq -c --arg title "consume-$1" '.[] | select(.title == $title)'
+  "$CANOPY" windows --json | jq -c --arg title "consume-$1" '.[] | select(.title == $title)'
 }
 
 assert_active() {
   local expected=$1 reason=$2 actual
-  actual=$("$UMBRIEL" windows --json | jq -r '.[] | select(.active) | .title')
+  actual=$("$CANOPY" windows --json | jq -r '.[] | select(.active) | .title')
   if [[ $actual != "consume-$expected" ]]; then
     echo "$reason: expected consume-$expected, got $actual"
-    "$UMBRIEL" windows --json
+    "$CANOPY" windows --json
     return 1
   fi
 }
@@ -34,27 +34,27 @@ assert_active() {
 wait_for_count() {
   local expected=$1
   for _ in $(seq 60); do
-    [[ $("$UMBRIEL" windows --json | jq length) == "$expected" ]] && return 0
+    [[ $("$CANOPY" windows --json | jq length) == "$expected" ]] && return 0
     sleep 0.05
   done
-  echo "expected $expected windows: $("$UMBRIEL" windows --json)"
+  echo "expected $expected windows: $("$CANOPY" windows --json)"
   return 1
 }
 
 for scenario in consume consume-from fallback expel; do
   clients=()
   for name in left right; do
-    log="$UMBRIEL_RUNTIME_DIR/$scenario-$name.log"
-    "$UMBRIEL_UNMAP_CLIENT" "consume-$name" 1200 700 > "$log" 2>&1 &
+    log="$CANOPY_RUNTIME_DIR/$scenario-$name.log"
+    "$CANOPY_UNMAP_CLIENT" "consume-$name" 1200 700 > "$log" 2>&1 &
     clients+=("$!")
     await_lines "$log" mapped 1
     wait_for_count "${#clients[@]}"
-    "$UMBRIEL" settle > /dev/null
+    "$CANOPY" settle > /dev/null
   done
 
   id=$(window left | jq -r .id)
-  "$UMBRIEL" msg window-focus "$id" > /dev/null
-  "$UMBRIEL" settle > /dev/null
+  "$CANOPY" msg window-focus "$id" > /dev/null
+  "$CANOPY" settle > /dev/null
   px=400
   py=180
   case $scenario in
@@ -67,8 +67,8 @@ for scenario in consume consume-from fallback expel; do
     expel)
       # Start with the focused window below its neighbor. Expelling it to the right leaves that neighbor beneath
       # the pointer in the lower half of the original column.
-      "$UMBRIEL" msg window-consume-right > /dev/null
-      "$UMBRIEL" settle > /dev/null
+      "$CANOPY" msg window-consume-right > /dev/null
+      "$CANOPY" settle > /dev/null
       action=window-consume-or-expel-right
       py=540
       ;;
@@ -78,8 +78,8 @@ for scenario in consume consume-from fallback expel; do
   # pending map-time invalidation. These points lie well inside the presented half-width columns and half-height rows.
   pointer_hold 1280 720 move "$px" "$py" -- move "$((px + 1))" "$py" mark moved hold
   assert_active left "$scenario initial hover"
-  "$UMBRIEL" msg "$action" > /dev/null
-  "$UMBRIEL" settle > /dev/null
+  "$CANOPY" msg "$action" > /dev/null
+  "$CANOPY" settle > /dev/null
   assert_active left "$scenario stationary pointer changed focus"
 
   right=$(window right)
@@ -99,7 +99,7 @@ for scenario in consume consume-from fallback expel; do
     wait "$pid" || true
   done
   wait_for_count 0
-  "$UMBRIEL" settle > /dev/null
+  "$CANOPY" settle > /dev/null
 done
 
 echo "consume, consume-from, consume-or-expel fallback, and expel refreshed hover on the first pointer motion"

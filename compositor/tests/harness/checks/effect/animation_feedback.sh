@@ -3,29 +3,29 @@
 # begin from the current target, and remain isolated between simultaneous targets.
 set -euo pipefail
 
-readonly SHADER="${UMBRIEL_CONFIG%/*}/feedback.glsl"
-readonly PASSTHROUGH="${UMBRIEL_CONFIG%/*}/feedback-passthrough.glsl"
-readonly IMAGE="$UMBRIEL_RUNTIME_DIR/feedback.png"
+readonly SHADER="${CANOPY_CONFIG%/*}/feedback.glsl"
+readonly PASSTHROUGH="${CANOPY_CONFIG%/*}/feedback-passthrough.glsl"
+readonly IMAGE="$CANOPY_RUNTIME_DIR/feedback.png"
 
 cat > "$SHADER" <<'GLSL'
 vec4 animation(vec2 uv) {
-    vec4 source = umbriel_sample(uv);
-    vec4 previous = umbriel_sample_previous(uv);
+    vec4 source = canopy_sample(uv);
+    vec4 previous = canopy_sample_previous(uv);
     if (uv.y < 0.2) {
         return previous;
     }
     if (uv.x >= 0.5) {
         return source;
     }
-    float base = umbriel_size.x < 500.0 ? 0.05 : 0.55;
-    if (umbriel_linear_progress < 0.2) {
+    float base = canopy_size.x < 500.0 ? 0.05 : 0.55;
+    if (canopy_linear_progress < 0.2) {
         return vec4(base, 0.0, 0.0, 1.0);
     }
-    if (umbriel_linear_progress < 0.4) {
+    if (canopy_linear_progress < 0.4) {
         float red = abs(previous.r - base) < 0.03 ? base + 0.1 : previous.r;
         return vec4(red, 0.0, 0.0, 1.0);
     }
-    if (umbriel_linear_progress < 0.6) {
+    if (canopy_linear_progress < 0.6) {
         float red = abs(previous.r - (base + 0.1)) < 0.03 ? base + 0.2 : previous.r;
         return vec4(red, 0.0, 0.0, 1.0);
     }
@@ -34,10 +34,10 @@ vec4 animation(vec2 uv) {
 GLSL
 
 cat > "$PASSTHROUGH" <<'GLSL'
-vec4 animation(vec2 uv) { return umbriel_sample(uv); }
+vec4 animation(vec2 uv) { return canopy_sample(uv); }
 GLSL
 
-cat >> "$UMBRIEL_CONFIG" <<'EOF'
+cat >> "$CANOPY_CONFIG" <<'EOF'
 
 [appearance]
 border_width = 0
@@ -75,16 +75,16 @@ match.title = "^feedback-large$"
 default_floating = true
 default_position = { x = 700, y = 80, anchor = "top_left" }
 EOF
-"$UMBRIEL" msg config-reload > /dev/null
+"$CANOPY" msg config-reload > /dev/null
 
 # Animation time only moves by clock-advance. Opening frames are drawn at 700, 2100, 3500, and 4550 ms of the 7000 ms
 # timeline, one in each feedback phase; the closing sample lands 150 ms into its 1200 ms timeline.
-"$UMBRIEL" clock-freeze
-"$UMBRIEL_UNMAP_CLIENT" feedback-small 320 360 > "$UMBRIEL_RUNTIME_DIR/feedback-small.log" 2>&1 &
-"$UMBRIEL_UNMAP_CLIENT" feedback-large 650 360 > "$UMBRIEL_RUNTIME_DIR/feedback-large.log" 2>&1 &
+"$CANOPY" clock-freeze
+"$CANOPY_UNMAP_CLIENT" feedback-small 320 360 > "$CANOPY_RUNTIME_DIR/feedback-small.log" 2>&1 &
+"$CANOPY_UNMAP_CLIENT" feedback-large 650 360 > "$CANOPY_RUNTIME_DIR/feedback-large.log" 2>&1 &
 
 for _ in $(seq 80); do
-  windows=$("$UMBRIEL" windows --json)
+  windows=$("$CANOPY" windows --json)
   small=$(jq -c '.[] | select(.title == "feedback-small")' <<< "$windows")
   large=$(jq -c '.[] | select(.title == "feedback-large")' <<< "$windows")
   [[ -n $small && -n $large ]] && break
@@ -95,10 +95,10 @@ if [[ -z ${small:-} || -z ${large:-} ]]; then
   exit 1
 fi
 
-"$UMBRIEL" clock-advance 700
-"$UMBRIEL" clock-advance 1400
-"$UMBRIEL" clock-advance 1400
-"$UMBRIEL" clock-advance 1050
+"$CANOPY" clock-advance 700
+"$CANOPY" clock-advance 1400
+"$CANOPY" clock-advance 1400
+"$CANOPY" clock-advance 1050
 grim "$IMAGE"
 
 sample() {
@@ -107,7 +107,7 @@ sample() {
   read -r x y width height <<< "$(jq -r '[.x, .y, .w, .h] | @tsv' <<< "$window")"
   sample_x=$(awk -v x="$x" -v width="$width" -v fraction="$x_fraction" 'BEGIN { printf "%d", x + width * fraction }')
   sample_y=$(awk -v y="$y" -v height="$height" -v fraction="$y_fraction" 'BEGIN { printf "%d", y + height * fraction }')
-  "$UMBRIEL_PIXEL_PROBE" "$IMAGE" mean "6x6+$((sample_x - 3))+$((sample_y - 3))"
+  "$CANOPY_PIXEL_PROBE" "$IMAGE" mean "6x6+$((sample_x - 3))+$((sample_y - 3))"
 }
 
 read -r small_red small_green small_blue <<< "$(sample "$small" 0.25 0.55)"
@@ -135,8 +135,8 @@ if ! (( initial_red > 70 && initial_red < 100 && initial_green > 100 && initial_
 fi
 
 small_id=$(jq -r .id <<< "$small")
-"$UMBRIEL" msg window-close "$small_id" > /dev/null
-"$UMBRIEL" clock-advance 150
+"$CANOPY" msg window-close "$small_id" > /dev/null
+"$CANOPY" clock-advance 150
 grim "$IMAGE"
 read -r closing_red closing_green closing_blue <<< "$(sample "$small" 0.25 0.55)"
 if ! (( closing_red > 52 && closing_red < 76 && closing_green < 8 && closing_blue < 8 )); then

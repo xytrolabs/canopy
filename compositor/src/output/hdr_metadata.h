@@ -10,7 +10,7 @@ extern "C" {
 #include <wlr/types/wlr_output.h>
 }
 
-namespace umbriel {
+namespace canopy {
 
   struct HdrStaticMetadata {
     double minLuminance = 0.0;
@@ -27,10 +27,10 @@ namespace umbriel {
   // outputs, unreadable EDIDs, and sinks without PQ static metadata return no value.
   std::optional<HdrStaticMetadata> hdrStaticMetadataForOutput(wlr_output* output);
 
-  // Describe Umbriel's BT.2020 PQ composition together with the display target
+  // Describe Canopy's BT.2020 PQ composition together with the display target
   // volume. BT.2020/D65 is used when the display does not publish valid primaries.
   wlr_output_image_description makeHdrOutputDescription(
       const wlr_color_primaries* displayPrimaries, const std::optional<HdrStaticMetadata>& metadata
   );
 
-} // namespace umbriel
+} // namespace canopy

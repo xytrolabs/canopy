@@ -11,7 +11,7 @@
 
 #include <algorithm>
 
-namespace umbriel {
+namespace canopy {
 
   namespace {
     // The size a virtual output gets without a requested mode: what the backend gives the ones from
@@ -279,4 +279,4 @@ namespace umbriel {
     return fullArea;
   }
 
-} // namespace umbriel
+} // namespace canopy

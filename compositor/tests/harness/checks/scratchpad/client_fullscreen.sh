@@ -3,26 +3,26 @@
 # the scratchpad tree, above the scratchpad's backdrop dim, instead of dropping beneath it.
 set -euo pipefail
 
-readonly CLIENT="${UMBRIEL_UNMAP_CLIENT:-./build-debug/tests/unmap-client}"
-readonly CONTROL_FIFO="$UMBRIEL_RUNTIME_DIR/scratch-fullscreen-control"
-readonly CLIENT_LOG="$UMBRIEL_RUNTIME_DIR/scratch-fullscreen.log"
-readonly BEFORE="$UMBRIEL_RUNTIME_DIR/scratch-fullscreen-before.png"
-readonly AFTER="$UMBRIEL_RUNTIME_DIR/scratch-fullscreen-after.png"
+readonly CLIENT="${CANOPY_UNMAP_CLIENT:-./build-debug/tests/unmap-client}"
+readonly CONTROL_FIFO="$CANOPY_RUNTIME_DIR/scratch-fullscreen-control"
+readonly CLIENT_LOG="$CANOPY_RUNTIME_DIR/scratch-fullscreen.log"
+readonly BEFORE="$CANOPY_RUNTIME_DIR/scratch-fullscreen-before.png"
+readonly AFTER="$CANOPY_RUNTIME_DIR/scratch-fullscreen-after.png"
 
 # The 400x300 window is centered on the 1280x720 output.
 window_center_red() {
   local red
-  read -r red _ _ < <("$UMBRIEL_PIXEL_PROBE" "$1" pixel 640 360)
+  read -r red _ _ < <("$CANOPY_PIXEL_PROBE" "$1" pixel 640 360)
   echo "$red"
 }
 
 wait_for_count() {
   local want=$1
   for _ in $(seq 60); do
-    [[ $("$UMBRIEL" windows --json | jq 'length') -eq $want ]] && return 0
+    [[ $("$CANOPY" windows --json | jq 'length') -eq $want ]] && return 0
     sleep 0.05
   done
-  echo "expected $want windows, got: $("$UMBRIEL" windows --json)"
+  echo "expected $want windows, got: $("$CANOPY" windows --json)"
   return 1
 }
 
@@ -37,7 +37,7 @@ wait_for_configured_state() {
   return 1
 }
 
-cat >> "$UMBRIEL_CONFIG" <<'EOF'
+cat >> "$CANOPY_CONFIG" <<'EOF'
 
 [appearance]
 border_width = 0
@@ -60,7 +60,7 @@ default_floating = true
 default_floating_size_px = { width = 400, height = 300 }
 default_position = { x = 440, y = 210, anchor = "top_left" }
 EOF
-"$UMBRIEL" msg config-reload > /dev/null
+"$CANOPY" msg config-reload > /dev/null
 
 mkfifo "$CONTROL_FIFO"
 exec {control_fd}<>"$CONTROL_FIFO"
@@ -68,8 +68,8 @@ FILL_COLOR=0xFFFF0000 FULLSCREEN_ON_STDIN=1 LOG_CONFIGURES=1 "$CLIENT" scratch-v
   <&"$control_fd" > "$CLIENT_LOG" 2>&1 &
 
 wait_for_count 1
-"$UMBRIEL" msg scratchpad-toggle test > /dev/null
-"$UMBRIEL" settle
+"$CANOPY" msg scratchpad-toggle test > /dev/null
+"$CANOPY" settle
 
 grim "$BEFORE"
 initial_red=$(window_center_red "$BEFORE")
@@ -82,7 +82,7 @@ printf f >&"$control_fd"
 wait_for_configured_state fullscreen
 printf u >&"$control_fd"
 wait_for_configured_state windowed
-"$UMBRIEL" settle
+"$CANOPY" settle
 
 grim "$AFTER"
 after_red=$(window_center_red "$AFTER")

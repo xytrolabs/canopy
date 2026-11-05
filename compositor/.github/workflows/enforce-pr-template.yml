@@ -14,7 +14,7 @@ concurrency:
 
 jobs:
   enforce:
-    if: ${{ github.repository == 'noctalia-dev/umbriel' }}
+    if: ${{ github.repository == 'noctalia-dev/canopy' }}
     runs-on: ubuntu-latest
     permissions:
       # The built-in token converts pull requests to drafts (the GraphQL mutation needs

@@ -1,16 +1,16 @@
 # Effects
 
-Effects are GLSL programs Umbriel runs on animation events, on window borders, on windows, on whole outputs, and around the pointer. Every effect is off until you select one. Umbriel ships a small set; each is a preset you include and then name where it should apply.
+Effects are GLSL programs Canopy runs on animation events, on window borders, on windows, on whole outputs, and around the pointer. Every effect is off until you select one. Canopy ships a small set; each is a preset you include and then name where it should apply.
 
 ## Use a bundled effect
 
-Bundled presets install under `share/umbriel/effects/<kind>/<name>/`. Include a preset's `effect.toml`, then select its name. For an installation under `/usr`:
+Bundled presets install under `share/canopy/effects/<kind>/<name>/`. Include a preset's `effect.toml`, then select its name. For an installation under `/usr`:
 
 ```toml
 [include]
 files = [
-  "/usr/share/umbriel/effects/border/pulse/effect.toml",
-  "/usr/share/umbriel/effects/animation/reveal/effect.toml",
+  "/usr/share/canopy/effects/border/pulse/effect.toml",
+  "/usr/share/canopy/effects/animation/reveal/effect.toml",
 ]
 
 [effects]
@@ -97,8 +97,8 @@ Presets and pools share a namespace. Names must be non-empty, cannot be `off`, a
 | `shader`          | all    | none     | Path to the GLSL source, at most 256 KiB. Without it the preset is inert.                                            |
 | `palette`         | all    | `false`  | Supply `[colors]` accent and status colors to the program.                                                           |
 | `padding`         | border | `0`      | Transparent space around the ring the effect may paint, 0 to 1024.                                                   |
-| `speed`           | border | `1.0`    | Multiplier on `umbriel_time`, 0 to 10. `0` holds `umbriel_time` at zero.                                             |
-| `animated`        | border | `true`   | `false` freezes `umbriel_time` at zero.                                                                              |
+| `speed`           | border | `1.0`    | Multiplier on `canopy_time`, 0 to 10. `0` holds `canopy_time` at zero.                                             |
+| `animated`        | border | `true`   | `false` freezes `canopy_time` at zero.                                                                              |
 | `overlay`         | border | `""`     | A window preset drawn on the window while the border effect applies.                                                 |
 | `light.spread`    | border | `80`     | How far light from the ring spills, 1 to 256 logical pixels. Defining `[effects.preset.<name>.light]` enables light. |
 | `light.intensity` | border | `1.0`    | Light gain, 0 to 4.                                                                                                  |
@@ -154,12 +154,12 @@ Visibility and drawing gates do not allocate. A focus rule that changes the winn
 The sixteen [effect actions](actions.md) operate independently on window, border, screen, and cursor slots:
 
 ```sh
-umbriel msg effect-window-set scanlines
-umbriel msg effect-border-cycle borders
-umbriel msg effect-window-toggle
-umbriel msg effect-window-reset
-umbriel msg effect-screen-set vignette --output HDMI-A-1
-umbriel msg effect-cursor-set glow
+canopywc msg effect-window-set scanlines
+canopywc msg effect-border-cycle borders
+canopywc msg effect-window-toggle
+canopywc msg effect-window-reset
+canopywc msg effect-screen-set vignette --output HDMI-A-1
+canopywc msg effect-cursor-set glow
 ```
 
 Window/border actions default to the focused window; screen actions use the preferred output. Set and cycle accept a target as `--window <window-id>` or `--output <output>`; output names may contain slashes. An unnamed targeted cycle is `effect-window-cycle --window <window-id>`. Toggle/reset take an optional target as a plain word. Cursor actions have no target. Explicit screen targets can address present disabled outputs; their cached selection is visible when they are enabled again.
@@ -174,9 +174,9 @@ Unrelated reloads and renderer recovery retain assignments. Effects reloads prun
 
 ## Inspect selections
 
-`umbriel effects` prints presets with program states, pools with exact hold counts, the cursor selection, and window/output owners. `--json` provides the same data for scripts. States are `inert`, `unreferenced`, `failed`, and `compiled`. Only reached pools compile their members. Named keybinds and enabled hot corners are prepared before their first trigger; an IPC-only name compiles synchronously on first selection. Suppressed runtime overrides remain roots; inactive pool history does not.
+`canopywc effects` prints presets with program states, pools with exact hold counts, the cursor selection, and window/output owners. `--json` provides the same data for scripts. States are `inert`, `unreferenced`, `failed`, and `compiled`. Only reached pools compile their members. Named keybinds and enabled hot corners are prepared before their first trigger; an IPC-only name compiles synchronously on first selection. Suppressed runtime overrides remain roots; inactive pool history does not.
 
-`umbriel windows --json` and `subscribe windows` include `border_effect` and `window_effect` with `name`, `pool`, `source` (`default`, `rule`, or `runtime`), and `suppressed`; borders also expose `overlay`. Inspection never picks, compiles, or binds. Screen assignments are in `effects`, not `outputs`. See [IPC](ipc.md).
+`canopywc windows --json` and `subscribe windows` include `border_effect` and `window_effect` with `name`, `pool`, `source` (`default`, `rule`, or `runtime`), and `suppressed`; borders also expose `overlay`. Inspection never picks, compiles, or binds. Screen assignments are in `effects`, not `outputs`. See [IPC](ipc.md).
 
 ## Write a shader
 
@@ -194,30 +194,30 @@ Every kind sees:
 
 | Name                               | Meaning                                                                                                                                                                                                                                                                          |
 | ---------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `umbriel_sample(vec2 uv)`          | The input under the drawn rectangle: the captured window for animations, the native ring for borders, the pixels already on screen for window, screen, and cursor effects.                                                                                                       |
-| `umbriel_sample_previous(vec2 uv)` | This effect's previous result. Using it allocates two extra buffers for each window or output it runs on.                                                                                                                                                                        |
-| `umbriel_size`                     | Drawn width and height in effect logical pixels, before overview zoom.                                                                                                                                                                                                           |
-| `umbriel_scale`                    | Buffer pixels per effect logical pixel, including overview zoom.                                                                                                                                                                                                                 |
-| `umbriel_expand`                   | How far the drawn rectangle extends past the window on each side, as a fraction of its width and height. `(0, 0)` except for an animation running while drag physics deforms the window.                                                                                         |
-| `umbriel_time`                     | Seconds on the animation clock, times the border's `speed`. Held as a single-precision float that is never wrapped, so fine time-based motion loses precision after long uptimes. `sin` and `cos` reduce their argument to one revolution, so they stay correct at large angles. |
-| `umbriel_palette_count`            | `4` for palette presets, `0` otherwise.                                                                                                                                                                                                                                          |
-| `umbriel_palette_at(float t)`      | The palette color at `t`, blended between neighboring colors from the wrapping sequence `accent_primary`, `accent_secondary`, `warning`, `error`. Transparent black when there is no palette.                                                                                    |
-| `umbriel_audio_spectrum(position)` | Interpolated spectrum intensity from 0 to 1, or 0 without a feed. See [Audio input](#audio-input).                                                                                                                                                                               |
-| `umbriel_audio_available()`        | `1` while the feed has fresh snapshots, otherwise `0`. See [Audio input](#audio-input).                                                                                                                                                                                          |
+| `canopy_sample(vec2 uv)`          | The input under the drawn rectangle: the captured window for animations, the native ring for borders, the pixels already on screen for window, screen, and cursor effects.                                                                                                       |
+| `canopy_sample_previous(vec2 uv)` | This effect's previous result. Using it allocates two extra buffers for each window or output it runs on.                                                                                                                                                                        |
+| `canopy_size`                     | Drawn width and height in effect logical pixels, before overview zoom.                                                                                                                                                                                                           |
+| `canopy_scale`                    | Buffer pixels per effect logical pixel, including overview zoom.                                                                                                                                                                                                                 |
+| `canopy_expand`                   | How far the drawn rectangle extends past the window on each side, as a fraction of its width and height. `(0, 0)` except for an animation running while drag physics deforms the window.                                                                                         |
+| `canopy_time`                     | Seconds on the animation clock, times the border's `speed`. Held as a single-precision float that is never wrapped, so fine time-based motion loses precision after long uptimes. `sin` and `cos` reduce their argument to one revolution, so they stay correct at large angles. |
+| `canopy_palette_count`            | `4` for palette presets, `0` otherwise.                                                                                                                                                                                                                                          |
+| `canopy_palette_at(float t)`      | The palette color at `t`, blended between neighboring colors from the wrapping sequence `accent_primary`, `accent_secondary`, `warning`, `error`. Transparent black when there is no palette.                                                                                    |
+| `canopy_audio_spectrum(position)` | Interpolated spectrum intensity from 0 to 1, or 0 without a feed. See [Audio input](#audio-input).                                                                                                                                                                               |
+| `canopy_audio_available()`        | `1` while the feed has fresh snapshots, otherwise `0`. See [Audio input](#audio-input).                                                                                                                                                                                          |
 
-Animations add `umbriel_progress`, `umbriel_clamped_progress`, `umbriel_linear_progress`, `umbriel_direction`, and `umbriel_random_seed` ([Animation](animation.md#custom-effects)); workspace reveal shaders also read the incoming scene with `umbriel_sample_incoming(vec2 uv)` ([Workspace reveal](animation.md#workspace-reveal)). Borders add `umbriel_border_hole` (the client rectangle in `uv`), `umbriel_border_radius` (its corner radii in logical pixels), and `umbriel_border_distance(vec2 uv)`, the signed distance in logical pixels to the client rectangle, negative inside it; the client hole is always cut out of a border's result. Cursor effects add `umbriel_pointer`, the pointer position in `uv`. Motion-aware cursor shaders can read `umbriel_pointer_count` (0–8) and `umbriel_pointer_history[8]`, oldest first. Each `vec4` contains position in the same `uv` coordinates, age in seconds, and a reserved component. Samples expire after 300 ms; older samples are spaced approximately 32 ms apart while the newest tracks each motion event. The drawn rectangle encloses the samples plus `radius` padding, so use `umbriel_size` to calculate distances in logical pixels. History resets on hide, output crossing, lock and program changes. Reading motion history requests frames only while samples remain; reading `umbriel_time` still requests continuous frames. No history buffers are allocated for this input.
+Animations add `canopy_progress`, `canopy_clamped_progress`, `canopy_linear_progress`, `canopy_direction`, and `canopy_random_seed` ([Animation](animation.md#custom-effects)); workspace reveal shaders also read the incoming scene with `canopy_sample_incoming(vec2 uv)` ([Workspace reveal](animation.md#workspace-reveal)). Borders add `canopy_border_hole` (the client rectangle in `uv`), `canopy_border_radius` (its corner radii in logical pixels), and `canopy_border_distance(vec2 uv)`, the signed distance in logical pixels to the client rectangle, negative inside it; the client hole is always cut out of a border's result. Cursor effects add `canopy_pointer`, the pointer position in `uv`. Motion-aware cursor shaders can read `canopy_pointer_count` (0–8) and `canopy_pointer_history[8]`, oldest first. Each `vec4` contains position in the same `uv` coordinates, age in seconds, and a reserved component. Samples expire after 300 ms; older samples are spaced approximately 32 ms apart while the newest tracks each motion event. The drawn rectangle encloses the samples plus `radius` padding, so use `canopy_size` to calculate distances in logical pixels. History resets on hide, output crossing, lock and program changes. Reading motion history requests frames only while samples remain; reading `canopy_time` still requests continuous frames. No history buffers are allocated for this input.
 
-For a longer tail, read `umbriel_pointer_path[64]` instead of `umbriel_pointer_history`. This opts into a two-second history with up to 64 samples at the same approximate 32 ms spacing. `umbriel_pointer_count` reports the active path length. The fourth component is a stable birth phase in seconds (wrapping every 60 seconds), useful for retaining a sample's colour and particle seed. Positions and ages have the same units as short history. Long paths follow the same expiry, damage, frame gating and reset rules.
+For a longer tail, read `canopy_pointer_path[64]` instead of `canopy_pointer_history`. This opts into a two-second history with up to 64 samples at the same approximate 32 ms spacing. `canopy_pointer_count` reports the active path length. The fourth component is a stable birth phase in seconds (wrapping every 60 seconds), useful for retaining a sample's colour and particle seed. Positions and ages have the same units as short history. Long paths follow the same expiry, damage, frame gating and reset rules.
 
-The bundled `trail` uses a fixed Noctalia-inspired palette, independent of the desktop theme. Its colours can be edited in `cursor/trail/shader.glsl`. Both `trail` and `trail-path` draw a Catmull-Rom curve through the samples, so fast circles stay round; `trail-path` reads `umbriel_pointer_path` and is the starting point for longer tails.
+The bundled `trail` uses a fixed Noctalia-inspired palette, independent of the desktop theme. Its colours can be edited in `cursor/trail/shader.glsl`. Both `trail` and `trail-path` draw a Catmull-Rom curve through the samples, so fast circles stay round; `trail-path` reads `canopy_pointer_path` and is the starting point for longer tails.
 
 ### Audio input
 
-Every effect kind can read `umbriel_audio_spectrum(position)` and `umbriel_audio_available()`. An [external analyser](ipc.md#audio-input) supplies 64 bands from 0 to 1. Position is clamped to `[0,1]` and linearly interpolates between entries at `position * 63`, from the lowest to the highest band. Band values are quantized to 8-bit intensity before interpolation. It is a normalized low-to-high coordinate, with no promised Hz centers or edges. Availability tracks receipt of fresh snapshots, including all-zero input from silence or idle capture. All bands and availability are zero without a feed. Bands represent visual intensity, not calibrated loudness. The analyser chooses the audio source and smoothing.
+Every effect kind can read `canopy_audio_spectrum(position)` and `canopy_audio_available()`. An [external analyser](ipc.md#audio-input) supplies 64 bands from 0 to 1. Position is clamped to `[0,1]` and linearly interpolates between entries at `position * 63`, from the lowest to the highest band. Band values are quantized to 8-bit intensity before interpolation. It is a normalized low-to-high coordinate, with no promised Hz centers or edges. Availability tracks receipt of fresh snapshots, including all-zero input from silence or idle capture. All bands and availability are zero without a feed. Bands represent visual intensity, not calibrated loudness. The analyser chooses the audio source and smoothing.
 
-Shaders can sample a band or aggregate the spectrum according to the effect's needs. For example, `umbriel_audio_spectrum(0.0)` reacts to the lowest band.
+Shaders can sample a band or aggregate the spectrum according to the effect's needs. For example, `canopy_audio_spectrum(0.0)` reacts to the lowest band.
 
-Audio works without `umbriel_time`; `animated` and `speed` only affect time. Changed input redraws visible consumers at `max_fps`. Identical input does not request frames. Each output holds its snapshot between eligible frames, and all passes of a composition, including closing copies, use that value. Existing `in_capture` behavior applies.
+Audio works without `canopy_time`; `animated` and `speed` only affect time. Changed input redraws visible consumers at `max_fps`. Identical input does not request frames. Each output holds its snapshot between eligible frames, and all passes of a composition, including closing copies, use that value. Existing `in_capture` behavior applies.
 
 Include `border/audio/effect.toml` from the installed effect directory and select `border = "audio"` for a simple example. It remains dim without a feed.
 
@@ -231,4 +231,4 @@ Referenced presets compile at startup, on effects reload, and during runtime act
 
 ## Cost
 
-Unreferenced presets and pools add no rendering work. Named keybinds and enabled hot corners prepare programs before use; selections retain bookkeeping state. A border effect renders the ring through a capture and one program pass per frame on each window it draws: the focused window, or every decorated, non-urgent, non-fullscreen window with `border_unfocused = true`. It requests extra frames only while its program reads `umbriel_time` and its clock advances, capped by `max_fps`. Light adds a second program pass and a blurred pyramid where the ring draws, and a blend on every output its light reaches. A window effect copies the pixels under the window and runs one pass per window per frame. Screen and cursor effects each run one pass over the output or the radius square and disable direct scanout on that output. Drag physics costs only while a window is held or settling. With `in_capture = false`, a pending screencopy or image-copy capture of an output composes its frame twice whenever any window, screen, or cursor effect is visible on that output.
+Unreferenced presets and pools add no rendering work. Named keybinds and enabled hot corners prepare programs before use; selections retain bookkeeping state. A border effect renders the ring through a capture and one program pass per frame on each window it draws: the focused window, or every decorated, non-urgent, non-fullscreen window with `border_unfocused = true`. It requests extra frames only while its program reads `canopy_time` and its clock advances, capped by `max_fps`. Light adds a second program pass and a blurred pyramid where the ring draws, and a blend on every output its light reaches. A window effect copies the pixels under the window and runs one pass per window per frame. Screen and cursor effects each run one pass over the output or the radius square and disable direct scanout on that output. Drag physics costs only while a window is held or settling. With `in_capture = false`, a pending screencopy or image-copy capture of an output composes its frame twice whenever any window, screen, or cursor effect is visible on that output.

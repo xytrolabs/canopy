@@ -3,7 +3,7 @@
 # until an offscreen column is reachable, and dropping there must place the window after that column.
 set -euo pipefail
 
-source "$UMBRIEL_HARNESS_LIB"
+source "$CANOPY_HARNESS_LIB"
 
 readonly BTN_LEFT=272
 readonly OUTPUT_W=1280
@@ -17,25 +17,25 @@ window_x() {
   jq -r --arg title "$1" '.[] | select(.title == $title) | .x' <<< "$2"
 }
 
-cat >> "$UMBRIEL_CONFIG" <<'EOF'
+cat >> "$CANOPY_CONFIG" <<'EOF'
 
 [layout.scrolling]
 default_extent_fraction = 0.5
 center_focused = "never"
 EOF
-"$UMBRIEL" msg config-reload > /dev/null
+"$CANOPY" msg config-reload > /dev/null
 
 for id in $(seq 1 4); do
   spawn_client "$id"
   for _ in $(seq 60); do
-    [[ $("$UMBRIEL" windows --json | jq 'length') -eq $id ]] && break
+    [[ $("$CANOPY" windows --json | jq 'length') -eq $id ]] && break
     sleep 0.25
   done
 done
-"$UMBRIEL" msg column-focus-first > /dev/null
-"$UMBRIEL" settle
+"$CANOPY" msg column-focus-first > /dev/null
+"$CANOPY" settle
 
-windows=$("$UMBRIEL" windows --json)
+windows=$("$CANOPY" windows --json)
 initial_last_x=$(window_x move-edge-4 "$windows")
 if ((initial_last_x < OUTPUT_W)); then
   echo "the last column began inside the viewport instead of offscreen: $windows"
@@ -52,7 +52,7 @@ pointer_hold "$OUTPUT_W" "$OUTPUT_H" \
 revealed=false
 last_x=$initial_last_x
 for _ in $(seq 120); do
-  windows=$("$UMBRIEL" windows --json)
+  windows=$("$CANOPY" windows --json)
   last_x=$(window_x move-edge-4 "$windows")
   if ((last_x <= OUTPUT_W / 2 + 60)); then
     revealed=true
@@ -67,9 +67,9 @@ if [[ $revealed != true ]]; then
 fi
 
 pointer_release
-"$UMBRIEL" settle
+"$CANOPY" settle
 
-windows=$("$UMBRIEL" windows --json)
+windows=$("$CANOPY" windows --json)
 moved_x=$(window_x move-edge-1 "$windows")
 last_x=$(window_x move-edge-4 "$windows")
 if ((moved_x <= last_x)); then

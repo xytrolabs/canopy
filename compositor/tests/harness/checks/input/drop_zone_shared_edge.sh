@@ -2,8 +2,8 @@
 # harness: outputs=2
 # Crossing a shared edge is immediate; region placement there requires staying on the same side for the dwell.
 set -euo pipefail
-source "$(dirname "$UMBRIEL_HARNESS_LIB")/title_bar.sh"
-cat >>"$UMBRIEL_CONFIG" <<'CONFIG'
+source "$(dirname "$CANOPY_HARNESS_LIB")/title_bar.sh"
+cat >>"$CANOPY_CONFIG" <<'CONFIG'
 [layout]
 mode = "stacking"
 [layout.stacking]
@@ -22,11 +22,11 @@ insert_hint = "#00FFFFFF"
 match.title = "^shared-drag$"
 default_floating = true
 CONFIG
-"$UMBRIEL" msg config-reload >/dev/null
-"$UMBRIEL_FRACTIONAL_CLIENT" shared-drag 480 300 >"$UMBRIEL_RUNTIME_DIR/shared-drag.log" 2>&1 &
+"$CANOPY" msg config-reload >/dev/null
+"$CANOPY_FRACTIONAL_CLIENT" shared-drag 480 300 >"$CANOPY_RUNTIME_DIR/shared-drag.log" 2>&1 &
 title_bar_wait_field shared-drag floating true
 read -r x y output < <(title_bar_window shared-drag | jq -r '"\(.x + .w / 2 | floor) \(.y + .h / 2 | floor) \(.output)"')
-left=$("$UMBRIEL" outputs --json | jq -r --arg name "$output" '.[] | select(.name == $name) | .position.x')
+left=$("$CANOPY" outputs --json | jq -r --arg name "$output" '.[] | select(.name == $name) | .position.x')
 if ((left == 0)); then
   edge=1279
   region=right
@@ -35,14 +35,14 @@ else
   region=left
 fi
 # Reach the seam and release without any intervening round trips.
-"$UMBRIEL_POINTER_CLIENT" 2560 720 move "$x" "$y" mod logo press 272 move-release "$edge" 360 272 mod none
+"$CANOPY_POINTER_CLIENT" 2560 720 move "$x" "$y" mod logo press 272 move-release "$edge" 360 272 mod none
 title_bar_wait_field shared-drag region null
 # Stay on this side of the same shared edge until the preview becomes visible.
 read -r x y < <(title_bar_window shared-drag | jq -r '"\(.x + .w / 2 | floor) \(.y + .h / 2 | floor)"')
 pointer_hold 2560 720 move "$x" "$y" mod logo press 272 move "$edge" 360 -- release 272 mod none
 for _ in $(seq 60); do
-  grim -o "$output" "$UMBRIEL_RUNTIME_DIR/shared-preview.png"
-  bounds=$("$UMBRIEL_PIXEL_PROBE" "$UMBRIEL_RUNTIME_DIR/shared-preview.png" bbox 'r < 0.1 && g > 0.9 && b > 0.9')
+  grim -o "$output" "$CANOPY_RUNTIME_DIR/shared-preview.png"
+  bounds=$("$CANOPY_PIXEL_PROBE" "$CANOPY_RUNTIME_DIR/shared-preview.png" bbox 'r < 0.1 && g > 0.9 && b > 0.9')
   [[ $bounds != '0 0 0 0' ]] && break
   sleep 0.025
 done

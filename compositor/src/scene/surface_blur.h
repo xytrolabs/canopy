@@ -9,7 +9,7 @@ struct wlr_scene_blur;
 struct wlr_scene_tree;
 struct wlr_surface;
 
-namespace umbriel {
+namespace canopy {
 
   struct SurfaceBlurOptions {
     float ignoreAlpha = 0.0F;
@@ -51,4 +51,4 @@ namespace umbriel {
     float m_alpha = 1.0F;
   };
 
-} // namespace umbriel
+} // namespace canopy

@@ -88,7 +88,7 @@ Preserve the current halves on all four edges, quarters in all four corners, cli
 - Update layout labels in `src/scene/cheatsheet_rows.cpp` and the workspace layout serializer in `src/server/ipc_commands.cpp`, including subscription/event payloads that use it.
 - Keep per-window floating fields unchanged. A window in a workspace reported as `"layout": "stacking"` may still be reported as `"floating": true`.
 - Reject `mode = "floating"`, `workspace-set-layout floating`, and old tokens in custom cycles through normal validation. Preserve valid window-kind uses of `floating`.
-- Audited the current local Noctalia Umbriel adapter and broader source for changed layout, region, action, and option names. That checked consumer does not consume the changed names and needs no coordinated source update. No `noctalia-docs` files were edited.
+- Audited the current local Noctalia Canopy adapter and broader source for changed layout, region, action, and option names. That checked consumer does not consume the changed names and needs no coordinated source update. No `noctalia-docs` files were edited.
 
 ### 3. Replace the region actions and placement vocabulary
 

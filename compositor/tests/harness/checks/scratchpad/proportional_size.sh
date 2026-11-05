@@ -3,14 +3,14 @@
 # Opted-in scratchpads resize real client buffers across outputs, using manual
 # adjustments as the next size basis. Leaving the pad releases that policy.
 set -euo pipefail
-source "$UMBRIEL_HARNESS_LIB"
+source "$CANOPY_HARNESS_LIB"
 
-readonly CLIENT="$UMBRIEL_UNMAP_CLIENT"
-readonly POINTER="$UMBRIEL_POINTER_CLIENT"
+readonly CLIENT="$CANOPY_UNMAP_CLIENT"
+readonly POINTER="$CANOPY_POINTER_CLIENT"
 readonly TITLE=proportional-member
 
 capture_config
-cat >> "$UMBRIEL_CONFIG" <<'EOF'
+cat >> "$CANOPY_CONFIG" <<'EOF'
 
 [layout]
 gap = 0
@@ -45,19 +45,19 @@ default_output = "HEADLESS-1"
 default_floating = true
 default_floating_size = { width = 0.5, height = 0.5 }
 EOF
-"$UMBRIEL" msg config-reload > /dev/null
+"$CANOPY" msg config-reload > /dev/null
 
-action() { "$UMBRIEL" msg "$@" > /dev/null; }
+action() { "$CANOPY" msg "$@" > /dev/null; }
 
 assert_size() {
-  "$UMBRIEL" settle
+  "$CANOPY" settle
   local actual
   actual=$(window_by_title "$1" | jq -r '"\(.w)x\(.h)"')
   [[ $actual == "$2" ]] || { echo "$1: expected $2, got $actual"; return 1; }
 }
 
 assert_state() {
-  "$UMBRIEL" settle
+  "$CANOPY" settle
   window_by_title "$TITLE" | jq -e "$1" > /dev/null || {
     echo "expected $1: $(window_by_title "$TITLE")"; return 1;
   }
@@ -75,7 +75,7 @@ summon_on() {
 }
 
 pointer_to left
-RESIZE_FILL_COLOR=0xFFFF0000 "$CLIENT" "$TITLE" 640 360 > "$UMBRIEL_RUNTIME_DIR/member.log" 2>&1 &
+RESIZE_FILL_COLOR=0xFFFF0000 "$CLIENT" "$TITLE" 640 360 > "$CANOPY_RUNTIME_DIR/member.log" 2>&1 &
 await_window "$TITLE"
 assert_size "$TITLE" 640x360
 member=$(window_by_title "$TITLE" | jq -r .id)
@@ -87,8 +87,8 @@ summon_on right
 assert_size "$TITLE" 960x540
 
 # Verify the new size is drawn, beyond the IPC layout target.
-grim -o HEADLESS-2 "$UMBRIEL_RUNTIME_DIR/scaled.png"
-read -r _ _ width height < <("$UMBRIEL_PIXEL_PROBE" "$UMBRIEL_RUNTIME_DIR/scaled.png" bbox 'r>0.9&&g<0.1&&b<0.1')
+grim -o HEADLESS-2 "$CANOPY_RUNTIME_DIR/scaled.png"
+read -r _ _ width height < <("$CANOPY_PIXEL_PROBE" "$CANOPY_RUNTIME_DIR/scaled.png" bbox 'r>0.9&&g<0.1&&b<0.1')
 [[ $width == 960 && $height == 540 ]] || { echo "scaled pixels were ${width}x${height}"; exit 1; }
 
 # Dropping a dragged member on another output resizes it without remapping its
@@ -111,7 +111,7 @@ action window-move-by 20 10
 action scratchpad-toggle scaled
 action scratchpad-toggle scaled
 assert_size "$TITLE" 320x360
-sed -i 's/scale = 1.0/scale = 1.25/' "$UMBRIEL_CONFIG"
+sed -i 's/scale = 1.0/scale = 1.25/' "$CANOPY_CONFIG"
 action config-reload
 assert_size "$TITLE" 320x360
 summon_on right
@@ -178,7 +178,7 @@ assert_size "$TITLE" 480x270
 
 # Client size limits also constrain opted-in transfers.
 pointer_to left
-FIXED_SIZE=1 "$UMBRIEL_SUBSURFACE_CLIENT" proportional-capped 400 200 > "$UMBRIEL_RUNTIME_DIR/capped.log" 2>&1 &
+FIXED_SIZE=1 "$CANOPY_SUBSURFACE_CLIENT" proportional-capped 400 200 > "$CANOPY_RUNTIME_DIR/capped.log" 2>&1 &
 await_window proportional-capped
 assert_size proportional-capped 400x200
 action window-focus "$(window_by_title proportional-capped | jq -r .id)"

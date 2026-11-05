@@ -1,4 +1,4 @@
-{ xdg-desktop-portal-umbriel }:
+{ xdg-desktop-portal-canopy }:
 {
   config,
   pkgs,
@@ -7,27 +7,27 @@
   ...
 }:
 let
-  cfg = config.programs.umbriel;
+  cfg = config.programs.canopy;
 in
 {
   # Disable the nixpkgs module to avoid conflicts
-  disabledModules = [ "programs/wayland/umbriel.nix" ];
+  disabledModules = [ "programs/wayland/canopy.nix" ];
 
-  options.programs.umbriel = {
-    enable = lib.mkEnableOption "Umbriel, a Wayland compositor built on wlroots.";
+  options.programs.canopy = {
+    enable = lib.mkEnableOption "Canopy, a Wayland compositor built on wlroots.";
 
     package = lib.mkOption {
       type = lib.types.nullOr lib.types.package;
       default = null;
-      description = "The umbriel package to install.";
+      description = "The canopy package to install.";
     };
 
     portalPackage = lib.mkOption {
       type = lib.types.nullOr lib.types.package;
-      default = xdg-desktop-portal-umbriel.packages.${pkgs.stdenv.hostPlatform.system}.default;
-      defaultText = lib.literalExpression "the xdg-desktop-portal-umbriel flake's package";
+      default = xdg-desktop-portal-canopy.packages.${pkgs.stdenv.hostPlatform.system}.default;
+      defaultText = lib.literalExpression "the xdg-desktop-portal-canopy flake's package";
       description = ''
-        The xdg-desktop-portal-umbriel package to install.
+        The xdg-desktop-portal-canopy package to install.
       '';
     };
   };
@@ -40,7 +40,7 @@ in
         assertions = [
           {
             assertion = cfg.package != null;
-            message = "programs.umbriel.package cannot be null when programs.umbriel.enable is true";
+            message = "programs.canopy.package cannot be null when programs.canopy.enable is true";
           }
         ];
       }
@@ -51,14 +51,14 @@ in
           # So `just debug` / meson outside `nix develop` can find headers via pkg-config.
           pkgs.tomlplusplus
         ];
-        environment.pathsToLink = [ "/share/umbriel/effects" ];
+        environment.pathsToLink = [ "/share/canopy/effects" ];
 
-        # Required for greetd / noctalia-greeter to discover the session (Name=Umbriel).
+        # Required for greetd / noctalia-greeter to discover the session (Name=Canopy).
         # Plain systemPackages .desktop files are not enough; NixOS aggregates via this.
         services.displayManager.sessionPackages = [ cfg.package ];
 
         systemd.packages = [ cfg.package ];
-        systemd.user.services.umbriel = {
+        systemd.user.services.canopy = {
           restartIfChanged = false;
           enableDefaultPath = false;
         };
@@ -68,8 +68,8 @@ in
         xdg.portal = {
           enable = lib.mkDefault true;
           extraPortals = [ cfg.portalPackage ];
-          config.umbriel.default = lib.mkDefault [
-            "umbriel"
+          config.canopy.default = lib.mkDefault [
+            "canopy"
             "gtk"
           ];
         };

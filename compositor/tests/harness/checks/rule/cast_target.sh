@@ -4,13 +4,13 @@
 # session ends. Two identical floats share a red frame; only the one a capture
 # client casts may turn green, and it must turn back once the cast stops.
 set -euo pipefail
-source "$UMBRIEL_HARNESS_LIB"
+source "$CANOPY_HARNESS_LIB"
 
-readonly SCREENSHOT="$UMBRIEL_RUNTIME_DIR/rule-cast-target.png"
-readonly CAPTURE_LOG="$UMBRIEL_RUNTIME_DIR/rule-cast-target-capture.log"
-readonly CLOSE_CAPTURE_LOG="$UMBRIEL_RUNTIME_DIR/rule-cast-target-close-capture.log"
+readonly SCREENSHOT="$CANOPY_RUNTIME_DIR/rule-cast-target.png"
+readonly CAPTURE_LOG="$CANOPY_RUNTIME_DIR/rule-cast-target-capture.log"
+readonly CLOSE_CAPTURE_LOG="$CANOPY_RUNTIME_DIR/rule-cast-target-close-capture.log"
 
-cat >> "$UMBRIEL_CONFIG" <<'EOF'
+cat >> "$CANOPY_CONFIG" <<'EOF'
 
 [animation]
 enabled = false
@@ -47,10 +47,10 @@ match.is_cast_target = true
 border_color_focused = "#00FF00FF"
 border_color_unfocused = "#00FF00FF"
 EOF
-"$UMBRIEL" msg config-reload > /dev/null
+"$CANOPY" msg config-reload > /dev/null
 
 window_of() {
-  "$UMBRIEL" windows --json | jq -c --arg a "$1" '.[] | select(.app_id == $a)'
+  "$CANOPY" windows --json | jq -c --arg a "$1" '.[] | select(.app_id == $a)'
 }
 
 wait_mapped() {
@@ -75,12 +75,12 @@ frame_of() {
   window=$(window_of "$1")
   x=$(($(jq -r '.x' <<< "$window") - 2))
   y=$(($(jq -r '.y' <<< "$window") + 150))
-  printf '%02X%02X%02X\n' $("$UMBRIEL_PIXEL_PROBE" "$SCREENSHOT" pixel "$x" "$y")
+  printf '%02X%02X%02X\n' $("$CANOPY_PIXEL_PROBE" "$SCREENSHOT" pixel "$x" "$y")
 }
 
 expect_frames() {
   local label=$1 want_a=$2 want_b=$3 a b
-  "$UMBRIEL" settle > /dev/null
+  "$CANOPY" settle > /dev/null
   grim -o HEADLESS-1 "$SCREENSHOT"
   a=$(frame_of cast-a)
   b=$(frame_of cast-b)
@@ -94,7 +94,7 @@ start_client cast-a
 start_client cast-b
 expect_frames "before the cast" FF0000 FF0000
 
-"$UMBRIEL_CAPTURE_CLIENT" --window "$(window_of cast-a | jq -r '.id')" > "$CAPTURE_LOG" 2>&1 &
+"$CANOPY_CAPTURE_CLIENT" --window "$(window_of cast-a | jq -r '.id')" > "$CAPTURE_LOG" 2>&1 &
 capture_pid=$!
 await_lines "$CAPTURE_LOG" 'frame window:' 1
 expect_frames "during the cast" 00FF00 FF0000
@@ -108,7 +108,7 @@ expect_frames "after the cast" FF0000 FF0000
 start_client cast-c
 cast_c_pid=$client_pid
 cast_c_id=$(window_of cast-c | jq -r '.id')
-"$UMBRIEL_CAPTURE_CLIENT" --window "$cast_c_id" > "$CLOSE_CAPTURE_LOG" 2>&1 &
+"$CANOPY_CAPTURE_CLIENT" --window "$cast_c_id" > "$CLOSE_CAPTURE_LOG" 2>&1 &
 capture_pid=$!
 await_lines "$CLOSE_CAPTURE_LOG" 'frame window:' 1
 kill "$cast_c_pid"
@@ -119,7 +119,7 @@ for _ in $(seq 80); do
 done
 kill "$capture_pid" 2> /dev/null || true
 wait "$capture_pid" 2> /dev/null || true
-if ! "$UMBRIEL" settle > /dev/null 2>&1; then
+if ! "$CANOPY" settle > /dev/null 2>&1; then
   echo "compositor died closing a window under a cast"
   exit 1
 fi

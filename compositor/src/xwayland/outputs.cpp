@@ -8,7 +8,7 @@
 #include <cmath>
 #include <limits>
 
-namespace umbriel {
+namespace canopy {
 
   namespace {
     constexpr uint32_t kVersion = 3;
@@ -247,4 +247,4 @@ namespace umbriel {
     std::erase_if(m_entries, [entry](const std::unique_ptr<Entry>& candidate) { return candidate.get() == entry; });
   }
 
-} // namespace umbriel
+} // namespace canopy

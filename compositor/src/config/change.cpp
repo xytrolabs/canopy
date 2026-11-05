@@ -5,7 +5,7 @@
 #include <algorithm>
 #include <string_view>
 
-namespace umbriel {
+namespace canopy {
   namespace {
 
     const OutputRule* findOutputRule(const Config& config, const std::string& name) {
@@ -390,4 +390,4 @@ namespace umbriel {
     add(dialogAttachment, "dialog attachment");
     return out;
   }
-} // namespace umbriel
+} // namespace canopy

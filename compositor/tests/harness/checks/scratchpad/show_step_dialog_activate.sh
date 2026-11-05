@@ -3,12 +3,12 @@
 # with its dialog rather than the dialog alone, and the dialog takes focus.
 set -euo pipefail
 
-readonly PARENT_CLIENT="${UMBRIEL_SEAT_LOG_CLIENT:-./build-debug/tests/seat-log-client}"
-readonly CLIENT="${UMBRIEL_UNMAP_CLIENT:-./build-debug/tests/unmap-client}"
-readonly PARENT_LOG="$UMBRIEL_RUNTIME_DIR/activate-parent.log"
-readonly FRAME="$UMBRIEL_RUNTIME_DIR/show-step-dialog-activate.png"
+readonly PARENT_CLIENT="${CANOPY_SEAT_LOG_CLIENT:-./build-debug/tests/seat-log-client}"
+readonly CLIENT="${CANOPY_UNMAP_CLIENT:-./build-debug/tests/unmap-client}"
+readonly PARENT_LOG="$CANOPY_RUNTIME_DIR/activate-parent.log"
+readonly FRAME="$CANOPY_RUNTIME_DIR/show-step-dialog-activate.png"
 
-cat >> "$UMBRIEL_CONFIG" <<'EOF'
+cat >> "$CANOPY_CONFIG" <<'EOF'
 
 [animation]
 enabled = false
@@ -37,9 +37,9 @@ default_floating = true
 default_floating_size_px = { width = 200, height = 150 }
 default_position = { x = 900, y = 400, anchor = "top_left" }
 EOF
-"$UMBRIEL" msg config-reload > /dev/null
+"$CANOPY" msg config-reload > /dev/null
 
-windows() { "$UMBRIEL" windows --json; }
+windows() { "$CANOPY" windows --json; }
 window_of() { windows | jq -c --arg title "$1" '.[] | select(.title == $title)'; }
 
 wait_for_window() {
@@ -54,14 +54,14 @@ wait_for_window() {
 # Whether the red window, the green dialog, and the parent (anything bright inside its box but clear of the dialog)
 # are on screen.
 shown() {
-  "$UMBRIEL" settle
+  "$CANOPY" settle
   grim "$FRAME"
   local visible=() w h parent
-  read -r _ _ w h < <("$UMBRIEL_PIXEL_PROBE" "$FRAME" bbox 'r > 0.9 && g < 0.1 && b < 0.1')
+  read -r _ _ w h < <("$CANOPY_PIXEL_PROBE" "$FRAME" bbox 'r > 0.9 && g < 0.1 && b < 0.1')
   ((w > 0 && h > 0)) && visible+=(red)
-  read -r _ _ w h < <("$UMBRIEL_PIXEL_PROBE" "$FRAME" bbox 'g > 0.9 && r < 0.1 && b < 0.1')
+  read -r _ _ w h < <("$CANOPY_PIXEL_PROBE" "$FRAME" bbox 'g > 0.9 && r < 0.1 && b < 0.1')
   ((w > 0 && h > 0)) && visible+=(green)
-  parent=$("$UMBRIEL_PIXEL_PROBE" "$FRAME" mean 40x40+110+120 | awk '{print (($1 + $2 + $3) / 3 > 0.05 * 255) ? 1 : 0}')
+  parent=$("$CANOPY_PIXEL_PROBE" "$FRAME" mean 40x40+110+120 | awk '{print (($1 + $2 + $3) / 3 > 0.05 * 255) ? 1 : 0}')
   [[ $parent == 1 ]] && visible+=(parent)
   echo "${visible[*]}"
 }
@@ -87,26 +87,26 @@ if [[ -z $handle ]]; then
   echo "parent did not export an xdg-foreign handle: $(cat "$PARENT_LOG")"
   exit 1
 fi
-"$UMBRIEL" msg window-move-to-scratchpad > /dev/null
+"$CANOPY" msg window-move-to-scratchpad > /dev/null
 
-FILL_COLOR=0xFFFF0000 "$CLIENT" activate-other 200 150 > "$UMBRIEL_RUNTIME_DIR/activate-other.log" 2>&1 &
+FILL_COLOR=0xFFFF0000 "$CLIENT" activate-other 200 150 > "$CANOPY_RUNTIME_DIR/activate-other.log" 2>&1 &
 wait_for_window activate-other
-"$UMBRIEL" msg window-move-to-scratchpad > /dev/null
+"$CANOPY" msg window-move-to-scratchpad > /dev/null
 
 # With every window shown, the parent opens a dialog that joins the scratchpad.
-"$UMBRIEL" msg scratchpad-toggle > /dev/null
+"$CANOPY" msg scratchpad-toggle > /dev/null
 FILL_COLOR=0xFF00FF00 TRANSIENT_FOREIGN_HANDLE="$handle" \
-  "$CLIENT" activate-dialog 300 200 > "$UMBRIEL_RUNTIME_DIR/activate-dialog.log" 2>&1 &
+  "$CLIENT" activate-dialog 300 200 > "$CANOPY_RUNTIME_DIR/activate-dialog.log" 2>&1 &
 wait_for_window activate-dialog
 expect "red green parent" "every window and the dialog did not show"
 
 # Step to the red window, hiding the parent and its dialog.
-"$UMBRIEL" msg window-focus "$(window_of activate-parent | jq -r .id)" > /dev/null
-"$UMBRIEL" msg scratchpad-window-show-next > /dev/null
+"$CANOPY" msg window-focus "$(window_of activate-parent | jq -r .id)" > /dev/null
+"$CANOPY" msg scratchpad-window-show-next > /dev/null
 expect "red" "stepping from the parent did not show the red window on its own"
 
 # Focusing the hidden dialog brings its parent along.
-"$UMBRIEL" msg window-focus "$(window_of activate-dialog | jq -r .id)" > /dev/null
+"$CANOPY" msg window-focus "$(window_of activate-dialog | jq -r .id)" > /dev/null
 expect "green parent" "focusing the hidden dialog did not show it with its parent"
 if [[ $(windows | jq -r '.[] | select(.active) | .title') != activate-dialog ]]; then
   echo "the dialog asked for did not take focus: $(windows)"

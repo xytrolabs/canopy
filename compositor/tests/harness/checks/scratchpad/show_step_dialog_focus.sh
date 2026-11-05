@@ -4,18 +4,18 @@
 # another process, is modal: it takes the focus its parent is given, and placement actions aimed at it act on the parent.
 set -euo pipefail
 
-readonly PARENT_CLIENT="${UMBRIEL_SEAT_LOG_CLIENT:-./build-debug/tests/seat-log-client}"
-readonly CLIENT="${UMBRIEL_UNMAP_CLIENT:-./build-debug/tests/unmap-client}"
-readonly PARENT_LOG="$UMBRIEL_RUNTIME_DIR/focus-parent.log"
+readonly PARENT_CLIENT="${CANOPY_SEAT_LOG_CLIENT:-./build-debug/tests/seat-log-client}"
+readonly CLIENT="${CANOPY_UNMAP_CLIENT:-./build-debug/tests/unmap-client}"
+readonly PARENT_LOG="$CANOPY_RUNTIME_DIR/focus-parent.log"
 
-cat >> "$UMBRIEL_CONFIG" <<'EOF'
+cat >> "$CANOPY_CONFIG" <<'EOF'
 
 [animation]
 enabled = false
 EOF
-"$UMBRIEL" msg config-reload > /dev/null
+"$CANOPY" msg config-reload > /dev/null
 
-windows() { "$UMBRIEL" windows --json; }
+windows() { "$CANOPY" windows --json; }
 window_of() { windows | jq -c --arg title "$1" '.[] | select(.title == $title)'; }
 active() { windows | jq -r '.[] | select(.active) | .title'; }
 
@@ -38,14 +38,14 @@ expect_active() {
 }
 
 focus_dialog() {
-  "$UMBRIEL" msg window-focus "$(window_of focus-dialog | jq -r .id)" > /dev/null
+  "$CANOPY" msg window-focus "$(window_of focus-dialog | jq -r .id)" > /dev/null
   expect_active focus-dialog "the dialog did not take focus"
 }
 
 # Three regular members, the middle one able to parent a dialog.
-"$CLIENT" focus-first 300 200 > "$UMBRIEL_RUNTIME_DIR/focus-first.log" 2>&1 &
+"$CLIENT" focus-first 300 200 > "$CANOPY_RUNTIME_DIR/focus-first.log" 2>&1 &
 wait_for_window focus-first
-"$UMBRIEL" msg window-move-to-scratchpad > /dev/null
+"$CANOPY" msg window-move-to-scratchpad > /dev/null
 
 EXPORT_TOPLEVEL=1 "$PARENT_CLIENT" focus-parent > "$PARENT_LOG" 2>&1 &
 wait_for_window focus-parent
@@ -59,15 +59,15 @@ if [[ -z $handle ]]; then
   echo "parent did not export an xdg-foreign handle: $(cat "$PARENT_LOG")"
   exit 1
 fi
-"$UMBRIEL" msg window-move-to-scratchpad > /dev/null
+"$CANOPY" msg window-move-to-scratchpad > /dev/null
 
-"$CLIENT" focus-last 300 200 > "$UMBRIEL_RUNTIME_DIR/focus-last.log" 2>&1 &
+"$CLIENT" focus-last 300 200 > "$CANOPY_RUNTIME_DIR/focus-last.log" 2>&1 &
 wait_for_window focus-last
-"$UMBRIEL" msg window-move-to-scratchpad > /dev/null
+"$CANOPY" msg window-move-to-scratchpad > /dev/null
 
 # Show every window, then open the middle member's dialog; it joins the scratchpad with its parent.
-"$UMBRIEL" msg scratchpad-toggle > /dev/null
-TRANSIENT_FOREIGN_HANDLE="$handle" "$CLIENT" focus-dialog 200 150 > "$UMBRIEL_RUNTIME_DIR/focus-dialog.log" 2>&1 &
+"$CANOPY" msg scratchpad-toggle > /dev/null
+TRANSIENT_FOREIGN_HANDLE="$handle" "$CLIENT" focus-dialog 200 150 > "$CANOPY_RUNTIME_DIR/focus-dialog.log" 2>&1 &
 dialog=$!
 wait_for_window focus-dialog
 if [[ $(window_of focus-dialog | jq -r .scratchpad) != default ]]; then
@@ -76,33 +76,33 @@ if [[ $(window_of focus-dialog | jq -r .scratchpad) != default ]]; then
 fi
 
 focus_dialog
-"$UMBRIEL" msg scratchpad-window-show-next > /dev/null
+"$CANOPY" msg scratchpad-window-show-next > /dev/null
 expect_active focus-last "next from the middle member's dialog"
 
-"$UMBRIEL" msg scratchpad-toggle > /dev/null
-"$UMBRIEL" msg scratchpad-toggle > /dev/null
+"$CANOPY" msg scratchpad-toggle > /dev/null
+"$CANOPY" msg scratchpad-toggle > /dev/null
 focus_dialog
-"$UMBRIEL" msg scratchpad-window-show-previous > /dev/null
+"$CANOPY" msg scratchpad-window-show-previous > /dev/null
 expect_active focus-first "previous from the middle member's dialog"
 
 # Hidden with the dialog focused, the scratchpad shows the dialog's parent again. The dialog, attached from another
 # process, is modal and shows with its parent, so it takes the focus the parent is given.
-"$UMBRIEL" msg scratchpad-toggle > /dev/null
-"$UMBRIEL" msg scratchpad-toggle > /dev/null
+"$CANOPY" msg scratchpad-toggle > /dev/null
+"$CANOPY" msg scratchpad-toggle > /dev/null
 focus_dialog
-"$UMBRIEL" msg scratchpad-toggle > /dev/null
-"$UMBRIEL" msg scratchpad-window-show-next > /dev/null
+"$CANOPY" msg scratchpad-toggle > /dev/null
+"$CANOPY" msg scratchpad-window-show-next > /dev/null
 expect_active focus-dialog "showing a scratchpad hidden while a dialog had focus"
 
 # With the parent shown on its own, focus-next from its dialog has nowhere to go: the parent is blocked.
-"$UMBRIEL" msg scratchpad-focus-next > /dev/null
+"$CANOPY" msg scratchpad-focus-next > /dev/null
 expect_active focus-dialog "focus-next from the dialog of the window on show"
 
 # The same holds when the dialog closes while the scratchpad is hidden.
-"$UMBRIEL" msg scratchpad-toggle > /dev/null
-"$UMBRIEL" msg scratchpad-toggle > /dev/null
+"$CANOPY" msg scratchpad-toggle > /dev/null
+"$CANOPY" msg scratchpad-toggle > /dev/null
 focus_dialog
-"$UMBRIEL" msg scratchpad-toggle > /dev/null
+"$CANOPY" msg scratchpad-toggle > /dev/null
 kill "$dialog"
 for _ in $(seq 80); do
   [[ -z "$(window_of focus-dialog)" ]] && break
@@ -112,14 +112,14 @@ if [[ -n "$(window_of focus-dialog)" ]]; then
   echo "the dialog did not close: $(windows)"
   exit 1
 fi
-"$UMBRIEL" msg scratchpad-window-show-next > /dev/null
+"$CANOPY" msg scratchpad-window-show-next > /dev/null
 expect_active focus-parent "showing a scratchpad whose focused dialog closed while it was hidden"
 
 # Restoring with the attached dialog focused takes out its parent, and the dialog comes along.
-TRANSIENT_FOREIGN_HANDLE="$handle" "$CLIENT" focus-dialog 200 150 > "$UMBRIEL_RUNTIME_DIR/focus-dialog-2.log" 2>&1 &
+TRANSIENT_FOREIGN_HANDLE="$handle" "$CLIENT" focus-dialog 200 150 > "$CANOPY_RUNTIME_DIR/focus-dialog-2.log" 2>&1 &
 wait_for_window focus-dialog
 focus_dialog
-"$UMBRIEL" msg window-restore-from-scratchpad > /dev/null
+"$CANOPY" msg window-restore-from-scratchpad > /dev/null
 restored_dialog=$(window_of focus-dialog | jq -r '"\(.scratchpad)|\(.workspace)"')
 restored_parent=$(window_of focus-parent | jq -r '"\(.scratchpad)|\(.workspace)"')
 if [[ $restored_parent != "|HEADLESS-1:1" || $restored_dialog != "$restored_parent" ]]; then

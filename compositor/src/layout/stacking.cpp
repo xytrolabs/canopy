@@ -4,7 +4,7 @@ extern "C" {
 #include <wlr/util/box.h>
 }
 
-namespace umbriel {
+namespace canopy {
   namespace {
     class StackingSnapshot final : public LayoutSnapshot {
     public:
@@ -22,4 +22,4 @@ namespace umbriel {
     static const std::vector<Column> empty;
     return empty;
   }
-} // namespace umbriel
+} // namespace canopy

@@ -7,7 +7,7 @@
 #include <string_view>
 #include <vector>
 
-namespace umbriel {
+namespace canopy {
 
   struct InputCapturePermission {
     std::string id;
@@ -53,4 +53,4 @@ namespace umbriel {
     bool m_loaded = false;
   };
 
-} // namespace umbriel
+} // namespace canopy

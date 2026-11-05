@@ -11,7 +11,7 @@
 #include "server/server.h"
 #include "view/view.h"
 extern "C" {
-#include <umbrielfx/render/effect.h>
+#include <canopyfx/render/effect.h>
 }
 #include "view/maximize.h"
 #include "view/size_hints.h"
@@ -25,7 +25,7 @@ extern "C" {
 #include "workspace/workspace.h"
 #include "xwayland/xwayland.h"
 
-namespace umbriel {
+namespace canopy {
   namespace {
     constexpr Logger kLog("view");
     // Orders minimized windows across the session so the latest one can be restored first.
@@ -1113,4 +1113,4 @@ namespace umbriel {
     }
     refreshStateRuleEffects();
   }
-} // namespace umbriel
+} // namespace canopy

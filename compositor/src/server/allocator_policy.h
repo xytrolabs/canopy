@@ -2,7 +2,7 @@
 
 #include <cstddef>
 
-namespace umbriel {
+namespace canopy {
 
   struct AlignedBufferLayout {
     int stride = 0;
@@ -20,4 +20,4 @@ namespace umbriel {
   // renderer has a DRM device file descriptor.
   bool wantsAlignedSoftwareAllocator(int backendDrmFd, int rendererDrmFd);
 
-} // namespace umbriel
+} // namespace canopy

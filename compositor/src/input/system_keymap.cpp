@@ -1,6 +1,6 @@
 #include "input/system_keymap.h"
 
-#if UMBRIEL_HAS_SD_BUS
+#if CANOPY_HAS_SD_BUS
 #include "core/log.h"
 
 #include <cstdlib>
@@ -8,9 +8,9 @@
 #include <systemd/sd-bus.h>
 #endif
 
-namespace umbriel {
+namespace canopy {
 
-#if UMBRIEL_HAS_SD_BUS
+#if CANOPY_HAS_SD_BUS
   namespace {
     constexpr Logger kLog("keyboard");
 
@@ -60,7 +60,7 @@ namespace umbriel {
 #endif
 
   XkbNames querySystemKeymap() {
-#if UMBRIEL_HAS_SD_BUS
+#if CANOPY_HAS_SD_BUS
     sd_bus* rawBus = nullptr;
     if (sd_bus_open_system(&rawBus) < 0) {
       kLog.debug("system bus unavailable; using the libxkbcommon default keymap");
@@ -92,4 +92,4 @@ namespace umbriel {
 #endif
   }
 
-} // namespace umbriel
+} // namespace canopy

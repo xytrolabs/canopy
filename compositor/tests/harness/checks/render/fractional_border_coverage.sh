@@ -4,11 +4,11 @@
 # background in the stripe is an antialiasing error rather than a curve.
 set -euo pipefail
 
-readonly CLIENT="${UMBRIEL_UNMAP_CLIENT:-./build-debug/tests/unmap-client}"
-readonly CLIENT_LOG="$UMBRIEL_RUNTIME_DIR/fractional-border-client.log"
-readonly SCREENSHOT="$UMBRIEL_RUNTIME_DIR/fractional-border.png"
+readonly CLIENT="${CANOPY_UNMAP_CLIENT:-./build-debug/tests/unmap-client}"
+readonly CLIENT_LOG="$CANOPY_RUNTIME_DIR/fractional-border-client.log"
+readonly SCREENSHOT="$CANOPY_RUNTIME_DIR/fractional-border.png"
 
-cat >> "$UMBRIEL_CONFIG" <<'EOF'
+cat >> "$CANOPY_CONFIG" <<'EOF'
 
 [animation]
 duration_ms = 1
@@ -25,7 +25,7 @@ corner_radius = 24
 [output."HEADLESS-1"]
 scale = 1.25
 EOF
-"$UMBRIEL" msg config-reload > /dev/null
+"$CANOPY" msg config-reload > /dev/null
 
 "$CLIENT" fractional-border 1024 576 > "$CLIENT_LOG" 2>&1 &
 for _ in $(seq 60); do
@@ -36,11 +36,11 @@ if ! grep -q '^mapped$' "$CLIENT_LOG"; then
   echo "fractional border client never mapped: $(cat "$CLIENT_LOG")"
   exit 1
 fi
-"$UMBRIEL" settle
+"$CANOPY" settle
 
-window=$("$UMBRIEL" windows --json | jq -c '.[] | select(.title == "fractional-border")')
+window=$("$CANOPY" windows --json | jq -c '.[] | select(.title == "fractional-border")')
 if [[ -z $window ]]; then
-  echo "fractional border client was not registered: $("$UMBRIEL" windows --json)"
+  echo "fractional border client was not registered: $("$CANOPY" windows --json)"
   exit 1
 fi
 x=$(jq -r '.x' <<< "$window")
@@ -70,10 +70,10 @@ fi
 grim -o HEADLESS-1 "$SCREENSHOT"
 side_stripe="1x100+${outer_x}+$((center_y - 50))"
 top_stripe="100x1+$((center_x - 50))+${outer_y}"
-side_translucent=$("$UMBRIEL_PIXEL_PROBE" "$SCREENSHOT" count 'r < 0.99412' "$side_stripe")
-top_translucent=$("$UMBRIEL_PIXEL_PROBE" "$SCREENSHOT" count 'r < 0.99412' "$top_stripe")
-read -r side_red _ _ < <("$UMBRIEL_PIXEL_PROBE" "$SCREENSHOT" mean "$side_stripe")
-read -r top_red _ _ < <("$UMBRIEL_PIXEL_PROBE" "$SCREENSHOT" mean "$top_stripe")
+side_translucent=$("$CANOPY_PIXEL_PROBE" "$SCREENSHOT" count 'r < 0.99412' "$side_stripe")
+top_translucent=$("$CANOPY_PIXEL_PROBE" "$SCREENSHOT" count 'r < 0.99412' "$top_stripe")
+read -r side_red _ _ < <("$CANOPY_PIXEL_PROBE" "$SCREENSHOT" mean "$side_stripe")
+read -r top_red _ _ < <("$CANOPY_PIXEL_PROBE" "$SCREENSHOT" mean "$top_stripe")
 if (( side_translucent != 0 || top_translucent != 0 )); then
   echo "fractionally scaled straight border was translucent: side_red=$side_red top_red=$top_red" \
     "($side_translucent side and $top_translucent top pixels below 254) window=$window"
@@ -85,10 +85,10 @@ fi
 # render margin keeps those samples inside the scene quad.
 side_aa_stripe="1x100+$((outer_x - 1))+$((center_y - 50))"
 top_aa_stripe="100x1+$((center_x - 50))+$((outer_y - 1))"
-side_aa_uneven=$("$UMBRIEL_PIXEL_PROBE" "$SCREENSHOT" count 'r < 0.15490 || r > 0.35490' "$side_aa_stripe")
-top_aa_uneven=$("$UMBRIEL_PIXEL_PROBE" "$SCREENSHOT" count 'r < 0.15490 || r > 0.35490' "$top_aa_stripe")
-read -r side_aa_red _ _ < <("$UMBRIEL_PIXEL_PROBE" "$SCREENSHOT" mean "$side_aa_stripe")
-read -r top_aa_red _ _ < <("$UMBRIEL_PIXEL_PROBE" "$SCREENSHOT" mean "$top_aa_stripe")
+side_aa_uneven=$("$CANOPY_PIXEL_PROBE" "$SCREENSHOT" count 'r < 0.15490 || r > 0.35490' "$side_aa_stripe")
+top_aa_uneven=$("$CANOPY_PIXEL_PROBE" "$SCREENSHOT" count 'r < 0.15490 || r > 0.35490' "$top_aa_stripe")
+read -r side_aa_red _ _ < <("$CANOPY_PIXEL_PROBE" "$SCREENSHOT" mean "$side_aa_stripe")
+read -r top_aa_red _ _ < <("$CANOPY_PIXEL_PROBE" "$SCREENSHOT" mean "$top_aa_stripe")
 aa_delta=$((side_aa_red - top_aa_red))
 (( aa_delta < 0 )) && aa_delta=$((-aa_delta))
 if (( side_aa_uneven != 0 || top_aa_uneven != 0 || aa_delta > 2 )); then
@@ -98,8 +98,8 @@ fi
 
 # The next row and column belong to the client. Antialiasing the stroke inward
 # makes one edge look two pixels thick, depending on fractional rounding.
-read -r side_edge_red _ side_edge_blue < <("$UMBRIEL_PIXEL_PROBE" "$SCREENSHOT" pixel "$inner_x" "$center_y")
-read -r top_edge_red _ top_edge_blue < <("$UMBRIEL_PIXEL_PROBE" "$SCREENSHOT" pixel "$center_x" "$inner_y")
+read -r side_edge_red _ side_edge_blue < <("$CANOPY_PIXEL_PROBE" "$SCREENSHOT" pixel "$inner_x" "$center_y")
+read -r top_edge_red _ top_edge_blue < <("$CANOPY_PIXEL_PROBE" "$SCREENSHOT" pixel "$center_x" "$inner_y")
 side_edge="$side_edge_red $side_edge_blue"
 top_edge="$top_edge_red $top_edge_blue"
 if (( side_edge_red > 90 || side_edge_blue < 160 || top_edge_red > 90 || top_edge_blue < 160 )); then

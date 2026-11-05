@@ -2,7 +2,7 @@
 # The diagnostics panel is drawn like the other internal panels, with a border that reports severity: the warning colour while the configuration still applied, the error colour once it did not. Colour and geometry are the whole signal, so this samples the two border rows alone rather than the panel interior, where the severity-coloured heading would satisfy the same assertion without any border being drawn. Each state is asserted against the one before it, so a panel stuck on its first severity fails even though every individual colour is present somewhere.
 set -euo pipefail
 
-readonly SHOT=$UMBRIEL_RUNTIME_DIR/banner.png
+readonly SHOT=$CANOPY_RUNTIME_DIR/banner.png
 readonly WARNING='#F5C96B'
 readonly ERROR='#FF6B6B'
 # The banner sits 24 logical pixels below the top edge with a 2px border, so
@@ -20,11 +20,11 @@ color_predicate() {
 }
 
 border_pixels() {
-  "$UMBRIEL_PIXEL_PROBE" "$SHOT" count "$(color_predicate "$1")" "$BORDER_ROWS"
+  "$CANOPY_PIXEL_PROBE" "$SHOT" count "$(color_predicate "$1")" "$BORDER_ROWS"
 }
 
 capture() {
-  "$UMBRIEL" settle
+  "$CANOPY" settle
   grim -o HEADLESS-1 "$SHOT"
 }
 
@@ -36,8 +36,8 @@ if (( clean_warning > 0 || clean_error > 0 )); then
   exit 1
 fi
 
-printf '\n[appearance]\nnot_a_real_key = true\n' >> "$UMBRIEL_CONFIG"
-"$UMBRIEL" msg config-reload > /dev/null
+printf '\n[appearance]\nnot_a_real_key = true\n' >> "$CANOPY_CONFIG"
+"$CANOPY" msg config-reload > /dev/null
 capture
 warned_warning=$(border_pixels "$WARNING")
 warned_error=$(border_pixels "$ERROR")
@@ -52,15 +52,15 @@ fi
 
 # Both selectors on one workspace rule is an error, so the configuration is
 # rejected and the banner has to change severity with it.
-printf '\n[[workspace]]\nname = "chat"\nindex = 3\n' >> "$UMBRIEL_CONFIG"
-"$UMBRIEL" msg config-reload > /dev/null
+printf '\n[[workspace]]\nname = "chat"\nindex = 3\n' >> "$CANOPY_CONFIG"
+"$CANOPY" msg config-reload > /dev/null
 capture
 failed_error=$(border_pixels "$ERROR")
 if (( failed_error < MIN_BORDER_PIXELS )); then
   echo "a rejected configuration did not draw an error-bordered banner: error=$failed_error"
   exit 1
 fi
-if ! grep -q "config reload failed; keeping previous configuration" "$UMBRIEL_LOG"; then
+if ! grep -q "config reload failed; keeping previous configuration" "$CANOPY_LOG"; then
   echo "the error banner appeared for a configuration that was still applied"
   exit 1
 fi

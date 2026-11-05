@@ -6,7 +6,7 @@
 
 struct wl_event_loop;
 
-namespace umbriel {
+namespace canopy {
 
   // Authenticates socket peers before bridging them into libeis' FD backend.
   // The socketpair backend is available in libei 1.3 and keeps peer authentication
@@ -29,4 +29,4 @@ namespace umbriel {
     std::unique_ptr<Impl> m_impl;
   };
 
-} // namespace umbriel
+} // namespace canopy

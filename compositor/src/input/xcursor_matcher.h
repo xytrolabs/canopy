@@ -9,7 +9,7 @@
 struct wlr_xcursor_manager;
 struct wlr_xcursor_theme;
 
-namespace umbriel {
+namespace canopy {
 
   // A packed DRM_FORMAT_ARGB8888 image. Rows may contain trailing padding.
   struct XcursorImageView {
@@ -35,4 +35,4 @@ namespace umbriel {
   std::optional<std::string>
   matchXcursorManagerImage(wlr_xcursor_manager* manager, XcursorImageView image, std::string_view preferredName = {});
 
-} // namespace umbriel
+} // namespace canopy

@@ -3,16 +3,16 @@
 # mapped view must use that pending fullscreen state when deciding whether to create rounded window chrome.
 set -euo pipefail
 
-readonly CLIENT="${UMBRIEL_SUBSURFACE_CLIENT:-./build-debug/tests/subsurface-client}"
-readonly CLIENT_LOG="$UMBRIEL_RUNTIME_DIR/fullscreen-pending-map-client.log"
-readonly SCREENSHOT="$UMBRIEL_RUNTIME_DIR/fullscreen-pending-map.png"
+readonly CLIENT="${CANOPY_SUBSURFACE_CLIENT:-./build-debug/tests/subsurface-client}"
+readonly CLIENT_LOG="$CANOPY_RUNTIME_DIR/fullscreen-pending-map-client.log"
+readonly SCREENSHOT="$CANOPY_RUNTIME_DIR/fullscreen-pending-map.png"
 
 if [[ ! -x $CLIENT ]]; then
   echo "subsurface client not built at $CLIENT"
   exit 1
 fi
 
-cat >> "$UMBRIEL_CONFIG" <<'EOF'
+cat >> "$CANOPY_CONFIG" <<'EOF'
 
 [animation]
 duration_ms = 1
@@ -30,7 +30,7 @@ border_width = 12
 outer_border_width = 0
 corner_radius = 64
 EOF
-"$UMBRIEL" msg config-reload > /dev/null
+"$CANOPY" msg config-reload > /dev/null
 
 env FULLSCREEN_BEFORE_MAP=1 TRANSPARENT_CONTENT=1 \
   "$CLIENT" fullscreen-pending-map > "$CLIENT_LOG" 2>&1 &
@@ -50,7 +50,7 @@ if [[ ! $first_configure =~ ^first-configure\ [0-9]+\ [0-9]+\ windowed$ ]]; then
 fi
 
 window_box() {
-  "$UMBRIEL" windows --json | jq -r '.[] | select(.title == "fullscreen-pending-map") | "\(.x) \(.y) \(.w) \(.h)"'
+  "$CANOPY" windows --json | jq -r '.[] | select(.title == "fullscreen-pending-map") | "\(.x) \(.y) \(.w) \(.h)"'
 }
 
 box=
@@ -67,16 +67,16 @@ if [[ ! $box =~ ^-?[0-9]+\ -?[0-9]+\ 1280\ 720$ ]]; then
 fi
 read -r win_x win_y _ _ <<< "$box"
 
-"$UMBRIEL" settle
+"$CANOPY" settle
 grim "$SCREENSHOT"
 
 sample() {
-  "$UMBRIEL_PIXEL_PROBE" "$SCREENSHOT" pixel "$1" "$2"
+  "$CANOPY_PIXEL_PROBE" "$SCREENSHOT" pixel "$1" "$2"
 }
 
 # Count the exact configured border colour rather than assuming which corner pixel lands inside the antialiased ring.
 # The transparent fullscreen client and red backdrop introduce no other green pixels.
-green_pixels=$("$UMBRIEL_PIXEL_PROBE" "$SCREENSHOT" count 'r == 0 && g == 1 && b == 0')
+green_pixels=$("$CANOPY_PIXEL_PROBE" "$SCREENSHOT" count 'r == 0 && g == 1 && b == 0')
 if (( green_pixels > 0 )); then
   echo "pending fullscreen map retained green window chrome: pixels=$green_pixels"
   exit 1

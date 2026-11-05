@@ -19,7 +19,7 @@
 #include <algorithm>
 #include <optional>
 
-namespace umbriel {
+namespace canopy {
 
   namespace {
     constexpr Logger kLog("keyboard");
@@ -584,4 +584,4 @@ namespace umbriel {
     return 0;
   }
 
-} // namespace umbriel
+} // namespace canopy

@@ -56,14 +56,14 @@ namespace {
     int relayFd = -1;
     std::vector<pid_t> authenticated;
     Fd backend;
-    std::unique_ptr<umbriel::EisSocket> socket;
+    std::unique_ptr<canopy::EisSocket> socket;
 
     Fixture() {
       if (const char* previous = std::getenv("XDG_RUNTIME_DIR")) {
         previousRuntime = previous;
       }
       std::array<char, 64> pattern{};
-      std::strcpy(pattern.data(), "/tmp/umbriel-eis-socket-test.XXXXXX");
+      std::strcpy(pattern.data(), "/tmp/canopy-eis-socket-test.XXXXXX");
       if (mkdtemp(pattern.data()) == nullptr) {
         return;
       }
@@ -73,7 +73,7 @@ namespace {
       if (loop == nullptr) {
         return;
       }
-      socket = std::make_unique<umbriel::EisSocket>(
+      socket = std::make_unique<canopy::EisSocket>(
           loop,
           [this](pid_t pid) {
             authenticated.push_back(pid);
@@ -240,7 +240,7 @@ namespace {
 
 } // namespace
 
-UMBRIEL_TEST(authenticateTheRealSocketPeerBeforeOpeningBackend) {
+CANOPY_TEST(authenticateTheRealSocketPeerBeforeOpeningBackend) {
   Fixture fixture;
   CHECK(fixture.valid());
   if (!fixture.valid()) {
@@ -272,7 +272,7 @@ UMBRIEL_TEST(authenticateTheRealSocketPeerBeforeOpeningBackend) {
   CHECK_EQ(WEXITSTATUS(status), 0);
 }
 
-UMBRIEL_TEST(relayBothDirectionsUnderBackpressureWithoutLosingOrder) {
+CANOPY_TEST(relayBothDirectionsUnderBackpressureWithoutLosingOrder) {
   Fixture fixture;
   CHECK(fixture.valid());
   if (!fixture.valid()) {
@@ -320,7 +320,7 @@ UMBRIEL_TEST(relayBothDirectionsUnderBackpressureWithoutLosingOrder) {
   CHECK(atPeer == reverse);
 }
 
-UMBRIEL_TEST(relayKeymapDescriptorsInBothDirections) {
+CANOPY_TEST(relayKeymapDescriptorsInBothDirections) {
   Fixture fixture;
   CHECK(fixture.valid());
   if (!fixture.valid()) {
@@ -360,7 +360,7 @@ UMBRIEL_TEST(relayKeymapDescriptorsInBothDirections) {
   }
 }
 
-UMBRIEL_TEST(truncatedRightsDisconnectAndReleaseEveryReceivedDescriptor) {
+CANOPY_TEST(truncatedRightsDisconnectAndReleaseEveryReceivedDescriptor) {
   Fixture fixture;
   CHECK(fixture.valid());
   if (!fixture.valid()) {
@@ -384,7 +384,7 @@ UMBRIEL_TEST(truncatedRightsDisconnectAndReleaseEveryReceivedDescriptor) {
   CHECK_EQ(descriptorCount(), baseline + 3);
 }
 
-UMBRIEL_TEST(halfCloseDrainsPayloadAndPreservesTheReverseDirection) {
+CANOPY_TEST(halfCloseDrainsPayloadAndPreservesTheReverseDirection) {
   Fixture fixture;
   CHECK(fixture.valid());
   if (!fixture.valid()) {

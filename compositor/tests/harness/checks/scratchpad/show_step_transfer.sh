@@ -3,10 +3,10 @@
 # new title, the scratchpad it left hides instead of staying open with nothing in it.
 set -euo pipefail
 
-readonly CONTROL="$UMBRIEL_RUNTIME_DIR/transfer-control"
-readonly FRAME="$UMBRIEL_RUNTIME_DIR/show-step-transfer.png"
+readonly CONTROL="$CANOPY_RUNTIME_DIR/transfer-control"
+readonly FRAME="$CANOPY_RUNTIME_DIR/show-step-transfer.png"
 
-cat >> "$UMBRIEL_CONFIG" <<'EOF'
+cat >> "$CANOPY_CONFIG" <<'EOF'
 
 [animation]
 enabled = false
@@ -28,16 +28,16 @@ name = "b"
 match.title = "^moved-out$"
 default_scratchpad = "b"
 EOF
-"$UMBRIEL" msg config-reload > /dev/null
+"$CANOPY" msg config-reload > /dev/null
 
-windows() { "$UMBRIEL" windows --json; }
+windows() { "$CANOPY" windows --json; }
 field_of() { windows | jq -r --arg title "$1" --arg field "$2" '.[] | select(.title == $title) | .[$field]'; }
 
 # The backdrop is white away from any window, and the scratchpad dim darkens it while a scratchpad is open.
 dimmed() {
-  "$UMBRIEL" settle
+  "$CANOPY" settle
   grim "$FRAME"
-  "$UMBRIEL_PIXEL_PROBE" "$FRAME" mean 20x20+5+5 | awk '{print (($1 + $2 + $3) / 3 < 0.8 * 255) ? 1 : 0}'
+  "$CANOPY_PIXEL_PROBE" "$FRAME" mean 20x20+5+5 | awk '{print (($1 + $2 + $3) / 3 < 0.8 * 255) ? 1 : 0}'
 }
 
 mkfifo "$CONTROL"
@@ -48,7 +48,7 @@ for _ in $(seq 80); do
   [[ -n "$(field_of moving-window id)" ]] && break
   sleep 0.05
 done
-"$UMBRIEL" msg window-move-to-scratchpad a > /dev/null
+"$CANOPY" msg window-move-to-scratchpad a > /dev/null
 
 # A second member stays hidden while a shows the moving window on its own.
 foot --title=staying-window sh -c "sleep 120" > /dev/null 2>&1 &
@@ -57,10 +57,10 @@ for _ in $(seq 80); do
   [[ -n "$(field_of staying-window id)" ]] && break
   sleep 0.05
 done
-"$UMBRIEL" msg window-move-to-scratchpad a > /dev/null
-"$UMBRIEL" msg scratchpad-window-show-next a > /dev/null
+"$CANOPY" msg window-move-to-scratchpad a > /dev/null
+"$CANOPY" msg scratchpad-window-show-next a > /dev/null
 if [[ $(windows | jq -r '.[] | select(.active) | .title') != moving-window ]]; then
-  "$UMBRIEL" msg scratchpad-window-show-next a > /dev/null
+  "$CANOPY" msg scratchpad-window-show-next a > /dev/null
 fi
 if [[ $(dimmed) != 1 ]]; then
   echo "scratchpad a did not open with its window: $(windows)"
@@ -88,7 +88,7 @@ for _ in $(seq 80); do
   [[ -z "$(field_of moved-out id)" ]] && break
   sleep 0.05
 done
-"$UMBRIEL" msg scratchpad-window-show-next a > /dev/null
+"$CANOPY" msg scratchpad-window-show-next a > /dev/null
 if [[ $(windows | jq -r '.[] | select(.active) | .title') != staying-window ]]; then
   echo "stepping through a did not reach the window still in it: $(windows)"
   exit 1

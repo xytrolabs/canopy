@@ -92,7 +92,7 @@ struct wlr_virtual_keyboard_manager_v1;
 struct wlr_virtual_pointer_manager_v1;
 struct wlr_virtual_pointer_v1;
 
-namespace umbriel {
+namespace canopy {
   enum class ContentType;
   struct ConfigEffects;
 
@@ -117,7 +117,7 @@ namespace umbriel {
   // game/network loop on the frame callback stalls. A suspended view gets none: clients such as Firefox detect
   // occlusion only from a long callback gap, and a slow tick reads as a slow display that drops video frames.
   inline constexpr int kBackgroundFrameIntervalMs = 100;
-  inline constexpr std::string_view kLaunchTokenEnvironment = "UMBRIEL_LAUNCH_TOKEN";
+  inline constexpr std::string_view kLaunchTokenEnvironment = "CANOPY_LAUNCH_TOKEN";
 
   // The pid of the process owning a surface's Wayland connection, or -1 when the surface has no client or the kernel
   // cannot represent that pid in the compositor's pid namespace.
@@ -265,7 +265,7 @@ namespace umbriel {
     // The animation clock, in fractional milliseconds, at a CLOCK_MONOTONIC instant such as an output's latest vblank.
     // Frames tick from it, so motion steps keep sub-millisecond spacing.
     double animationFrameClockMsec(double monotonicMsec) const;
-#ifdef UMBRIEL_HARNESS
+#ifdef CANOPY_HARNESS
     void freezeAnimationClock();
     // Moves a frozen clock forward and schedules a frame on every output. False when the clock is not frozen.
     bool advanceAnimationClock(uint64_t ms);
@@ -908,7 +908,7 @@ namespace umbriel {
     std::optional<ScreenCastCommand> m_pendingScreenCastCommand;
     bool m_screenCastActive = false;
     bool m_screenCastDynamicConfirmed = false;
-#ifdef UMBRIEL_HARNESS
+#ifdef CANOPY_HARNESS
     std::optional<uint64_t> m_frozenAnimationClockMsec;
     int64_t m_animationClockOffsetMsec = 0;
 #endif
@@ -1038,4 +1038,4 @@ namespace umbriel {
     std::vector<std::unique_ptr<LayerSurface>> m_layerSurfaces;
   };
 
-} // namespace umbriel
+} // namespace canopy

@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 # harness: outputs=2
 set -euo pipefail
-cat > "$UMBRIEL_RUNTIME_DIR/audio.glsl" <<'GLSL'
-vec4 screen(vec2 uv) { return vec4(umbriel_audio_spectrum(1.0), umbriel_audio_available(), 0.0, 1.0); }
+cat > "$CANOPY_RUNTIME_DIR/audio.glsl" <<'GLSL'
+vec4 screen(vec2 uv) { return vec4(canopy_audio_spectrum(1.0), canopy_audio_available(), 0.0, 1.0); }
 GLSL
-cat >> "$UMBRIEL_CONFIG" <<'TOML'
+cat >> "$CANOPY_CONFIG" <<'TOML'
 [animation]
 enabled = false
 [colors]
@@ -19,8 +19,8 @@ shader = "audio.glsl"
 [output.HEADLESS-2]
 screen_effect = "off"
 TOML
-"$UMBRIEL" msg config-reload > /dev/null
-"$UMBRIEL" settle > /dev/null
+"$CANOPY" msg config-reload > /dev/null
+"$CANOPY" settle > /dev/null
 python3 - <<'PY'
 import json
 import math
@@ -31,8 +31,8 @@ import subprocess
 import threading
 import time
 
-exe = os.environ['UMBRIEL']
-image = str(Path(os.environ['UMBRIEL_RUNTIME_DIR']) / 'audio.png')
+exe = os.environ['CANOPY']
+image = str(Path(os.environ['CANOPY_RUNTIME_DIR']) / 'audio.png')
 
 
 def run(*args):
@@ -42,7 +42,7 @@ def run(*args):
 def connect():
     sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
     sock.settimeout(3)
-    sock.connect(os.environ['UMBRIEL_SOCKET'])
+    sock.connect(os.environ['CANOPY_SOCKET'])
     return sock
 
 
@@ -65,7 +65,7 @@ def pixel(expected, output='HEADLESS-1'):
     deadline = time.monotonic() + 4
     while time.monotonic() < deadline:
         run('grim', '-s', '1', '-o', output, image)
-        actual = tuple(map(int, run(os.environ['UMBRIEL_PIXEL_PROBE'], image, 'pixel', '900', '600').split()))
+        actual = tuple(map(int, run(os.environ['CANOPY_PIXEL_PROBE'], image, 'pixel', '900', '600').split()))
         if all(abs(a-b) < 8 for a, b in zip(actual, expected)):
             return
     raise AssertionError(f'{output}: {actual}, wanted {expected}; producer: {producer.error}')
@@ -132,7 +132,7 @@ producer.finish()
 run(exe, 'settle')
 producer = Producer(1)
 pixel((255, 255, 0))
-config = Path(os.environ['UMBRIEL_CONFIG'])
+config = Path(os.environ['CANOPY_CONFIG'])
 config.write_text(config.read_text().replace('in_capture = true', 'in_capture = false'))
 run(exe, 'msg', 'config-reload')
 pixel((0, 0, 0))
@@ -180,7 +180,7 @@ pixel((0, 0, 0))
 
 producer = Producer(1)
 pixel((255, 255, 0))
-lock = subprocess.Popen([os.environ['UMBRIEL_LOCK_CLIENT']], stdin=subprocess.PIPE, stdout=subprocess.PIPE, text=True)
+lock = subprocess.Popen([os.environ['CANOPY_LOCK_CLIENT']], stdin=subprocess.PIPE, stdout=subprocess.PIPE, text=True)
 assert lock.stdout.readline().strip() == 'locked'
 producer.worker.join(3)
 assert producer.error is not None, 'lock did not disconnect the producer'

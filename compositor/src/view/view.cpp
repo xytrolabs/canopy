@@ -15,7 +15,7 @@
 #include "server/color_manager.h"
 #include "server/server.h"
 extern "C" {
-#include <umbrielfx/render/effect.h>
+#include <canopyfx/render/effect.h>
 }
 #include "view/size_hints.h"
 #include "view/view_internal.h"
@@ -30,7 +30,7 @@ extern "C" {
 #include "workspace/workspace.h"
 #include "xwayland/xwayland.h"
 
-namespace umbriel {
+namespace canopy {
   namespace {
     constexpr Logger kLog("view");
 
@@ -160,7 +160,7 @@ namespace umbriel {
     wl_signal_add(&surface->events.destroy, &m_rootSurfaceDestroy);
 
     m_sceneTree = wlr_scene_tree_create(m_server->xdgTree());
-    (void)umbrielfx_scene_node_set_capture_excluded(&m_sceneTree->node, false);
+    (void)canopyfx_scene_node_set_capture_excluded(&m_sceneTree->node, false);
     m_decoration.createShadow(m_sceneTree);
     // The content tree's direct child is the root surface's subsurface tree for both roles; the effect and clip paths
     // find the surface there.
@@ -969,7 +969,7 @@ namespace umbriel {
       return;
     }
     if (m_captureSource != nullptr) {
-      umbrielfx_scene_capture_source_set_scale(m_captureSource, output->wlr()->scale);
+      canopyfx_scene_capture_source_set_scale(m_captureSource, output->wlr()->scale);
     }
     forEachSurface(&Output::notifySurfaceScaleIter, output);
     forEachPopupSurface(&Output::notifySurfaceScaleIter, output);
@@ -1078,4 +1078,4 @@ namespace umbriel {
       applyDynamicRules();
     }
   }
-} // namespace umbriel
+} // namespace canopy

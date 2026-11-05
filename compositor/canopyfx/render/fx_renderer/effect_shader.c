@@ -1,0 +1,437 @@
+#include "render/egl.h"
+#include "render/fx_renderer/effect.h"
+#include "render/fx_renderer/fx_renderer.h"
+#include "render/fx_renderer/shaders.h"
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <wlr/util/log.h>
+
+_Static_assert(FX_AUDIO_BANDS == 64, "audio shader coordinates require 64 bands");
+
+// Shared by every kind. Its names are the shared preamble contract.
+static const char kPreamble[] =
+    "precision highp float;\n"
+    // Some GPUs' native sin/cos return wrong values for large angles even at
+    // highp, so each argument is reduced to one revolution. A function-like macro
+    // does not re-expand itself, so every overload and constant use still works.
+    "#define sin(x) sin(mod((x), 6.283185307179586))\n"
+    "#define cos(x) cos(mod((x), 6.283185307179586))\n"
+    "varying vec2 v_texcoord;\n"
+    "uniform sampler2D canopy_texture;\n"
+    "uniform sampler2D canopy_incoming_texture;\n"
+    "uniform mat3 canopy_sample_matrix;\n"
+    "uniform sampler2D canopy_previous_texture;\n"
+    "uniform mat3 canopy_previous_sample_matrix;\n"
+    "uniform vec2 canopy_size;\n"
+    "uniform float canopy_scale;\n"
+    "uniform float canopy_time;\n"
+    "uniform sampler2D canopy_audio_bands;\n"
+    "uniform float canopy_audio_ready;\n"
+    "float canopy_audio_available() { return canopy_audio_ready; }\n"
+    "float canopy_audio_entry(float index) {\n"
+    "  return texture2D(canopy_audio_bands, vec2((index + 0.5) / 64.0, 0.5)).r;\n"
+    "}\n"
+    "float canopy_audio_spectrum(float position) {\n"
+    "  float index = clamp(position, 0.0, 1.0) * 63.0;\n"
+    "  float low = floor(index);\n"
+    "  return mix(canopy_audio_entry(low), canopy_audio_entry(min(low + 1.0, 63.0)), index - low);\n"
+    "}\n"
+    "uniform vec2 canopy_expand;\n"
+    "uniform vec4 canopy_palette[4];\n"
+    "uniform int canopy_palette_count;\n"
+    "vec4 canopy_sample(vec2 uv) {\n"
+    "  if (any(lessThan(uv, vec2(0.0))) || any(greaterThan(uv, vec2(1.0)))) return vec4(0.0);\n"
+    "  vec2 p = (vec3(uv, 1.0) * canopy_sample_matrix).xy;\n"
+    "  if (any(lessThan(p, vec2(0.0))) || any(greaterThan(p, vec2(1.0)))) return vec4(0.0);\n"
+    "  return texture2D(canopy_texture, p);\n"
+    "}\n"
+    "vec4 canopy_sample_incoming(vec2 uv) {\n"
+    "  if (any(lessThan(uv, vec2(0.0))) || any(greaterThan(uv, vec2(1.0)))) return vec4(0.0);\n"
+    "  vec2 p = (vec3(uv, 1.0) * canopy_sample_matrix).xy;\n"
+    "  if (any(lessThan(p, vec2(0.0))) || any(greaterThan(p, vec2(1.0)))) return vec4(0.0);\n"
+    "  return texture2D(canopy_incoming_texture, p);\n"
+    "}\n"
+    "vec4 canopy_sample_previous(vec2 uv) {\n"
+    "  if (any(lessThan(uv, vec2(0.0))) || any(greaterThan(uv, vec2(1.0)))) return vec4(0.0);\n"
+    "  vec2 p = (vec3(uv, 1.0) * canopy_previous_sample_matrix).xy;\n"
+    "  if (any(lessThan(p, vec2(0.0))) || any(greaterThan(p, vec2(1.0)))) return vec4(0.0);\n"
+    "  return texture2D(canopy_previous_texture, p);\n"
+    "}\n"
+    // GLSL ES 1.00 indexes uniform arrays by constant expressions only, so the loop counter is the index.
+    "vec4 canopy_palette_at(float t) {\n"
+    "  if (canopy_palette_count <= 0) return vec4(0.0);\n"
+    "  float span = float(canopy_palette_count);\n"
+    "  float scaled = fract(t) * span;\n"
+    "  float index = floor(scaled);\n"
+    "  float next = mod(index + 1.0, span);\n"
+    "  vec4 from = canopy_palette[0];\n"
+    "  vec4 to = canopy_palette[0];\n"
+    "  for (int i = 0; i < 4; i++) {\n"
+    "    if (i >= canopy_palette_count) break;\n"
+    "    if (float(i) == index) from = canopy_palette[i];\n"
+    "    if (float(i) == next) to = canopy_palette[i];\n"
+    "  }\n"
+    "  return mix(from, to, scaled - index);\n"
+    "}\n";
+
+static const char kAnimationSection[] = "uniform float canopy_progress;\n"
+                                        "uniform float canopy_linear_progress;\n"
+                                        "uniform float canopy_direction;\n"
+                                        "uniform vec4 canopy_random_seed;\n"
+                                        "#define canopy_clamped_progress clamp(canopy_progress, 0.0, 1.0)\n";
+static const char kAnimationSuffix[] = "\nvoid main() { gl_FragColor = animation(v_texcoord); }\n";
+
+// Hole and radii describe the client rectangle inside the drawn rectangle. The
+// distance is signed logical pixels, negative inside the window.
+static const char kBorderSection[] =
+    "uniform vec4 canopy_border_hole;\n"
+    "uniform vec4 canopy_border_radius;\n"
+    "float canopy_border_distance(vec2 uv) {\n"
+    "  vec2 half_size = canopy_border_hole.zw * canopy_size * 0.5;\n"
+    "  vec2 p = (uv - canopy_border_hole.xy) * canopy_size - half_size;\n"
+    "  float r = p.y < 0.0 ? (p.x < 0.0 ? canopy_border_radius.x : canopy_border_radius.y)\n"
+    "                      : (p.x < 0.0 ? canopy_border_radius.w : canopy_border_radius.z);\n"
+    "  r = min(r, min(half_size.x, half_size.y));\n"
+    "  vec2 q = abs(p) - half_size + r;\n"
+    "  return length(max(q, 0.0)) + min(max(q.x, q.y), 0.0) - r;\n"
+    "}\n";
+// The client hole is always cut out of the result with one buffer pixel of antialiasing.
+static const char kBorderSuffix[] =
+    "\nvoid main() {\n"
+    "  vec4 c = border(v_texcoord);\n"
+    "  gl_FragColor = c * smoothstep(-0.5, 0.5, canopy_border_distance(v_texcoord) * canopy_scale);\n"
+    "}\n";
+
+// In-place kinds write back through the rounded mask of the drawn rectangle:
+// outside the corner arcs the original pixel is restored. The edge is one
+// buffer pixel soft, so straight edges keep every buffer pixel whole.
+static const char kMaskSection[] =
+    "uniform vec4 canopy_corner_radius;\n"
+    "float canopy_mask(vec2 uv) {\n"
+    "  vec2 half_size = canopy_size * 0.5;\n"
+    "  vec2 p = uv * canopy_size - half_size;\n"
+    "  float r = p.y < 0.0 ? (p.x < 0.0 ? canopy_corner_radius.x : canopy_corner_radius.y)\n"
+    "                      : (p.x < 0.0 ? canopy_corner_radius.w : canopy_corner_radius.z);\n"
+    "  r = min(r, min(half_size.x, half_size.y));\n"
+    "  vec2 q = abs(p) - half_size + r;\n"
+    "  float d = length(max(q, 0.0)) + min(max(q.x, q.y), 0.0) - r;\n"
+    "  return 1.0 - smoothstep(-0.5, 0.5, d * canopy_scale);\n"
+    "}\n";
+static const char kWindowSuffix[] =
+    "\nvoid main() { gl_FragColor = mix(canopy_sample(v_texcoord), window(v_texcoord), canopy_mask(v_texcoord)); }\n";
+static const char kScreenSuffix[] = "\nvoid main() { gl_FragColor = screen(v_texcoord); }\n";
+// The cursor kind is in place too, so it needs the mask helper before its own uniform.
+static const char kCursorSection[] = "uniform vec2 canopy_pointer;\n"
+                                     "uniform int canopy_pointer_count;\n"
+                                     "uniform vec4 canopy_pointer_history[8];\n"
+                                     "uniform vec4 canopy_pointer_path[64];\n";
+static const char kCursorSuffix[] =
+    "\nvoid main() { gl_FragColor = mix(canopy_sample(v_texcoord), cursor(v_texcoord), canopy_mask(v_texcoord)); }\n";
+
+static const char* kind_name(enum fx_effect_kind kind) {
+  switch (kind) {
+  case FX_EFFECT_ANIMATION:
+    return "animation";
+  case FX_EFFECT_BORDER:
+    return "border";
+  case FX_EFFECT_WINDOW:
+    return "window";
+  case FX_EFFECT_SCREEN:
+    return "screen";
+  case FX_EFFECT_CURSOR:
+    return "cursor";
+  }
+  return "effect";
+}
+
+// Two sections per kind: the second lets the cursor kind stack the mask helper and its pointer uniform.
+static void kind_sections(enum fx_effect_kind kind, const char** section, const char** extra, const char** suffix) {
+  *extra = "";
+  switch (kind) {
+  case FX_EFFECT_ANIMATION:
+    *section = kAnimationSection;
+    *suffix = kAnimationSuffix;
+    return;
+  case FX_EFFECT_BORDER:
+    *section = kBorderSection;
+    *suffix = kBorderSuffix;
+    return;
+  case FX_EFFECT_WINDOW:
+    *section = kMaskSection;
+    *suffix = kWindowSuffix;
+    return;
+  case FX_EFFECT_SCREEN:
+    *section = "";
+    *suffix = kScreenSuffix;
+    return;
+  case FX_EFFECT_CURSOR:
+    *section = kMaskSection;
+    *extra = kCursorSection;
+    *suffix = kCursorSuffix;
+    return;
+  }
+  *section = "";
+  *suffix = "";
+}
+
+static void effect_renderer_destroy(struct wl_listener* listener, void* data) {
+  struct fx_effect_shader* shader = wl_container_of(listener, shader, destroy);
+  // Context destruction releases the GL program. Scene and config references
+  // may outlive that context, but may never use its object names again.
+  shader->renderer = NULL;
+  shader->program = 0;
+  wl_list_remove(&shader->destroy.link);
+}
+
+struct fx_effect_shader* fx_effect_shader_ref(struct fx_effect_shader* shader) {
+  if (shader != NULL) {
+    shader->references++;
+  }
+  return shader;
+}
+
+void fx_effect_shader_set_shape_preserving(struct fx_effect_shader* shader, bool shape_preserving) {
+  if (shader != NULL) {
+    shader->shape_preserving = shape_preserving;
+  }
+}
+
+enum fx_effect_kind fx_effect_shader_kind(const struct fx_effect_shader* shader) { return shader->kind; }
+
+void fx_effect_shader_unref(struct fx_effect_shader* shader) {
+  if (shader == NULL || --shader->references != 0) {
+    return;
+  }
+  if (shader->renderer != NULL) {
+    struct wlr_egl_context previous;
+    if (wlr_egl_make_current(shader->renderer->egl, &previous)) {
+      glDeleteProgram(shader->program);
+      wlr_egl_restore_context(&previous);
+    }
+    wl_list_remove(&shader->destroy.link);
+  }
+  free(shader);
+}
+
+// Enumerates the linked program's active uniforms once. Array names come back
+// as "name[0]"; the cache stores the bare name so lookups match the config.
+static void cache_uniforms(struct fx_effect_shader* shader, const char* label) {
+  GLint active = 0;
+  glGetProgramiv(shader->program, GL_ACTIVE_UNIFORMS, &active);
+  // glGetActiveUniform truncates a name into the buffer and reports the
+  // truncated length, never bufSize or more, so a name that does not fit the
+  // cache entry must be measured in a larger scratch buffer first.
+  char scratch[256];
+  GLint i = 0;
+  for (; i < active && shader->uniform_count < FX_EFFECT_UNIFORM_CACHE; i++) {
+    struct fx_effect_uniform* uniform = &shader->uniforms[shader->uniform_count];
+    GLsizei length = 0;
+    GLint size = 0;
+    GLenum type = 0;
+    glGetActiveUniform(shader->program, (GLuint)i, sizeof(scratch), &length, &size, &type, scratch);
+    if (length <= 0) {
+      continue;
+    }
+    char* bracket = strchr(scratch, '[');
+    if (bracket != NULL) {
+      *bracket = '\0';
+    }
+    if (strlen(scratch) >= sizeof(uniform->name)) {
+      continue;
+    }
+    uniform->size = size;
+    uniform->type = type;
+    strcpy(uniform->name, scratch);
+    uniform->location = glGetUniformLocation(shader->program, uniform->name);
+    if (uniform->location < 0) {
+      continue;
+    }
+    shader->uniform_count++;
+  }
+  if (i < active) {
+    wlr_log(
+        WLR_ERROR, "Effect shader '%s' has more than %d active uniforms; %d are not cached and cannot be set", label,
+        FX_EFFECT_UNIFORM_CACHE, (int)(active - i)
+    );
+  }
+}
+
+const struct fx_effect_uniform* fx_effect_shader_uniform(const struct fx_effect_shader* shader, const char* name) {
+  for (unsigned i = 0; i < shader->uniform_count; i++) {
+    if (strcmp(shader->uniforms[i].name, name) == 0) {
+      return &shader->uniforms[i];
+    }
+  }
+  return NULL;
+}
+
+bool fx_effect_shader_reads(const struct fx_effect_shader* shader, const char* uniform) {
+  return shader != NULL && fx_effect_shader_uniform(shader, uniform) != NULL;
+}
+
+static GLenum gl_type(enum fx_uniform_type type) {
+  switch (type) {
+  case FX_UNIFORM_FLOAT:
+    return GL_FLOAT;
+  case FX_UNIFORM_VEC2:
+    return GL_FLOAT_VEC2;
+  case FX_UNIFORM_VEC3:
+    return GL_FLOAT_VEC3;
+  case FX_UNIFORM_VEC4:
+    return GL_FLOAT_VEC4;
+  case FX_UNIFORM_INT:
+    return GL_INT;
+  case FX_UNIFORM_BOOL:
+    return GL_BOOL;
+  }
+  return 0;
+}
+
+void fx_effect_shader_bind_uniform_data(
+    struct fx_effect_shader* shader, const char* name, enum fx_uniform_type type, unsigned element_count,
+    const void* data, size_t data_bytes
+) {
+  struct fx_effect_uniform* cached = (struct fx_effect_uniform*)fx_effect_shader_uniform(shader, name);
+  if (cached == NULL) {
+    return;
+  }
+  const unsigned components = fx_uniform_components(type);
+  const size_t component_bytes = type == FX_UNIFORM_INT || type == FX_UNIFORM_BOOL ? sizeof(int32_t) : sizeof(float);
+  const size_t capacity = data_bytes / component_bytes / components;
+  if (cached->type != gl_type(type) || element_count == 0 || element_count > capacity || data == NULL) {
+    if (!cached->warned) {
+      cached->warned = true;
+      wlr_log(
+          WLR_ERROR, "Effect uniform '%s' does not match the program's declaration or its own storage; ignoring it",
+          name
+      );
+    }
+    return;
+  }
+  // Drivers drop array elements a program cannot reach, so the active size may be below the declared one.
+  const unsigned active_count = (unsigned)cached->size;
+  const GLsizei count = (GLsizei)(element_count < active_count ? element_count : active_count);
+  if (element_count > active_count) {
+    if (!cached->warned) {
+      cached->warned = true;
+      wlr_log(
+          WLR_INFO, "Effect shader '%s': uniform '%s' supplies %u elements, the program reads %d; binding %d",
+          shader->label, name, element_count, (int)cached->size, (int)cached->size
+      );
+    }
+  }
+  switch (type) {
+  case FX_UNIFORM_FLOAT:
+    glUniform1fv(cached->location, count, data);
+    break;
+  case FX_UNIFORM_VEC2:
+    glUniform2fv(cached->location, count, data);
+    break;
+  case FX_UNIFORM_VEC3:
+    glUniform3fv(cached->location, count, data);
+    break;
+  case FX_UNIFORM_VEC4:
+    glUniform4fv(cached->location, count, data);
+    break;
+  case FX_UNIFORM_INT:
+  case FX_UNIFORM_BOOL:
+    glUniform1iv(cached->location, count, data);
+    break;
+  }
+}
+
+void fx_effect_shader_bind_uniform(struct fx_effect_shader* shader, const struct fx_uniform* uniform) {
+  const bool integer = uniform->type == FX_UNIFORM_INT || uniform->type == FX_UNIFORM_BOOL;
+  fx_effect_shader_bind_uniform_data(
+      shader, uniform->name, uniform->type, uniform->count,
+      integer ? (const void*)uniform->ints : (const void*)uniform->floats,
+      integer ? sizeof(uniform->ints) : sizeof(uniform->floats)
+  );
+}
+
+// Uniform state persists on a program between draws. Optional inputs a caller
+// leaves out must not inherit the previous instance's values, so the ones the
+// preamble declares (and that fillTimeUniforms may omit) are reset first.
+static void reset_optional_uniforms(struct fx_effect_shader* shader) {
+  static const struct fx_uniform defaults[] = {
+      {.name = "canopy_palette_count", .type = FX_UNIFORM_INT, .count = 1},
+      {.name = "canopy_time", .type = FX_UNIFORM_FLOAT, .count = 1},
+  };
+  for (size_t i = 0; i < sizeof(defaults) / sizeof(defaults[0]); i++) {
+    fx_effect_shader_bind_uniform(shader, &defaults[i]);
+  }
+}
+
+void fx_effect_shader_bind_parameters(
+    struct fx_effect_shader* shader, const struct fx_animation_parameters* parameters
+) {
+  reset_optional_uniforms(shader);
+  for (unsigned i = 0; i < parameters->uniform_count && i < FX_UNIFORMS_MAX; i++) {
+    fx_effect_shader_bind_uniform(shader, &parameters->uniforms[i]);
+  }
+}
+
+struct fx_effect_shader* fx_effect_shader_create(
+    struct wlr_renderer* renderer, enum fx_effect_kind kind, const char* source, const char* label
+) {
+  if (source == NULL || !wlr_renderer_is_fx(renderer)) {
+    return NULL;
+  }
+  const char* section = NULL;
+  const char* extra = NULL;
+  const char* suffix = NULL;
+  kind_sections(kind, &section, &extra, &suffix);
+  struct fx_renderer* fx = fx_get_renderer(renderer);
+  struct wlr_egl_context previous;
+  if (!wlr_egl_make_current(fx->egl, &previous)) {
+    return NULL;
+  }
+  struct fx_effect_shader* shader = calloc(1, sizeof(*shader));
+  static const char line[] = "#line 1\n";
+  const size_t length =
+      sizeof(kPreamble) + strlen(section) + strlen(extra) + sizeof(line) + strlen(source) + strlen(suffix) + 1;
+  char* fragment = malloc(length);
+  if (shader == NULL || fragment == NULL) {
+    free(shader);
+    free(fragment);
+    wlr_egl_restore_context(&previous);
+    return NULL;
+  }
+  snprintf(fragment, length, "%s%s%s%s%s%s", kPreamble, section, extra, line, source, suffix);
+  wlr_log(WLR_INFO, "Compiling %s shader: %s", kind_name(kind), label);
+  shader->program = link_program(fragment);
+  free(fragment);
+  if (shader->program == 0) {
+    wlr_log(WLR_ERROR, "Animation effect '%s' [%s] rejected; using built-in animation", label, kind_name(kind));
+    free(shader);
+    wlr_egl_restore_context(&previous);
+    return NULL;
+  }
+  shader->renderer = fx;
+  snprintf(shader->label, sizeof(shader->label), "%s", label != NULL ? label : "");
+  shader->kind = kind;
+  shader->references = 1;
+  shader->destroy.notify = effect_renderer_destroy;
+  wl_signal_add(&renderer->events.destroy, &shader->destroy);
+  shader->proj = glGetUniformLocation(shader->program, "proj");
+  shader->tex_proj = glGetUniformLocation(shader->program, "tex_proj");
+  shader->position = glGetAttribLocation(shader->program, "pos");
+  shader->tex = glGetUniformLocation(shader->program, "canopy_texture");
+  shader->sample_matrix = glGetUniformLocation(shader->program, "canopy_sample_matrix");
+  shader->audio_tex = glGetUniformLocation(shader->program, "canopy_audio_bands");
+  shader->incoming_tex = glGetUniformLocation(shader->program, "canopy_incoming_texture");
+  shader->previous_tex = glGetUniformLocation(shader->program, "canopy_previous_texture");
+  shader->previous_sample_matrix = glGetUniformLocation(shader->program, "canopy_previous_sample_matrix");
+  shader->progress = glGetUniformLocation(shader->program, "canopy_progress");
+  shader->linear_progress = glGetUniformLocation(shader->program, "canopy_linear_progress");
+  shader->direction = glGetUniformLocation(shader->program, "canopy_direction");
+  shader->random_seed = glGetUniformLocation(shader->program, "canopy_random_seed");
+  shader->size = glGetUniformLocation(shader->program, "canopy_size");
+  shader->scale = glGetUniformLocation(shader->program, "canopy_scale");
+  shader->expand = glGetUniformLocation(shader->program, "canopy_expand");
+  cache_uniforms(shader, label);
+  wlr_egl_restore_context(&previous);
+  return shader;
+}

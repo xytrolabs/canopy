@@ -6,24 +6,24 @@
 # move shader is still composed into the snapshot.
 set -euo pipefail
 
-readonly FIRST_LOG="$UMBRIEL_RUNTIME_DIR/overview-close-first.log"
-readonly SECOND_LOG="$UMBRIEL_RUNTIME_DIR/overview-close-second.log"
-readonly MOVING="$UMBRIEL_RUNTIME_DIR/overview-close-moving.png"
-readonly DURING="$UMBRIEL_RUNTIME_DIR/overview-close-during.png"
-readonly OPENED="$UMBRIEL_RUNTIME_DIR/overview-close-opened.png"
-readonly AFTER="$UMBRIEL_RUNTIME_DIR/overview-close-after.png"
+readonly FIRST_LOG="$CANOPY_RUNTIME_DIR/overview-close-first.log"
+readonly SECOND_LOG="$CANOPY_RUNTIME_DIR/overview-close-second.log"
+readonly MOVING="$CANOPY_RUNTIME_DIR/overview-close-moving.png"
+readonly DURING="$CANOPY_RUNTIME_DIR/overview-close-during.png"
+readonly OPENED="$CANOPY_RUNTIME_DIR/overview-close-opened.png"
+readonly AFTER="$CANOPY_RUNTIME_DIR/overview-close-after.png"
 
-cat > "$UMBRIEL_RUNTIME_DIR/overview-move.glsl" <<'GLSL'
+cat > "$CANOPY_RUNTIME_DIR/overview-move.glsl" <<'GLSL'
 vec4 animation(vec2 uv) { return vec4(1.0, 0.0, 0.0, 1.0); }
 GLSL
-cat > "$UMBRIEL_RUNTIME_DIR/overview-close.glsl" <<'GLSL'
+cat > "$CANOPY_RUNTIME_DIR/overview-close.glsl" <<'GLSL'
 vec4 animation(vec2 uv) {
-    vec4 source = umbriel_sample(uv);
+    vec4 source = canopy_sample(uv);
     return source.b > 0.5 ? vec4(0.0, 1.0, 0.0, 1.0) : vec4(1.0, 0.0, 1.0, 1.0);
 }
 GLSL
 
-cat >> "$UMBRIEL_CONFIG" <<'EOF'
+cat >> "$CANOPY_CONFIG" <<'EOF'
 
 [layout]
 mode = "master"
@@ -70,16 +70,16 @@ enabled = false
 [overview]
 zoom = 0.5
 EOF
-"$UMBRIEL" msg config-reload > /dev/null
+"$CANOPY" msg config-reload > /dev/null
 
 color_pixels() {
   local image=$1 expression=$2
-  "$UMBRIEL_PIXEL_PROBE" "$image" count "$expression"
+  "$CANOPY_PIXEL_PROBE" "$image" count "$expression"
 }
 
-FILL_COLOR=0xFF0000FF "$UMBRIEL_UNMAP_CLIENT" overview-close-first 1200 700 > "$FIRST_LOG" 2>&1 &
+FILL_COLOR=0xFF0000FF "$CANOPY_UNMAP_CLIENT" overview-close-first 1200 700 > "$FIRST_LOG" 2>&1 &
 for _ in $(seq 80); do
-  first=$("$UMBRIEL" windows --json | jq -c '.[] | select(.title == "overview-close-first")')
+  first=$("$CANOPY" windows --json | jq -c '.[] | select(.title == "overview-close-first")')
   [[ -n $first ]] && break
   sleep 0.025
 done
@@ -88,28 +88,28 @@ if [[ -z ${first:-} ]]; then
   exit 1
 fi
 first_id=$(jq -r .id <<< "$first")
-"$UMBRIEL" settle
+"$CANOPY" settle
 
-"$UMBRIEL" msg overview-open > /dev/null
-"$UMBRIEL" settle
+"$CANOPY" msg overview-open > /dev/null
+"$CANOPY" settle
 
 # Animation time only moves by clock-advance from here: samples land 120 ms and 720 ms into the admission, and 120 ms
 # into the close. Advancing 1600 ms finishes every timeline, including the reflow each change starts.
-"$UMBRIEL" clock-freeze
+"$CANOPY" clock-freeze
 
 # Mapping the second tile starts a long windows_move transition on the established first tile and its overview card.
-FILL_COLOR=0xFF00FFFF "$UMBRIEL_UNMAP_CLIENT" overview-close-second 1200 700 > "$SECOND_LOG" 2>&1 &
+FILL_COLOR=0xFF00FFFF "$CANOPY_UNMAP_CLIENT" overview-close-second 1200 700 > "$SECOND_LOG" 2>&1 &
 for _ in $(seq 80); do
-  if [[ $("$UMBRIEL" windows --json | jq length) -eq 2 ]]; then
+  if [[ $("$CANOPY" windows --json | jq length) -eq 2 ]]; then
     break
   fi
   sleep 0.025
 done
-if [[ $("$UMBRIEL" windows --json | jq length) -ne 2 ]]; then
+if [[ $("$CANOPY" windows --json | jq length) -ne 2 ]]; then
   echo "second overview close client never mapped"
   exit 1
 fi
-"$UMBRIEL" clock-advance 120
+"$CANOPY" clock-advance 120
 grim "$MOVING"
 moving_red=$(color_pixels "$MOVING" 'r > 0.8 && g < 0.1 && b < 0.1')
 if ((moving_red < 4000)); then
@@ -126,7 +126,7 @@ if ((opening_dim < 4000)); then
 fi
 
 # windows_in ends 600 ms after the admission, while windows_move still runs until 1600 ms.
-"$UMBRIEL" clock-advance 600
+"$CANOPY" clock-advance 600
 grim "$OPENED"
 opened_cyan=$(color_pixels "$OPENED" 'g > 0.8 && b > 0.8 && r < 0.1')
 if ((opened_cyan < 4000)); then
@@ -138,10 +138,10 @@ if ((opened_red < 4000)); then
   echo "the overview opener's windows_in did not finish ahead of the neighbour reflow: red_pixels=$opened_red"
   exit 1
 fi
-"$UMBRIEL" clock-advance 1600
-"$UMBRIEL" settle
+"$CANOPY" clock-advance 1600
+"$CANOPY" settle
 
-"$UMBRIEL" msg window-close "$first_id" > /dev/null
+"$CANOPY" msg window-close "$first_id" > /dev/null
 for _ in $(seq 80); do
   grep -q '^unmapped$' "$FIRST_LOG" && break
   sleep 0.01
@@ -150,7 +150,7 @@ if ! grep -q '^unmapped$' "$FIRST_LOG"; then
   echo "overview close client never unmapped: $(cat "$FIRST_LOG")"
   exit 1
 fi
-"$UMBRIEL" clock-advance 120
+"$CANOPY" clock-advance 120
 grim "$DURING"
 during_green=$(color_pixels "$DURING" 'g > 0.8 && r < 0.1 && b < 0.1')
 during_magenta=$(color_pixels "$DURING" 'r > 0.8 && g < 0.1 && b > 0.8')
@@ -163,8 +163,8 @@ if ((during_magenta > 40)); then
   exit 1
 fi
 
-"$UMBRIEL" clock-advance 1600
-"$UMBRIEL" settle
+"$CANOPY" clock-advance 1600
+"$CANOPY" settle
 grim "$AFTER"
 after_green=$(color_pixels "$AFTER" 'g > 0.8 && r < 0.1 && b < 0.1')
 after_magenta=$(color_pixels "$AFTER" 'r > 0.8 && g < 0.1 && b > 0.8')

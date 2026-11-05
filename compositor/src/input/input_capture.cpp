@@ -16,14 +16,14 @@
 #include <memory>
 #include <string>
 #include <tuple>
-#include <umbriel-input-capture-v1-server-protocol.h>
+#include <canopy-input-capture-v1-server-protocol.h>
 #include <unistd.h>
 #include <unordered_map>
 #include <unordered_set>
 #include <utility>
 #include <vector>
 
-namespace umbriel {
+namespace canopy {
 
   namespace {
     constexpr Logger kLog("input-capture");
@@ -112,7 +112,7 @@ namespace umbriel {
       }
 
       void result(uint32_t request, bool success) const {
-        umbriel_input_capture_session_v1_send_result(resource, request, success ? kSuccess : kFailure);
+        canopy_input_capture_session_v1_send_result(resource, request, success ? kSuccess : kFailure);
       }
 
       bool usable() const { return approved && !closed && !owner.blocked(); }
@@ -155,10 +155,10 @@ namespace umbriel {
           if (owner.cancelled) {
             owner.cancelled(id);
           }
-          umbriel_input_capture_session_v1_send_started(resource, startRequest, kFailure, 0);
+          canopy_input_capture_session_v1_send_started(resource, startRequest, kFailure, 0);
         }
         destroyClient();
-        umbriel_input_capture_session_v1_send_closed(resource);
+        canopy_input_capture_session_v1_send_closed(resource);
       }
 
       void sendModifiers(KeyboardDevice& keyboard) const {
@@ -195,7 +195,7 @@ namespace umbriel {
           return;
         }
         eis_device_configure_type(device->handle, EIS_DEVICE_TYPE_VIRTUAL);
-        eis_device_configure_name(device->handle, "Umbriel captured keyboard");
+        eis_device_configure_name(device->handle, "Canopy captured keyboard");
         eis_device_configure_capability(device->handle, EIS_DEVICE_CAP_KEYBOARD);
         eis_keymap* keymap =
             eis_device_new_keymap(device->handle, EIS_KEYMAP_TYPE_XKB, keyboard->keymap_fd, keyboard->keymap_size);
@@ -223,7 +223,7 @@ namespace umbriel {
           return;
         }
         eis_device_configure_type(device, EIS_DEVICE_TYPE_VIRTUAL);
-        eis_device_configure_name(device, "Umbriel captured pointer");
+        eis_device_configure_name(device, "Canopy captured pointer");
         eis_device_configure_capability(device, EIS_DEVICE_CAP_POINTER);
         if (buttonsBound) {
           eis_device_configure_capability(device, EIS_DEVICE_CAP_BUTTON);
@@ -285,7 +285,7 @@ namespace umbriel {
         if (owner.changed) {
           owner.changed(true);
         }
-        umbriel_input_capture_session_v1_send_activated(
+        canopy_input_capture_session_v1_send_activated(
             resource, activation, protocolPosition(x), protocolPosition(y), barrier
         );
         if (pointer != nullptr) {
@@ -328,7 +328,7 @@ namespace umbriel {
           owner.changed(false);
         }
         if (signal) {
-          umbriel_input_capture_session_v1_send_deactivated(resource, activation);
+          canopy_input_capture_session_v1_send_deactivated(resource, activation);
         }
       }
 
@@ -336,7 +336,7 @@ namespace umbriel {
         deactivate(signal);
         const bool wasEnabled = std::exchange(enabled, false);
         if (signal && wasEnabled) {
-          umbriel_input_capture_session_v1_send_disabled(resource);
+          canopy_input_capture_session_v1_send_disabled(resource);
         }
       }
 
@@ -356,7 +356,7 @@ namespace umbriel {
           client = eis_client_ref(candidate);
           eis_client_set_user_data(client, this);
           eis_client_connect(client);
-          seat = eis_client_new_seat(client, "Umbriel capture");
+          seat = eis_client_new_seat(client, "Canopy capture");
           if (seat == nullptr) {
             close();
             return;
@@ -445,7 +445,7 @@ namespace umbriel {
           return false;
         }
         fdIssued = true;
-        umbriel_input_capture_session_v1_send_eis_fd(resource, request, fd);
+        canopy_input_capture_session_v1_send_eis_fd(resource, request, fd);
         ::close(fd);
         result(request, true);
         return true;
@@ -459,7 +459,7 @@ namespace umbriel {
             || label == nullptr
             || std::char_traits<char>::length(label) > 256
             || (requested & 3U) == 0) {
-          umbriel_input_capture_session_v1_send_started(resource, request, kFailure, 0);
+          canopy_input_capture_session_v1_send_started(resource, request, kFailure, 0);
           return;
         }
         startAttempted = true;
@@ -494,9 +494,9 @@ namespace umbriel {
         approved = true;
         grantId = grant.id;
         if (grant.persistMode != 0 && wl_resource_get_version(resource) >= 2) {
-          umbriel_input_capture_session_v1_send_grant(resource, startRequest, grant.persistMode, grant.token.c_str());
+          canopy_input_capture_session_v1_send_grant(resource, startRequest, grant.persistMode, grant.token.c_str());
         }
-        umbriel_input_capture_session_v1_send_started(resource, startRequest, kSuccess, capabilities);
+        canopy_input_capture_session_v1_send_started(resource, startRequest, kSuccess, capabilities);
       }
 
       void commitBarriers(uint32_t request, uint32_t generation) {
@@ -506,14 +506,14 @@ namespace umbriel {
         for (const InputCaptureBarrier& barrier : pendingBarriers) {
           const bool duplicate = std::ranges::count(pendingBarriers, barrier.id, &InputCaptureBarrier::id) != 1;
           if (!current || duplicate || !validInputCaptureBarrier(owner.zones, barrier)) {
-            umbriel_input_capture_session_v1_send_barrier_failed(resource, request, barrier.id);
+            canopy_input_capture_session_v1_send_barrier_failed(resource, request, barrier.id);
           } else {
             barriers.push_back(barrier);
           }
         }
         pendingBarriers.clear();
         overflow = false;
-        umbriel_input_capture_session_v1_send_barriers_done(resource, request, current ? kSuccess : kFailure);
+        canopy_input_capture_session_v1_send_barriers_done(resource, request, current ? kSuccess : kFailure);
       }
     };
 
@@ -627,11 +627,11 @@ namespace umbriel {
 
     void initialize() {
       global = wl_global_create(
-          server.display(), &umbriel_input_capture_manager_v1_interface, 2, this,
+          server.display(), &canopy_input_capture_manager_v1_interface, 2, this,
           [](wl_client* client, void* data, uint32_t version, uint32_t id) {
             auto* self = static_cast<Impl*>(data);
             wl_resource* resource =
-                wl_resource_create(client, &umbriel_input_capture_manager_v1_interface, version, id);
+                wl_resource_create(client, &canopy_input_capture_manager_v1_interface, version, id);
             if (resource == nullptr) {
               wl_client_post_no_memory(client);
               return;
@@ -658,7 +658,7 @@ namespace umbriel {
       }
       auto session = std::make_unique<Session>(*self);
       session->resource =
-          wl_resource_create(client, &umbriel_input_capture_session_v1_interface, wl_resource_get_version(manager), id);
+          wl_resource_create(client, &canopy_input_capture_session_v1_interface, wl_resource_get_version(manager), id);
       if (session->resource == nullptr) {
         wl_client_post_no_memory(client);
         return;
@@ -675,11 +675,11 @@ namespace umbriel {
       return *static_cast<Session*>(wl_resource_get_user_data(resource));
     }
 
-    static const struct umbriel_input_capture_manager_v1_interface kManager;
-    static const struct umbriel_input_capture_session_v1_interface kSession;
+    static const struct canopy_input_capture_manager_v1_interface kManager;
+    static const struct canopy_input_capture_session_v1_interface kSession;
   };
 
-  const struct umbriel_input_capture_manager_v1_interface InputCapture::Impl::kManager{
+  const struct canopy_input_capture_manager_v1_interface InputCapture::Impl::kManager{
       .destroy = destroy,
       .create_session = createSession,
       .expire_scope = [](wl_client* client, wl_resource* resource, const char* scope) {
@@ -690,7 +690,7 @@ namespace umbriel {
       },
   };
 
-  const struct umbriel_input_capture_session_v1_interface InputCapture::Impl::kSession{
+  const struct canopy_input_capture_session_v1_interface InputCapture::Impl::kSession{
       .destroy = destroy,
       .start = [](wl_client*, wl_resource* resource, uint32_t request, const char* label,
                   uint32_t capabilities) { session(resource).start(request, label, capabilities); },
@@ -699,11 +699,11 @@ namespace umbriel {
             auto& state = session(resource);
             if (state.usable()) {
               for (const auto& zone : state.owner.zones) {
-                umbriel_input_capture_session_v1_send_zone(resource, request, zone.width, zone.height, zone.x, zone.y);
+                canopy_input_capture_session_v1_send_zone(resource, request, zone.width, zone.height, zone.x, zone.y);
               }
               state.lastZoneSet = state.owner.zoneSet;
             }
-            umbriel_input_capture_session_v1_send_zones_done(
+            canopy_input_capture_session_v1_send_zones_done(
                 resource, request, state.usable() ? kSuccess : kFailure, state.owner.zoneSet
             );
           },
@@ -826,11 +826,11 @@ namespace umbriel {
         }
         kLog.error("unable to save input capture permission; capture was not started");
       }
-      umbriel_input_capture_session_v1_send_started(state.resource, state.startRequest, kFailure, 0);
+      canopy_input_capture_session_v1_send_started(state.resource, state.startRequest, kFailure, 0);
       return;
     }
     state.approved = false;
-    umbriel_input_capture_session_v1_send_started(
+    canopy_input_capture_session_v1_send_started(
         state.resource, state.startRequest, state.approved ? kSuccess : kCancelled,
         state.approved ? state.capabilities : 0
     );
@@ -933,7 +933,7 @@ namespace umbriel {
       state->clearPointer();
       state->createPointer();
       if (state->approved && !state->closed) {
-        umbriel_input_capture_session_v1_send_zones_changed(state->resource, invalidated);
+        canopy_input_capture_session_v1_send_zones_changed(state->resource, invalidated);
       }
     }
   }
@@ -946,7 +946,7 @@ namespace umbriel {
         if (m_impl->cancelled) {
           m_impl->cancelled(state->id);
         }
-        umbriel_input_capture_session_v1_send_started(state->resource, state->startRequest, kCancelled, 0);
+        canopy_input_capture_session_v1_send_started(state->resource, state->startRequest, kCancelled, 0);
       }
     }
   }
@@ -1127,4 +1127,4 @@ namespace umbriel {
     return true;
   }
 
-} // namespace umbriel
+} // namespace canopy

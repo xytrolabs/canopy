@@ -3,18 +3,18 @@
 # fills the column by default and the usable-area edges when configured, while an unmaximize
 # request exits whichever mode is active instead of following the configured policy.
 set -euo pipefail
-source "$UMBRIEL_HARNESS_LIB"
+source "$CANOPY_HARNESS_LIB"
 
-readonly CLIENT="${UMBRIEL_UNMAP_CLIENT:-./build-debug/tests/unmap-client}"
-readonly COLUMN_LOG="$UMBRIEL_RUNTIME_DIR/client-maximize-column.log"
-readonly RESTORED_LOG="$UMBRIEL_RUNTIME_DIR/client-maximize-restored.log"
-readonly FIRST_LOG="$UMBRIEL_RUNTIME_DIR/client-maximize-restored-first.log"
-readonly RULED_FIRST_LOG="$UMBRIEL_RUNTIME_DIR/client-maximize-ruled-first.log"
-readonly RULED_AFTER_LOG="$UMBRIEL_RUNTIME_DIR/client-maximize-ruled-after.log"
-readonly OVERRIDE_LOG="$UMBRIEL_RUNTIME_DIR/client-maximize-override.log"
+readonly CLIENT="${CANOPY_UNMAP_CLIENT:-./build-debug/tests/unmap-client}"
+readonly COLUMN_LOG="$CANOPY_RUNTIME_DIR/client-maximize-column.log"
+readonly RESTORED_LOG="$CANOPY_RUNTIME_DIR/client-maximize-restored.log"
+readonly FIRST_LOG="$CANOPY_RUNTIME_DIR/client-maximize-restored-first.log"
+readonly RULED_FIRST_LOG="$CANOPY_RUNTIME_DIR/client-maximize-ruled-first.log"
+readonly RULED_AFTER_LOG="$CANOPY_RUNTIME_DIR/client-maximize-ruled-after.log"
+readonly OVERRIDE_LOG="$CANOPY_RUNTIME_DIR/client-maximize-override.log"
 
 field_of() {
-  "$UMBRIEL" windows --json | jq -r --arg title "$1" --arg field "$2" '.[] | select(.title == $title) | .[$field]'
+  "$CANOPY" windows --json | jq -r --arg title "$1" --arg field "$2" '.[] | select(.title == $title) | .[$field]'
 }
 
 wait_for_field() {
@@ -60,14 +60,14 @@ stop_client() {
   wait "$CLIENT_PID" 2>/dev/null || true
 }
 
-readonly CONTROL_FIFO="$UMBRIEL_RUNTIME_DIR/client-maximize-control"
+readonly CONTROL_FIFO="$CANOPY_RUNTIME_DIR/client-maximize-control"
 mkfifo "$CONTROL_FIFO"
 exec {control_fd}<>"$CONTROL_FIFO"
 
 # honor_restored_maximize accepts a client's opening maximize re-assert (restored-session clients);
 # the scrolling extent keeps the tile width distinct from both maximized widths. The key lands in
 # the boot config's [general], the file's last table.
-cat >> "$UMBRIEL_CONFIG" <<'EOF'
+cat >> "$CANOPY_CONFIG" <<'EOF'
 honor_restored_maximize = true
 
 [animation]
@@ -87,7 +87,7 @@ match.title = "^client-maximize-ruled-"
 default_maximize = true
 
 EOF
-"$UMBRIEL" msg config-reload > /dev/null
+"$CANOPY" msg config-reload > /dev/null
 
 # Policy off: the client's maximize fills the column (1264x704 usable), not the edges.
 request_maximize client-maximize-column "$COLUMN_LOG"
@@ -98,19 +98,19 @@ wait_for_field client-maximize-column y 8
 
 # Policy enabled under the still column-maximized client: the unmaximize request must restore the
 # tile instead of routing into the edges mode's no-op exit.
-cat >> "$UMBRIEL_CONFIG" <<'EOF'
+cat >> "$CANOPY_CONFIG" <<'EOF'
 
 [layout]
 client_maximize = "edges"
 EOF
-"$UMBRIEL" msg config-reload > /dev/null
+"$CANOPY" msg config-reload > /dev/null
 
 send_command M "$COLUMN_LOG" 'unmaximize-requested$'
 wait_for_field client-maximize-column w 628
 wait_for_field client-maximize-column h 704
 
 # A compositor-driven column maximize is undone by the client's unmaximize request too.
-"$UMBRIEL" msg window-toggle-maximize > /dev/null
+"$CANOPY" msg window-toggle-maximize > /dev/null
 wait_for_field client-maximize-column w 1264
 send_command M "$COLUMN_LOG" 'unmaximize-requested$'
 wait_for_field client-maximize-column w 628
@@ -128,9 +128,9 @@ wait_for_field client-maximize-column w 628
 
 # Column-maximize underneath the edges stacks both states; the unmaximize leaves the edges first
 # and the full-width column on the next request.
-"$UMBRIEL" msg window-toggle-maximize > /dev/null
+"$CANOPY" msg window-toggle-maximize > /dev/null
 wait_for_field client-maximize-column w 1264
-"$UMBRIEL" msg window-toggle-maximize-to-edges > /dev/null
+"$CANOPY" msg window-toggle-maximize-to-edges > /dev/null
 wait_for_field client-maximize-column w 1280
 send_command M "$COLUMN_LOG" 'unmaximize-requested$'
 wait_for_field client-maximize-column w 1264
@@ -193,13 +193,13 @@ wait_for_field client-maximize-ruled-after w 628
 stop_client
 
 # A workspace override sets "column" for that workspace: the client's maximize fills the column again.
-cat >> "$UMBRIEL_CONFIG" <<'EOF'
+cat >> "$CANOPY_CONFIG" <<'EOF'
 
 [[workspace]]
 index = 1
 layout.client_maximize = "column"
 EOF
-"$UMBRIEL" msg config-reload > /dev/null
+"$CANOPY" msg config-reload > /dev/null
 request_maximize client-maximize-override "$OVERRIDE_LOG"
 wait_for_field client-maximize-override w 1264
 wait_for_field client-maximize-override h 704

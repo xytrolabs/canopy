@@ -3,10 +3,10 @@
 # output-management transactions and power cycles, while settled changes are pushed to subscribers and logged.
 set -euo pipefail
 
-readonly CLIENT="${UMBRIEL_SUBSURFACE_CLIENT:-./build-debug/tests/subsurface-client}"
-readonly OUTPUT_MANAGEMENT="${UMBRIEL_OUTPUT_MANAGEMENT_CLIENT:-./build-debug/tests/output-management-client}"
-readonly CLIENT_LOG="$UMBRIEL_RUNTIME_DIR/direct-scanout-client.log"
-readonly EVENTS="$UMBRIEL_RUNTIME_DIR/direct-scanout-events.jsonl"
+readonly CLIENT="${CANOPY_SUBSURFACE_CLIENT:-./build-debug/tests/subsurface-client}"
+readonly OUTPUT_MANAGEMENT="${CANOPY_OUTPUT_MANAGEMENT_CLIENT:-./build-debug/tests/output-management-client}"
+readonly CLIENT_LOG="$CANOPY_RUNTIME_DIR/direct-scanout-client.log"
+readonly EVENTS="$CANOPY_RUNTIME_DIR/direct-scanout-events.jsonl"
 
 if [[ ! -x $CLIENT ]]; then
   echo "subsurface client not built at $CLIENT"
@@ -17,17 +17,17 @@ if [[ ! -x $OUTPUT_MANAGEMENT ]]; then
   exit 1
 fi
 
-cat >> "$UMBRIEL_CONFIG" <<'EOF'
+cat >> "$CANOPY_CONFIG" <<'EOF'
 
 [animation]
 duration_ms = 1
 curve = "linear"
 EOF
-"$UMBRIEL" msg config-reload > /dev/null
-"$UMBRIEL" subscribe outputs > "$EVENTS" &
+"$CANOPY" msg config-reload > /dev/null
+"$CANOPY" subscribe outputs > "$EVENTS" &
 
 scanout() {
-  "$UMBRIEL" outputs --json | jq -c '.[] | select(.name == "HEADLESS-1") | .direct_scanout'
+  "$CANOPY" outputs --json | jq -c '.[] | select(.name == "HEADLESS-1") | .direct_scanout'
 }
 
 await_query() {
@@ -76,7 +76,7 @@ if ! grep -q '^mapped$' "$CLIENT_LOG"; then
   echo "fullscreen client never mapped: $(cat "$CLIENT_LOG")"
   exit 1
 fi
-window_id=$("$UMBRIEL" windows --json | jq -r '.[] | select(.title == "direct-scanout") | .id')
+window_id=$("$CANOPY" windows --json | jq -r '.[] | select(.title == "direct-scanout") | .id')
 
 await_query ".active and .reason == null and .window.id == \"$window_id\"
     and .commits > $(jq '.commits' <<< "$initial") and .scanout_commits > 0" \
@@ -96,22 +96,22 @@ if ! jq -en --argjson current "$current" --argjson pushed "$pushed" '
   echo "the query and subscription disagree on scanout state or counter ordering: $current versus $pushed"
   exit 1
 fi
-if ! "$UMBRIEL" outputs | grep -q '^  Direct scanout: active (.* "direct-scanout")$'; then
-  echo "the outputs listing does not show the scanned-out window: $("$UMBRIEL" outputs)"
+if ! "$CANOPY" outputs | grep -q '^  Direct scanout: active (.* "direct-scanout")$'; then
+  echo "the outputs listing does not show the scanned-out window: $("$CANOPY" outputs)"
   exit 1
 fi
 
 before_disabled=$(scanout)
-printf '\n[output.HEADLESS-1]\ndirect_scanout = false\n' >> "$UMBRIEL_CONFIG"
-"$UMBRIEL" msg config-reload > /dev/null
+printf '\n[output.HEADLESS-1]\ndirect_scanout = false\n' >> "$CANOPY_CONFIG"
+"$CANOPY" msg config-reload > /dev/null
 await_query ".active == false and .reason == \"disabled\" and .window == null
     and .commits > $(jq '.commits' <<< "$before_disabled")
     and .scanout_commits == $(jq '.scanout_commits' <<< "$before_disabled")" \
   "composition did not retain scanout history while advancing the scene counter"
 await_scanout '.active == false and .reason == "disabled" and .window == null' \
   "turning direct scanout off for the output did not report it disabled"
-if ! "$UMBRIEL" outputs | grep -q '^  Direct scanout: inactive (disabled)$'; then
-  echo "the outputs listing does not show scanout disabled: $("$UMBRIEL" outputs)"
+if ! "$CANOPY" outputs | grep -q '^  Direct scanout: inactive (disabled)$'; then
+  echo "the outputs listing does not show scanout disabled: $("$CANOPY" outputs)"
   exit 1
 fi
 
@@ -128,12 +128,12 @@ fi
 # This precedes the output-management transaction below: the wlroots multi backend applies a grouped commit twice,
 # and the unrecorded second sequence number would surface here as an extra bufferless commit.
 before_power=$(scanout)
-"$UMBRIEL" msg dpms-off HEADLESS-1 > /dev/null
+"$CANOPY" msg dpms-off HEADLESS-1 > /dev/null
 if [[ $(scanout) != null ]]; then
   echo "a powered-off output still reports a live scanout state"
   exit 1
 fi
-"$UMBRIEL" msg dpms-on HEADLESS-1 > /dev/null
+"$CANOPY" msg dpms-on HEADLESS-1 > /dev/null
 after_power=$(scanout)
 if ! jq -en --argjson before "$before_power" --argjson after "$after_power" '
     ($after.active | not) and $after.reason == "disabled" and $after.commits > $before.commits
@@ -144,7 +144,7 @@ if ! jq -en --argjson before "$before_power" --argjson after "$after_power" '
 fi
 
 # Applying an unchanged enabled head still commits a scene through the grouped backend path, and that buffer counts.
-"$UMBRIEL" settle > /dev/null
+"$CANOPY" settle > /dev/null
 before_apply=$(scanout)
 "$OUTPUT_MANAGEMENT" apply enable HEADLESS-1 > /dev/null
 after_apply=$(scanout)
@@ -157,19 +157,19 @@ fi
 
 # Other output events can publish the immediate state before the log's settling timer expires.
 for _ in $(seq 60); do
-  grep -q "output 'HEADLESS-1': direct scanout off (disabled)" "$UMBRIEL_LOG" && break
+  grep -q "output 'HEADLESS-1': direct scanout off (disabled)" "$CANOPY_LOG" && break
   sleep 0.1
 done
-if ! grep -q "output 'HEADLESS-1': direct scanout on (.* \"direct-scanout\")" "$UMBRIEL_LOG"; then
+if ! grep -q "output 'HEADLESS-1': direct scanout on (.* \"direct-scanout\")" "$CANOPY_LOG"; then
   echo "scanout starting was not logged"
   exit 1
 fi
-if ! grep -q "output 'HEADLESS-1': direct scanout off (disabled)" "$UMBRIEL_LOG"; then
+if ! grep -q "output 'HEADLESS-1': direct scanout off (disabled)" "$CANOPY_LOG"; then
   echo "scanout stopping was not logged"
   exit 1
 fi
 # Each lasting change is logged once.
-if (($(grep -c "output 'HEADLESS-1': direct scanout o" "$UMBRIEL_LOG") != 2)); then
-  echo "expected two direct scanout log lines: $(grep "direct scanout" "$UMBRIEL_LOG")"
+if (($(grep -c "output 'HEADLESS-1': direct scanout o" "$CANOPY_LOG") != 2)); then
+  echo "expected two direct scanout log lines: $(grep "direct scanout" "$CANOPY_LOG")"
   exit 1
 fi

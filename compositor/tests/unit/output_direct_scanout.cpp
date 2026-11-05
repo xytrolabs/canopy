@@ -4,9 +4,9 @@
 #include <cstdint>
 #include <limits>
 
-using umbriel::DirectScanoutState;
-using umbriel::DirectScanoutTracker;
-using Observation = umbriel::DirectScanoutTracker::Observation;
+using canopy::DirectScanoutState;
+using canopy::DirectScanoutTracker;
+using Observation = canopy::DirectScanoutTracker::Observation;
 
 namespace {
   DirectScanoutState scannedOut(const char* windowId) {
@@ -25,7 +25,7 @@ namespace {
   }
 } // namespace
 
-UMBRIEL_TEST(startsInactiveWithoutACandidate) {
+CANOPY_TEST(startsInactiveWithoutACandidate) {
   const DirectScanoutTracker tracker;
   CHECK_EQ(tracker.current(), tracker.settled());
   CHECK(!tracker.settled().active);
@@ -35,7 +35,7 @@ UMBRIEL_TEST(startsInactiveWithoutACandidate) {
   CHECK_EQ(tracker.commitSeq(), uint32_t{0});
 }
 
-UMBRIEL_TEST(aNewStateStartsTheWaitOnce) {
+CANOPY_TEST(aNewStateStartsTheWaitOnce) {
   DirectScanoutTracker tracker;
   CHECK_EQ(tracker.recordCommit(scannedOut("a"), 17), Observation::Pending);
   // Every later frame in the same state leaves the running wait alone, so it can expire.
@@ -43,7 +43,7 @@ UMBRIEL_TEST(aNewStateStartsTheWaitOnce) {
   CHECK(!tracker.settled().active);
 }
 
-UMBRIEL_TEST(aCommitUpdatesQueriesBeforeTheStateSettles) {
+CANOPY_TEST(aCommitUpdatesQueriesBeforeTheStateSettles) {
   DirectScanoutTracker tracker;
   tracker.recordCommit(composited("composited"), 11);
   tracker.settle();
@@ -62,7 +62,7 @@ UMBRIEL_TEST(aCommitUpdatesQueriesBeforeTheStateSettles) {
   CHECK_EQ(tracker.commitSeq(), uint32_t{13});
 }
 
-UMBRIEL_TEST(aBriefScanoutLeavesEvidenceWithoutASettledChange) {
+CANOPY_TEST(aBriefScanoutLeavesEvidenceWithoutASettledChange) {
   DirectScanoutTracker tracker;
   tracker.recordCommit(composited("composited"), 4);
   tracker.settle();
@@ -79,7 +79,7 @@ UMBRIEL_TEST(aBriefScanoutLeavesEvidenceWithoutASettledChange) {
   CHECK_EQ(tracker.commitSeq(), uint32_t{6});
 }
 
-UMBRIEL_TEST(unchangedCommitsAdvanceCountersWithoutRestartingTheWait) {
+CANOPY_TEST(unchangedCommitsAdvanceCountersWithoutRestartingTheWait) {
   DirectScanoutTracker tracker;
   CHECK_EQ(tracker.recordCommit(scannedOut("a"), 20), Observation::Pending);
   CHECK_EQ(tracker.commits(), uint64_t{1});
@@ -98,7 +98,7 @@ UMBRIEL_TEST(unchangedCommitsAdvanceCountersWithoutRestartingTheWait) {
   CHECK_EQ(tracker.scanoutCommits(), uint64_t{2});
 }
 
-UMBRIEL_TEST(outputCommitSequenceCanWrapWithoutResettingCounters) {
+CANOPY_TEST(outputCommitSequenceCanWrapWithoutResettingCounters) {
   DirectScanoutTracker tracker;
   tracker.recordCommit(scannedOut("a"), std::numeric_limits<uint32_t>::max());
   CHECK_EQ(tracker.commitSeq(), std::numeric_limits<uint32_t>::max());
@@ -110,7 +110,7 @@ UMBRIEL_TEST(outputCommitSequenceCanWrapWithoutResettingCounters) {
   CHECK(!tracker.current().active);
 }
 
-UMBRIEL_TEST(settlingAdoptsTheObservedState) {
+CANOPY_TEST(settlingAdoptsTheObservedState) {
   DirectScanoutTracker tracker;
   tracker.recordCommit(scannedOut("a"), 1);
   CHECK(tracker.settle());
@@ -121,7 +121,7 @@ UMBRIEL_TEST(settlingAdoptsTheObservedState) {
   CHECK(!tracker.settle());
 }
 
-UMBRIEL_TEST(flickerBackToTheSettledStateDropsTheWait) {
+CANOPY_TEST(flickerBackToTheSettledStateDropsTheWait) {
   DirectScanoutTracker tracker;
   tracker.recordCommit(scannedOut("a"), 1);
   tracker.settle();
@@ -132,7 +132,7 @@ UMBRIEL_TEST(flickerBackToTheSettledStateDropsTheWait) {
   CHECK(tracker.settled().active);
 }
 
-UMBRIEL_TEST(switchingReasonsWhileCompositingIsNotNotable) {
+CANOPY_TEST(switchingReasonsWhileCompositingIsNotNotable) {
   DirectScanoutTracker tracker;
   tracker.recordCommit(composited("composited"), 1);
   CHECK(tracker.settle());
@@ -143,7 +143,7 @@ UMBRIEL_TEST(switchingReasonsWhileCompositingIsNotNotable) {
   CHECK_EQ(tracker.settled().reason, std::string("effects"));
 }
 
-UMBRIEL_TEST(stoppingAndMovingWindowsAreNotable) {
+CANOPY_TEST(stoppingAndMovingWindowsAreNotable) {
   DirectScanoutTracker tracker;
   tracker.recordCommit(scannedOut("a"), 1);
   tracker.settle();

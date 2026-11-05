@@ -4,13 +4,13 @@
 # usable area), and each change to it is pushed to subscribers.
 set -euo pipefail
 
-readonly LAYER_CLIENT="${UMBRIEL_LAYER_CLIENT:-./build-debug/tests/layer-client}"
-readonly EVENTS="$UMBRIEL_RUNTIME_DIR/output-ipc-events.jsonl"
+readonly LAYER_CLIENT="${CANOPY_LAYER_CLIENT:-./build-debug/tests/layer-client}"
+readonly EVENTS="$CANOPY_RUNTIME_DIR/output-ipc-events.jsonl"
 
-printf '\n[output.HEADLESS-1]\nworkspaces = 2\n' >> "$UMBRIEL_CONFIG"
-"$UMBRIEL" msg config-reload > /dev/null
-"$UMBRIEL" settle > /dev/null
-"$UMBRIEL" subscribe outputs > "$EVENTS" &
+printf '\n[output.HEADLESS-1]\nworkspaces = 2\n' >> "$CANOPY_CONFIG"
+"$CANOPY" msg config-reload > /dev/null
+"$CANOPY" settle > /dev/null
+"$CANOPY" subscribe outputs > "$EVENTS" &
 
 # Waits until the newest pushed outputs event satisfies a jq predicate on its data.
 await_outputs() {
@@ -27,11 +27,11 @@ await_outputs() {
 }
 
 action() {
-  "$UMBRIEL" msg "$@" > /dev/null
+  "$CANOPY" msg "$@" > /dev/null
 }
 
 active_workspace() {
-  "$UMBRIEL" workspaces --json | jq -r --arg output "$1" '.[] | select(.output == $output and .active) | .id'
+  "$CANOPY" workspaces --json | jq -r --arg output "$1" '.[] | select(.output == $output and .active) | .id'
 }
 
 first_workspace=$(active_workspace HEADLESS-1)
@@ -44,13 +44,13 @@ await_outputs "
 " "the initial outputs lack focus, power, workspace, or area state"
 
 # The listing answers the query with the same payload the stream carries.
-if ! diff <("$UMBRIEL" outputs --json | jq -S .) \
+if ! diff <("$CANOPY" outputs --json | jq -S .) \
   <(jq -s -S '[.[] | select(.event == "outputs")] | last | .data' "$EVENTS") > /dev/null; then
-  echo "outputs --json differs from the pushed snapshot: $("$UMBRIEL" outputs --json)"
+  echo "outputs --json differs from the pushed snapshot: $("$CANOPY" outputs --json)"
   exit 1
 fi
 
-focused=$("$UMBRIEL" outputs --json | jq -r '.[] | select(.focused) | .name')
+focused=$("$CANOPY" outputs --json | jq -r '.[] | select(.focused) | .name')
 action output-focus-next
 await_outputs "[.[] | select(.focused) | .name] == [(.[] | select(.name != \"$focused\") | .name)]" \
   "focusing the next output"
@@ -65,7 +65,7 @@ await_outputs ".[] | select(.name == \"HEADLESS-1\") | .active_workspace == \"$s
   "switching workspaces"
 
 # An exclusive panel shrinks the usable area.
-"$LAYER_CLIENT" HEADLESS-1 40 > "$UMBRIEL_RUNTIME_DIR/output-ipc-panel.log" 2>&1 &
+"$LAYER_CLIENT" HEADLESS-1 40 > "$CANOPY_RUNTIME_DIR/output-ipc-panel.log" 2>&1 &
 await_outputs '
   .[] | select(.name == "HEADLESS-1")
     | .usable_area.y == .position.y + 40 and .usable_area.height == .logical_size.height - 40
@@ -85,12 +85,12 @@ action output-enable HEADLESS-2
 await_outputs '.[] | select(.name == "HEADLESS-2") | .enabled and .logical_size.width > 0' "enabling an output"
 
 # A virtual output appears with its custom mode as the current one, and leaves when destroyed.
-"$UMBRIEL" output-create ipc-virtual 800x600@30 > /dev/null
+"$CANOPY" output-create ipc-virtual 800x600@30 > /dev/null
 await_outputs '
   .[] | select(.name == "ipc-virtual")
     | [.modes[] | select(.current) | [.width, .height, .refresh_mhz]] == [[800, 600, 30000]]
 ' "the virtual output did not appear with its mode"
-"$UMBRIEL" output-destroy ipc-virtual > /dev/null
+"$CANOPY" output-destroy ipc-virtual > /dev/null
 await_outputs 'all(.[]; .name != "ipc-virtual")' "the destroyed virtual output stayed listed"
 
 echo "output focus, power, workspace, area, and inventory are listed and pushed to subscribers"

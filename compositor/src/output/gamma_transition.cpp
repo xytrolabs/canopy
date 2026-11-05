@@ -2,7 +2,7 @@
 
 #include <cmath>
 
-namespace umbriel {
+namespace canopy {
 
   std::array<float, 3> hdrWhitePointFromGamma(const uint16_t* table, size_t rampSize) {
     std::array<float, 3> whitePoint{1.0F, 1.0F, 1.0F};
@@ -40,4 +40,4 @@ namespace umbriel {
     return false;
   }
 
-} // namespace umbriel
+} // namespace canopy

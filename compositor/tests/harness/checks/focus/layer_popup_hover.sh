@@ -3,15 +3,15 @@
 # A grabbing layer popup retains keyboard focus when follows_mouse crosses a window or another output. An outside
 # click still dismisses it, after which ordinary hover focus resumes.
 set -euo pipefail
-source "$UMBRIEL_HARNESS_LIB"
+source "$CANOPY_HARNESS_LIB"
 
 readonly OUTPUT_W=2560
 readonly OUTPUT_H=720
 readonly LEFT_BUTTON=272
 readonly SPACE=57
-readonly WINDOW_LOG="$UMBRIEL_RUNTIME_DIR/layer-popup-hover-window.log"
-readonly OTHER_LOG="$UMBRIEL_RUNTIME_DIR/layer-popup-hover-other.log"
-readonly PANEL_LOG="$UMBRIEL_RUNTIME_DIR/layer-popup-hover-panel.log"
+readonly WINDOW_LOG="$CANOPY_RUNTIME_DIR/layer-popup-hover-window.log"
+readonly OTHER_LOG="$CANOPY_RUNTIME_DIR/layer-popup-hover-other.log"
+readonly PANEL_LOG="$CANOPY_RUNTIME_DIR/layer-popup-hover-panel.log"
 
 refuse_events() {
   local file=$1 event=$2 limit=$3 label=$4
@@ -33,7 +33,7 @@ assert_popup_keeps_keyboard() {
   refuse_events "$OTHER_LOG" keyboard-enter "$other_enters" "the second-output window"
 }
 
-cat >> "$UMBRIEL_CONFIG" <<'CONFIG'
+cat >> "$CANOPY_CONFIG" <<'CONFIG'
 
 [animation]
 enabled = false
@@ -60,19 +60,19 @@ default_output = "HEADLESS-1"
 match.title = "^layer-popup-hover-other$"
 default_output = "HEADLESS-2"
 CONFIG
-"$UMBRIEL" msg config-reload > /dev/null
+"$CANOPY" msg config-reload > /dev/null
 
-"$UMBRIEL_SEAT_LOG_CLIENT" layer-popup-hover-window > "$WINDOW_LOG" 2>&1 &
+"$CANOPY_SEAT_LOG_CLIENT" layer-popup-hover-window > "$WINDOW_LOG" 2>&1 &
 await_events "$WINDOW_LOG" keyboard-enter 1 "the first-output window"
-"$UMBRIEL_SEAT_LOG_CLIENT" layer-popup-hover-other > "$OTHER_LOG" 2>&1 &
+"$CANOPY_SEAT_LOG_CLIENT" layer-popup-hover-other > "$OTHER_LOG" 2>&1 &
 await_events "$OTHER_LOG" keyboard-enter 1 "the second-output window"
 
-window_id=$("$UMBRIEL" windows --json | jq -r '.[] | select(.title == "layer-popup-hover-window") | .id')
+window_id=$("$CANOPY" windows --json | jq -r '.[] | select(.title == "layer-popup-hover-window") | .id')
 window_enters=$(events "$WINDOW_LOG" keyboard-enter)
-"$UMBRIEL" msg window-focus "$window_id" > /dev/null
+"$CANOPY" msg window-focus "$window_id" > /dev/null
 await_events "$WINDOW_LOG" keyboard-enter "$((window_enters + 1))" "the refocused first-output window"
-"$UMBRIEL" settle > /dev/null
-"$UMBRIEL_LAYER_CLIENT" HEADLESS-1 40 popup-on-click > "$PANEL_LOG" 2>&1 &
+"$CANOPY" settle > /dev/null
+"$CANOPY_LAYER_CLIENT" HEADLESS-1 40 popup-on-click > "$PANEL_LOG" 2>&1 &
 await_events "$PANEL_LOG" ready 1 "the bar"
 window_enters=$(events "$WINDOW_LOG" keyboard-enter)
 other_enters=$(events "$OTHER_LOG" keyboard-enter)
@@ -101,7 +101,7 @@ await_events "$OTHER_LOG" keyboard-enter "$((other_enters + 1))" "the clicked se
 
 # Leave the pointer on the second output while focusing elsewhere. The next real motion must restore hover focus
 # without relying on the separate focus handoff performed when crossing outputs.
-"$UMBRIEL" msg window-focus "$window_id" > /dev/null
+"$CANOPY" msg window-focus "$window_id" > /dev/null
 await_events "$WINDOW_LOG" keyboard-enter "$((window_enters + 1))" "the refocused first-output window"
 pointer_release
 await_events "$OTHER_LOG" keyboard-enter "$((other_enters + 2))" "the hovered second-output window"

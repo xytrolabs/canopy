@@ -13,7 +13,7 @@ extern "C" {
 #include <span>
 #include <vector>
 
-namespace umbriel {
+namespace canopy {
 
   struct FloatingPoint {
     int x = 0;
@@ -257,4 +257,4 @@ namespace umbriel {
     bool m_resizeActive = false;
   };
 
-} // namespace umbriel
+} // namespace canopy

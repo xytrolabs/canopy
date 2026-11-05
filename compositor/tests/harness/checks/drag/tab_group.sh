@@ -11,46 +11,46 @@ spawn_client() {
 
 wait_for_windows() {
   for _ in $(seq 60); do
-    [[ $("$UMBRIEL" windows --json | jq 'length') == "$1" ]] && return 0
+    [[ $("$CANOPY" windows --json | jq 'length') == "$1" ]] && return 0
     sleep 0.1
   done
-  echo "expected $1 window(s): $("$UMBRIEL" windows --json)"
+  echo "expected $1 window(s): $("$CANOPY" windows --json)"
   return 1
 }
 
-cat >> "$UMBRIEL_CONFIG" <<'EOF'
+cat >> "$CANOPY_CONFIG" <<'EOF'
 
 [layout.scrolling]
 default_extent_fraction = 0.5
 center_focused = "never"
 EOF
-"$UMBRIEL" msg config-reload > /dev/null
+"$CANOPY" msg config-reload > /dev/null
 
 spawn_client tab-a
 wait_for_windows 1
 spawn_client tab-b
 wait_for_windows 2
-"$UMBRIEL" msg window-consume-left > /dev/null
+"$CANOPY" msg window-consume-left > /dev/null
 spawn_client tab-c
 wait_for_windows 3
-"$UMBRIEL" msg window-consume-left > /dev/null
-"$UMBRIEL" msg column-toggle-tabbed > /dev/null
-"$UMBRIEL" msg column-focus-tab 2 > /dev/null
-"$UMBRIEL" msg window-set-primary-extent 0.4 > /dev/null
+"$CANOPY" msg window-consume-left > /dev/null
+"$CANOPY" msg column-toggle-tabbed > /dev/null
+"$CANOPY" msg column-focus-tab 2 > /dev/null
+"$CANOPY" msg window-set-primary-extent 0.4 > /dev/null
 spawn_client other
 wait_for_windows 4
-"$UMBRIEL" msg column-focus-first > /dev/null
-"$UMBRIEL" settle
+"$CANOPY" msg column-focus-first > /dev/null
+"$CANOPY" settle
 
-windows=$("$UMBRIEL" windows --json)
+windows=$("$CANOPY" windows --json)
 read -r x y width <<< "$(jq -r '.[] | select(.title == "tab-b") | "\(.x + (.w / 2 | floor)) \(.y + (.h / 2 | floor)) \(.w)"' <<< "$windows")"
 read -r drop_x drop_y <<< "$(jq -r '.[] | select(.title == "other") | "\(.x + .w - 20) \(.y + (.h / 2 | floor))"' <<< "$windows")"
 
-"$UMBRIEL_POINTER_CLIENT" 1280 720 mod logo move "$x" "$y" press "$BTN_LEFT" move "$((x + 40))" "$y" move "$drop_x" "$drop_y" \
+"$CANOPY_POINTER_CLIENT" 1280 720 mod logo move "$x" "$y" press "$BTN_LEFT" move "$((x + 40))" "$y" move "$drop_x" "$drop_y" \
   release "$BTN_LEFT" mod none
-"$UMBRIEL" settle
+"$CANOPY" settle
 
-windows=$("$UMBRIEL" windows --json)
+windows=$("$CANOPY" windows --json)
 if ! jq -e --argjson width "$width" '
   (map(select(.title | startswith("tab-"))) | sort_by(.tab_index)) as $tabs
   | (.[] | select(.title == "other")) as $other

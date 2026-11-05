@@ -6,7 +6,7 @@
 #include <optional>
 #include <vector>
 
-namespace umbriel {
+namespace canopy {
 
   // How a column presents its views: stacked rows that share the column, or tabs that each get the whole column while
   // only one of them shows.
@@ -319,4 +319,4 @@ namespace umbriel {
     std::vector<TabGroup> m_groups;
   };
 
-} // namespace umbriel
+} // namespace canopy

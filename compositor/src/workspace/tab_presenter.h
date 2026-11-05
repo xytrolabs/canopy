@@ -12,7 +12,7 @@ extern "C" {
 #include <wlr/util/box.h>
 }
 
-namespace umbriel {
+namespace canopy {
 
   class TabBar;
   class TabLabelCache;
@@ -103,4 +103,4 @@ namespace umbriel {
     std::vector<View*> m_members;
   };
 
-} // namespace umbriel
+} // namespace canopy

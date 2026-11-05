@@ -1,6 +1,6 @@
 // Regression coverage for the SceneFX subtree clip (wlr_scene_tree_set_clip). A tree clip has to contain everything
 // that keys off node->visible, which the compositor observes as output membership and the wl_surface enter/leave that
-// follows it, plus hit testing, which walks the scene independently. Umbriel relies on exactly that to keep one
+// follows it, plus hit testing, which walks the scene independently. Canopy relies on exactly that to keep one
 // output's windows off its neighbour.
 #include "check.h"
 
@@ -182,7 +182,7 @@ namespace {
 
 } // namespace
 
-UMBRIEL_TEST(unclippedTreeStraddlesBothOutputs) {
+CANOPY_TEST(unclippedTreeStraddlesBothOutputs) {
   Fixture fixture;
   CHECK(fixture.setUp());
 
@@ -194,7 +194,7 @@ UMBRIEL_TEST(unclippedTreeStraddlesBothOutputs) {
   fixture.tearDown();
 }
 
-UMBRIEL_TEST(clipDropsNeighbourMembershipAndFiresLeave) {
+CANOPY_TEST(clipDropsNeighbourMembershipAndFiresLeave) {
   Fixture fixture;
   CHECK(fixture.setUp());
 
@@ -215,7 +215,7 @@ UMBRIEL_TEST(clipDropsNeighbourMembershipAndFiresLeave) {
   fixture.tearDown();
 }
 
-UMBRIEL_TEST(clearingTheClipRestoresMembership) {
+CANOPY_TEST(clearingTheClipRestoresMembership) {
   Fixture fixture;
   CHECK(fixture.setUp());
 
@@ -233,7 +233,7 @@ UMBRIEL_TEST(clearingTheClipRestoresMembership) {
   fixture.tearDown();
 }
 
-UMBRIEL_TEST(clipOutsideTheNodeHidesItEntirely) {
+CANOPY_TEST(clipOutsideTheNodeHidesItEntirely) {
   Fixture fixture;
   CHECK(fixture.setUp());
 
@@ -248,7 +248,7 @@ UMBRIEL_TEST(clipOutsideTheNodeHidesItEntirely) {
   fixture.tearDown();
 }
 
-UMBRIEL_TEST(nestedClipsIntersect) {
+CANOPY_TEST(nestedClipsIntersect) {
   Fixture fixture;
   CHECK(fixture.setUp());
 
@@ -272,7 +272,7 @@ UMBRIEL_TEST(nestedClipsIntersect) {
   fixture.tearDown();
 }
 
-UMBRIEL_TEST(hitTestSeededInsideTheClippedSubtreeStillClips) {
+CANOPY_TEST(hitTestSeededInsideTheClippedSubtreeStillClips) {
   Fixture fixture;
   CHECK(fixture.setUp());
 
@@ -287,7 +287,7 @@ UMBRIEL_TEST(hitTestSeededInsideTheClippedSubtreeStillClips) {
   fixture.tearDown();
 }
 
-UMBRIEL_TEST(regionClipPreservesDisconnectedPiecesAndCutsTheHole) {
+CANOPY_TEST(regionClipPreservesDisconnectedPiecesAndCutsTheHole) {
   Fixture fixture;
   CHECK(fixture.setUp());
 
@@ -307,7 +307,7 @@ UMBRIEL_TEST(regionClipPreservesDisconnectedPiecesAndCutsTheHole) {
   fixture.tearDown();
 }
 
-UMBRIEL_TEST(emptyRegionLeavesOutputsAndClearingItReenters) {
+CANOPY_TEST(emptyRegionLeavesOutputsAndClearingItReenters) {
   Fixture fixture;
   CHECK(fixture.setUp());
 
@@ -335,7 +335,7 @@ UMBRIEL_TEST(emptyRegionLeavesOutputsAndClearingItReenters) {
   fixture.tearDown();
 }
 
-UMBRIEL_TEST(regionAndRectangleClipsIntersectOnTheSameTree) {
+CANOPY_TEST(regionAndRectangleClipsIntersectOnTheSameTree) {
   Fixture fixture;
   CHECK(fixture.setUp());
 
@@ -364,7 +364,7 @@ UMBRIEL_TEST(regionAndRectangleClipsIntersectOnTheSameTree) {
   fixture.tearDown();
 }
 
-UMBRIEL_TEST(regionClipsFollowTreeMovementAndSeededHitTests) {
+CANOPY_TEST(regionClipsFollowTreeMovementAndSeededHitTests) {
   Fixture fixture;
   CHECK(fixture.setUp());
 
@@ -384,7 +384,7 @@ UMBRIEL_TEST(regionClipsFollowTreeMovementAndSeededHitTests) {
   fixture.tearDown();
 }
 
-UMBRIEL_TEST(regionHoleUncoversPreviouslyOccludedContent) {
+CANOPY_TEST(regionHoleUncoversPreviouslyOccludedContent) {
   Fixture fixture;
   CHECK(fixture.setUp());
 

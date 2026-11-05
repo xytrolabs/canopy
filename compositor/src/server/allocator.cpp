@@ -13,13 +13,13 @@
 #include <unistd.h>
 
 extern "C" {
-#include <umbrielfx/render/pixel_format.h>
+#include <canopyfx/render/pixel_format.h>
 #include <wlr/interfaces/wlr_buffer.h>
 #include <wlr/render/allocator.h>
 #include <wlr/render/dmabuf.h>
 }
 
-namespace umbriel {
+namespace canopy {
   namespace {
 
     struct AlignedUdmabufAllocator {
@@ -190,4 +190,4 @@ namespace umbriel {
     return wlr_allocator_autocreate(backend, renderer);
   }
 
-} // namespace umbriel
+} // namespace canopy

@@ -18,16 +18,16 @@
 
 // Declared config keys. Each table of the config file is a list of Fields over the struct it fills. Reading walks the
 // list through Section; describing walks the same list, so the schema is the parser's own declaration.
-namespace umbriel {
+namespace canopy {
   struct Config;
-} // namespace umbriel
+} // namespace canopy
 
-namespace umbriel::registry {
+namespace canopy::registry {
 
   // What one load shares across tables. Defined by the loader; fields only pass it to the parsers that need it.
   struct ReadContext;
 
-  // One key as `umbriel config schema` reports it.
+  // One key as `canopy config schema` reports it.
   struct KeyDescription {
     explicit KeyDescription(std::string_view keyType) : type(keyType) {}
 
@@ -606,4 +606,4 @@ namespace umbriel::registry {
     };
   }
 
-} // namespace umbriel::registry
+} // namespace canopy::registry

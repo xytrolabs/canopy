@@ -21,7 +21,7 @@
 #include <unistd.h>
 #include <vector>
 
-namespace umbriel {
+namespace canopy {
 
   namespace {
     constexpr Logger kLog("xwayland");
@@ -509,4 +509,4 @@ namespace umbriel {
     );
   }
 
-} // namespace umbriel
+} // namespace canopy

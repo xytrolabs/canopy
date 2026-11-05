@@ -5,7 +5,7 @@
 # workspace under the pointer.
 set -euo pipefail
 
-source "$UMBRIEL_HARNESS_LIB"
+source "$CANOPY_HARNESS_LIB"
 
 readonly BTN_LEFT=272
 readonly OUTPUT_W=1280
@@ -16,10 +16,10 @@ spawn_client() {
 }
 
 active_workspace() {
-  "$UMBRIEL" workspaces --json | jq -r '.[] | select(.active) | .index'
+  "$CANOPY" workspaces --json | jq -r '.[] | select(.active) | .index'
 }
 
-cat >> "$UMBRIEL_CONFIG" <<'EOF'
+cat >> "$CANOPY_CONFIG" <<'EOF'
 
 [output."HEADLESS-1"]
 workspaces = 3
@@ -31,17 +31,17 @@ zoom = 0.5
 scroll_factor_horizontal = 1.0
 scroll_factor_vertical = 1.0
 EOF
-"$UMBRIEL" msg config-reload > /dev/null
+"$CANOPY" msg config-reload > /dev/null
 
 spawn_client 1
 for _ in $(seq 60); do
-  [[ $("$UMBRIEL" windows --json | jq 'length') -eq 1 ]] && break
+  [[ $("$CANOPY" windows --json | jq 'length') -eq 1 ]] && break
   sleep 0.25
 done
-"$UMBRIEL" settle
+"$CANOPY" settle
 
 active_before=$(active_workspace)
-windows=$("$UMBRIEL" windows --json)
+windows=$("$CANOPY" windows --json)
 start_x=$(jq -r '.[] | select(.title == "card-wsaxis-1") | (.x + .w / 2 | round)' <<< "$windows")
 start_y=$(jq -r '.[] | select(.title == "card-wsaxis-1") | (.y + .h / 2 | round)' <<< "$windows")
 # Overview zoom 0.5: the active workspace preview is centred at origin 320,180, half scale; rows
@@ -49,9 +49,9 @@ start_y=$(jq -r '.[] | select(.title == "card-wsaxis-1") | (.y + .h / 2 | round)
 press_x=$((320 + start_x / 2))
 press_y=$((180 + start_y / 2))
 
-"$UMBRIEL_POINTER_CLIENT" "$OUTPUT_W" "$OUTPUT_H" move 640 360
-"$UMBRIEL" msg overview-open > /dev/null
-"$UMBRIEL" settle
+"$CANOPY_POINTER_CLIENT" "$OUTPUT_W" "$OUTPUT_H" move 640 360
+"$CANOPY" msg overview-open > /dev/null
+"$CANOPY" settle
 
 # Drag threshold nudge is a pointer move (no pan); the axis stream is the touchpad finger-scroll.
 # travelScale(1.0, zoom 0.5 -> zoomScale 1.25, factor 1.0, workspace 500) = 0.0025 rows/px, so
@@ -73,9 +73,9 @@ if [[ $active_during != "$active_before" ]]; then
 fi
 
 pointer_release
-"$UMBRIEL" settle
+"$CANOPY" settle
 
-windows=$("$UMBRIEL" windows --json)
+windows=$("$CANOPY" windows --json)
 dropped=$(jq -r '.[] | select(.title == "card-wsaxis-1") | .workspace' <<< "$windows")
 focused=$(jq -r '.[] | select(.title == "card-wsaxis-1") | .focused // false' <<< "$windows")
 echo "probe: dropped workspace $dropped (pointer at $((press_x + 30)),$press_y -> world $(((press_x + 30 - 320) * 2)),$(((press_y - 180) * 2)))"

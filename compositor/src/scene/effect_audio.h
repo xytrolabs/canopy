@@ -1,8 +1,8 @@
 #pragma once
 
 #include <array>
-#include <umbrielfx/render/audio.h>
+#include <canopyfx/render/audio.h>
 
-namespace umbriel {
+namespace canopy {
   using EffectAudio = std::array<float, FX_AUDIO_VALUES>;
 }

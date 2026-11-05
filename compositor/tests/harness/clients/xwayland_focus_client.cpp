@@ -258,7 +258,7 @@ namespace {
         state.connection, XCB_PROP_MODE_REPLACE, window, state.atoms.netWmName, state.atoms.utf8String, 8,
         static_cast<uint32_t>(name.size()), name.data()
     );
-    const std::string wmClass = name + '\0' + "UmbrielXwaylandFocus" + '\0';
+    const std::string wmClass = name + '\0' + "CanopyXwaylandFocus" + '\0';
     xcb_change_property(
         state.connection, XCB_PROP_MODE_REPLACE, window, XCB_ATOM_WM_CLASS, XCB_ATOM_STRING, 8,
         static_cast<uint32_t>(wmClass.size()), wmClass.data()

@@ -1,13 +1,13 @@
 # IPC
 
-Umbriel exposes a local UNIX socket for queries, actions, and event subscriptions. Most users should use the `umbriel` command rather than connect to the socket directly.
+Canopy exposes a local UNIX socket for queries, actions, and event subscriptions. Most users should use the `canopy` command rather than connect to the socket directly.
 
-`UMBRIEL_SOCKET` contains the socket path. Without it, use `$XDG_RUNTIME_DIR/umbriel-$WAYLAND_DISPLAY.sock`.
+`CANOPY_SOCKET` contains the socket path. Without it, use `$XDG_RUNTIME_DIR/canopy-$WAYLAND_DISPLAY.sock`.
 
 Each request and reply is one JSON object per line:
 
 ```sh
-printf '{"cmd":"workspaces"}\n' | socat -t 5 STDIO "$UMBRIEL_SOCKET"
+printf '{"cmd":"workspaces"}\n' | socat -t 5 STDIO "$CANOPY_SOCKET"
 ```
 
 Replies use `{"ok": ...}` or `{"err": "..."}`. Commands that take arguments send them as an `args` array of strings, one per command-line word.
@@ -16,15 +16,15 @@ Replies use `{"ok": ...}` or `{"err": "..."}`. Commands that take arguments send
 
 | Request                                          | CLI                                        |
 | ------------------------------------------------ | ------------------------------------------ |
-| `{"cmd":"effects"}`                              | `umbriel effects --json`                   |
-| `{"cmd":"windows"}`                              | `umbriel windows --json`                   |
-| `{"cmd":"focused-window"}`                       | `umbriel focused-window --json`            |
-| `{"cmd":"workspaces"}`                           | `umbriel workspaces --json`                |
-| `{"cmd":"submap"}`                               | `umbriel submap --json`                    |
-| `{"cmd":"layers"}`                               | `umbriel layers --json`                    |
-| `{"cmd":"outputs"}`                              | `umbriel outputs --json`                   |
-| `{"cmd":"input-capture-permissions"}`            | `umbriel input-capture-permissions --json` |
-| `{"cmd":"input-capture-revoke","args":["<id>"]}` | `umbriel input-capture-revoke <id>`        |
+| `{"cmd":"effects"}`                              | `canopywc effects --json`                   |
+| `{"cmd":"windows"}`                              | `canopywc windows --json`                   |
+| `{"cmd":"focused-window"}`                       | `canopy focused-window --json`            |
+| `{"cmd":"workspaces"}`                           | `canopy workspaces --json`                |
+| `{"cmd":"submap"}`                               | `canopy submap --json`                    |
+| `{"cmd":"layers"}`                               | `canopy layers --json`                    |
+| `{"cmd":"outputs"}`                              | `canopywc outputs --json`                   |
+| `{"cmd":"input-capture-permissions"}`            | `canopywc input-capture-permissions --json` |
+| `{"cmd":"input-capture-revoke","args":["<id>"]}` | `canopywc input-capture-revoke <id>`        |
 
 ## Actions
 
@@ -34,7 +34,7 @@ Programs run an [action](actions.md) with a typed request instead of the words p
 { "cmd": "action", "action": "window-focus", "window": "<window-id>" }
 ```
 
-`umbriel msg <action> [args...]` parses its words and sends this same request. The reply is `{"ok": null}` or `{"err": "..."}`. A field that the action does not take, a missing required field, a wrong JSON type, or an empty string is rejected with the field named in the error. Optional fields are left out rather than sent empty.
+`canopywc msg <action> [args...]` parses its words and sends this same request. The reply is `{"ok": null}` or `{"err": "..."}`. A field that the action does not take, a missing required field, a wrong JSON type, or an empty string is rejected with the field named in the error. Optional fields are left out rather than sent empty.
 
 | Argument form (see [Actions](actions.md#argument-forms)) | Fields                                                                                                           |
 | -------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
@@ -75,13 +75,13 @@ Window entries include IDs, application identity, process ID, geometry, output, 
 
 `{"cmd":"focused-window"}` answers with the focused window's listing entry: the window the window actions act on. The seat's focused window wins (for a modal dialog, the dialog itself; for a visible scratchpad window holding the keyboard, that window); while a layer surface or the overview holds the keyboard, the answer falls back to the pointer output's active workspace's remembered focus; and the reply is `{"err": "no focused window"}` while a scratchpad owns the seat with no window focused, or when nothing is focused. The entry is exactly a `windows` entry for that window; its `focused` member stays the workspace-local remembered focus and does not select which window the query answers about.
 
-Window state follows what Umbriel has decided, ahead of the client's redraw, the same way geometry reports layout targets:
+Window state follows what Canopy has decided, ahead of the client's redraw, the same way geometry reports layout targets:
 
 | Field                | Meaning                                                                                                                                                                                                                                                                      |
 | -------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `floating`           | Outside the tiled layout                                                                                                                                                                                                                                                     |
 | `region`             | Edge placement region (`left`, `right`, `top`, `bottom`, `top_left`, `top_right`, `bottom_left`, `bottom_right`), or `null`; retained under maximize and fullscreen within stacking                                                                                          |
-| `title_bar`          | Umbriel's server-side title bar is enabled for this window in its current state                                                                                                                                                                                              |
+| `title_bar`          | Canopy's server-side title bar is enabled for this window in its current state                                                                                                                                                                                              |
 | `fullscreen`         | Fullscreen                                                                                                                                                                                                                                                                   |
 | `maximized`          | Maximized by `window-toggle-maximize` (a full-width column for a tiled window) or by maximize-to-edges                                                                                                                                                                       |
 | `maximized_to_edges` | Maximized without gaps, struts, or borders                                                                                                                                                                                                                                   |
@@ -108,13 +108,13 @@ Three diagnostic fields retain successful scene-buffer commit history for each o
 | `scanout_commits` | Number of those commits that used direct scanout, including brief episodes.                                                                         |
 | `commit_seq`      | The backend's 32-bit commit sequence for the latest accepted scene buffer. It can wrap and can skip numbers used by commits without a scene buffer. |
 
-The counters survive configuration reloads and power cycles. They reset when Umbriel restarts or the output is destroyed and recreated. Compare snapshots from the same output lifetime to measure activity during a game session. A zero increase in `scanout_commits` means no direct scanout commits occurred during that interval.
+The counters survive configuration reloads and power cycles. They reset when Canopy restarts or the output is destroyed and recreated. Compare snapshots from the same output lifetime to measure activity during a game session. A zero increase in `scanout_commits` means no direct scanout commits occurred during that interval.
 
 Scanout-triggered subscription notifications and routine log messages still wait until a state has held for half a second. Counter increments alone do not trigger subscription events. Other output events can carry a newer snapshot before that interval expires. Poll `outputs` when immediate state or updated counters are needed. See [direct scanout](outputs.md#direct-scanout) for the reasons.
 
 ## Effect inspection
 
-`umbriel effects` prints tables; `--json` exposes `presets`, `pools`, `cursor`, and `owners`. Presets and pools keep their configuration declaration order, including includes. Each preset has `name`, `kind`, and current-source `state`: `inert` means missing or empty source, `unreferenced` means no registry entry, `failed` means compilation failed, and `compiled` means a usable program. Border presets also report their configured `overlay`.
+`canopywc effects` prints tables; `--json` exposes `presets`, `pools`, `cursor`, and `owners`. Presets and pools keep their configuration declaration order, including includes. Each preset has `name`, `kind`, and current-source `state`: `inert` means missing or empty source, `unreferenced` means no registry entry, `failed` means compilation failed, and `compiled` means a usable program. Border presets also report their configured `overlay`.
 
 Pools have `name`, `kind`, `policy`, and ordered `members`, each with `name` and `held`. Holds count unsuppressed mapped windows, present outputs (including disabled outputs), and the session cursor, independently of visibility or focus. Owners list mapped windows, sorted by stable `id`, followed by present outputs, sorted by `name`. Window owners have `type`, `id`, `app_id`, and `slots` with `border` and `window`; output owners have `type`, `name`, and `slots.screen`. The single cursor appears separately in `cursor`.
 
@@ -215,16 +215,16 @@ See [Appearance](appearance.md#colors) for the meaning of each value.
 The CLI exposes the same event stream:
 
 ```sh
-umbriel subscribe workspaces
-umbriel subscribe workspaces,windows
-umbriel subscribe submap
-umbriel subscribe screencast
+canopy subscribe workspaces
+canopy subscribe workspaces,windows
+canopy subscribe submap
+canopy subscribe screencast
 ```
 
-It writes one JSON line per event until Umbriel exits or the reader closes:
+It writes one JSON line per event until Canopy exits or the reader closes:
 
 ```sh
-umbriel subscribe workspaces |
+canopy subscribe workspaces |
   jq -r '.data[] | select(.focused) | "\(.output) \(.name) \(.layout)"'
 ```
 
@@ -232,7 +232,7 @@ Because the output is always JSON, `--json` and `-j` are accepted and change not
 
 ## Audio input
 
-An external analyser, such as Noctalia, can supply a shared 64-band spectrum to [effect shaders](effects.md#audio-input). Keep a dedicated Unix socket connection to `$UMBRIEL_SOCKET` open and send complete newline-delimited JSON snapshots. For example, a silent snapshot is:
+An external analyser, such as Noctalia, can supply a shared 64-band spectrum to [effect shaders](effects.md#audio-input). Keep a dedicated Unix socket connection to `$CANOPY_SOCKET` open and send complete newline-delimited JSON snapshots. For example, a silent snapshot is:
 
 ```json
 {
@@ -254,25 +254,25 @@ Wait for `{"ok":true}` before sending another snapshot. Send at most 60 per seco
 
 Send the analyser's current values on changes and a heartbeat every 100 ms while unchanged. Values should decay or clear to zero when capture stops, and old values must be cleared when switching sources. Zero-valued snapshots keep the feed available, so an idle analyser can keep the connection open.
 
-Availability reports feed freshness. Gain, smoothing, and source selection belong to the analyser. Umbriel does not start or supervise it or capture audio.
+Availability reports feed freshness. Gain, smoothing, and source selection belong to the analyser. Canopy does not start or supervise it or capture audio.
 
-Disconnect, malformed or oversized input, or 250 ms without a snapshot closes the feed and clears all bands and availability. Lock and inactive sessions also disconnect the producer and reject audio until active and unlocked. Reconnect with a fresh snapshot to resume. Use a dedicated socket client; `umbriel msg` does not provide this streaming interface.
+Disconnect, malformed or oversized input, or 250 ms without a snapshot closes the feed and clears all bands and availability. Lock and inactive sessions also disconnect the producer and reject audio until active and unlocked. Reconnect with a fresh snapshot to resume. Use a dedicated socket client; `canopywc msg` does not provide this streaming interface.
 
 ## Inspection commands
 
-`umbriel outputs`, `umbriel color`, `umbriel tearing`, `umbriel layers`, and `umbriel keyboard-layouts` print human-readable state. Each accepts `--json`.
+`canopywc outputs`, `canopy color`, `canopy tearing`, `canopy layers`, and `canopy keyboard-layouts` print human-readable state. Each accepts `--json`.
 
 ## Config commands
 
-`umbriel config validate` checks a configuration and `umbriel config schema` lists the keys it accepts, both without a running compositor.
+`canopywc config validate` checks a configuration and `canopywc config schema` lists the keys it accepts, both without a running compositor.
 
-`umbriel config-replace <path>` loads and watches a different configuration file in the running compositor. The path must be absolute. On success, the new file and its includes replace the previous watch set, and later reloads use the new file. A missing, unreadable, or invalid file returns an error and leaves the active configuration and watch set unchanged. Warnings do not reject a replacement.
+`canopywc config-replace <path>` loads and watches a different configuration file in the running compositor. The path must be absolute. On success, the new file and its includes replace the previous watch set, and later reloads use the new file. A missing, unreadable, or invalid file returns an error and leaves the active configuration and watch set unchanged. Warnings do not reject a replacement.
 
 ## Virtual outputs
 
 | Request                                                                                             | CLI                                   |
 | --------------------------------------------------------------------------------------------------- | ------------------------------------- |
-| `{"cmd":"output-create","args":["<name>"]}` or `{"cmd":"output-create","args":["<name>","<mode>"]}` | `umbriel output-create <name> [mode]` |
-| `{"cmd":"output-destroy","args":["<name>"]}`                                                        | `umbriel output-destroy <name>`       |
+| `{"cmd":"output-create","args":["<name>"]}` or `{"cmd":"output-create","args":["<name>","<mode>"]}` | `canopywc output-create <name> [mode]` |
+| `{"cmd":"output-destroy","args":["<name>"]}`                                                        | `canopywc output-destroy <name>`       |
 
 `output-create` replies with the new output's name. Its optional mode is in the `WIDTHxHEIGHT[@HZ]` form. Both commands reply with an error for a name that is invalid, already taken, or unknown, and `output-destroy` refuses outputs backed by a real display. See [Virtual outputs](outputs.md#virtual-outputs).

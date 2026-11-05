@@ -6,15 +6,15 @@
 # black headless output makes the presented width measurable.
 set -euo pipefail
 
-readonly CLIENT="${UMBRIEL_UNMAP_CLIENT:-./build-debug/tests/unmap-client}"
-readonly BASELINE="$UMBRIEL_RUNTIME_DIR/initial-maximize-to-edges-baseline.png"
-readonly RULED="$UMBRIEL_RUNTIME_DIR/initial-maximize-to-edges-ruled.png"
-readonly MAXIMIZED_LOG="$UMBRIEL_RUNTIME_DIR/initial-maximize-ruled.log"
-readonly EDGES_LOG="$UMBRIEL_RUNTIME_DIR/initial-maximize-to-edges-ruled.log"
+readonly CLIENT="${CANOPY_UNMAP_CLIENT:-./build-debug/tests/unmap-client}"
+readonly BASELINE="$CANOPY_RUNTIME_DIR/initial-maximize-to-edges-baseline.png"
+readonly RULED="$CANOPY_RUNTIME_DIR/initial-maximize-to-edges-ruled.png"
+readonly MAXIMIZED_LOG="$CANOPY_RUNTIME_DIR/initial-maximize-ruled.log"
+readonly EDGES_LOG="$CANOPY_RUNTIME_DIR/initial-maximize-to-edges-ruled.log"
 
 # Pixels of the client's #5577AA fill, within 2% per channel, across the output's middle row.
 presented_width() {
-  "$UMBRIEL_PIXEL_PROBE" "$1" count \
+  "$CANOPY_PIXEL_PROBE" "$1" count \
     'r > 0.313 && r < 0.353 && g > 0.447 && g < 0.487 && b > 0.647 && b < 0.687' 1280x1+0+360
 }
 assert_stable_initial_size() {
@@ -44,7 +44,7 @@ stop_client() {
   wait "$CLIENT_PID" 2>/dev/null || true
 }
 
-cat >> "$UMBRIEL_CONFIG" <<'EOF'
+cat >> "$CANOPY_CONFIG" <<'EOF'
 
 [animation]
 duration_ms = 1
@@ -66,11 +66,11 @@ default_maximize = true
 match.title = "^edges-ruled$"
 default_maximize_to_edges = true
 EOF
-"$UMBRIEL" msg config-reload > /dev/null
+"$CANOPY" msg config-reload > /dev/null
 
 # The unmatched window keeps the half-width fraction: the measurement baseline.
-spawn_client edges-baseline "$UMBRIEL_RUNTIME_DIR/initial-maximize-to-edges-baseline.log" || exit 1
-"$UMBRIEL" settle
+spawn_client edges-baseline "$CANOPY_RUNTIME_DIR/initial-maximize-to-edges-baseline.log" || exit 1
+"$CANOPY" settle
 grim "$BASELINE"
 baseline_width=$(presented_width "$BASELINE")
 stop_client
@@ -78,9 +78,9 @@ if (( baseline_width > 900 )); then
   echo "baseline window was not laid out at the half-width fraction: width=$baseline_width"
   exit 1
 fi
-readonly MAXIMIZED_SCREENSHOT="$UMBRIEL_RUNTIME_DIR/initial-maximize-ruled.png"
+readonly MAXIMIZED_SCREENSHOT="$CANOPY_RUNTIME_DIR/initial-maximize-ruled.png"
 spawn_client maximize-ruled "$MAXIMIZED_LOG" || exit 1
-"$UMBRIEL" settle
+"$CANOPY" settle
 grim "$MAXIMIZED_SCREENSHOT"
 maximized_width=$(presented_width "$MAXIMIZED_SCREENSHOT")
 stop_client
@@ -92,7 +92,7 @@ fi
 
 # Same fraction, but the rule maximizes it to the edges at map.
 spawn_client edges-ruled "$EDGES_LOG" || exit 1
-"$UMBRIEL" settle
+"$CANOPY" settle
 grim "$RULED"
 ruled_width=$(presented_width "$RULED")
 assert_stable_initial_size "$EDGES_LOG" "default_maximize_to_edges"

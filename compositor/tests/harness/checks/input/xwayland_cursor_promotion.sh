@@ -1,18 +1,18 @@
 #!/usr/bin/env bash
 # harness: xwayland=true
 # harness: xcursor-theme=true
-# A theme cursor submitted through Xwayland is promoted to Umbriel's named,
+# A theme cursor submitted through Xwayland is promoted to Canopy's named,
 # output-scale-aware cursor. An exact-geometry custom image stays client-owned,
 # returning to the theme promotes it again, and native cursor surfaces are never
 # candidates for the Xwayland-only matcher.
 set -euo pipefail
 
-readonly X_CLIENT="${UMBRIEL_XWAYLAND_CURSOR_CLIENT:-./build-debug/tests/xwayland-cursor-client}"
-readonly NATIVE_CLIENT="${UMBRIEL_WAYLAND_CURSOR_CLIENT:-./build-debug/tests/wayland-cursor-client}"
-readonly POINTER="${UMBRIEL_POINTER_CLIENT:-./build-debug/tests/pointer-client}"
-readonly X_LOG="$UMBRIEL_RUNTIME_DIR/xwayland-cursor.log"
-readonly NATIVE_LOG="$UMBRIEL_RUNTIME_DIR/wayland-cursor.log"
-readonly X_CONTROL="$UMBRIEL_RUNTIME_DIR/xwayland-cursor-control"
+readonly X_CLIENT="${CANOPY_XWAYLAND_CURSOR_CLIENT:-./build-debug/tests/xwayland-cursor-client}"
+readonly NATIVE_CLIENT="${CANOPY_WAYLAND_CURSOR_CLIENT:-./build-debug/tests/wayland-cursor-client}"
+readonly POINTER="${CANOPY_POINTER_CLIENT:-./build-debug/tests/pointer-client}"
+readonly X_LOG="$CANOPY_RUNTIME_DIR/xwayland-cursor.log"
+readonly NATIVE_LOG="$CANOPY_RUNTIME_DIR/wayland-cursor.log"
+readonly X_CONTROL="$CANOPY_RUNTIME_DIR/xwayland-cursor-control"
 readonly X_TITLE=xwayland-cursor-promotion
 readonly NATIVE_TITLE=wayland-cursor-control
 readonly OUTPUT_W=640
@@ -25,7 +25,7 @@ if [[ ! -x $X_CLIENT || ! -x $NATIVE_CLIENT || ! -x $POINTER || -z ${DISPLAY:-} 
   exit 1
 fi
 
-cat >> "$UMBRIEL_CONFIG" <<'EOF'
+cat >> "$CANOPY_CONFIG" <<'EOF'
 
 [animation]
 enabled = false
@@ -33,10 +33,10 @@ enabled = false
 [output."HEADLESS-1"]
 scale = 2
 EOF
-"$UMBRIEL" msg config-reload > /dev/null
+"$CANOPY" msg config-reload > /dev/null
 
 cursor_state() {
-  "$UMBRIEL" cursor-state --json 2>/dev/null || true
+  "$CANOPY" cursor-state --json 2>/dev/null || true
 }
 
 await_state() {
@@ -58,7 +58,7 @@ await_state() {
 await_window() {
   local title=$1 log=$2 windows=
   for _ in $(seq 80); do
-    windows=$("$UMBRIEL" windows --json)
+    windows=$("$CANOPY" windows --json)
     if jq -e --arg title "$title" 'any(.[]; .title == $title)' <<< "$windows" > /dev/null; then
       return 0
     fi
@@ -71,10 +71,10 @@ await_window() {
 
 focus_and_enter() {
   local title=$1 window id x y
-  window=$("$UMBRIEL" windows --json | jq -c --arg title "$title" '.[] | select(.title == $title)')
+  window=$("$CANOPY" windows --json | jq -c --arg title "$title" '.[] | select(.title == $title)')
   id=$(jq -r '.id' <<< "$window")
-  "$UMBRIEL" msg window-focus "$id" > /dev/null
-  window=$("$UMBRIEL" windows --json | jq -c --arg title "$title" '.[] | select(.title == $title)')
+  "$CANOPY" msg window-focus "$id" > /dev/null
+  window=$("$CANOPY" windows --json | jq -c --arg title "$title" '.[] | select(.title == $title)')
   x=$(jq -r '(.x + .w / 2 | round)' <<< "$window")
   y=$(jq -r '(.y + .h / 2 | round)' <<< "$window")
   "$POINTER" "$OUTPUT_W" "$OUTPUT_H" move "$x" "$y" > /dev/null
@@ -118,15 +118,15 @@ await_state "the restored X11 theme image" \
 
 # A theme reload must reclassify the current image in both directions without
 # waiting for Xwayland to submit the cursor again.
-sed -i 's/^size = 24$/size = 48/' "$UMBRIEL_CONFIG"
-"$UMBRIEL" msg config-reload > /dev/null
+sed -i 's/^size = 24$/size = 48/' "$CANOPY_CONFIG"
+"$CANOPY" msg config-reload > /dev/null
 await_state "the old X11 theme image after selecting a different base size" \
   ".source == \"surface\" and .name == \"\" and .xwayland == true
    and .image.texture_width == $CURSOR_BASE and .image.texture_height == $CURSOR_BASE
    and .image.render_width == $CURSOR_SCALED and .image.render_height == $CURSOR_SCALED"
 
-sed -i 's/^size = 48$/size = 24/' "$UMBRIEL_CONFIG"
-"$UMBRIEL" msg config-reload > /dev/null
+sed -i 's/^size = 48$/size = 24/' "$CANOPY_CONFIG"
+"$CANOPY" msg config-reload > /dev/null
 await_state "the X11 theme image promoted again after restoring the base size" \
   ".source == \"xcursor\" and .name == \"default\" and .xwayland == true
    and .image.texture_width == $CURSOR_SCALED and .image.texture_height == $CURSOR_SCALED

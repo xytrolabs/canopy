@@ -32,18 +32,18 @@ if name == "systemctl":
         sys.exit(0)
     assert "NOTIFY_SOCKET" not in os.environ
     assert os.environ["WAYLAND_DISPLAY"] == "wayland-0"
-    assert os.environ["XDG_CURRENT_DESKTOP"] == "umbriel"
+    assert os.environ["XDG_CURRENT_DESKTOP"] == "canopy"
     if args[1] == "import-environment":
         record("systemd-imported")
-    elif args[1:] == ["set-environment", "UMBRIEL_READINESS_TEST=configured"]:
+    elif args[1:] == ["set-environment", "CANOPY_READINESS_TEST=configured"]:
         record("configured-imported")
-    elif args[1:] == ["start", "--no-block", "umbriel-session.target"] and os.environ["READINESS_MANAGED"] == "false":
+    elif args[1:] == ["start", "--no-block", "canopywc-session.target"] and os.environ["READINESS_MANAGED"] == "false":
         record("target")
     else:
         raise AssertionError("unexpected manager command: " + repr(args))
 elif name == "dbus-update-activation-environment":
     assert "NOTIFY_SOCKET" not in os.environ
-    assert "UMBRIEL_READINESS_TEST" not in os.environ
+    assert "CANOPY_READINESS_TEST" not in os.environ
     record("dbus-waiting")
     with socket.socket(socket.AF_UNIX, socket.SOCK_STREAM) as gate:
         gate.connect(str(root / "import-gate"))
@@ -54,7 +54,7 @@ elif name == "dbus-update-activation-environment":
 elif name == "systemd-run":
     raise AssertionError("readiness must not launch a managed application before reporting ready")
 elif name in ("startup", "autostart"):
-    assert os.environ["UMBRIEL_READINESS_TEST"] == "configured"
+    assert os.environ["CANOPY_READINESS_TEST"] == "configured"
     assert "NOTIFY_SOCKET" not in os.environ
     assert "dbus-imported" in (root / "events").read_text().splitlines(), "autostart preceded environment import"
     record(name)
@@ -90,7 +90,7 @@ def check(binary, abstract=False, fail_import=False, managed=True):
         config.write_text(
             '[general]\nxwayland = false\nshow_cheatsheet = false\n'
             f'autostart = {json.dumps([] if managed else [str(root / "bin" / "autostart")])}\n'
-            '[environment]\nUMBRIEL_READINESS_TEST = "configured"\n'
+            '[environment]\nCANOPY_READINESS_TEST = "configured"\n'
         )
 
         with socket.socket(socket.AF_UNIX, socket.SOCK_DGRAM) as notify, \
@@ -104,9 +104,9 @@ def check(binary, abstract=False, fail_import=False, managed=True):
             gate.listen(1)
             gate.settimeout(10)
             environment = os.environ.copy()
-            for name in ("WAYLAND_DISPLAY", "WAYLAND_SOCKET", "DISPLAY", "UMBRIEL_SOCKET",
+            for name in ("WAYLAND_DISPLAY", "WAYLAND_SOCKET", "DISPLAY", "CANOPY_SOCKET",
                          "XDG_CURRENT_DESKTOP", "XDG_SESSION_DESKTOP", "XDG_SESSION_TYPE",
-                         "UMBRIEL_READINESS_TEST", "SYSTEMD_EXEC_PID"):
+                         "CANOPY_READINESS_TEST", "SYSTEMD_EXEC_PID"):
                 environment.pop(name, None)
             environment.update(
                 PATH=str(root / "bin") + ":" + os.environ["PATH"],

@@ -3,18 +3,18 @@
 # Match Steam's keyboard hints: Input=False, no WM_TAKE_FOCUS, and UTILITY type. The overlay receives pointer input
 # while native keyboard ownership survives mapping, hovering, clicking, explicit focus requests, and replacement.
 set -euo pipefail
-source "$UMBRIEL_REPO/tests/harness/xwayland_focus_lib.sh"
+source "$CANOPY_REPO/tests/harness/xwayland_focus_lib.sh"
 
 readonly NATIVE_TITLE=focus-native-target
-readonly NATIVE_LOG="$UMBRIEL_RUNTIME_DIR/focus-native-target.log"
+readonly NATIVE_LOG="$CANOPY_RUNTIME_DIR/focus-native-target.log"
 readonly NONE_TITLE=focus-model-none
 
 x_focus_fixture_config
 "$NATIVE_CLIENT" "$NATIVE_TITLE" > "$NATIVE_LOG" 2>&1 &
 eis_wait_window "$NATIVE_TITLE"
 eis_wait_active "$NATIVE_TITLE"
-eis_start sender umbriel-no-input-focus
-eis_approve sender umbriel-no-input-focus
+eis_start sender canopy-no-input-focus
+eis_approve sender canopy-no-input-focus
 x_focus_native_key "$NATIVE_TITLE" "$NATIVE_LOG" 31
 native_leaves=$(events "$NATIVE_LOG" keyboard-leave)
 
@@ -32,17 +32,17 @@ x_focus_native_key "$NATIVE_TITLE" "$NATIVE_LOG" 32
 window=$(eis_window "$NONE_TITLE")
 pointer_x=$(jq -r '.x + .w / 2 | floor' <<< "$window")
 pointer_y=$(jq -r '.y + .h / 2 | floor' <<< "$window")
-"$UMBRIEL_POINTER_CLIENT" 1280 720 move "$pointer_x" "$pointer_y" > /dev/null
-"$UMBRIEL" settle > /dev/null
+"$CANOPY_POINTER_CLIENT" 1280 720 move "$pointer_x" "$pointer_y" > /dev/null
+"$CANOPY" settle > /dev/null
 assert_native_held hovering
 x_focus_native_key "$NATIVE_TITLE" "$NATIVE_LOG" 33
 
-"$UMBRIEL_POINTER_CLIENT" 1280 720 click 272 > /dev/null
+"$CANOPY_POINTER_CLIENT" 1280 720 click 272 > /dev/null
 await_events "${X_FOCUS_LOGS[none]}" "button window=$NONE_TITLE code=1 state=pressed" 1 "the NoInput overlay's pointer click"
 assert_native_held clicking
 x_focus_native_key "$NATIVE_TITLE" "$NATIVE_LOG" 34
 
-"$UMBRIEL" msg window-focus "$(x_focus_id "$NONE_TITLE")" > /dev/null
+"$CANOPY" msg window-focus "$(x_focus_id "$NONE_TITLE")" > /dev/null
 assert_native_held "explicit focusing"
 x_focus_native_key "$NATIVE_TITLE" "$NATIVE_LOG" 35
 
@@ -59,8 +59,8 @@ x_focus_stop passive
 # A mapped client can change its input hint. Once it withdraws keyboard input, focus returns to an eligible window.
 x_focus_send none 'input true'
 await_events "${X_FOCUS_LOGS[none]}" input-requested=true 1 "the overlay allowing keyboard input"
-"$UMBRIEL" settle > /dev/null
-"$UMBRIEL" msg window-focus "$(x_focus_id "$NONE_TITLE")" > /dev/null
+"$CANOPY" settle > /dev/null
+"$CANOPY" msg window-focus "$(x_focus_id "$NONE_TITLE")" > /dev/null
 eis_wait_active "$NONE_TITLE"
 eis_send sender 'tap 38'
 await_events "${X_FOCUS_LOGS[none]}" "key window=$NONE_TITLE code=46 state=pressed" 1 "the updated input hint's keyboard"
@@ -71,7 +71,7 @@ x_focus_native_key "$NATIVE_TITLE" "$NATIVE_LOG" 39
 
 native_leaves=$(events "$NATIVE_LOG" keyboard-leave)
 x_focus_stop none
-"$UMBRIEL" settle > /dev/null
+"$CANOPY" settle > /dev/null
 assert_native_held "closing the overlay"
 x_focus_native_key "$NATIVE_TITLE" "$NATIVE_LOG" 40
 eis_stop sender

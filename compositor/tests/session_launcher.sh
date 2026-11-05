@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-readonly SOURCE_LAUNCHER=${1:?usage: session_launcher.sh <start-umbriel>}
-readonly SOURCE_DIRECT_LAUNCHER=${2:?usage: session_launcher.sh <start-umbriel> <direct-start-umbriel>}
+readonly SOURCE_LAUNCHER=${1:?usage: session_launcher.sh <start-canopy>}
+readonly SOURCE_DIRECT_LAUNCHER=${2:?usage: session_launcher.sh <start-canopy> <direct-start-canopy>}
 readonly TEST_DIR=$(mktemp -d)
 lifecycle_launcher_pid=
 lifecycle_state=
@@ -40,8 +40,8 @@ readonly NESTED_SESSION_ENV="$TEST_DIR/nested-session-environment"
 readonly EXTERNAL_ENV="$TEST_DIR/external-environment"
 readonly EXTERNAL_ARGUMENTS="$TEST_DIR/external-arguments"
 readonly EXTERNAL_SESSION_ENV="$TEST_DIR/external-session-environment"
-readonly LAUNCHER="$TEST_DIR/start-umbriel"
-readonly DIRECT_LAUNCHER="$TEST_DIR/direct-start-umbriel"
+readonly LAUNCHER="$TEST_DIR/start-canopy"
+readonly DIRECT_LAUNCHER="$TEST_DIR/direct-start-canopy"
 readonly DIRECT_TARGET="$TEST_DIR/direct-target"
 readonly INJECTION_MARKER="$TEST_DIR/injected"
 readonly DRS_INJECTION_MARKER="$TEST_DIR/drs-injected"
@@ -56,59 +56,59 @@ login_shell=$BASH
 printf '%s\n' "$login_shell" > "$TEST_HOME/shells"
 
 cat > "$TEST_HOME/.bash_profile" <<'EOF'
-printf 'profile\n' >> "$UMBRIEL_TEST_PROFILE_TRACE"
-export UMBRIEL_LOGIN_PROFILE_MARKER='from login profile'
-export PATH="$UMBRIEL_TEST_PROFILE_BIN:$UMBRIEL_TEST_BIN:$UMBRIEL_TEST_HOST_PATH"
+printf 'profile\n' >> "$CANOPY_TEST_PROFILE_TRACE"
+export CANOPY_LOGIN_PROFILE_MARKER='from login profile'
+export PATH="$CANOPY_TEST_PROFILE_BIN:$CANOPY_TEST_BIN:$CANOPY_TEST_HOST_PATH"
 export DISPLAY=:from-login-profile
 export WAYLAND_DISPLAY=profile-wayland
 export WAYLAND_SOCKET=42
-export UMBRIEL_SOCKET=profile-umbriel
+export CANOPY_SOCKET=profile-canopy
 export XDG_CURRENT_DESKTOP=profile-current
 export XDG_SESSION_DESKTOP=profile-session
 export XDG_SESSION_TYPE=profile-type
 EOF
 
-cat > "$PROFILE_BIN/umbriel-session-profile-path-probe" <<'EOF'
+cat > "$PROFILE_BIN/canopy-session-profile-path-probe" <<'EOF'
 #!/bin/sh
-printf 'launched\n' > "$UMBRIEL_TEST_PROFILE_EXEC_TRACE"
+printf 'launched\n' > "$CANOPY_TEST_PROFILE_EXEC_TRACE"
 EOF
 
 cat > "$TEST_BIN/systemctl" <<'EOF'
 #!/bin/sh
 if [ "${2:-}" = "show-environment" ]; then
-  [ "${UMBRIEL_TEST_SYSTEMD_AVAILABLE:-true}" = true ]
+  [ "${CANOPY_TEST_SYSTEMD_AVAILABLE:-true}" = true ]
   exit $?
 fi
 if [ "${3:-}" = "is-active" ]; then
   exit 1
 fi
 if [ "${2:-}" = "import-environment" ]; then
-  printf '%s\n' "$@" > "$UMBRIEL_TEST_IMPORT_TRACE"
-  service_path=$UMBRIEL_TEST_MANAGER_PATH
+  printf '%s\n' "$@" > "$CANOPY_TEST_IMPORT_TRACE"
+  service_path=$CANOPY_TEST_MANAGER_PATH
   for name in "$@"; do
     if [ "$name" = PATH ]; then
       service_path=$PATH
       break
     fi
   done
-  printf '%s\n' "$service_path" > "$UMBRIEL_TEST_SERVICE_PATH"
+  printf '%s\n' "$service_path" > "$CANOPY_TEST_SERVICE_PATH"
   exit 0
 fi
-if [ "${3:-}" = "start" ] && [ "${4:-}" = "umbriel.service" ]; then
-  printf '%s\n' "${UMBRIEL_LOGIN_PROFILE_MARKER:-missing}" > "$UMBRIEL_TEST_SERVICE_ENV"
+if [ "${3:-}" = "start" ] && [ "${4:-}" = "canopywc.service" ]; then
+  printf '%s\n' "${CANOPY_LOGIN_PROFILE_MARKER:-missing}" > "$CANOPY_TEST_SERVICE_ENV"
   {
     printf 'WAYLAND_DISPLAY=%s\n' "${WAYLAND_DISPLAY-unset}"
     printf 'WAYLAND_SOCKET=%s\n' "${WAYLAND_SOCKET-unset}"
     printf 'DISPLAY=%s\n' "${DISPLAY-unset}"
-    printf 'UMBRIEL_SOCKET=%s\n' "${UMBRIEL_SOCKET-unset}"
+    printf 'CANOPY_SOCKET=%s\n' "${CANOPY_SOCKET-unset}"
     printf 'XDG_CURRENT_DESKTOP=%s\n' "${XDG_CURRENT_DESKTOP-unset}"
     printf 'XDG_SESSION_DESKTOP=%s\n' "${XDG_SESSION_DESKTOP-unset}"
     printf 'XDG_SESSION_TYPE=%s\n' "${XDG_SESSION_TYPE-unset}"
-  } > "$UMBRIEL_TEST_SERVICE_SESSION_ENV"
-  IFS= read -r service_path < "$UMBRIEL_TEST_SERVICE_PATH"
+  } > "$CANOPY_TEST_SERVICE_SESSION_ENV"
+  IFS= read -r service_path < "$CANOPY_TEST_SERVICE_PATH"
   (
     export PATH="$service_path"
-    umbriel-session-profile-path-probe
+    canopy-session-profile-path-probe
   ) 2>/dev/null || :
   exit 0
 fi
@@ -117,48 +117,48 @@ EOF
 
 cat > "$TEST_BIN/dbus-update-activation-environment" <<'EOF'
 #!/bin/sh
-printf '%s\n' "$@" > "$UMBRIEL_TEST_DBUS_IMPORT_TRACE"
-printf '%s\n' "${UMBRIEL_LOGIN_PROFILE_MARKER:-missing}" > "$UMBRIEL_TEST_DBUS_ENV"
+printf '%s\n' "$@" > "$CANOPY_TEST_DBUS_IMPORT_TRACE"
+printf '%s\n' "${CANOPY_LOGIN_PROFILE_MARKER:-missing}" > "$CANOPY_TEST_DBUS_ENV"
 EOF
 
 cat > "$DIRECT_TARGET" <<'EOF'
 #!/bin/sh
-printf '%s\n' "${UMBRIEL_LOGIN_PROFILE_MARKER:-missing}" > "$UMBRIEL_TEST_DIRECT_ENV"
-printf '%s\n' "$@" > "$UMBRIEL_TEST_DIRECT_ARGUMENTS"
+printf '%s\n' "${CANOPY_LOGIN_PROFILE_MARKER:-missing}" > "$CANOPY_TEST_DIRECT_ENV"
+printf '%s\n' "$@" > "$CANOPY_TEST_DIRECT_ARGUMENTS"
 {
   printf 'WAYLAND_DISPLAY=%s\n' "${WAYLAND_DISPLAY-unset}"
   printf 'WAYLAND_SOCKET=%s\n' "${WAYLAND_SOCKET-unset}"
   printf 'DISPLAY=%s\n' "${DISPLAY-unset}"
-  printf 'UMBRIEL_SOCKET=%s\n' "${UMBRIEL_SOCKET-unset}"
+  printf 'CANOPY_SOCKET=%s\n' "${CANOPY_SOCKET-unset}"
   printf 'XDG_CURRENT_DESKTOP=%s\n' "${XDG_CURRENT_DESKTOP-unset}"
   printf 'XDG_SESSION_DESKTOP=%s\n' "${XDG_SESSION_DESKTOP-unset}"
   printf 'XDG_SESSION_TYPE=%s\n' "${XDG_SESSION_TYPE-unset}"
-} > "$UMBRIEL_TEST_SESSION_ENV"
+} > "$CANOPY_TEST_SESSION_ENV"
 EOF
 
 chmod 700 "$TEST_BIN/systemctl" "$TEST_BIN/dbus-update-activation-environment" \
-  "$PROFILE_BIN/umbriel-session-profile-path-probe"
+  "$PROFILE_BIN/canopy-session-profile-path-probe"
 
 env -i \
   HOME="$TEST_HOME" \
   SHELL="$login_shell" \
-  USER="${USER:-umbriel-test}" \
-  LOGNAME="${LOGNAME:-umbriel-test}" \
+  USER="${USER:-canopy-test}" \
+  LOGNAME="${LOGNAME:-canopy-test}" \
   PATH="$TEST_BIN:$PATH" \
   DBUS_SESSION_BUS_ADDRESS="unix:path=$TEST_DIR/nonexistent-bus" \
-  UMBRIEL_TEST_PROFILE_TRACE="$PROFILE_TRACE" \
-  UMBRIEL_TEST_IMPORT_TRACE="$IMPORT_TRACE" \
-  UMBRIEL_TEST_SERVICE_ENV="$SERVICE_ENV" \
-  UMBRIEL_TEST_SERVICE_PATH="$SERVICE_PATH" \
-  UMBRIEL_TEST_SERVICE_SESSION_ENV="$SERVICE_SESSION_ENV" \
-  UMBRIEL_TEST_DBUS_ENV="$DBUS_ENV" \
-  UMBRIEL_TEST_DBUS_IMPORT_TRACE="$DBUS_IMPORT_TRACE" \
-  UMBRIEL_TEST_PROFILE_BIN="$PROFILE_BIN" \
-  UMBRIEL_TEST_PROFILE_EXEC_TRACE="$PROFILE_EXEC_TRACE" \
-  UMBRIEL_TEST_BIN="$TEST_BIN" \
-  UMBRIEL_TEST_HOST_PATH="$PATH" \
-  UMBRIEL_TEST_MANAGER_PATH="$MANAGER_PATH" \
-  UMBRIEL_TEST_SYSTEMD_AVAILABLE=true \
+  CANOPY_TEST_PROFILE_TRACE="$PROFILE_TRACE" \
+  CANOPY_TEST_IMPORT_TRACE="$IMPORT_TRACE" \
+  CANOPY_TEST_SERVICE_ENV="$SERVICE_ENV" \
+  CANOPY_TEST_SERVICE_PATH="$SERVICE_PATH" \
+  CANOPY_TEST_SERVICE_SESSION_ENV="$SERVICE_SESSION_ENV" \
+  CANOPY_TEST_DBUS_ENV="$DBUS_ENV" \
+  CANOPY_TEST_DBUS_IMPORT_TRACE="$DBUS_IMPORT_TRACE" \
+  CANOPY_TEST_PROFILE_BIN="$PROFILE_BIN" \
+  CANOPY_TEST_PROFILE_EXEC_TRACE="$PROFILE_EXEC_TRACE" \
+  CANOPY_TEST_BIN="$TEST_BIN" \
+  CANOPY_TEST_HOST_PATH="$PATH" \
+  CANOPY_TEST_MANAGER_PATH="$MANAGER_PATH" \
+  CANOPY_TEST_SYSTEMD_AVAILABLE=true \
   drs="touch $DRS_INJECTION_MARKER" \
   "$LAUNCHER" plain "two words" 'semi;colon' "quote'and\"double"
 
@@ -166,7 +166,7 @@ if [[ ! -f $PROFILE_TRACE || $(< "$PROFILE_TRACE") != profile ]]; then
   echo "login profile did not run exactly once"
   exit 1
 fi
-if ! grep -Fxq UMBRIEL_LOGIN_PROFILE_MARKER "$IMPORT_TRACE"; then
+if ! grep -Fxq CANOPY_LOGIN_PROFILE_MARKER "$IMPORT_TRACE"; then
   echo "profile variable was not included in the systemd environment import"
   exit 1
 fi
@@ -198,7 +198,7 @@ if ! grep -Fxq PATH "$DBUS_IMPORT_TRACE"; then
   echo "login PATH was not included in the D-Bus environment import"
   exit 1
 fi
-if ! grep -Fxq UMBRIEL_LOGIN_PROFILE_MARKER "$DBUS_IMPORT_TRACE"; then
+if ! grep -Fxq CANOPY_LOGIN_PROFILE_MARKER "$DBUS_IMPORT_TRACE"; then
   echo "profile variable was not included in the D-Bus environment import"
   exit 1
 fi
@@ -206,7 +206,7 @@ cat > "$TEST_DIR/expected-native-session-environment" <<'EOF'
 WAYLAND_DISPLAY=unset
 WAYLAND_SOCKET=unset
 DISPLAY=unset
-UMBRIEL_SOCKET=unset
+CANOPY_SOCKET=unset
 XDG_CURRENT_DESKTOP=unset
 XDG_SESSION_DESKTOP=unset
 XDG_SESSION_TYPE=unset
@@ -219,18 +219,18 @@ fi
 env -i \
   HOME="$TEST_HOME" \
   SHELL="$login_shell" \
-  USER="${USER:-umbriel-test}" \
-  LOGNAME="${LOGNAME:-umbriel-test}" \
+  USER="${USER:-canopy-test}" \
+  LOGNAME="${LOGNAME:-canopy-test}" \
   PATH="$TEST_BIN:$PATH" \
   DBUS_SESSION_BUS_ADDRESS="unix:path=$TEST_DIR/nonexistent-bus" \
-  UMBRIEL_TEST_PROFILE_TRACE="$PROFILE_TRACE" \
-  UMBRIEL_TEST_DIRECT_ENV="$DIRECT_ENV" \
-  UMBRIEL_TEST_DIRECT_ARGUMENTS="$DIRECT_ARGUMENTS" \
-  UMBRIEL_TEST_SESSION_ENV="$DIRECT_SESSION_ENV" \
-  UMBRIEL_TEST_PROFILE_BIN="$PROFILE_BIN" \
-  UMBRIEL_TEST_BIN="$TEST_BIN" \
-  UMBRIEL_TEST_HOST_PATH="$PATH" \
-  UMBRIEL_TEST_SYSTEMD_AVAILABLE=false \
+  CANOPY_TEST_PROFILE_TRACE="$PROFILE_TRACE" \
+  CANOPY_TEST_DIRECT_ENV="$DIRECT_ENV" \
+  CANOPY_TEST_DIRECT_ARGUMENTS="$DIRECT_ARGUMENTS" \
+  CANOPY_TEST_SESSION_ENV="$DIRECT_SESSION_ENV" \
+  CANOPY_TEST_PROFILE_BIN="$PROFILE_BIN" \
+  CANOPY_TEST_BIN="$TEST_BIN" \
+  CANOPY_TEST_HOST_PATH="$PATH" \
+  CANOPY_TEST_SYSTEMD_AVAILABLE=false \
   drs="touch $DRS_INJECTION_MARKER" \
   "$DIRECT_LAUNCHER" "$DIRECT_TARGET" plain "two words" 'semi;colon' "quote'and\"double" "$DANGEROUS_ARGUMENT"
 
@@ -259,18 +259,18 @@ fi
 env -i \
   HOME="$TEST_HOME" \
   SHELL="$login_shell" \
-  USER="${USER:-umbriel-test}" \
-  LOGNAME="${LOGNAME:-umbriel-test}" \
+  USER="${USER:-canopy-test}" \
+  LOGNAME="${LOGNAME:-canopy-test}" \
   PATH="$TEST_BIN:$PATH" \
   DBUS_SESSION_BUS_ADDRESS="unix:path=$TEST_DIR/nonexistent-bus" \
   WAYLAND_DISPLAY=wayland-test \
-  UMBRIEL_TEST_PROFILE_TRACE="$PROFILE_TRACE" \
-  UMBRIEL_TEST_DIRECT_ENV="$NESTED_ENV" \
-  UMBRIEL_TEST_DIRECT_ARGUMENTS="$NESTED_ARGUMENTS" \
-  UMBRIEL_TEST_SESSION_ENV="$NESTED_SESSION_ENV" \
-  UMBRIEL_TEST_BIN="$TEST_BIN" \
-  UMBRIEL_TEST_HOST_PATH="$PATH" \
-  UMBRIEL_TEST_SYSTEMD_AVAILABLE=false \
+  CANOPY_TEST_PROFILE_TRACE="$PROFILE_TRACE" \
+  CANOPY_TEST_DIRECT_ENV="$NESTED_ENV" \
+  CANOPY_TEST_DIRECT_ARGUMENTS="$NESTED_ARGUMENTS" \
+  CANOPY_TEST_SESSION_ENV="$NESTED_SESSION_ENV" \
+  CANOPY_TEST_BIN="$TEST_BIN" \
+  CANOPY_TEST_HOST_PATH="$PATH" \
+  CANOPY_TEST_SYSTEMD_AVAILABLE=false \
   drs="touch $DRS_INJECTION_MARKER" \
   "$DIRECT_LAUNCHER" "$DIRECT_TARGET" nested
 
@@ -294,18 +294,18 @@ fi
 env -i \
   HOME="$TEST_HOME" \
   SHELL="$login_shell" \
-  USER="${USER:-umbriel-test}" \
-  LOGNAME="${LOGNAME:-umbriel-test}" \
+  USER="${USER:-canopy-test}" \
+  LOGNAME="${LOGNAME:-canopy-test}" \
   PATH="$TEST_BIN:$PATH" \
   DBUS_SESSION_BUS_ADDRESS="unix:path=$TEST_DIR/nonexistent-bus" \
   MANAGERPID=1 \
-  UMBRIEL_TEST_PROFILE_TRACE="$PROFILE_TRACE" \
-  UMBRIEL_TEST_DIRECT_ENV="$EXTERNAL_ENV" \
-  UMBRIEL_TEST_DIRECT_ARGUMENTS="$EXTERNAL_ARGUMENTS" \
-  UMBRIEL_TEST_SESSION_ENV="$EXTERNAL_SESSION_ENV" \
-  UMBRIEL_TEST_BIN="$TEST_BIN" \
-  UMBRIEL_TEST_HOST_PATH="$PATH" \
-  UMBRIEL_TEST_SYSTEMD_AVAILABLE=false \
+  CANOPY_TEST_PROFILE_TRACE="$PROFILE_TRACE" \
+  CANOPY_TEST_DIRECT_ENV="$EXTERNAL_ENV" \
+  CANOPY_TEST_DIRECT_ARGUMENTS="$EXTERNAL_ARGUMENTS" \
+  CANOPY_TEST_SESSION_ENV="$EXTERNAL_SESSION_ENV" \
+  CANOPY_TEST_BIN="$TEST_BIN" \
+  CANOPY_TEST_HOST_PATH="$PATH" \
+  CANOPY_TEST_SYSTEMD_AVAILABLE=false \
   drs="touch $DRS_INJECTION_MARKER" \
   /bin/sh -c 'SYSTEMD_EXEC_PID=$$; export SYSTEMD_EXEC_PID; exec "$@"' \
     sh "$DIRECT_LAUNCHER" "$DIRECT_TARGET" external
@@ -329,7 +329,7 @@ echo "native session launcher imports the login profile environment"
   printf '#!%s\n' "$BASH"
   cat <<'EOF'
 set -eu
-state=$UMBRIEL_TEST_STATE
+state=$CANOPY_TEST_STATE
 case "${2:-}" in
   show-environment) exit 0 ;;
   unset-environment) printf 'unset\n' >> "$state/trace"; exit 0 ;;
@@ -338,7 +338,7 @@ if [[ ${3:-} == is-active ]]; then
   [[ -f $state/active ]]
   exit $?
 fi
-if [[ ${3:-} == start && ${4:-} == umbriel.service ]]; then
+if [[ ${3:-} == start && ${4:-} == canopywc.service ]]; then
   trap 'rm -f "$state/client-live"; : > "$state/client-stopped"' EXIT
   trap 'trap "" HUP INT TERM; exit 143' TERM
   trap 'trap "" HUP INT TERM; exit 129' HUP
@@ -346,7 +346,7 @@ if [[ ${3:-} == start && ${4:-} == umbriel.service ]]; then
   printf '%s\n' "$$" > "$state/client-pid"
   : > "$state/client-live"
   : > "$state/entered"
-  if [[ ${UMBRIEL_TEST_HOLD_START:-false} == true ]]; then
+  if [[ ${CANOPY_TEST_HOLD_START:-false} == true ]]; then
     IFS= read -r release <&3
   fi
   : > "$state/active"
@@ -355,7 +355,7 @@ if [[ ${3:-} == start && ${4:-} == umbriel.service ]]; then
   rm -f "$state/active"
   exit "$status"
 fi
-if [[ ${2:-} == start && ${4:-} == umbriel-shutdown.target ]]; then
+if [[ ${2:-} == start && ${4:-} == canopywc-shutdown.target ]]; then
   if [[ -f $state/client-pid ]] && kill -0 "$(< "$state/client-pid")" 2>/dev/null; then
     : > "$state/shutdown-before-client-exit"
   fi
@@ -388,9 +388,9 @@ start_session() {
     HOME="$TEST_HOME" \
     PATH="$TEST_BIN:$PATH" \
     DBUS_SESSION_BUS_ADDRESS="unix:path=$TEST_DIR/nonexistent-bus" \
-    UMBRIEL_LOGIN_REENTRY=1 \
-    UMBRIEL_TEST_STATE="$lifecycle_state" \
-    UMBRIEL_TEST_HOLD_START="${2:-false}" \
+    CANOPY_LOGIN_REENTRY=1 \
+    CANOPY_TEST_STATE="$lifecycle_state" \
+    CANOPY_TEST_HOLD_START="${2:-false}" \
     "$LAUNCHER" > "$lifecycle_state/output" 2>&1 &
   lifecycle_launcher_pid=$!
 }

@@ -7,7 +7,7 @@ extern "C" {
 #include <wlr/backend/session.h>
 }
 
-namespace umbriel {
+namespace canopy {
 
   enum class OutputFrameFollowup {
     None,
@@ -81,4 +81,4 @@ namespace umbriel {
     bool m_regularCommitPending = false;
   };
 
-} // namespace umbriel
+} // namespace canopy

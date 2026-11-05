@@ -17,7 +17,7 @@ struct wlr_scene_buffer;
 struct wlr_scene_blur;
 struct wlr_buffer;
 
-namespace umbriel {
+namespace canopy {
   class TabLabelCache;
 
   class SsdFrame final : public ViewChromeAttachment {
@@ -86,4 +86,4 @@ namespace umbriel {
     SsdFramePart m_hovered = SsdFramePart::None;
     SsdFramePart m_pressed = SsdFramePart::None;
   };
-} // namespace umbriel
+} // namespace canopy

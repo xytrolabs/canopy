@@ -23,7 +23,7 @@ struct wlr_scene_tree;
 struct wlr_scene_node;
 struct fx_effect_shader;
 
-namespace umbriel {
+namespace canopy {
 
   class DwindleLayout;
   class MasterStackLayout;
@@ -508,4 +508,4 @@ namespace umbriel {
     Slide m_slide;
   };
 
-} // namespace umbriel
+} // namespace canopy

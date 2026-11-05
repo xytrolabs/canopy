@@ -3,10 +3,10 @@
 # stay clipped to its viewport, and become hidden when that workspace finishes leaving the output.
 set -euo pipefail
 
-readonly SHOTS="$UMBRIEL_RUNTIME_DIR/close-snapshot-workspace"
+readonly SHOTS="$CANOPY_RUNTIME_DIR/close-snapshot-workspace"
 mkdir -p "$SHOTS"
 
-cat > "$UMBRIEL_RUNTIME_DIR/workspace-close-stripe.glsl" <<'GLSL'
+cat > "$CANOPY_RUNTIME_DIR/workspace-close-stripe.glsl" <<'GLSL'
 vec4 animation(vec2 uv) {
     if (uv.x >= 0.70 && uv.x <= 0.78 && uv.y >= 0.55) {
         return vec4(0.0, 1.0, 0.0, 1.0);
@@ -15,7 +15,7 @@ vec4 animation(vec2 uv) {
 }
 GLSL
 
-cat >> "$UMBRIEL_CONFIG" <<'EOF'
+cat >> "$CANOPY_CONFIG" <<'EOF'
 
 [colors]
 backdrop = "#000000FF"
@@ -67,14 +67,14 @@ default_floating = true
 default_floating_size_px = { width = 600, height = 360 }
 default_position = { x = 420, y = 300, anchor = "top_left" }
 EOF
-"$UMBRIEL" msg config-reload > /dev/null
+"$CANOPY" msg config-reload > /dev/null
 
 spawn() {
   local title=$1 color=$2 width=${3:-1280} height=${4:-720}
-  FILL_COLOR="$color" "$UMBRIEL_UNMAP_CLIENT" "$title" "$width" "$height" \
-    > "$UMBRIEL_RUNTIME_DIR/$title.log" 2>&1 &
+  FILL_COLOR="$color" "$CANOPY_UNMAP_CLIENT" "$title" "$width" "$height" \
+    > "$CANOPY_RUNTIME_DIR/$title.log" 2>&1 &
   for _ in $(seq 100); do
-    window=$("$UMBRIEL" windows --json | jq -c --arg title "$title" '.[] | select(.title == $title)')
+    window=$("$CANOPY" windows --json | jq -c --arg title "$title" '.[] | select(.title == $title)')
     [[ -n $window ]] && return 0
     sleep 0.025
   done
@@ -85,8 +85,8 @@ spawn() {
 wait_unmapped() {
   local title=$1
   for _ in $(seq 100); do
-    if grep -q '^unmapped$' "$UMBRIEL_RUNTIME_DIR/$title.log" \
-        && ! "$UMBRIEL" windows --json | jq -e --arg title "$title" 'any(.[]; .title == $title)' > /dev/null; then
+    if grep -q '^unmapped$' "$CANOPY_RUNTIME_DIR/$title.log" \
+        && ! "$CANOPY" windows --json | jq -e --arg title "$title" 'any(.[]; .title == $title)' > /dev/null; then
       return 0
     fi
     sleep 0.025
@@ -96,19 +96,19 @@ wait_unmapped() {
 }
 
 red_pixels() {
-  "$UMBRIEL_PIXEL_PROBE" "$1" count 'r > 0.7 && g < 0.2 && b < 0.2'
+  "$CANOPY_PIXEL_PROBE" "$1" count 'r > 0.7 && g < 0.2 && b < 0.2'
 }
 
 green_pixels() {
-  "$UMBRIEL_PIXEL_PROBE" "$1" count 'r < 0.2 && g > 0.7 && b < 0.2'
+  "$CANOPY_PIXEL_PROBE" "$1" count 'r < 0.2 && g > 0.7 && b < 0.2'
 }
 
 red_bounds() {
-  "$UMBRIEL_PIXEL_PROBE" "$1" bbox 'r > 0.7 && g < 0.2 && b < 0.2'
+  "$CANOPY_PIXEL_PROBE" "$1" bbox 'r > 0.7 && g < 0.2 && b < 0.2'
 }
 
 green_bounds() {
-  "$UMBRIEL_PIXEL_PROBE" "$1" bbox 'r < 0.2 && g > 0.7 && b < 0.2'
+  "$CANOPY_PIXEL_PROBE" "$1" bbox 'r < 0.2 && g > 0.7 && b < 0.2'
 }
 
 absolute() {
@@ -123,17 +123,17 @@ absolute() {
 verify_workspace_slide() {
   local phase=$1 closing_title=$2 anchor_title=$3 destination=$4
   local closing anchor id image label
-  closing=$("$UMBRIEL" windows --json | jq -c --arg title "$closing_title" '.[] | select(.title == $title)')
-  anchor=$("$UMBRIEL" windows --json | jq -c --arg title "$anchor_title" '.[] | select(.title == $title)')
+  closing=$("$CANOPY" windows --json | jq -c --arg title "$closing_title" '.[] | select(.title == $title)')
+  anchor=$("$CANOPY" windows --json | jq -c --arg title "$anchor_title" '.[] | select(.title == $title)')
   if [[ -z $closing || -z $anchor ]]; then
     echo "$phase: source workspace did not contain both the closer and its live anchor"
     return 1
   fi
 
   id=$(jq -r .id <<< "$closing")
-  "$UMBRIEL" msg window-close "$id" > /dev/null
+  "$CANOPY" msg window-close "$id" > /dev/null
   wait_unmapped "$closing_title"
-  "$UMBRIEL" clock-advance 50
+  "$CANOPY" clock-advance 50
 
   image="$SHOTS/$phase-baseline.png"
   grim "$image"
@@ -148,10 +148,10 @@ verify_workspace_slide() {
   local base_delta=$((2 * base_gx + base_gw - 2 * base_rx - base_rw))
   local previous_rx=$base_rx previous_gx=$base_gx
 
-  "$UMBRIEL" msg workspace-switch "$destination" > /dev/null
-  "$UMBRIEL" clock-advance 250
+  "$CANOPY" msg workspace-switch "$destination" > /dev/null
+  "$CANOPY" clock-advance 250
   grim "$SHOTS/$phase-early.png"
-  "$UMBRIEL" clock-advance 350
+  "$CANOPY" clock-advance 350
   grim "$SHOTS/$phase-middle.png"
 
   for label in early middle; do
@@ -181,7 +181,7 @@ verify_workspace_slide() {
   done
 
   # The slide has ended, but the four-second close timeline has not. Workspace ownership must hide both objects.
-  "$UMBRIEL" clock-advance 750
+  "$CANOPY" clock-advance 750
   image="$SHOTS/$phase-settled.png"
   grim "$image"
   local final_red final_green
@@ -194,19 +194,19 @@ verify_workspace_slide() {
 }
 
 spawn ownership-tiled-close 0xFF0000FF
-"$UMBRIEL" settle
+"$CANOPY" settle
 spawn ownership-tiled-anchor 0xFFFF0000
-"$UMBRIEL" settle
+"$CANOPY" settle
 # Animation time only moves by clock-advance: slide samples land 250 ms and 600 ms into the 1200 ms workspace slide,
 # and the settled sample at 1350 ms, still inside the 4000 ms close timeline.
-"$UMBRIEL" clock-freeze
+"$CANOPY" clock-freeze
 verify_workspace_slide tiled ownership-tiled-close ownership-tiled-anchor 2
-"$UMBRIEL" clock-advance 4000
+"$CANOPY" clock-advance 4000
 
 spawn ownership-floating-close 0xFF0000FF 600 360
-"$UMBRIEL" settle
+"$CANOPY" settle
 spawn ownership-floating-anchor 0xFFFF0000 120 120
-"$UMBRIEL" settle
+"$CANOPY" settle
 verify_workspace_slide floating ownership-floating-close ownership-floating-anchor 3
 
 echo "tiled and floating close snapshots stayed owned by their source workspaces throughout horizontal slides"

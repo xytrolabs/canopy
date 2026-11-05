@@ -30,7 +30,7 @@ def main():
     if child_pid == 0:
         compositor.close()
         server.close()
-        binary = os.environ["UMBRIEL_XWAYLAND_REAL_BINARY"]
+        binary = os.environ["CANOPY_XWAYLAND_REAL_BINARY"]
         os.execv(binary, [binary, *arguments])
 
     child_socket.close()
@@ -46,10 +46,10 @@ def main():
                 pass
 
     control = os.open(
-        os.environ["UMBRIEL_XWAYLAND_ASSOCIATION_CONTROL"],
+        os.environ["CANOPY_XWAYLAND_ASSOCIATION_CONTROL"],
         os.O_RDWR | os.O_NONBLOCK,
     )
-    with open(os.environ["UMBRIEL_XWAYLAND_ASSOCIATION_LOG"], "a", buffering=1) as log:
+    with open(os.environ["CANOPY_XWAYLAND_ASSOCIATION_LOG"], "a", buffering=1) as log:
         trace = lambda message: print(f"{time.monotonic():.6f} {message}", file=log)
         endian = None
         client_setup = True

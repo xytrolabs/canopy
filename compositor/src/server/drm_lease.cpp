@@ -6,16 +6,16 @@
 #include <memory>
 #include <vector>
 
-#if UMBRIEL_HAS_DRM_BACKEND
+#if CANOPY_HAS_DRM_BACKEND
 extern "C" {
 #include <wlr/backend/drm.h>
 #include <wlr/types/wlr_drm_lease_v1.h>
 }
 #endif
 
-namespace umbriel {
+namespace canopy {
 
-#if UMBRIEL_HAS_DRM_BACKEND
+#if CANOPY_HAS_DRM_BACKEND
   namespace {
     constexpr Logger kLog("drm-lease");
   } // namespace
@@ -24,7 +24,7 @@ namespace umbriel {
   class DrmLeaseManager::Impl {
   public:
     Impl(wl_display* display, wlr_backend* backend) {
-#if UMBRIEL_HAS_DRM_BACKEND
+#if CANOPY_HAS_DRM_BACKEND
       m_display = display;
       if (wlr_backend_is_multi(backend)) {
         wlr_multi_for_each_backend(
@@ -45,7 +45,7 @@ namespace umbriel {
       if (!output->non_desktop) {
         return false;
       }
-#if UMBRIEL_HAS_DRM_BACKEND
+#if CANOPY_HAS_DRM_BACKEND
       if (!wlr_output_is_drm(output)) {
         return false;
       }
@@ -61,7 +61,7 @@ namespace umbriel {
     }
 
     void setActive(bool active) {
-#if UMBRIEL_HAS_DRM_BACKEND
+#if CANOPY_HAS_DRM_BACKEND
       // Revoking a lease can synchronously announce its outputs again. Close
       // the request gate first, and let the normal output path reoffer them.
       m_active = active;
@@ -87,7 +87,7 @@ namespace umbriel {
     }
 
   private:
-#if UMBRIEL_HAS_DRM_BACKEND
+#if CANOPY_HAS_DRM_BACKEND
     struct Manager {
       Impl* owner = nullptr;
       wlr_drm_lease_v1_manager* manager = nullptr;
@@ -181,4 +181,4 @@ namespace umbriel {
 
   void DrmLeaseManager::setActive(bool active) { m_impl->setActive(active); }
 
-} // namespace umbriel
+} // namespace canopy

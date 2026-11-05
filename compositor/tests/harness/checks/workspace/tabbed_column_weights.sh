@@ -6,45 +6,45 @@ set -euo pipefail
 
 wait_for_windows() {
   for _ in $(seq 60); do
-    [[ $("$UMBRIEL" windows --json | jq length) == "$1" ]] && return 0
+    [[ $("$CANOPY" windows --json | jq length) == "$1" ]] && return 0
     sleep 0.05
   done
   echo "expected $1 windows"
   return 1
 }
 
-"$UMBRIEL" msg workspace-next
-"$UMBRIEL" msg workspace-set-layout scrolling
-"$UMBRIEL" msg workspace-previous
-"$UMBRIEL" msg workspace-set-layout master
-foot --title=group-weight-a sh -c 'sleep 120' > "$UMBRIEL_RUNTIME_DIR/a.log" 2>&1 &
+"$CANOPY" msg workspace-next
+"$CANOPY" msg workspace-set-layout scrolling
+"$CANOPY" msg workspace-previous
+"$CANOPY" msg workspace-set-layout master
+foot --title=group-weight-a sh -c 'sleep 120' > "$CANOPY_RUNTIME_DIR/a.log" 2>&1 &
 wait_for_windows 1
-foot --title=group-weight-b sh -c 'sleep 120' > "$UMBRIEL_RUNTIME_DIR/b.log" 2>&1 &
+foot --title=group-weight-b sh -c 'sleep 120' > "$CANOPY_RUNTIME_DIR/b.log" 2>&1 &
 wait_for_windows 2
-"$UMBRIEL" msg layout-master-count-increase
-"$UMBRIEL" settle
-read -r first last <<< "$("$UMBRIEL" windows --json | jq -r 'sort_by(.y) | "\(.[0].id) \(.[1].id)"')"
-"$UMBRIEL" msg window-focus "$first"
-"$UMBRIEL" msg window-set-secondary-extent 0.25
-"$UMBRIEL" settle
-source=$("$UMBRIEL" windows --json)
+"$CANOPY" msg layout-master-count-increase
+"$CANOPY" settle
+read -r first last <<< "$("$CANOPY" windows --json | jq -r 'sort_by(.y) | "\(.[0].id) \(.[1].id)"')"
+"$CANOPY" msg window-focus "$first"
+"$CANOPY" msg window-set-secondary-extent 0.25
+"$CANOPY" settle
+source=$("$CANOPY" windows --json)
 if ! jq -e --arg first "$first" --arg last "$last" '
   (.[] | select(.id == $first) | .h) < (.[] | select(.id == $last) | .h)
 ' <<< "$source" > /dev/null; then
   echo "master source rows did not acquire unequal proportions: $source"
   exit 1
 fi
-"$UMBRIEL" msg column-set-display tabbed
-"$UMBRIEL" msg column-move-to-workspace-next
-"$UMBRIEL" settle
-"$UMBRIEL" msg window-focus "$last"
-"$UMBRIEL" msg window-move-down
-"$UMBRIEL" settle
-foot --title=group-weight-incoming sh -c 'sleep 120' > "$UMBRIEL_RUNTIME_DIR/incoming.log" 2>&1 &
+"$CANOPY" msg column-set-display tabbed
+"$CANOPY" msg column-move-to-workspace-next
+"$CANOPY" settle
+"$CANOPY" msg window-focus "$last"
+"$CANOPY" msg window-move-down
+"$CANOPY" settle
+foot --title=group-weight-incoming sh -c 'sleep 120' > "$CANOPY_RUNTIME_DIR/incoming.log" 2>&1 &
 wait_for_windows 3
-"$UMBRIEL" msg window-consume-left
-"$UMBRIEL" settle
-windows=$("$UMBRIEL" windows --json)
+"$CANOPY" msg window-consume-left
+"$CANOPY" settle
+windows=$("$CANOPY" windows --json)
 if ! jq -e --arg first "$first" --arg last "$last" '
   length == 3
   and all(.[]; (.tab_hidden | not))

@@ -140,7 +140,7 @@ default_extent_fraction = 0.4
 
 A workspace rule can override both global and output defaults. Reloading these settings affects new columns only.
 
-When focus moves to a hidden column, Umbriel scrolls just far enough to reveal it. Dragged windows show an insertion preview and can be dropped into a new or existing column.
+When focus moves to a hidden column, Canopy scrolls just far enough to reveal it. Dragged windows show an insertion preview and can be dropped into a new or existing column.
 
 During an application drag-and-drop operation, holding the pointer near either edge of the scrolling axis reveals offscreen columns after a short delay. The strip moves faster as the pointer approaches the edge, and stops when the pointer moves away or the drag ends. A window revealed beneath a stationary pointer becomes the active drop target, so the file or other payload can be dropped without extra pointer motion.
 
@@ -148,7 +148,7 @@ Rearranging a tiled window by dragging it (Mod+left-click or its tab) pans the s
 
 With `center_focused = "on_overflow"`, a column is centered when it and the neighbor focus came from cannot share the viewport, and a width change that makes them fit puts the pair back side by side at the edge focus came from. Closing the focused column or sending it to another workspace runs the same rule with the column that took its place. Moving or resizing the focused column does too, as does going fullscreen or maximized to edges. A lone column has no such pair, so it never centers itself; `center_underfull_strip` decides where it rests.
 
-Closing a focused column moves focus to the nearest surviving column. When that column contains stacked windows, Umbriel restores its most recently focused member instead of always selecting its first row.
+Closing a focused column moves focus to the nearest surviving column. When that column contains stacked windows, Canopy restores its most recently focused member instead of always selecting its first row.
 
 With `follows_mouse = true`, closing a focused window beneath the pointer instead focuses the tiled window that occupies that position after the layout reflows. This also applies when another row in the same scrolling column expands into the stationary pointer.
 
@@ -282,7 +282,7 @@ A wide column scrolls like a strip longer than the output: `layout-scroll-left`,
 
 ### Client minimum sizes
 
-Applications may enforce a minimum size larger than their assigned tile. Umbriel clips oversized content rather than allowing it to cover neighboring tiles. Application-specific minimums must be disabled in that application's settings when smaller tiles are required.
+Applications may enforce a minimum size larger than their assigned tile. Canopy clips oversized content rather than allowing it to cover neighboring tiles. Application-specific minimums must be disabled in that application's settings when smaller tiles are required.
 
 ### Floating windows
 
@@ -306,9 +306,9 @@ The dialog leaves when it stops being modal or closes, and becomes an ordinary f
 
 ### Minimize
 
-Only floating windows minimize: `window-minimize`, the minimize button of Umbriel's [title bar](appearance.md#title-bar) or of the application, or a taskbar can hide one. Tiled, pinned, fullscreen, and scratchpad windows do not minimize, and applications and the title bar offer minimize only while the window floats. Tiling a minimized window, for example by switching its workspace to a tiling layout, shows it again.
+Only floating windows minimize: `window-minimize`, the minimize button of Canopy's [title bar](appearance.md#title-bar) or of the application, or a taskbar can hide one. Tiled, pinned, fullscreen, and scratchpad windows do not minimize, and applications and the title bar offer minimize only while the window floats. Tiling a minimized window, for example by switching its workspace to a tiling layout, shows it again.
 
-A minimized window keeps its workspace, position, size, and stacking. It stays in taskbars and in `umbriel windows`, where it reports `minimized` (see [IPC](ipc.md)). When the focused window is minimized, focus moves to another window on the workspace. Focus cycling, directional focus, `window-focus-last`, and the overview skip minimized windows.
+A minimized window keeps its workspace, position, size, and stacking. It stays in taskbars and in `canopywc windows`, where it reports `minimized` (see [IPC](ipc.md)). When the focused window is minimized, focus moves to another window on the workspace. Focus cycling, directional focus, `window-focus-last`, and the overview skip minimized windows.
 
 A minimized window comes back when:
 
@@ -317,7 +317,7 @@ A minimized window comes back when:
 - `window-focus` or `window-focus-warp` names it,
 - a modal dialog attaches to it.
 
-Without a taskbar, `window-restore-minimized` restores the most recently minimized window of the active workspace; repeat it to restore the one before. For a specific window, find its ID with `umbriel windows --json` and run `umbriel msg window-focus <window-id>`.
+Without a taskbar, `window-restore-minimized` restores the most recently minimized window of the active workspace; repeat it to restore the one before. For a specific window, find its ID with `canopywc windows --json` and run `canopywc msg window-focus <window-id>`.
 
 `workspace-toggle-show-desktop` minimizes every floating window of the active workspace. Once none is left to hide, the next toggle restores every minimized window of that workspace, including ones minimized another way, and returns focus to the window that had it.
 

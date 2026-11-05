@@ -57,9 +57,9 @@ namespace {
 
 } // namespace
 
-UMBRIEL_TEST(edidStaticMetadataPopulatesHdrOutputDescription) {
+CANOPY_TEST(edidStaticMetadataPopulatesHdrOutputDescription) {
   const auto edid = hdrEdid();
-  const auto metadata = umbriel::hdrStaticMetadataFromEdid(edid);
+  const auto metadata = canopy::hdrStaticMetadataFromEdid(edid);
   CHECK(metadata.has_value());
   if (!metadata) {
     return;
@@ -75,7 +75,7 @@ UMBRIEL_TEST(edidStaticMetadataPopulatesHdrOutputDescription) {
       .blue = {.x = 0.15F, .y = 0.06F},
       .white = {.x = 0.3127F, .y = 0.329F},
   };
-  const wlr_output_image_description description = umbriel::makeHdrOutputDescription(&displayPrimaries, metadata);
+  const wlr_output_image_description description = canopy::makeHdrOutputDescription(&displayPrimaries, metadata);
   CHECK(description.primaries == WLR_COLOR_NAMED_PRIMARIES_BT2020);
   CHECK(description.transfer_function == WLR_COLOR_TRANSFER_FUNCTION_ST2084_PQ);
   CHECK_NEAR(description.mastering_luminance.min, metadata->minLuminance, 0.01);
@@ -86,8 +86,8 @@ UMBRIEL_TEST(edidStaticMetadataPopulatesHdrOutputDescription) {
   CHECK_NEAR(description.mastering_display_primaries.white.y, displayPrimaries.white.y, 0.01);
 }
 
-UMBRIEL_TEST(hdrDescriptionFallsBackToBt2020TargetPrimaries) {
-  const wlr_output_image_description description = umbriel::makeHdrOutputDescription(nullptr, std::nullopt);
+CANOPY_TEST(hdrDescriptionFallsBackToBt2020TargetPrimaries) {
+  const wlr_output_image_description description = canopy::makeHdrOutputDescription(nullptr, std::nullopt);
   wlr_color_primaries bt2020{};
   wlr_color_primaries_from_named(&bt2020, WLR_COLOR_NAMED_PRIMARIES_BT2020);
 
@@ -100,9 +100,9 @@ UMBRIEL_TEST(hdrDescriptionFallsBackToBt2020TargetPrimaries) {
   CHECK_EQ(description.max_fall, 0.0);
 }
 
-UMBRIEL_TEST(nonHdrEdidDoesNotProduceStaticMetadata) {
+CANOPY_TEST(nonHdrEdidDoesNotProduceStaticMetadata) {
   std::array<uint8_t, 128> edid{};
-  CHECK(!umbriel::hdrStaticMetadataFromEdid(edid).has_value());
+  CHECK(!canopy::hdrStaticMetadataFromEdid(edid).has_value());
 }
 
 int main() { return RUN_TESTS(); }

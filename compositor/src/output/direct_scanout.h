@@ -3,7 +3,7 @@
 #include <cstdint>
 #include <string>
 
-namespace umbriel {
+namespace canopy {
 
   // Whether an output scans a client buffer out directly, which window owns it, or why the output composites instead.
   struct DirectScanoutState {
@@ -78,4 +78,4 @@ namespace umbriel {
     uint32_t m_commitSeq = 0;
   };
 
-} // namespace umbriel
+} // namespace canopy

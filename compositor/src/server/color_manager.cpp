@@ -17,7 +17,7 @@
 #include <utility>
 #include <vector>
 
-namespace umbriel {
+namespace canopy {
 
   namespace {
 
@@ -1164,4 +1164,4 @@ namespace umbriel {
 
   void ColorManager::updatePreferredDescriptions() { m_impl->updatePreferredDescriptions(); }
 
-} // namespace umbriel
+} // namespace canopy

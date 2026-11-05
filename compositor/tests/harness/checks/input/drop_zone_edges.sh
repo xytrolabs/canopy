@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # Every edge and corner has a matching preview and placement, including on fractional-scale outputs.
 set -euo pipefail
-source "$(dirname "$UMBRIEL_HARNESS_LIB")/title_bar.sh"
-cat >>"$UMBRIEL_CONFIG" <<'CONFIG'
+source "$(dirname "$CANOPY_HARNESS_LIB")/title_bar.sh"
+cat >>"$CANOPY_CONFIG" <<'CONFIG'
 [layout]
 mode = "stacking"
 [layout.stacking]
@@ -24,18 +24,18 @@ match.title = "^region-edges$"
 default_floating = true
 default_position = { x = 173, y = 109, anchor = "top_left" }
 CONFIG
-"$UMBRIEL" msg config-reload >/dev/null
-"$UMBRIEL_FRACTIONAL_CLIENT" region-edges 480 300 >"$UMBRIEL_RUNTIME_DIR/client.log" 2>&1 &
+"$CANOPY" msg config-reload >/dev/null
+"$CANOPY_FRACTIONAL_CLIENT" region-edges 480 300 >"$CANOPY_RUNTIME_DIR/client.log" 2>&1 &
 title_bar_wait_box region-edges 480x300+173+109
 for scale in 1 1.25; do
   if [[ $scale == 1.25 ]]; then
-    cat >>"$UMBRIEL_CONFIG" <<'CONFIG'
+    cat >>"$CANOPY_CONFIG" <<'CONFIG'
 [output."HEADLESS-1"]
 scale = 1.25
 CONFIG
-    "$UMBRIEL" msg config-reload >/dev/null
+    "$CANOPY" msg config-reload >/dev/null
   fi
-  "$UMBRIEL" settle >/dev/null
+  "$CANOPY" settle >/dev/null
   width=1280
   height=720
   [[ $scale == 1 ]] || {
@@ -79,8 +79,8 @@ CONFIG
     expected=$(awk -v x="$x" -v y="$y" -v w="$w" -v h="$h" -v s="$scale" 'BEGIN { printf "%d %d %d %d", x*s, y*s, w*s, h*s }')
     bounds=
     for _ in $(seq 60); do
-      grim "$UMBRIEL_RUNTIME_DIR/preview.png"
-      bounds=$("$UMBRIEL_PIXEL_PROBE" "$UMBRIEL_RUNTIME_DIR/preview.png" bbox 'r < 0.1 && g > 0.9 && b > 0.9')
+      grim "$CANOPY_RUNTIME_DIR/preview.png"
+      bounds=$("$CANOPY_PIXEL_PROBE" "$CANOPY_RUNTIME_DIR/preview.png" bbox 'r < 0.1 && g > 0.9 && b > 0.9')
       [[ $bounds == "$expected" ]] && break
       sleep 0.025
     done
@@ -92,7 +92,7 @@ CONFIG
     title_bar_wait_field region-edges region "$region"
     title_bar_wait_field region-edges maximized false
     title_bar_wait_box region-edges "${w}x$((h - 28))+${x}+$((y + 28))"
-    "$UMBRIEL" msg window-clear-region >/dev/null
+    "$CANOPY" msg window-clear-region >/dev/null
     title_bar_wait_field region-edges region null
     title_bar_wait_box region-edges 480x300+173+109
   done

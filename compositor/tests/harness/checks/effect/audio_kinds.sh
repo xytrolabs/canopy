@@ -2,27 +2,27 @@
 # Border, window, cursor, and animation presets read the external spectrum and availability like the screen preset
 # in effect/audio: each kind's pixels follow the spectrum a producer sends and report the feed as available.
 set -euo pipefail
-readonly IMAGE="$UMBRIEL_RUNTIME_DIR/effect-audio-kinds.png"
-readonly LEVEL="$UMBRIEL_RUNTIME_DIR/audio-level"
-readonly BASE="$UMBRIEL_RUNTIME_DIR/effect-audio-kinds-base.toml"
-cp "$UMBRIEL_CONFIG" "$BASE"
+readonly IMAGE="$CANOPY_RUNTIME_DIR/effect-audio-kinds.png"
+readonly LEVEL="$CANOPY_RUNTIME_DIR/audio-level"
+readonly BASE="$CANOPY_RUNTIME_DIR/effect-audio-kinds-base.toml"
+cp "$CANOPY_CONFIG" "$BASE"
 
 # Red is the lowest band and green the availability, so a lit green channel also proves the feed reached the shader.
 for kind in border window cursor animation; do
-  cat > "$UMBRIEL_RUNTIME_DIR/$kind.glsl" <<GLSL
-vec4 $kind(vec2 uv) { return vec4(umbriel_audio_spectrum(0.0), umbriel_audio_available(), 0.0, 1.0); }
+  cat > "$CANOPY_RUNTIME_DIR/$kind.glsl" <<GLSL
+vec4 $kind(vec2 uv) { return vec4(canopy_audio_spectrum(0.0), canopy_audio_available(), 0.0, 1.0); }
 GLSL
 done
 
 # Keeps one producer connection fresh, sending whatever level the file holds.
-cat > "$UMBRIEL_RUNTIME_DIR/audio-feed.py" <<'PY'
+cat > "$CANOPY_RUNTIME_DIR/audio-feed.py" <<'PY'
 import json
 import os
 import socket
 import time
 
 sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
-sock.connect(os.environ['UMBRIEL_SOCKET'])
+sock.connect(os.environ['CANOPY_SOCKET'])
 while True:
     with open(os.environ['AUDIO_LEVEL_FILE']) as level:
         value = float(level.read())
@@ -37,12 +37,12 @@ set_level() {
   mv "$LEVEL.tmp" "$LEVEL"
 }
 set_level 1
-AUDIO_LEVEL_FILE="$LEVEL" python3 "$UMBRIEL_RUNTIME_DIR/audio-feed.py" > "$UMBRIEL_RUNTIME_DIR/audio-feed.log" 2>&1 &
+AUDIO_LEVEL_FILE="$LEVEL" python3 "$CANOPY_RUNTIME_DIR/audio-feed.py" > "$CANOPY_RUNTIME_DIR/audio-feed.log" 2>&1 &
 
 # A fresh config per kind: $1 is the border width, $2 whether animations run, $3 the [effects] selection.
 reset_config() {
-  cat "$BASE" > "$UMBRIEL_CONFIG"
-  cat >> "$UMBRIEL_CONFIG" <<EOF
+  cat "$BASE" > "$CANOPY_CONFIG"
+  cat >> "$CANOPY_CONFIG" <<EOF
 
 [colors]
 backdrop = "#000000FF"
@@ -67,14 +67,14 @@ EOF
 }
 # The preset every kind selects: $1 is its kind, $2 any extra key.
 preset() {
-  printf '[effects.preset.audio]\nkind = "%s"\nshader = "%s.glsl"\n%s\n' "$1" "$1" "${2:-}" >> "$UMBRIEL_CONFIG"
-  "$UMBRIEL" msg config-reload > /dev/null
+  printf '[effects.preset.audio]\nkind = "%s"\nshader = "%s.glsl"\n%s\n' "$1" "$1" "${2:-}" >> "$CANOPY_CONFIG"
+  "$CANOPY" msg config-reload > /dev/null
 }
 
 spawn() {
-  FILL_COLOR=0xFF0000FF "$UMBRIEL_UNMAP_CLIENT" "$1" 300 200 > "$UMBRIEL_RUNTIME_DIR/$1.log" 2>&1 &
+  FILL_COLOR=0xFF0000FF "$CANOPY_UNMAP_CLIENT" "$1" 300 200 > "$CANOPY_RUNTIME_DIR/$1.log" 2>&1 &
   for _ in $(seq 80); do
-    window=$("$UMBRIEL" windows --json | jq -c --arg title "$1" '.[] | select(.title == $title)')
+    window=$("$CANOPY" windows --json | jq -c --arg title "$1" '.[] | select(.title == $title)')
     [[ -n $window ]] && break
     sleep 0.025
   done
@@ -87,7 +87,7 @@ await_audio() {
   local r g b
   for _ in $(seq 80); do
     grim "$IMAGE"
-    read -r r g b < <("$UMBRIEL_PIXEL_PROBE" "$IMAGE" pixel "$1" "$2")
+    read -r r g b < <("$CANOPY_PIXEL_PROBE" "$IMAGE" pixel "$1" "$2")
     if (( r >= $3 - 6 && r <= $3 + 6 && g > 250 )); then
       return 0
     fi
@@ -109,28 +109,28 @@ assert_follows() {
 reset_config 4 false 'border = "audio"'
 preset border 'padding = 20'
 spawn audio-kind-border
-"$UMBRIEL" settle > /dev/null
+"$CANOPY" settle > /dev/null
 assert_follows "$((x + w / 2))" "$((y - 12))" "the border preset"
-"$UMBRIEL" msg window-close > /dev/null
+"$CANOPY" msg window-close > /dev/null
 
 ### Window: the middle of the window.
 reset_config 0 false 'window = "audio"'
 preset window
 spawn audio-kind-window
-"$UMBRIEL" settle > /dev/null
+"$CANOPY" settle > /dev/null
 assert_follows "$((x + w / 2))" "$((y + h / 2))" "the window preset"
-"$UMBRIEL" msg window-close > /dev/null
+"$CANOPY" msg window-close > /dev/null
 
 ### Cursor: the pointer's own pixel.
 reset_config 0 false 'cursor = "audio"'
 preset cursor 'radius = 40'
-"$UMBRIEL_POINTER_CLIENT" 1280 720 move 300 300 > /dev/null
-"$UMBRIEL" settle > /dev/null
+"$CANOPY_POINTER_CLIENT" 1280 720 move 300 300 > /dev/null
+"$CANOPY" settle > /dev/null
 assert_follows 300 300 "the cursor preset"
 
 ### Animation: an opening window held at the start of a long animation.
 reset_config 0 true ''
-cat >> "$UMBRIEL_CONFIG" <<'EOF'
+cat >> "$CANOPY_CONFIG" <<'EOF'
 [animation.windows_in]
 style = "none"
 effect = "audio"
@@ -138,6 +138,6 @@ duration_ms = 10000
 curve = "linear"
 EOF
 preset animation
-"$UMBRIEL" clock-freeze
+"$CANOPY" clock-freeze
 spawn audio-kind-animation
 assert_follows "$((x + w / 2))" "$((y + h / 2))" "the animation preset"

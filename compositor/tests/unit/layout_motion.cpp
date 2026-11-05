@@ -6,9 +6,9 @@
 #include <span>
 #include <vector>
 
-using umbriel::interpolateBox;
-using umbriel::keepsSeparation;
-using umbriel::MotionBox;
+using canopy::interpolateBox;
+using canopy::keepsSeparation;
+using canopy::MotionBox;
 
 namespace {
 
@@ -60,14 +60,14 @@ namespace {
 
 } // namespace
 
-UMBRIEL_TEST(interpolateBoxEndpointsAreExact) {
+CANOPY_TEST(interpolateBoxEndpointsAreExact) {
   const wlr_box from{3, 7, 100, 50};
   const wlr_box to{-40, 12, 5, 0};
   CHECK(sameBox(interpolateBox(from, to, 0.0), from));
   CHECK(sameBox(interpolateBox(from, to, 1.0), to));
 }
 
-UMBRIEL_TEST(interpolateBoxEdgesMoveMonotonically) {
+CANOPY_TEST(interpolateBoxEdgesMoveMonotonically) {
   const wlr_box from{0, 0, 7, 7};
   const wlr_box to{100, 0, 13, 7};
   int lastLeft = from.x;
@@ -81,7 +81,7 @@ UMBRIEL_TEST(interpolateBoxEdgesMoveMonotonically) {
   }
 }
 
-UMBRIEL_TEST(interpolateBoxSplitsPositionFromSize) {
+CANOPY_TEST(interpolateBoxSplitsPositionFromSize) {
   const wlr_box from{0, 0, 800, 900};
   const wlr_box to{400, 500, 400, 400};
   // A resize that has finished while the move is a quarter done: the final size at a quarter of the travel.
@@ -94,7 +94,7 @@ UMBRIEL_TEST(interpolateBoxSplitsPositionFromSize) {
   }
 }
 
-UMBRIEL_TEST(establishedColumnsStaySeparateDuringInsertionReflow) {
+CANOPY_TEST(establishedColumnsStaySeparateDuringInsertionReflow) {
   const std::vector<MotionBox> peers{
       {{0, 0, 600, 800}, kColumnA},
       {{600 + kGap, 0, 600, 800}, kColumnB},
@@ -103,7 +103,7 @@ UMBRIEL_TEST(establishedColumnsStaySeparateDuringInsertionReflow) {
   checkAllKeepSeparation(peers);
 }
 
-UMBRIEL_TEST(establishedColumnsStaySeparateDuringClosingReflow) {
+CANOPY_TEST(establishedColumnsStaySeparateDuringClosingReflow) {
   const std::vector<MotionBox> peers{
       {kColumnA, {0, 0, 600, 800}},
       {kColumnC, {600 + kGap, 0, 600, 800}},
@@ -112,7 +112,7 @@ UMBRIEL_TEST(establishedColumnsStaySeparateDuringClosingReflow) {
   checkAllKeepSeparation(peers);
 }
 
-UMBRIEL_TEST(keepsSeparationFlagsRearrangements) {
+CANOPY_TEST(keepsSeparationFlagsRearrangements) {
   const int rowHeight = (800 - kGap) / 2;
   // A above B becomes A left of B (expel), C shifts right to make room.
   const MotionBox a{{0, 0, 400, rowHeight}, kColumnA};

@@ -10,7 +10,7 @@ struct wlr_input_device;
 struct wlr_keyboard;
 struct wlr_keyboard_modifiers;
 
-namespace umbriel {
+namespace canopy {
 
   class Server;
 
@@ -44,4 +44,4 @@ namespace umbriel {
     wlr_keyboard* sourceKeyboard() const;
   };
 
-} // namespace umbriel
+} // namespace canopy

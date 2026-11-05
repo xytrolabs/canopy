@@ -13,7 +13,7 @@
 #include "workspace/scratchpad.h"
 #include "workspace/workspace.h"
 
-namespace umbriel {
+namespace canopy {
 
   View* View::placementRoot() {
     View* root = this;
@@ -316,4 +316,4 @@ namespace umbriel {
     wlr_scene_node_set_enabled(&m_modalShade->node, alpha > 0.0F);
   }
 
-} // namespace umbriel
+} // namespace canopy

@@ -9,7 +9,7 @@
 
 struct wlr_keyboard;
 
-namespace umbriel {
+namespace canopy {
 
   class Server;
 
@@ -61,4 +61,4 @@ namespace umbriel {
     std::unique_ptr<Impl> m_impl;
   };
 
-} // namespace umbriel
+} // namespace canopy

@@ -5,30 +5,30 @@
 # floatingKeepVisible: a quarter of the window, at least 10px and at most 75px,
 # stays inside the usable area per axis.
 set -euo pipefail
-source "$UMBRIEL_HARNESS_LIB"
+source "$CANOPY_HARNESS_LIB"
 
 readonly TITLE=release-settle
-readonly CLIENT="${UMBRIEL_FRACTIONAL_CLIENT:-./build-debug/fractional-client}"
-readonly CLIENT_LOG="$UMBRIEL_RUNTIME_DIR/release-settle.log"
+readonly CLIENT="${CANOPY_FRACTIONAL_CLIENT:-./build-debug/fractional-client}"
+readonly CLIENT_LOG="$CANOPY_RUNTIME_DIR/release-settle.log"
 readonly BTN_LEFT=272 # evdev BTN_LEFT
 readonly OUTPUT_W=1280
 readonly OUTPUT_H=720
 
 ipc_box() {
-  "$UMBRIEL" windows --json | jq -r --arg title "$TITLE" '.[] | select(.title == $title) | "\(.x) \(.y) \(.w) \(.h)"'
+  "$CANOPY" windows --json | jq -r --arg title "$TITLE" '.[] | select(.title == $title) | "\(.x) \(.y) \(.w) \(.h)"'
 }
 
 # The IPC box is the animation target; the presented sliver is what the user
 # sees, so the interpolation is sampled from pixels.
 capture_width() {
-  local image="$UMBRIEL_RUNTIME_DIR/$1.png"
+  local image="$CANOPY_RUNTIME_DIR/$1.png"
   local w
   grim "$image"
-  read -r _ _ w _ < <("$UMBRIEL_PIXEL_PROBE" "$image" bbox 'r > 0.01 || g > 0.01 || b > 0.01')
+  read -r _ _ w _ < <("$CANOPY_PIXEL_PROBE" "$image" bbox 'r > 0.01 || g > 0.01 || b > 0.01')
   echo "$w"
 }
 
-cat >> "$UMBRIEL_CONFIG" <<'EOF'
+cat >> "$CANOPY_CONFIG" <<'EOF'
 
 [animation.windows_move]
 duration_ms = 2000
@@ -50,14 +50,14 @@ match.title = "^release-settle$"
 default_floating = true
 default_floating_size_px = { width = 700, height = 700 }
 EOF
-"$UMBRIEL" msg config-reload > /dev/null
+"$CANOPY" msg config-reload > /dev/null
 
 "$CLIENT" "$TITLE" 700 700 > "$CLIENT_LOG" 2>&1 &
 for _ in $(seq 60); do
   [[ -n $(ipc_box) ]] && break
   sleep 0.25
 done
-"$UMBRIEL" settle
+"$CANOPY" settle
 
 # Grab near the right edge and shove the window to the left border: at the
 # drop only 11px of the 700px window are still visible, and the margin (75px)
@@ -72,14 +72,14 @@ pointer_hold "$OUTPUT_W" "$OUTPUT_H" \
 # Freeze the clock before release so the settle is sampled halfway through its
 # linear timeline: the visible sliver must sit strictly between the drop's 11px
 # and the margin's 75px. A flash jumps straight to 75.
-"$UMBRIEL" clock-freeze
+"$CANOPY" clock-freeze
 pointer_release
 w0=$(capture_width drop)
-"$UMBRIEL" clock-advance 1000
+"$CANOPY" clock-advance 1000
 w1=$(capture_width mid)
-"$UMBRIEL" clock-advance 2000
+"$CANOPY" clock-advance 2000
 w2=$(capture_width settled)
-"$UMBRIEL" clock-resume
+"$CANOPY" clock-resume
 
 if ! ((w0 <= 12 && w0 < w1 && w1 < w2 && w2 >= 74 && w2 <= 76)); then
   echo "the release settle did not animate through the margin (slivers: $w0 -> $w1 -> $w2)"

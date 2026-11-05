@@ -5,10 +5,10 @@ set -euo pipefail
 
 readonly OUTPUT_W=1280
 readonly OUTPUT_H=720
-readonly POINTER="${UMBRIEL_POINTER_CLIENT:-./build-debug/tests/pointer-client}"
-readonly CLIENT="${UMBRIEL_UNMAP_CLIENT:-./build-debug/tests/unmap-client}"
+readonly POINTER="${CANOPY_POINTER_CLIENT:-./build-debug/tests/pointer-client}"
+readonly CLIENT="${CANOPY_UNMAP_CLIENT:-./build-debug/tests/unmap-client}"
 
-windows() { "$UMBRIEL" windows --json; }
+windows() { "$CANOPY" windows --json; }
 
 spawn_client() {
   "$CLIENT" "$1" "${2:-1200}" "${3:-700}" > /dev/null 2>&1 &
@@ -38,7 +38,7 @@ wait_for_active() {
   return 1
 }
 
-cat >> "$UMBRIEL_CONFIG" <<'EOF'
+cat >> "$CANOPY_CONFIG" <<'EOF'
 
 [animation]
 enabled = false
@@ -53,7 +53,7 @@ default_pinned = true
 default_floating_size_px = { width = 300, height = 200 }
 default_position = { x = 100, y = 100, anchor = "top_left" }
 EOF
-"$UMBRIEL" msg config-reload > /dev/null
+"$CANOPY" msg config-reload > /dev/null
 
 spawn_client workspace-one
 wait_for_count 1
@@ -61,7 +61,7 @@ spawn_client pinned-hover 300 200
 wait_for_count 2
 wait_for_active pinned-hover
 
-"$UMBRIEL" msg workspace-switch 2 > /dev/null
+"$CANOPY" msg workspace-switch 2 > /dev/null
 spawn_client workspace-two
 wait_for_count 3
 wait_for_active workspace-two
@@ -69,7 +69,7 @@ wait_for_active workspace-two
 # Focus the pinned window explicitly so the handoff does not depend on how the workspace switch itself selected focus.
 "$POINTER" "$OUTPUT_W" "$OUTPUT_H" move 200 200
 pin_id=$(windows | jq -r '.[] | select(.title == "pinned-hover") | .id')
-"$UMBRIEL" msg window-focus "$pin_id" > /dev/null
+"$CANOPY" msg window-focus "$pin_id" > /dev/null
 wait_for_active pinned-hover
 
 # Moving onto the workspace's own window must hand seat focus back to it.

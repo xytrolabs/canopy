@@ -4,7 +4,7 @@
 
 struct wlr_compositor;
 
-namespace umbriel {
+namespace canopy {
 
   // wlroots signals a linux-drm-syncobj release point only when the client commits its next buffer, so the last
   // buffer before a NULL attach stays pending while the surface is unmapped. A client that waits for that release
@@ -24,4 +24,4 @@ namespace umbriel {
     wl_listener m_newSurface{};
   };
 
-} // namespace umbriel
+} // namespace canopy

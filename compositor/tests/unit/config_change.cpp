@@ -2,21 +2,21 @@
 #include "config/change.h"
 #include "config/resolve.h"
 
-using umbriel::AccelProfile;
-using umbriel::Config;
-using umbriel::ConfigChange;
-using umbriel::ConfigEffects;
-using umbriel::ContentType;
-using umbriel::Keybind;
-using umbriel::LayerRule;
-using umbriel::ModifierKey;
-using umbriel::OutputRule;
-using umbriel::RegexPatterns;
-using umbriel::SecurityContextRule;
-using umbriel::WindowRule;
-using umbriel::WorkspaceConfig;
+using canopy::AccelProfile;
+using canopy::Config;
+using canopy::ConfigChange;
+using canopy::ConfigEffects;
+using canopy::ContentType;
+using canopy::Keybind;
+using canopy::LayerRule;
+using canopy::ModifierKey;
+using canopy::OutputRule;
+using canopy::RegexPatterns;
+using canopy::SecurityContextRule;
+using canopy::WindowRule;
+using canopy::WorkspaceConfig;
 
-UMBRIEL_TEST(anIdenticalConfigChangesNothing) {
+CANOPY_TEST(anIdenticalConfigChangesNothing) {
   const Config before;
   const Config after;
   const ConfigChange change = ConfigChange::between(before, after);
@@ -25,7 +25,7 @@ UMBRIEL_TEST(anIdenticalConfigChangesNothing) {
   CHECK(!change.any());
 }
 
-UMBRIEL_TEST(aFirstLoadReportsEverything) {
+CANOPY_TEST(aFirstLoadReportsEverything) {
   const ConfigChange change = ConfigChange::everything();
   CHECK(change.any());
   CHECK(change.appearance);
@@ -38,7 +38,7 @@ UMBRIEL_TEST(aFirstLoadReportsEverything) {
   CHECK(change.scratchpads);
 }
 
-UMBRIEL_TEST(eachSectionIsReportedOnItsOwn) {
+CANOPY_TEST(eachSectionIsReportedOnItsOwn) {
   const Config before;
 
   {
@@ -204,7 +204,7 @@ UMBRIEL_TEST(eachSectionIsReportedOnItsOwn) {
   }
 }
 
-UMBRIEL_TEST(windowOpacityTimingRefreshesPresentationWithoutLayoutChanges) {
+CANOPY_TEST(windowOpacityTimingRefreshesPresentationWithoutLayoutChanges) {
   Config before;
   Config after = before;
   after.animation.windowsOpacity.enabled = false;
@@ -221,11 +221,11 @@ UMBRIEL_TEST(windowOpacityTimingRefreshesPresentationWithoutLayoutChanges) {
   CHECK(!effects.workspaceLayout);
 
   after = before;
-  after.animation.windowsOpacity.curve.easing = umbriel::Easing::Linear;
+  after.animation.windowsOpacity.curve.easing = canopy::Easing::Linear;
   CHECK(ConfigEffects::between(before, after).viewChrome);
 }
 
-UMBRIEL_TEST(nestedAppearanceChangesAreCaught) {
+CANOPY_TEST(nestedAppearanceChangesAreCaught) {
   const Config before;
   Config after;
   // Nested structs need their own comparison, so a change buried a level down is
@@ -246,7 +246,7 @@ UMBRIEL_TEST(nestedAppearanceChangesAreCaught) {
   CHECK(ConfigChange::between(before, focused).input);
 }
 
-UMBRIEL_TEST(borderColorChangesAreColorChangesThatRefreshChrome) {
+CANOPY_TEST(borderColorChangesAreColorChangesThatRefreshChrome) {
   const Config before;
   Config after;
   after.colors.border.focused[0] += 0.1F;
@@ -262,7 +262,7 @@ UMBRIEL_TEST(borderColorChangesAreColorChangesThatRefreshChrome) {
   CHECK(!effects.sceneBlur);
 }
 
-UMBRIEL_TEST(listSectionsAreCompared) {
+CANOPY_TEST(listSectionsAreCompared) {
   const Config before;
 
   {
@@ -301,7 +301,7 @@ UMBRIEL_TEST(listSectionsAreCompared) {
   }
 }
 
-UMBRIEL_TEST(ruleEqualityIgnoresTheCompiledRegex) {
+CANOPY_TEST(ruleEqualityIgnoresTheCompiledRegex) {
   // Two rules built from the same patterns are the same rule, even though their
   // std::regex members are distinct objects that cannot be compared at all.
   Config before;
@@ -318,7 +318,7 @@ UMBRIEL_TEST(ruleEqualityIgnoresTheCompiledRegex) {
   CHECK(!ConfigChange::between(before, after).windowRules);
 }
 
-UMBRIEL_TEST(ruleEqualityStillSeesAnXdgTagChange) {
+CANOPY_TEST(ruleEqualityStillSeesAnXdgTagChange) {
   Config before;
   Config after;
   WindowRule first;
@@ -333,7 +333,7 @@ UMBRIEL_TEST(ruleEqualityStillSeesAnXdgTagChange) {
   CHECK(ConfigChange::between(before, after).windowRules);
 }
 
-UMBRIEL_TEST(ruleEqualityStillSeesAContentTypeChange) {
+CANOPY_TEST(ruleEqualityStillSeesAContentTypeChange) {
   Config before;
   Config after;
   WindowRule first;
@@ -348,7 +348,7 @@ UMBRIEL_TEST(ruleEqualityStillSeesAContentTypeChange) {
   CHECK(ConfigChange::between(before, after).windowRules);
 }
 
-UMBRIEL_TEST(ruleEqualitySeesAnOptionChangeUnderTheSamePattern) {
+CANOPY_TEST(ruleEqualitySeesAnOptionChangeUnderTheSamePattern) {
   Config before;
   Config after;
   WindowRule first;
@@ -362,7 +362,7 @@ UMBRIEL_TEST(ruleEqualitySeesAnOptionChangeUnderTheSamePattern) {
   CHECK(ConfigChange::between(before, after).windowRules);
 }
 
-UMBRIEL_TEST(ruleEqualitySeesDefaultScratchpadChange) {
+CANOPY_TEST(ruleEqualitySeesDefaultScratchpadChange) {
   Config before;
   Config after;
   WindowRule first;
@@ -375,13 +375,13 @@ UMBRIEL_TEST(ruleEqualitySeesDefaultScratchpadChange) {
   CHECK(ConfigChange::between(before, after).windowRules);
 }
 
-UMBRIEL_TEST(identicalConfigsProduceNoRuntimeEffects) {
+CANOPY_TEST(identicalConfigsProduceNoRuntimeEffects) {
   const Config before;
   const Config after;
   CHECK(!ConfigEffects::between(before, after).any());
 }
 
-UMBRIEL_TEST(firstLoadInvalidatesEveryRuntimeConsumer) {
+CANOPY_TEST(firstLoadInvalidatesEveryRuntimeConsumer) {
   const ConfigEffects effects = ConfigEffects::everything();
   CHECK(effects.outputState);
   CHECK(effects.tearingPolicy);
@@ -398,7 +398,7 @@ UMBRIEL_TEST(firstLoadInvalidatesEveryRuntimeConsumer) {
   CHECK(effects.dialogAttachment);
 }
 
-UMBRIEL_TEST(dialogAttachmentFollowsTheSwitchAndWindowRules) {
+CANOPY_TEST(dialogAttachmentFollowsTheSwitchAndWindowRules) {
   const Config before;
   Config disabled;
   disabled.general.attachModalDialogs = false;
@@ -425,7 +425,7 @@ UMBRIEL_TEST(dialogAttachmentFollowsTheSwitchAndWindowRules) {
   CHECK(!ConfigEffects::between(before, slower).dialogAttachment);
 }
 
-UMBRIEL_TEST(anyColorChangeRefreshesEveryColorConsumer) {
+CANOPY_TEST(anyColorChangeRefreshesEveryColorConsumer) {
   const Config before;
   Config after;
   after.colors.textPrimary[0] -= 0.1F;
@@ -438,7 +438,7 @@ UMBRIEL_TEST(anyColorChangeRefreshesEveryColorConsumer) {
   CHECK(!effects.input);
 }
 
-UMBRIEL_TEST(borderWidthRefreshesChromeAndWorkspaceLayout) {
+CANOPY_TEST(borderWidthRefreshesChromeAndWorkspaceLayout) {
   const Config before;
   Config after;
   after.appearance.borderWidth += 1;
@@ -453,7 +453,7 @@ UMBRIEL_TEST(borderWidthRefreshesChromeAndWorkspaceLayout) {
   CHECK(!effects.input);
 }
 
-UMBRIEL_TEST(layoutGapDoesNotReapplyOutputState) {
+CANOPY_TEST(layoutGapDoesNotReapplyOutputState) {
   const Config before;
   Config after;
   after.layout.gap += 1;
@@ -465,7 +465,7 @@ UMBRIEL_TEST(layoutGapDoesNotReapplyOutputState) {
   CHECK(!effects.viewChrome);
 }
 
-UMBRIEL_TEST(layoutStrutsOnlyRefreshWorkspaceLayout) {
+CANOPY_TEST(layoutStrutsOnlyRefreshWorkspaceLayout) {
   const Config before;
   Config after;
   after.layout.struts.left = 32;
@@ -479,9 +479,9 @@ UMBRIEL_TEST(layoutStrutsOnlyRefreshWorkspaceLayout) {
   CHECK(!effects.layerEffects);
 }
 
-UMBRIEL_TEST(workspaceRuleStrutsOnlyRefreshWorkspaceLayout) {
+CANOPY_TEST(workspaceRuleStrutsOnlyRefreshWorkspaceLayout) {
   Config before;
-  umbriel::WorkspaceConfig rule;
+  canopy::WorkspaceConfig rule;
   rule.name = "dev";
   before.workspaceRules.push_back(rule);
   Config after = before;
@@ -495,7 +495,7 @@ UMBRIEL_TEST(workspaceRuleStrutsOnlyRefreshWorkspaceLayout) {
   CHECK(!effects.layerEffects);
 }
 
-UMBRIEL_TEST(namedWorkspaceDeclarationChangesRefreshDynamicInventory) {
+CANOPY_TEST(namedWorkspaceDeclarationChangesRefreshDynamicInventory) {
   const Config empty;
   Config configured;
   WorkspaceConfig named;
@@ -527,16 +527,16 @@ UMBRIEL_TEST(namedWorkspaceDeclarationChangesRefreshDynamicInventory) {
   CHECK(!retargetEffects.outputState);
 }
 
-UMBRIEL_TEST(workspaceRuleLayoutAndIndexEditsDoNotRefreshDynamicInventory) {
+CANOPY_TEST(workspaceRuleLayoutAndIndexEditsDoNotRefreshDynamicInventory) {
   Config named;
   WorkspaceConfig namedRule;
   namedRule.name = "dev";
   namedRule.output = "DP-1";
-  namedRule.layout.mode = umbriel::LayoutMode::Scrolling;
+  namedRule.layout.mode = canopy::LayoutMode::Scrolling;
   named.workspaceRules.push_back(std::move(namedRule));
 
   Config layoutChanged = named;
-  layoutChanged.workspaceRules[0].layout.mode = umbriel::LayoutMode::Master;
+  layoutChanged.workspaceRules[0].layout.mode = canopy::LayoutMode::Master;
   const ConfigEffects layoutEffects = ConfigEffects::between(named, layoutChanged);
   CHECK(layoutEffects.workspaceLayout);
   CHECK(!layoutEffects.workspaceInventory);
@@ -547,7 +547,7 @@ UMBRIEL_TEST(workspaceRuleLayoutAndIndexEditsDoNotRefreshDynamicInventory) {
   WorkspaceConfig indexRule;
   indexRule.index = 2;
   indexRule.output = "DP-1";
-  indexRule.layout.mode = umbriel::LayoutMode::Dwindle;
+  indexRule.layout.mode = canopy::LayoutMode::Dwindle;
   indexAdded.workspaceRules.push_back(std::move(indexRule));
   const ConfigEffects indexAddedEffects = ConfigEffects::between(named, indexAdded);
   CHECK(indexAddedEffects.workspaceLayout);
@@ -565,7 +565,7 @@ UMBRIEL_TEST(workspaceRuleLayoutAndIndexEditsDoNotRefreshDynamicInventory) {
   CHECK_EQ(indexRetargetedEffects.summary(), std::string{"workspace layout"});
 }
 
-UMBRIEL_TEST(outputStateAndWorkspaceInventoryAreIndependent) {
+CANOPY_TEST(outputStateAndWorkspaceInventoryAreIndependent) {
   Config before;
   OutputRule original;
   original.name = "HEADLESS-1";
@@ -579,13 +579,13 @@ UMBRIEL_TEST(outputStateAndWorkspaceInventoryAreIndependent) {
   CHECK(!stateEffects.workspaceLayout);
 
   Config vrrChanged = before;
-  vrrChanged.outputs[0].vrr = umbriel::VrrMode::Fullscreen;
+  vrrChanged.outputs[0].vrr = canopy::VrrMode::Fullscreen;
   const ConfigEffects vrrEffects = ConfigEffects::between(before, vrrChanged);
   CHECK(vrrEffects.outputState);
   CHECK(!vrrEffects.workspaceInventory);
 
   Config hdrChanged = before;
-  hdrChanged.outputs[0].hdr = umbriel::HdrMode::On;
+  hdrChanged.outputs[0].hdr = canopy::HdrMode::On;
   const ConfigEffects hdrEffects = ConfigEffects::between(before, hdrChanged);
   CHECK(hdrEffects.outputState);
   CHECK(!hdrEffects.workspaceInventory);
@@ -637,14 +637,14 @@ UMBRIEL_TEST(outputStateAndWorkspaceInventoryAreIndependent) {
   CHECK(!reenableEffects.workspaceInventory);
 }
 
-UMBRIEL_TEST(outputSdrTransferReloadOnlyRefreshesOutputState) {
+CANOPY_TEST(outputSdrTransferReloadOnlyRefreshesOutputState) {
   Config before;
   OutputRule original;
   original.name = "HEADLESS-1";
   before.outputs.push_back(original);
 
   Config after = before;
-  after.outputs[0].sdrTransfer = umbriel::SdrTransfer::Srgb;
+  after.outputs[0].sdrTransfer = canopy::SdrTransfer::Srgb;
   CHECK(ConfigChange::between(before, after).outputs);
   const ConfigEffects changed = ConfigEffects::between(before, after);
   CHECK(changed.outputState);
@@ -656,7 +656,7 @@ UMBRIEL_TEST(outputSdrTransferReloadOnlyRefreshesOutputState) {
   CHECK(!ConfigEffects::between(after, after).any());
 }
 
-UMBRIEL_TEST(outputScrollingDefaultOnlyRefreshesWorkspaceLayout) {
+CANOPY_TEST(outputScrollingDefaultOnlyRefreshesWorkspaceLayout) {
   Config before;
   OutputRule output;
   output.name = "HEADLESS-1";
@@ -686,14 +686,14 @@ UMBRIEL_TEST(outputScrollingDefaultOnlyRefreshesWorkspaceLayout) {
   CHECK_EQ(effects.summary(), std::string("workspace layout"));
 }
 
-UMBRIEL_TEST(outputWorkspaceAxisOnlyRefreshesWorkspaceLayout) {
+CANOPY_TEST(outputWorkspaceAxisOnlyRefreshesWorkspaceLayout) {
   Config before;
   OutputRule output;
   output.name = "HEADLESS-1";
   before.outputs.push_back(output);
 
   Config after = before;
-  after.outputs[0].workspaceAxis = umbriel::WorkspaceAxis::Horizontal;
+  after.outputs[0].workspaceAxis = canopy::WorkspaceAxis::Horizontal;
 
   const ConfigEffects effects = ConfigEffects::between(before, after);
   CHECK(effects.workspaceLayout);
@@ -703,7 +703,7 @@ UMBRIEL_TEST(outputWorkspaceAxisOnlyRefreshesWorkspaceLayout) {
   CHECK_EQ(effects.summary(), std::string("workspace layout"));
 }
 
-UMBRIEL_TEST(outputRuleNameSetChangesRefreshIdentityDependentEffects) {
+CANOPY_TEST(outputRuleNameSetChangesRefreshIdentityDependentEffects) {
   Config before;
   OutputRule connector;
   connector.name = "HDMI-A-1";
@@ -730,23 +730,23 @@ UMBRIEL_TEST(outputRuleNameSetChangesRefreshIdentityDependentEffects) {
   CHECK(!caseEffects.workspaceLayout);
 }
 
-UMBRIEL_TEST(descriptorRuleWithoutSelectorInvalidatesDisplacedScreenOverride) {
+CANOPY_TEST(descriptorRuleWithoutSelectorInvalidatesDisplacedScreenOverride) {
   Config before;
   before.effects.screen = "default-screen";
   OutputRule connector;
   connector.name = "HDMI-A-1";
   connector.screenEffect = "connector-screen";
   before.outputs.push_back(connector);
-  const umbriel::OutputIdentity identity{
+  const canopy::OutputIdentity identity{
       .connector = "HDMI-A-1", .make = "Microstep", .model = "MSI G2712F", .serial = "CD6T084401192"
   };
-  CHECK(umbriel::findOutputRule(before, identity)->screenEffect == "connector-screen");
+  CHECK(canopy::findOutputRule(before, identity)->screenEffect == "connector-screen");
 
   Config after = before;
   OutputRule descriptor;
   descriptor.name = "Microstep MSI G2712F CD6T084401192";
   after.outputs.push_back(descriptor);
-  CHECK(!umbriel::findOutputRule(after, identity)->screenEffect.has_value());
+  CHECK(!canopy::findOutputRule(after, identity)->screenEffect.has_value());
   CHECK(ConfigEffects::between(before, after).effects);
   CHECK(ConfigEffects::between(after, before).effects);
 
@@ -759,7 +759,7 @@ UMBRIEL_TEST(descriptorRuleWithoutSelectorInvalidatesDisplacedScreenOverride) {
 }
 
 // A per-output cast selector is read only when a capture starts, so a reload must rebind effects to pick the edit up.
-UMBRIEL_TEST(outputScreenCastEffectEditRebindsEffects) {
+CANOPY_TEST(outputScreenCastEffectEditRebindsEffects) {
   Config before;
   OutputRule output;
   output.name = "HEADLESS-1";
@@ -770,7 +770,7 @@ UMBRIEL_TEST(outputScreenCastEffectEditRebindsEffects) {
   CHECK(!ConfigEffects::between(after, after).effects);
 }
 
-UMBRIEL_TEST(tearingPolicyDoesNotReapplyOutputStateOrInvalidateOverview) {
+CANOPY_TEST(tearingPolicyDoesNotReapplyOutputStateOrInvalidateOverview) {
   Config before;
   OutputRule output;
   output.name = "HEADLESS-1";
@@ -851,7 +851,7 @@ UMBRIEL_TEST(tearingPolicyDoesNotReapplyOutputStateOrInvalidateOverview) {
   CHECK(unrelatedEffects.viewChrome);
 }
 
-UMBRIEL_TEST(animationEventEffectsRaiseEffects) {
+CANOPY_TEST(animationEventEffectsRaiseEffects) {
   const Config before;
   Config opening = before;
   opening.animation.windowsIn.effect = "fade";
@@ -864,7 +864,7 @@ UMBRIEL_TEST(animationEventEffectsRaiseEffects) {
   CHECK(!ConfigEffects::between(before, slower).effects);
 }
 
-UMBRIEL_TEST(windowRulesRaiseEffectsOnlyWhenARuleSelectsAnEffect) {
+CANOPY_TEST(windowRulesRaiseEffectsOnlyWhenARuleSelectsAnEffect) {
   Config before;
   WindowRule translucent;
   translucent.appIdPatterns.add("^foot$");
@@ -886,7 +886,7 @@ UMBRIEL_TEST(windowRulesRaiseEffectsOnlyWhenARuleSelectsAnEffect) {
   CHECK(ConfigEffects::between(selecting, rematched).effects);
 }
 
-UMBRIEL_TEST(directScanoutPolicyForcesOnlyItsRuntimeEffect) {
+CANOPY_TEST(directScanoutPolicyForcesOnlyItsRuntimeEffect) {
   Config before;
   OutputRule output;
   output.name = "HEADLESS-1";
@@ -922,25 +922,25 @@ UMBRIEL_TEST(directScanoutPolicyForcesOnlyItsRuntimeEffect) {
   CHECK(ConfigEffects::between(onlyDefault, Config{}).directScanoutPolicy);
 }
 
-UMBRIEL_TEST(vrrPolicyTracksFullscreenOnlyWhenRequested) {
-  CHECK(!umbriel::vrrEnabled(umbriel::VrrMode::Disabled, false));
-  CHECK(!umbriel::vrrEnabled(umbriel::VrrMode::Disabled, true));
-  CHECK(umbriel::vrrEnabled(umbriel::VrrMode::Always, false));
-  CHECK(umbriel::vrrEnabled(umbriel::VrrMode::Always, true));
-  CHECK(!umbriel::vrrEnabled(umbriel::VrrMode::Fullscreen, false));
-  CHECK(umbriel::vrrEnabled(umbriel::VrrMode::Fullscreen, true));
+CANOPY_TEST(vrrPolicyTracksFullscreenOnlyWhenRequested) {
+  CHECK(!canopy::vrrEnabled(canopy::VrrMode::Disabled, false));
+  CHECK(!canopy::vrrEnabled(canopy::VrrMode::Disabled, true));
+  CHECK(canopy::vrrEnabled(canopy::VrrMode::Always, false));
+  CHECK(canopy::vrrEnabled(canopy::VrrMode::Always, true));
+  CHECK(!canopy::vrrEnabled(canopy::VrrMode::Fullscreen, false));
+  CHECK(canopy::vrrEnabled(canopy::VrrMode::Fullscreen, true));
 }
 
-UMBRIEL_TEST(hdrPolicyTracksEligibilityForEachMode) {
-  CHECK(!umbriel::hdrEnabled(umbriel::HdrMode::Off, false, false));
-  CHECK(umbriel::hdrEnabled(umbriel::HdrMode::On, false, false));
-  CHECK(!umbriel::hdrEnabled(umbriel::HdrMode::Auto, true, false));
-  CHECK(umbriel::hdrEnabled(umbriel::HdrMode::Auto, true, true));
-  CHECK(!umbriel::hdrEnabled(umbriel::HdrMode::Fullscreen, false, false));
-  CHECK(umbriel::hdrEnabled(umbriel::HdrMode::Fullscreen, true, false));
+CANOPY_TEST(hdrPolicyTracksEligibilityForEachMode) {
+  CHECK(!canopy::hdrEnabled(canopy::HdrMode::Off, false, false));
+  CHECK(canopy::hdrEnabled(canopy::HdrMode::On, false, false));
+  CHECK(!canopy::hdrEnabled(canopy::HdrMode::Auto, true, false));
+  CHECK(canopy::hdrEnabled(canopy::HdrMode::Auto, true, true));
+  CHECK(!canopy::hdrEnabled(canopy::HdrMode::Fullscreen, false, false));
+  CHECK(canopy::hdrEnabled(canopy::HdrMode::Fullscreen, true, false));
 }
 
-UMBRIEL_TEST(blurRulesAndInputReachOnlyTheirConsumers) {
+CANOPY_TEST(blurRulesAndInputReachOnlyTheirConsumers) {
   const Config before;
 
   Config blurred;
@@ -976,7 +976,7 @@ UMBRIEL_TEST(blurRulesAndInputReachOnlyTheirConsumers) {
   CHECK(ConfigEffects::between(before, cursorChanged).input);
 }
 
-UMBRIEL_TEST(ruleRequestingOptimizedBlurReachesTheOutputs) {
+CANOPY_TEST(ruleRequestingOptimizedBlurReachesTheOutputs) {
   Config before;
   before.appearance.blur.optimized = false;
   CHECK(!before.optimizedBlurNeeded());
@@ -1005,7 +1005,7 @@ UMBRIEL_TEST(ruleRequestingOptimizedBlurReachesTheOutputs) {
   CHECK(!ConfigEffects::between(before, optedOut).sceneBlur);
 }
 
-UMBRIEL_TEST(overviewInvalidationExcludesIrrelevantRuntimeEffects) {
+CANOPY_TEST(overviewInvalidationExcludesIrrelevantRuntimeEffects) {
   const Config before;
 
   Config overviewChanged;
@@ -1036,7 +1036,7 @@ UMBRIEL_TEST(overviewInvalidationExcludesIrrelevantRuntimeEffects) {
   CHECK(ConfigChange::between(before, hotCornerChanged).hotCorners);
 }
 
-UMBRIEL_TEST(modKeyReloadRefreshesOnlyInternalUi) {
+CANOPY_TEST(modKeyReloadRefreshesOnlyInternalUi) {
   const Config before;
   Config after;
   after.general.modKey = ModifierKey::Control;
@@ -1049,19 +1049,19 @@ UMBRIEL_TEST(modKeyReloadRefreshesOnlyInternalUi) {
   CHECK(!effects.viewChrome);
 }
 
-UMBRIEL_TEST(aFailedReloadResultCarriesNoChangesOrEffects) {
-  const umbriel::ConfigReloadResult result;
+CANOPY_TEST(aFailedReloadResultCarriesNoChangesOrEffects) {
+  const canopy::ConfigReloadResult result;
   CHECK(!result.success);
   CHECK(!result.change.any());
   CHECK(!result.effects.any());
 }
 
-UMBRIEL_TEST(effectPoolDefinitionsAndMemberOrderRaiseEffectsChange) {
+CANOPY_TEST(effectPoolDefinitionsAndMemberOrderRaiseEffectsChange) {
   Config before;
-  before.effects.pools.push_back({.name = "borders", .kind = umbriel::EffectKind::Border, .members = {"z", "a"}});
+  before.effects.pools.push_back({.name = "borders", .kind = canopy::EffectKind::Border, .members = {"z", "a"}});
   Config after = before;
   CHECK(!ConfigEffects::between(before, after).effects);
-  after.effects.pools[0].selection = umbriel::EffectSelectionPolicy::RoundRobin;
+  after.effects.pools[0].selection = canopy::EffectSelectionPolicy::RoundRobin;
   CHECK(ConfigEffects::between(before, after).effects);
   after = before;
   after.effects.pools[0].members = {"a", "z"};
@@ -1071,13 +1071,13 @@ UMBRIEL_TEST(effectPoolDefinitionsAndMemberOrderRaiseEffectsChange) {
   CHECK(ConfigEffects::between(before, after).effects);
 }
 
-UMBRIEL_TEST(effectActionRootChangesDrivePreparation) {
+CANOPY_TEST(effectActionRootChangesDrivePreparation) {
   Config before;
   Keybind selected;
-  CHECK(umbriel::parseAction("effect-window-set pool --window window-1", selected));
+  CHECK(canopy::parseAction("effect-window-set pool --window window-1", selected));
   before.keybinds = {selected};
   Config after = before;
-  CHECK(umbriel::parseAction("effect-window-cycle pool --window window-2", after.keybinds.front()));
+  CHECK(canopy::parseAction("effect-window-cycle pool --window window-2", after.keybinds.front()));
   CHECK(!ConfigEffects::between(before, after).effects);
   after.keybinds.front().cooldownMs = 100;
   after.keybinds.front().submap = "effects";
@@ -1089,39 +1089,39 @@ UMBRIEL_TEST(effectActionRootChangesDrivePreparation) {
   CHECK(!ConfigEffects::between(before, after).effects);
   after.hotCorners.corners[0].enabled = false;
   CHECK(ConfigEffects::between(before, after).effects);
-  CHECK(umbriel::configuredEffectActionRoots(after).empty());
+  CHECK(canopy::configuredEffectActionRoots(after).empty());
   after = before;
-  CHECK(umbriel::parseAction("effect-window-set other", after.keybinds.front()));
+  CHECK(canopy::parseAction("effect-window-set other", after.keybinds.front()));
   CHECK(ConfigEffects::between(before, after).effects);
   after = before;
-  CHECK(umbriel::parseAction("effect-window-set off", after.keybinds.front()));
+  CHECK(canopy::parseAction("effect-window-set off", after.keybinds.front()));
   CHECK(ConfigEffects::between(before, after).effects);
   after = before;
-  CHECK(umbriel::parseAction("effect-window-cycle", after.keybinds.front()));
+  CHECK(canopy::parseAction("effect-window-cycle", after.keybinds.front()));
   CHECK(ConfigEffects::between(before, after).effects);
 }
 
-UMBRIEL_TEST(effectActionRootsAreUniqueAcrossKeybindsAndCorners) {
+CANOPY_TEST(effectActionRootsAreUniqueAcrossKeybindsAndCorners) {
   Config config;
   config.keybinds.clear();
   for (const std::string action : {"effect-border-set zebra", "effect-screen-cycle alpha", "effect-border-set zebra"}) {
     Keybind bind;
-    CHECK(umbriel::parseAction(action, bind));
+    CHECK(canopy::parseAction(action, bind));
     config.keybinds.push_back(bind);
   }
   config.hotCorners.corners[0].enabled = true;
   config.hotCorners.corners[0].action = config.keybinds.front();
-  CHECK(umbriel::configuredEffectActionRoots(config) == std::vector<std::string>({"alpha", "zebra"}));
+  CHECK(canopy::configuredEffectActionRoots(config) == std::vector<std::string>({"alpha", "zebra"}));
 }
 
-UMBRIEL_TEST(titleBarGeometryReloadRearrangesWorkspaces) {
+CANOPY_TEST(titleBarGeometryReloadRearrangesWorkspaces) {
   Config before;
   Config after = before;
   after.appearance.titleBar.height = 40;
   CHECK(ConfigEffects::between(before, after).workspaceLayout);
   CHECK(ConfigEffects::between(before, after).viewChrome);
   after = before;
-  after.appearance.titleBar.mode = umbriel::TitleBarMode::Forced;
+  after.appearance.titleBar.mode = canopy::TitleBarMode::Forced;
   CHECK(ConfigEffects::between(before, after).workspaceLayout);
   after = before;
   after.colors.titleBar.close[0] = 0.25F;

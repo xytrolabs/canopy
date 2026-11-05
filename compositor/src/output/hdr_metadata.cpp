@@ -7,14 +7,14 @@
 
 extern "C" {
 #include <libdisplay-info/info.h>
-#if UMBRIEL_HAS_DRM_BACKEND
+#if CANOPY_HAS_DRM_BACKEND
 #include <unistd.h>
 #include <wlr/backend/drm.h>
 #include <xf86drmMode.h>
 #endif
 }
 
-namespace umbriel {
+namespace canopy {
 
   namespace {
 
@@ -44,7 +44,7 @@ namespace umbriel {
       return twiceArea > 0.000001 && primaries.white.x > 0.0 && primaries.white.y > 0.0;
     }
 
-#if UMBRIEL_HAS_DRM_BACKEND
+#if CANOPY_HAS_DRM_BACKEND
     struct FdCloser {
       void operator()(int* fd) const {
         if (fd != nullptr) {
@@ -97,7 +97,7 @@ namespace umbriel {
   }
 
   std::optional<HdrStaticMetadata> hdrStaticMetadataForOutput(wlr_output* output) {
-#if UMBRIEL_HAS_DRM_BACKEND
+#if CANOPY_HAS_DRM_BACKEND
     if (output == nullptr || !wlr_output_is_drm(output)) {
       return std::nullopt;
     }
@@ -164,4 +164,4 @@ namespace umbriel {
     };
   }
 
-} // namespace umbriel
+} // namespace canopy

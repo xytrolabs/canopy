@@ -2,16 +2,16 @@
 # Floating windows minimize through the action, the client, and foreign-toplevel; every explicit focus path shows
 # them again, automatic focus skips them, and tiling a minimized window shows it.
 set -euo pipefail
-source "$UMBRIEL_HARNESS_LIB"
+source "$CANOPY_HARNESS_LIB"
 
-readonly CLIENT="${UMBRIEL_UNMAP_CLIENT:-./build-debug/tests/unmap-client}"
-readonly FOREIGN_TOPLEVEL="${UMBRIEL_FOREIGN_TOPLEVEL_CLIENT:-./build-debug/tests/foreign-toplevel-client}"
-readonly A_LOG="$UMBRIEL_RUNTIME_DIR/minimize-a.log"
-readonly B_LOG="$UMBRIEL_RUNTIME_DIR/minimize-b.log"
-readonly EVENTS="$UMBRIEL_RUNTIME_DIR/minimize-events.jsonl"
+readonly CLIENT="${CANOPY_UNMAP_CLIENT:-./build-debug/tests/unmap-client}"
+readonly FOREIGN_TOPLEVEL="${CANOPY_FOREIGN_TOPLEVEL_CLIENT:-./build-debug/tests/foreign-toplevel-client}"
+readonly A_LOG="$CANOPY_RUNTIME_DIR/minimize-a.log"
+readonly B_LOG="$CANOPY_RUNTIME_DIR/minimize-b.log"
+readonly EVENTS="$CANOPY_RUNTIME_DIR/minimize-events.jsonl"
 
 field_of() {
-  "$UMBRIEL" windows --json | jq -r --arg title "$1" --arg field "$2" '.[] | select(.title == $title) | .[$field]'
+  "$CANOPY" windows --json | jq -r --arg title "$1" --arg field "$2" '.[] | select(.title == $title) | .[$field]'
 }
 
 wait_for_field() {
@@ -21,7 +21,7 @@ wait_for_field() {
     [[ $actual == "$expected" ]] && return 0
     sleep 0.1
   done
-  echo "expected '$title' field '$field' to be '$expected', got '$actual': $("$UMBRIEL" windows --json)"
+  echo "expected '$title' field '$field' to be '$expected', got '$actual': $("$CANOPY" windows --json)"
   return 1
 }
 
@@ -29,7 +29,7 @@ expect_field() {
   local title=$1 field=$2 expected=$3 actual
   actual=$(field_of "$title" "$field")
   if [[ $actual != "$expected" ]]; then
-    echo "expected '$title' field '$field' to be '$expected', got '$actual': $("$UMBRIEL" windows --json)"
+    echo "expected '$title' field '$field' to be '$expected', got '$actual': $("$CANOPY" windows --json)"
     exit 1
   fi
 }
@@ -51,7 +51,7 @@ wait_for_minimizable() {
   exit 1
 }
 
-msg() { "$UMBRIEL" msg "$@" >/dev/null; }
+msg() { "$CANOPY" msg "$@" >/dev/null; }
 
 foreign() {
   local reply
@@ -62,11 +62,11 @@ foreign() {
   fi
 }
 
-readonly CONTROL_FIFO="$UMBRIEL_RUNTIME_DIR/minimize-control"
+readonly CONTROL_FIFO="$CANOPY_RUNTIME_DIR/minimize-control"
 mkfifo "$CONTROL_FIFO"
 exec {control_fd}<>"$CONTROL_FIFO"
 
-cat >>"$UMBRIEL_CONFIG" <<'EOF'
+cat >>"$CANOPY_CONFIG" <<'EOF'
 [layout]
 mode = "stacking"
 
@@ -84,7 +84,7 @@ wait_for_field minimize-b floating true
 A=$(field_of minimize-a id)
 B=$(field_of minimize-b id)
 OUTPUT=$(field_of minimize-a output)
-"$UMBRIEL" subscribe windows >"$EVENTS" &
+"$CANOPY" subscribe windows >"$EVENTS" &
 wait_for_minimizable minimize-a true
 wait_for_minimizable minimize-b true
 
@@ -100,7 +100,7 @@ wait_for_minimizable minimize-a true
 
 # Focus cycling skips it.
 msg window-focus-next
-"$UMBRIEL" settle
+"$CANOPY" settle
 expect_field minimize-a minimized true
 expect_field minimize-b active true
 
@@ -148,7 +148,7 @@ expect_field minimize-a minimized false
 expect_field minimize-a visible true
 msg window-focus "$A"
 wait_for_field minimize-a active true
-if reply=$("$UMBRIEL" msg window-minimize 2>&1); then
+if reply=$("$CANOPY" msg window-minimize 2>&1); then
   echo "window-minimize unexpectedly succeeded on a tiled window"
   exit 1
 fi
@@ -158,7 +158,7 @@ if [[ $reply != *"window-minimize needs a floating, unpinned window on a workspa
 fi
 printf z >&"$control_fd"
 await_lines "$A_LOG" 'minimize-requested$' 2
-"$UMBRIEL" settle
+"$CANOPY" settle
 expect_field minimize-a minimized false
 
 # window-restore-minimized brings back the latest first.
@@ -181,7 +181,7 @@ msg window-restore-minimized
 wait_for_field minimize-b minimized false
 wait_for_field minimize-b active true
 msg window-restore-minimized
-"$UMBRIEL" settle
+"$CANOPY" settle
 expect_field minimize-a minimized false
 expect_field minimize-b active true
 

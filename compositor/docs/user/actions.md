@@ -1,6 +1,6 @@
 # Actions
 
-Actions are the compositor's verbs. Bind one under `[keybinds]`, attach it to a [hot corner](keybinds.md#hot-corners), or run it with `umbriel msg <action>`. `umbriel msg --help` prints this same list, with the same wording and the same grouping. See [Keybinds](keybinds.md) for chord syntax, [IPC](ipc.md#actions) for the typed request programs send instead of words, and the [event stream](ipc.md#event-stream) that reports what an action changed.
+Actions are the compositor's verbs. Bind one under `[keybinds]`, attach it to a [hot corner](keybinds.md#hot-corners), or run it with `canopywc msg <action>`. `canopywc msg --help` prints this same list, with the same wording and the same grouping. See [Keybinds](keybinds.md) for chord syntax, [IPC](ipc.md#actions) for the typed request programs send instead of words, and the [event stream](ipc.md#event-stream) that reports what an action changed.
 
 ## Argument forms
 
@@ -11,8 +11,8 @@ Arguments follow the action name as separate words. On the command line each wor
 | `<cmd...>`                                                         | Command line, run through the shell: `spawn kitty`                                                                                                                                                                                                                   |
 | `<name>`                                                           | Submap to enter; `submap reset` leaves one level                                                                                                                                                                                                                     |
 | `<workspace> [--output <output>]`                                  | Bare digits select a 1-based position, other text selects a name, and `--name <name>` selects a name even when it is only digits; `--output <output>` scopes either form                                                                                             |
-| `<output>`                                                         | Connector or monitor name from `umbriel outputs`                                                                                                                                                                                                                     |
-| `<window-id>`                                                      | Window id from `umbriel windows`                                                                                                                                                                                                                                     |
+| `<output>`                                                         | Connector or monitor name from `canopywc outputs`                                                                                                                                                                                                                     |
+| `<window-id>`                                                      | Window id from `canopywc windows`                                                                                                                                                                                                                                     |
 | `[<window-id>]`                                                    | The same id; the bare action targets the focused window                                                                                                                                                                                                              |
 | `[<output>]`                                                       | Connector or monitor name. Bare `dpms-off` and `dpms-on` target every configured output                                                                                                                                                                              |
 | `[<scratchpad>]`                                                   | Scratchpad name. The bare form selects the implicit `default` scratchpad, which exists only when no named scratchpads are configured                                                                                                                                 |
@@ -40,7 +40,7 @@ Named `set` and successful `cycle` create a runtime override and clear suppressi
 
 Select one screen or window normally. The selected source starts sharing immediately, and the actions below can later change it while keeping the same PipeWire stream alive. Shares containing several selected sources remain fixed.
 
-The first set or follow action during an active share opens an Umbriel confirmation panel. Enter, or repeat a target-changing action, to approve it. Any other key or pointer click dismisses the panel and cancels only that pending action. A later action asks again. Once approved, target changes are immediate until the share ends. Set [`screencast.disable_dynamic_confirmation`](configuration.md#screencast) to `true` to skip this protection.
+The first set or follow action during an active share opens an Canopy confirmation panel. Enter, or repeat a target-changing action, to approve it. Any other key or pointer click dismisses the panel and cancels only that pending action. A later action asks again. Once approved, target changes are immediate until the share ends. Set [`screencast.disable_dynamic_confirmation`](configuration.md#screencast) to `true` to skip this protection.
 
 Changing a window stream to an output, or an output stream to a window, is supported. Follow mode lasts only for the active portal session. Be careful with window following because focusing a private window immediately shares it.
 
@@ -191,9 +191,9 @@ No window ID is needed: a bare `window-kill` targets the focused window, includi
 "Mod+Shift+Q" = { action = "window-kill", repeat = false }
 ```
 
-Use `umbriel msg window-kill` from a terminal, or add a window id to target a specific window using an ID from `umbriel windows`.
+Use `canopywc msg window-kill` from a terminal, or add a window id to target a specific window using an ID from `canopywc windows`.
 
-For Xwayland windows, fullscreen entered with `window-toggle-fullscreen` remains compositor-owned until an Umbriel action exits it. Fullscreen entered by the application remains client-controlled.
+For Xwayland windows, fullscreen entered with `window-toggle-fullscreen` remains compositor-owned until an Canopy action exits it. Fullscreen entered by the application remains client-controlled.
 
 ## Scratchpad
 
@@ -318,6 +318,6 @@ See [Layout](layout.md) for geometry, directions, and resizing behavior.
 - Moving a multi-window column into Dwindle creates separate tiles.
 - `column-focus-tab-next` and `column-focus-tab-previous` wrap unless `layout.tabs.wrap_focus` is off. In the scrolling layout a tab group is one row of its column: `window-focus-up` and `window-focus-down` step over it, and `window-move-up` and `window-move-down` take a tab out of it or a window into it. In a tabbed master area they step through its tabs without wrapping.
 - Floating and pinned behavior is described in [Layout](layout.md) and [Scratchpads](scratchpad.md).
-- An action unavailable in the active layout does nothing from a keybind and returns an explanatory error through `umbriel msg`.
+- An action unavailable in the active layout does nothing from a keybind and returns an explanatory error through `canopywc msg`.
 - `spawn` supplies an activation token and records the pointer-preferred output and its active workspace. The launched application's first window opens there even if you switch workspaces while it starts. Opening on a workspace you left is silent, and explicit `default_output`, `default_workspace`, and `default_scratchpad` window rules take precedence. `focus_on_activate` controls whether an activation request focuses the window, not the recorded launch destination. Autostart commands do not receive a token or recorded placement.
 - Bare `session-quit` asks for confirmation. Use `session-quit skip-confirmation` only when an immediate exit is intended.

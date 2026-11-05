@@ -4,10 +4,10 @@
 # including column topology, widths, and a runtime switch to another layout.
 set -euo pipefail
 
-readonly CLIENT="$UMBRIEL_UNMAP_CLIENT"
+readonly CLIENT="$CANOPY_UNMAP_CLIENT"
 readonly OFFSET=1280
 
-cat >> "$UMBRIEL_CONFIG" <<'EOF'
+cat >> "$CANOPY_CONFIG" <<'EOF'
 
 [animation]
 enabled = false
@@ -20,36 +20,36 @@ workspaces = ["origin"]
 position = [1280, 0]
 workspaces = ["local"]
 EOF
-"$UMBRIEL" msg config-reload > /dev/null
+"$CANOPY" msg config-reload > /dev/null
 
 field() {
-  "$UMBRIEL" windows --json | jq -r --arg title "$1" --arg field "$2" \
+  "$CANOPY" windows --json | jq -r --arg title "$1" --arg field "$2" \
     '.[] | select(.title == $title) | .[$field]'
 }
 
 focus() {
-  "$UMBRIEL" msg window-focus "$(field "$1" id)" > /dev/null
+  "$CANOPY" msg window-focus "$(field "$1" id)" > /dev/null
 }
 
 spawn() {
   local title=$1 count=$2 id
-  "$UMBRIEL" msg workspace-switch origin --output HEADLESS-1 > /dev/null
-  RESIZE_FILL_COLOR=0xFF5577AA "$CLIENT" "$title" 800 600 > "$UMBRIEL_RUNTIME_DIR/$title.log" 2>&1 &
+  "$CANOPY" msg workspace-switch origin --output HEADLESS-1 > /dev/null
+  RESIZE_FILL_COLOR=0xFF5577AA "$CLIENT" "$title" 800 600 > "$CANOPY_RUNTIME_DIR/$title.log" 2>&1 &
   for _ in $(seq 60); do
-    [[ $("$UMBRIEL" windows --json | jq 'length') == "$count" ]] && break
+    [[ $("$CANOPY" windows --json | jq 'length') == "$count" ]] && break
     sleep 0.05
   done
   id=$(field "$title" id)
   if [[ -z $id ]]; then
-    echo "window '$title' did not map: $(< "$UMBRIEL_RUNTIME_DIR/$title.log")"
+    echo "window '$title' did not map: $(< "$CANOPY_RUNTIME_DIR/$title.log")"
     return 1
   fi
-  "$UMBRIEL" msg window-focus "$id" > /dev/null
-  "$UMBRIEL" msg window-move-to-workspace origin --output HEADLESS-1 > /dev/null
+  "$CANOPY" msg window-focus "$id" > /dev/null
+  "$CANOPY" msg window-move-to-workspace origin --output HEADLESS-1 > /dev/null
 }
 
 snapshot() {
-  "$UMBRIEL" windows --json | jq -c --argjson offset "$1" '
+  "$CANOPY" windows --json | jq -c --argjson offset "$1" '
     [.[] | {title, column, row, x: (.x - $offset), y, w, h}] | sort_by(.title)
   '
 }
@@ -57,24 +57,24 @@ snapshot() {
 select_refuge() {
   local workspace index
   workspace=$(field edit-c workspace)
-  index=$("$UMBRIEL" workspaces --json | jq -r --arg id "$workspace" '.[] | select(.id == $id) | .index')
+  index=$("$CANOPY" workspaces --json | jq -r --arg id "$workspace" '.[] | select(.id == $id) | .index')
   if [[ $workspace != HEADLESS-2:* || -z $index ]]; then
-    echo "source windows did not enter a temporary workspace: $("$UMBRIEL" windows --json)"
+    echo "source windows did not enter a temporary workspace: $("$CANOPY" windows --json)"
     return 1
   fi
-  "$UMBRIEL" msg workspace-switch "$index" --output HEADLESS-2 > /dev/null
+  "$CANOPY" msg workspace-switch "$index" --output HEADLESS-2 > /dev/null
   focus edit-c
-  "$UMBRIEL" settle
+  "$CANOPY" settle
 }
 
 assert_returned_layout() {
   local label=$1 expected=$2 mode=$3 windows workspace state actual
-  "$UMBRIEL" msg workspace-switch origin --output HEADLESS-1 > /dev/null
+  "$CANOPY" msg workspace-switch origin --output HEADLESS-1 > /dev/null
   focus edit-c
-  "$UMBRIEL" settle
-  windows=$("$UMBRIEL" windows --json)
+  "$CANOPY" settle
+  windows=$("$CANOPY" windows --json)
   workspace=$(field edit-c workspace)
-  state=$("$UMBRIEL" workspaces --json)
+  state=$("$CANOPY" workspaces --json)
   if ! jq -e --arg workspace "$workspace" '
     length == 3 and all(.[]; .workspace == $workspace and (.workspace | startswith("HEADLESS-1:")))
   ' <<< "$windows" > /dev/null || \
@@ -94,20 +94,20 @@ assert_returned_layout() {
 spawn edit-a 1
 spawn edit-b 2
 spawn edit-c 3
-"$UMBRIEL" settle
+"$CANOPY" settle
 readonly ORIGINAL="$(snapshot 0)"
 
-"$UMBRIEL" output-destroy HEADLESS-1 > /dev/null
+"$CANOPY" output-destroy HEADLESS-1 > /dev/null
 select_refuge
 
 # Turn three independent columns into c,[b,a] after the home is already absent.
-"$UMBRIEL" msg column-move-to-first > /dev/null
+"$CANOPY" msg column-move-to-first > /dev/null
 focus edit-b
-"$UMBRIEL" msg window-consume-left > /dev/null
-"$UMBRIEL" msg window-move-up > /dev/null
+"$CANOPY" msg window-consume-left > /dev/null
+"$CANOPY" msg window-move-up > /dev/null
 focus edit-c
-"$UMBRIEL" msg window-set-primary-extent 0.67 > /dev/null
-"$UMBRIEL" settle
+"$CANOPY" msg window-set-primary-extent 0.67 > /dev/null
+"$CANOPY" settle
 readonly REVISED="$(snapshot "$OFFSET")"
 if [[ $REVISED == "$ORIGINAL" ]] || ! jq -e '
   first(.[] | select(.title == "edit-a")) as $a |
@@ -120,17 +120,17 @@ if [[ $REVISED == "$ORIGINAL" ]] || ! jq -e '
   exit 1
 fi
 
-"$UMBRIEL" output-create HEADLESS-1 > /dev/null
+"$CANOPY" output-create HEADLESS-1 > /dev/null
 assert_returned_layout scrolling "$REVISED" scrolling
 
 for mode in master dwindle; do
-  "$UMBRIEL" output-destroy HEADLESS-1 > /dev/null
+  "$CANOPY" output-destroy HEADLESS-1 > /dev/null
   select_refuge
-  "$UMBRIEL" msg workspace-set-layout "$mode" > /dev/null
-  "$UMBRIEL" msg window-set-primary-extent 0.63 > /dev/null
-  "$UMBRIEL" settle
+  "$CANOPY" msg workspace-set-layout "$mode" > /dev/null
+  "$CANOPY" msg window-set-primary-extent 0.63 > /dev/null
+  "$CANOPY" settle
   workspace=$(field edit-c workspace)
-  state=$("$UMBRIEL" workspaces --json)
+  state=$("$CANOPY" workspaces --json)
   if ! jq -e --arg workspace "$workspace" --arg mode "$mode" '
     any(.[]; .id == $workspace and .layout == $mode and .layout_override)
   ' <<< "$state" > /dev/null; then
@@ -138,7 +138,7 @@ for mode in master dwindle; do
     exit 1
   fi
   revised=$(snapshot "$OFFSET")
-  "$UMBRIEL" output-create HEADLESS-1 > /dev/null
+  "$CANOPY" output-create HEADLESS-1 > /dev/null
   assert_returned_layout "$mode runtime override" "$revised" "$mode"
 done
 

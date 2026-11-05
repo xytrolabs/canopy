@@ -7,7 +7,7 @@
 // clang-format on
 #include <pixman.h>
 
-namespace umbriel {
+namespace canopy {
 
   namespace {
 
@@ -156,4 +156,4 @@ namespace umbriel {
     }
   }
 
-} // namespace umbriel
+} // namespace canopy

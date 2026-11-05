@@ -41,7 +41,7 @@ struct wlr_xdg_toplevel;
 struct wlr_xwayland_surface;
 struct wlr_xwayland_surface_configure_event;
 
-namespace umbriel {
+namespace canopy {
 
   class Server;
   class SsdFrame;
@@ -1124,4 +1124,4 @@ namespace umbriel {
     wl_listener m_dialogDestroy{};
   };
 
-} // namespace umbriel
+} // namespace canopy

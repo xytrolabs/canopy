@@ -6,7 +6,7 @@
 struct wlr_xdg_popup;
 struct wlr_scene_tree;
 
-namespace umbriel {
+namespace canopy {
 
   class Popup {
   public:
@@ -38,4 +38,4 @@ namespace umbriel {
     wl_listener m_destroy{};
   };
 
-} // namespace umbriel
+} // namespace canopy

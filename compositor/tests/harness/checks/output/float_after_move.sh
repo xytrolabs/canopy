@@ -7,18 +7,18 @@
 set -euo pipefail
 
 printf '\n[output."HEADLESS-1"]\nmode = "1280x720@4"\n\n[output."HEADLESS-2"]\nmode = "1280x720@4"\n' \
-  >> "$UMBRIEL_CONFIG"
-"$UMBRIEL" msg config-reload > /dev/null
+  >> "$CANOPY_CONFIG"
+"$CANOPY" msg config-reload > /dev/null
 
 # Opens a tile on HEADLESS-2, moves it to a workspace of its own on HEADLESS-1, floats it, and prints where it landed.
 float_after_move() {
   local title=$1 workspace=$2 timing=$3 id
-  if [[ $("$UMBRIEL" workspaces --json | jq -r '.[] | select(.focused) | .output') != HEADLESS-2 ]]; then
-    "$UMBRIEL" msg output-focus-left > /dev/null
+  if [[ $("$CANOPY" workspaces --json | jq -r '.[] | select(.focused) | .output') != HEADLESS-2 ]]; then
+    "$CANOPY" msg output-focus-left > /dev/null
   fi
-  "$UMBRIEL_UNMAP_CLIENT" "$title" 400 300 > "$UMBRIEL_RUNTIME_DIR/$title.log" 2>&1 &
+  "$CANOPY_UNMAP_CLIENT" "$title" 400 300 > "$CANOPY_RUNTIME_DIR/$title.log" 2>&1 &
   for _ in $(seq 60); do
-    id=$("$UMBRIEL" windows --json | jq -r --arg title "$title" '.[] | select(.title == $title) | .id')
+    id=$("$CANOPY" windows --json | jq -r --arg title "$title" '.[] | select(.title == $title) | .id')
     [[ -n $id ]] && break
     sleep 0.05
   done
@@ -26,17 +26,17 @@ float_after_move() {
     echo "$title never mapped"
     return 1
   fi
-  if [[ $("$UMBRIEL" windows --json | jq -r --arg id "$id" '.[] | select(.id == $id) | .workspace') != HEADLESS-2:* ]]; then
-    echo "$title did not open on HEADLESS-2: $("$UMBRIEL" windows --json)"
+  if [[ $("$CANOPY" windows --json | jq -r --arg id "$id" '.[] | select(.id == $id) | .workspace') != HEADLESS-2:* ]]; then
+    echo "$title did not open on HEADLESS-2: $("$CANOPY" windows --json)"
     return 1
   fi
-  "$UMBRIEL" msg window-focus "$id" > /dev/null
-  "$UMBRIEL" settle
-  "$UMBRIEL" msg window-move-to-workspace "$workspace" --output HEADLESS-1 > /dev/null
-  [[ $timing == settled ]] && "$UMBRIEL" settle
-  "$UMBRIEL" msg window-toggle-floating > /dev/null
-  "$UMBRIEL" settle
-  "$UMBRIEL" windows --json | jq -r --arg id "$id" '.[] | select(.id == $id) | "\(.x) \(.y) \(.workspace)"'
+  "$CANOPY" msg window-focus "$id" > /dev/null
+  "$CANOPY" settle
+  "$CANOPY" msg window-move-to-workspace "$workspace" --output HEADLESS-1 > /dev/null
+  [[ $timing == settled ]] && "$CANOPY" settle
+  "$CANOPY" msg window-toggle-floating > /dev/null
+  "$CANOPY" settle
+  "$CANOPY" windows --json | jq -r --arg id "$id" '.[] | select(.id == $id) | "\(.x) \(.y) \(.workspace)"'
 }
 
 pending=$(float_after_move float-pending 2 pending)

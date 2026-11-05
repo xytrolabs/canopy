@@ -4,7 +4,7 @@
 # that the teardown never reaches, and wlroots aborts on them (a VT switch takes every monitor this way).
 set -euo pipefail
 
-cat >> "$UMBRIEL_CONFIG" <<'EOF'
+cat >> "$CANOPY_CONFIG" <<'EOF'
 
 [output.HEADLESS-1]
 workspaces = 2
@@ -14,10 +14,10 @@ match.app_id = "^destroy-hidden$"
 default_workspace = 2
 default_focused = false
 EOF
-"$UMBRIEL" msg config-reload > /dev/null
+"$CANOPY" msg config-reload > /dev/null
 
 workspace_of() {
-  "$UMBRIEL" windows --json | jq -r '.[] | select(.app_id == "destroy-hidden") | .workspace'
+  "$CANOPY" windows --json | jq -r '.[] | select(.app_id == "destroy-hidden") | .workspace'
 }
 
 wait_for_workspace() {
@@ -33,9 +33,9 @@ wait_for_workspace() {
 
 foot --app-id=destroy-hidden sh -c 'sleep 120' > /dev/null 2>&1 &
 wait_for_workspace HEADLESS-1:2
-"$UMBRIEL" settle > /dev/null
+"$CANOPY" settle > /dev/null
 
-"$UMBRIEL" output-destroy HEADLESS-1 > /dev/null
+"$CANOPY" output-destroy HEADLESS-1 > /dev/null
 wait_for_workspace ''
 
 echo "destroying an output kept a never-shown hidden window and the compositor alive"

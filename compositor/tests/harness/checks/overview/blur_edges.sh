@@ -3,11 +3,11 @@
 # bottom of that reduced image must duplicate its edge texels rather than read the unused remainder of the texture.
 set -euo pipefail
 
-readonly LAYER="${UMBRIEL_LAYER_CLIENT:-./build-debug/tests/layer-client}"
-readonly LAYER_LOG="$UMBRIEL_RUNTIME_DIR/blur-background.log"
-readonly SCREENSHOT="$UMBRIEL_RUNTIME_DIR/overview-blur-edges.png"
+readonly LAYER="${CANOPY_LAYER_CLIENT:-./build-debug/tests/layer-client}"
+readonly LAYER_LOG="$CANOPY_RUNTIME_DIR/blur-background.log"
+readonly SCREENSHOT="$CANOPY_RUNTIME_DIR/overview-blur-edges.png"
 
-cat >> "$UMBRIEL_CONFIG" <<'EOF'
+cat >> "$CANOPY_CONFIG" <<'EOF'
 
 [colors.overview]
 background_tint = "#00000000"
@@ -31,7 +31,7 @@ workspace_wallpaper = false
 [animation.overview]
 enabled = false
 EOF
-"$UMBRIEL" msg config-reload > /dev/null
+"$CANOPY" msg config-reload > /dev/null
 
 "$LAYER" HEADLESS-1 0 > "$LAYER_LOG" 2>&1 &
 for _ in $(seq 60); do
@@ -43,12 +43,12 @@ if ! grep -q '^ready$' "$LAYER_LOG"; then
   exit 1
 fi
 
-"$UMBRIEL" msg overview-open > /dev/null
-"$UMBRIEL" settle
+"$CANOPY" msg overview-open > /dev/null
+"$CANOPY" settle
 grim "$SCREENSHOT"
 
 sample_rgb() {
-  "$UMBRIEL_PIXEL_PROBE" "$SCREENSHOT" mean "16x16+$1+$2"
+  "$CANOPY_PIXEL_PROBE" "$SCREENSHOT" mean "16x16+$1+$2"
 }
 
 read -r center_r center_g center_b <<< "$(sample_rgb 632 352)"

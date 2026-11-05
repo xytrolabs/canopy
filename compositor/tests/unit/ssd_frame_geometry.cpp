@@ -9,14 +9,14 @@ extern "C" {
 #include <wlr/util/edges.h>
 }
 
-using namespace umbriel;
+using namespace canopy;
 
 namespace {
   constexpr std::array kAll{TitleBarButton::Minimize, TitleBarButton::Maximize, TitleBarButton::Close};
   constexpr std::span<const TitleBarButton> kNone{};
 } // namespace
 
-UMBRIEL_TEST(rightButtonsPutLastListedOutermost) {
+CANOPY_TEST(rightButtonsPutLastListedOutermost) {
   const auto parts = titleBarLayout(480, 28, TitleBarButtonSide::Right, kAll);
   CHECK_EQ(parts.button(TitleBarButton::Close)->x, 459);
   CHECK_EQ(parts.button(TitleBarButton::Close)->y, 7);
@@ -28,7 +28,7 @@ UMBRIEL_TEST(rightButtonsPutLastListedOutermost) {
   CHECK_EQ(parts.title.width, 399);
 }
 
-UMBRIEL_TEST(leftButtonsMirror) {
+CANOPY_TEST(leftButtonsMirror) {
   const auto parts = titleBarLayout(480, 28, TitleBarButtonSide::Left, kAll);
   CHECK_EQ(parts.button(TitleBarButton::Close)->x, 7);
   CHECK_EQ(parts.button(TitleBarButton::Maximize)->x, 29);
@@ -37,7 +37,7 @@ UMBRIEL_TEST(leftButtonsMirror) {
   CHECK_EQ(parts.title.width, 399);
 }
 
-UMBRIEL_TEST(omittedButtonsLeaveNoGapAndWidenTheTitle) {
+CANOPY_TEST(omittedButtonsLeaveNoGapAndWidenTheTitle) {
   constexpr std::array order{TitleBarButton::Close, TitleBarButton::Minimize};
   const auto parts = titleBarLayout(480, 28, TitleBarButtonSide::Right, order);
   CHECK_EQ(parts.button(TitleBarButton::Minimize)->x, 459);
@@ -52,7 +52,7 @@ UMBRIEL_TEST(omittedButtonsLeaveNoGapAndWidenTheTitle) {
   }
 }
 
-UMBRIEL_TEST(buttonsSitOnTheBarCenterAtEveryHeight) {
+CANOPY_TEST(buttonsSitOnTheBarCenterAtEveryHeight) {
   for (int height = 16; height <= 128; ++height) {
     const auto parts = titleBarLayout(480, height, TitleBarButtonSide::Right, kAll);
     const wlr_box close = *parts.button(TitleBarButton::Close);
@@ -62,7 +62,7 @@ UMBRIEL_TEST(buttonsSitOnTheBarCenterAtEveryHeight) {
   }
 }
 
-UMBRIEL_TEST(buttonHitSpansTitleBarHeight) {
+CANOPY_TEST(buttonHitSpansTitleBarHeight) {
   const auto at = [](TitleBarButtonSide side, std::span<const TitleBarButton> shown, double x, double y) {
     return ssdFramePointAt(480, 300, 28, 2, true, side, shown, x, y).part;
   };
@@ -78,7 +78,7 @@ UMBRIEL_TEST(buttonHitSpansTitleBarHeight) {
   CHECK_EQ(at(TitleBarButtonSide::Right, kNone, 466, -15), SsdFramePart::TitleBar);
 }
 
-UMBRIEL_TEST(resizeBandOnlyWhenResizable) {
+CANOPY_TEST(resizeBandOnlyWhenResizable) {
   CHECK_EQ(ssdFramePointAt(480, 300, 28, 2, false, TitleBarButtonSide::Right, kAll, -3, 100).part, SsdFramePart::None);
   CHECK_EQ(
       ssdFramePointAt(480, 300, 28, 2, true, TitleBarButtonSide::Right, kAll, -3, 100).edges, uint32_t{WLR_EDGE_LEFT}
@@ -86,7 +86,7 @@ UMBRIEL_TEST(resizeBandOnlyWhenResizable) {
   CHECK_EQ(ssdFramePointAt(480, 300, 28, 2, true, TitleBarButtonSide::Right, kAll, -8.1, 100).part, SsdFramePart::None);
 }
 
-UMBRIEL_TEST(resizeBandWithoutTitleBar) {
+CANOPY_TEST(resizeBandWithoutTitleBar) {
   const auto at = [](bool resizable, double x, double y) {
     return ssdFramePointAt(480, 300, 0, 2, resizable, TitleBarButtonSide::Right, kAll, x, y);
   };
@@ -103,7 +103,7 @@ UMBRIEL_TEST(resizeBandWithoutTitleBar) {
   CHECK_EQ(at(true, -8.1, 100).part, SsdFramePart::None);
 }
 
-UMBRIEL_TEST(cornerExtensionAddsBothEdges) {
+CANOPY_TEST(cornerExtensionAddsBothEdges) {
   CHECK_EQ(
       ssdFramePointAt(480, 300, 28, 2, true, TitleBarButtonSide::Right, kAll, -3, -15).edges,
       uint32_t{WLR_EDGE_LEFT | WLR_EDGE_TOP}
@@ -117,7 +117,7 @@ UMBRIEL_TEST(cornerExtensionAddsBothEdges) {
   );
 }
 
-UMBRIEL_TEST(contentBoxInTileRemovesTitleBar) {
+CANOPY_TEST(contentBoxInTileRemovesTitleBar) {
   const auto content = contentBoxInTile({8, 8, 1264, 704}, 28);
   CHECK_EQ(content.x, 8);
   CHECK_EQ(content.y, 36);

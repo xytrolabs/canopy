@@ -5,12 +5,12 @@
 # user-selected RandR state is left alone. protocol/xwayland_primary_restart covers lazy Xwayland restarts.
 set -euo pipefail
 
-readonly QUERY="$UMBRIEL_XWAYLAND_OUTPUT_CLIENT"
-readonly HOLDER="$UMBRIEL_XWAYLAND_FOCUS_CLIENT"
-mkfifo "$UMBRIEL_RUNTIME_DIR/primary-control"
-exec {control_fd}<>"$UMBRIEL_RUNTIME_DIR/primary-control"
+readonly QUERY="$CANOPY_XWAYLAND_OUTPUT_CLIENT"
+readonly HOLDER="$CANOPY_XWAYLAND_FOCUS_CLIENT"
+mkfifo "$CANOPY_RUNTIME_DIR/primary-control"
+exec {control_fd}<>"$CANOPY_RUNTIME_DIR/primary-control"
 
-cat >> "$UMBRIEL_CONFIG" <<'CONFIG'
+cat >> "$CANOPY_CONFIG" <<'CONFIG'
 
 [animation]
 enabled = false
@@ -36,12 +36,12 @@ default_output = "HEADLESS-1"
 match.title = "^primary-other$"
 default_output = "HEADLESS-2"
 CONFIG
-"$UMBRIEL" msg config-reload > /dev/null
+"$CANOPY" msg config-reload > /dev/null
 
 start_holder() {
-  "$HOLDER" primary-holder <&"$control_fd" > "$UMBRIEL_RUNTIME_DIR/primary-holder.log" 2>&1 &
+  "$HOLDER" primary-holder <&"$control_fd" > "$CANOPY_RUNTIME_DIR/primary-holder.log" 2>&1 &
   for _ in $(seq 100); do
-    if "$UMBRIEL" windows --json | jq -e 'any(.[]; .title == "primary-holder")' > /dev/null; then
+    if "$CANOPY" windows --json | jq -e 'any(.[]; .title == "primary-holder")' > /dev/null; then
       return
     fi
     sleep 0.02
@@ -65,11 +65,11 @@ await_primary() {
 
 configure_primary() {
   local name=$1
-  sed -i '/^xwayland_primary_output = /d' "$UMBRIEL_CONFIG"
+  sed -i '/^xwayland_primary_output = /d' "$CANOPY_CONFIG"
   if [[ -n $name ]]; then
-    sed -i "/^\[general\]$/a xwayland_primary_output = \"$name\"" "$UMBRIEL_CONFIG"
+    sed -i "/^\[general\]$/a xwayland_primary_output = \"$name\"" "$CANOPY_CONFIG"
   fi
-  "$UMBRIEL" msg config-reload > /dev/null
+  "$CANOPY" msg config-reload > /dev/null
 }
 
 start_holder
@@ -80,55 +80,55 @@ await_primary ''
 # Without a setting, an external primary survives both no-op and unrelated reloads.
 "$QUERY" HEADLESS-3
 await_primary HEADLESS-3
-"$UMBRIEL" msg config-reload > /dev/null
-sed -i '/^\[general\]$/a focus_on_activate = true' "$UMBRIEL_CONFIG"
-"$UMBRIEL" msg config-reload > /dev/null
+"$CANOPY" msg config-reload > /dev/null
+sed -i '/^\[general\]$/a focus_on_activate = true' "$CANOPY_CONFIG"
+"$CANOPY" msg config-reload > /dev/null
 await_primary HEADLESS-3
 
 # Observe a transition away from the origin monitor, rather than accepting its default state.
 configure_primary headless-1
 await_primary HEADLESS-1
-mkfifo "$UMBRIEL_RUNTIME_DIR/primary-other-control"
-exec {other_fd}<>"$UMBRIEL_RUNTIME_DIR/primary-other-control"
-"$HOLDER" primary-other <&"$other_fd" > "$UMBRIEL_RUNTIME_DIR/primary-other.log" 2>&1 &
+mkfifo "$CANOPY_RUNTIME_DIR/primary-other-control"
+exec {other_fd}<>"$CANOPY_RUNTIME_DIR/primary-other-control"
+"$HOLDER" primary-other <&"$other_fd" > "$CANOPY_RUNTIME_DIR/primary-other.log" 2>&1 &
 other_pid=$!
 for _ in $(seq 100); do
-  if "$UMBRIEL" windows --json | jq -e 'any(.[]; .title == "primary-other" and .active
+  if "$CANOPY" windows --json | jq -e 'any(.[]; .title == "primary-other" and .active
     and (.workspace | startswith("HEADLESS-2:")))' > /dev/null; then
     break
   fi
   sleep 0.02
 done
-"$UMBRIEL" windows --json | jq -e 'any(.[]; .title == "primary-other" and .active
+"$CANOPY" windows --json | jq -e 'any(.[]; .title == "primary-other" and .active
   and (.workspace | startswith("HEADLESS-2:")))' > /dev/null
-"$UMBRIEL" settle > /dev/null
+"$CANOPY" settle > /dev/null
 await_primary HEADLESS-1
 printf 'quit\n' >&"$other_fd"
 wait "$other_pid"
-"$UMBRIEL" msg workspace-switch 1 --output HEADLESS-3 > /dev/null
-"$UMBRIEL" settle > /dev/null
+"$CANOPY" msg workspace-switch 1 --output HEADLESS-3 > /dev/null
+"$CANOPY" settle > /dev/null
 await_primary HEADLESS-1
-"$UMBRIEL" msg workspace-switch 1 --output HEADLESS-2 > /dev/null
-"$UMBRIEL" settle > /dev/null
+"$CANOPY" msg workspace-switch 1 --output HEADLESS-2 > /dev/null
+"$CANOPY" settle > /dev/null
 await_primary HEADLESS-1
 configure_primary HEADLESS-2
 await_primary HEADLESS-2
 configure_primary HEADLESS-1
 await_primary HEADLESS-1
 
-"$UMBRIEL" msg output-disable HEADLESS-1 > /dev/null
+"$CANOPY" msg output-disable HEADLESS-1 > /dev/null
 await_primary ''
-"$UMBRIEL" msg output-enable HEADLESS-1 > /dev/null
+"$CANOPY" msg output-enable HEADLESS-1 > /dev/null
 await_primary HEADLESS-1
 old_id=$("$QUERY" | jq .id)
-"$UMBRIEL" output-destroy HEADLESS-1 > /dev/null
+"$CANOPY" output-destroy HEADLESS-1 > /dev/null
 await_primary ''
-"$UMBRIEL" output-create HEADLESS-1 > /dev/null
+"$CANOPY" output-create HEADLESS-1 > /dev/null
 await_primary HEADLESS-1
 [[ $("$QUERY" | jq .id) != "$old_id" ]]
 
-sed -i '/^position = \[0, 0\]$/a scale = 1.25' "$UMBRIEL_CONFIG"
-"$UMBRIEL" msg config-reload > /dev/null
+sed -i '/^position = \[0, 0\]$/a scale = 1.25' "$CANOPY_CONFIG"
+"$CANOPY" msg config-reload > /dev/null
 await_primary HEADLESS-1
 
 configure_primary missing-output
@@ -138,7 +138,7 @@ await_primary HEADLESS-1
 configure_primary ''
 await_primary ''
 "$QUERY" HEADLESS-2
-"$UMBRIEL" msg config-reload > /dev/null
+"$CANOPY" msg config-reload > /dev/null
 await_primary HEADLESS-2
 configure_primary HEADLESS-1
 await_primary HEADLESS-1

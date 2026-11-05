@@ -8,12 +8,12 @@ set -euo pipefail
 readonly BTN_LEFT=272
 readonly OUTPUT_LAYOUT_W=2560
 readonly OUTPUT_LAYOUT_H=720
-readonly CLIENT="${UMBRIEL_DRAG_CLIENT:-./build-debug/tests/drag-client}"
-readonly POINTER="${UMBRIEL_POINTER_CLIENT:-./build-debug/tests/pointer-client}"
-readonly CLIENT_LOG="$UMBRIEL_RUNTIME_DIR/tear-off-client.log"
-readonly POINTER_LOG="$UMBRIEL_RUNTIME_DIR/tear-off-pointer.log"
+readonly CLIENT="${CANOPY_DRAG_CLIENT:-./build-debug/tests/drag-client}"
+readonly POINTER="${CANOPY_POINTER_CLIENT:-./build-debug/tests/pointer-client}"
+readonly CLIENT_LOG="$CANOPY_RUNTIME_DIR/tear-off-client.log"
+readonly POINTER_LOG="$CANOPY_RUNTIME_DIR/tear-off-pointer.log"
 
-cat >> "$UMBRIEL_CONFIG" <<'EOF'
+cat >> "$CANOPY_CONFIG" <<'EOF'
 
 [animation]
 enabled = false
@@ -22,15 +22,15 @@ enabled = false
 match.title = "^tear-off-source$"
 default_output = "HEADLESS-1"
 EOF
-"$UMBRIEL" msg config-reload > /dev/null
+"$CANOPY" msg config-reload > /dev/null
 
 output_origin() {
-  "$UMBRIEL" outputs |
+  "$CANOPY" outputs |
     awk -v name="$1" '$1 == name { found = 1; next } found && /Position:/ { split($2, p, ","); print p[1], p[2]; exit }'
 }
 
 window_json() {
-  "$UMBRIEL" windows --json | jq -c --arg title "$1" '.[] | select(.title == $title)'
+  "$CANOPY" windows --json | jq -c --arg title "$1" '.[] | select(.title == $title)'
 }
 
 "$CLIENT" tear-off > "$CLIENT_LOG" 2>&1 &

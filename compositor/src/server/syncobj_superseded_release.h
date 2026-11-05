@@ -4,7 +4,7 @@
 
 struct wlr_compositor;
 
-namespace umbriel {
+namespace canopy {
 
   // wlroots queues each commit to a synchronized subsurface as its own cached state and creates its linux-drm-syncobj
   // release only once that state is applied, so buffers committed while the parent has not committed again keep their
@@ -28,4 +28,4 @@ namespace umbriel {
     wl_listener m_newSurface{};
   };
 
-} // namespace umbriel
+} // namespace canopy

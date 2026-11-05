@@ -30,10 +30,10 @@
 #include <utility>
 
 extern "C" {
-#include <umbrielfx/render/effect.h>
+#include <canopyfx/render/effect.h>
 }
 
-namespace umbriel {
+namespace canopy {
 
   nlohmann::json IpcCommands::inputCapturePermissions(Server& server, IpcArgs /*args*/) {
     auto result = nlohmann::json::array();
@@ -736,7 +736,7 @@ namespace umbriel {
   // The view the window actions target. The qualified call keeps the shared
   // focus policy distinct from this command's own name.
   nlohmann::json IpcCommands::focusedWindow(Server& server, IpcArgs /*args*/) {
-    View* view = umbriel::focusedWindow(server);
+    View* view = canopy::focusedWindow(server);
     if (view == nullptr) {
       return nlohmann::json{{"err", "no focused window"}};
     }
@@ -1218,7 +1218,7 @@ namespace umbriel {
   nlohmann::json IpcCommands::settle(Server& /*server*/, IpcArgs /*args*/) { return nlohmann::json{{"ok", nullptr}}; }
 
   nlohmann::json IpcCommands::clockFreeze([[maybe_unused]] Server& server, IpcArgs /*args*/) {
-#ifdef UMBRIEL_HARNESS
+#ifdef CANOPY_HARNESS
     server.freezeAnimationClock();
 #endif
     return nlohmann::json{{"ok", nullptr}};
@@ -1229,13 +1229,13 @@ namespace umbriel {
   }
 
   nlohmann::json IpcCommands::clockResume([[maybe_unused]] Server& server, IpcArgs /*args*/) {
-#ifdef UMBRIEL_HARNESS
+#ifdef CANOPY_HARNESS
     server.resumeAnimationClock();
 #endif
     return nlohmann::json{{"ok", nullptr}};
   }
 
-#ifdef UMBRIEL_HARNESS
+#ifdef CANOPY_HARNESS
   namespace {
     // The harness commands below parse their words as one whitespace-separated stream.
     std::string joinArgs(IpcArgs args) {
@@ -1407,7 +1407,7 @@ namespace umbriel {
        &printTearing},
       {"keyboard-layouts", "", "list keyboard layouts", IpcCommandGroup::Inspect, false, &IpcCommands::keyboardLayouts,
        &printKeyboardLayouts},
-#ifdef UMBRIEL_HARNESS
+#ifdef CANOPY_HARNESS
       {"settle", "", "wait until no layout or animation is pending and every output has drawn a frame",
        IpcCommandGroup::Harness, false, &IpcCommands::settle, nullptr, 35},
       {"clock-freeze", "", "stop animation time", IpcCommandGroup::Harness, false, &IpcCommands::clockFreeze, nullptr},
@@ -1445,4 +1445,4 @@ namespace umbriel {
     return nullptr;
   }
 
-} // namespace umbriel
+} // namespace canopy

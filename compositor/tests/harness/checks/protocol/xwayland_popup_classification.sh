@@ -3,17 +3,17 @@
 # Popup metadata can arrive after association and while the Wayland surface
 # stays mapped. Classification must change without a client hide/show cycle.
 set -euo pipefail
-source "$UMBRIEL_HARNESS_LIB"
+source "$CANOPY_HARNESS_LIB"
 
-readonly CLIENT="$UMBRIEL_XWAYLAND_POPUP_CLIENT"
-readonly APP_ID=UmbrielXwaylandPopup
-readonly NATIVE_CLIENT="$UMBRIEL_SEAT_LOG_CLIENT"
+readonly CLIENT="$CANOPY_XWAYLAND_POPUP_CLIENT"
+readonly APP_ID=CanopyXwaylandPopup
+readonly NATIVE_CLIENT="$CANOPY_SEAT_LOG_CLIENT"
 readonly NATIVE_TITLE=xwayland-popup-native
-readonly NATIVE_LOG="$UMBRIEL_RUNTIME_DIR/popup-native.log"
+readonly NATIVE_LOG="$CANOPY_RUNTIME_DIR/popup-native.log"
 client_pid=
 sequence=0
 
-cat >> "$UMBRIEL_CONFIG" <<'CONFIG'
+cat >> "$CANOPY_CONFIG" <<'CONFIG'
 [animation]
 enabled = false
 [animation.dim_unfocused]
@@ -36,20 +36,20 @@ workspace_wallpaper = false
 shortcuts = false
 
 [[window_rule]]
-match.app_id = "^UmbrielXwaylandPopup$"
+match.app_id = "^CanopyXwaylandPopup$"
 default_floating = false
 default_maximize = true
 opacity = 1.0
 blur = false
 CONFIG
-"$UMBRIEL" msg config-reload > /dev/null
+"$CANOPY" msg config-reload > /dev/null
 
-views() { "$UMBRIEL" windows --json | jq -c --arg app "$APP_ID" '[.[] | select(.app_id == $app)]'; }
+views() { "$CANOPY" windows --json | jq -c --arg app "$APP_ID" '[.[] | select(.app_id == $app)]'; }
 send() { printf '%s\n' "$@" >&"$control_fd"; }
 
 start_client() {
-  local name=$1 fifo="$UMBRIEL_RUNTIME_DIR/popup-$1.control"
-  client_log="$UMBRIEL_RUNTIME_DIR/popup-$name.log"
+  local name=$1 fifo="$CANOPY_RUNTIME_DIR/popup-$1.control"
+  client_log="$CANOPY_RUNTIME_DIR/popup-$name.log"
   mkfifo "$fifo"
   exec {control_fd}<> "$fifo"
   "$CLIENT" "xwayland-popup-$name" <&"$control_fd" > "$client_log" 2>&1 &
@@ -88,7 +88,7 @@ expect_managed() {
   expect_view_count 1
   for _ in $(seq 100); do
     if views | jq -e '.[0] | .visible and .active and .maximized and (.floating == false)' > /dev/null; then
-      "$UMBRIEL" settle > /dev/null
+      "$CANOPY" settle > /dev/null
       return 0
     fi
     sleep 0.025
@@ -129,11 +129,11 @@ expect_raw_focus_clear() {
 
 expect_native_active() {
   for _ in $(seq 100); do
-    if "$UMBRIEL" windows --json | jq -e --arg title "$NATIVE_TITLE" \
+    if "$CANOPY" windows --json | jq -e --arg title "$NATIVE_TITLE" \
       '.[] | select(.title == $title) | .active' > /dev/null; then return 0; fi
     sleep 0.025
   done
-  echo "native window did not retain active focus: $("$UMBRIEL" windows --json)"
+  echo "native window did not retain active focus: $("$CANOPY" windows --json)"
   cat "$NATIVE_LOG"
   return 1
 }
@@ -155,23 +155,23 @@ expect_popup_state() {
 }
 
 expect_output_pixel() {
-  local label=$1 x=$2 y=$3 expected=$4 image="$UMBRIEL_RUNTIME_DIR/popup-$1.png" pixel
-  "$UMBRIEL" settle > /dev/null
+  local label=$1 x=$2 y=$3 expected=$4 image="$CANOPY_RUNTIME_DIR/popup-$1.png" pixel
+  "$CANOPY" settle > /dev/null
   grim -o HEADLESS-1 "$image"
-  pixel=$("$UMBRIEL_PIXEL_PROBE" "$image" pixel "$x" "$y")
+  pixel=$("$CANOPY_PIXEL_PROBE" "$image" pixel "$x" "$y")
   [[ $pixel == "$expected" ]] || { echo "$label: pixel at $x,$y was $pixel, expected $expected"; return 1; }
 }
 
 expect_pixels() {
   local label=$1 x=${2:-200} y=${3:-150} width=${4:-300} height=${5:-160}
-  local image="$UMBRIEL_RUNTIME_DIR/popup-$label.png" pixel
-  "$UMBRIEL" settle > /dev/null
+  local image="$CANOPY_RUNTIME_DIR/popup-$label.png" pixel
+  "$CANOPY" settle > /dev/null
   grim -o HEADLESS-1 "$image"
-  pixel=$("$UMBRIEL_PIXEL_PROBE" "$image" pixel "$((x + width / 2))" "$((y + height / 2))")
+  pixel=$("$CANOPY_PIXEL_PROBE" "$image" pixel "$((x + width / 2))" "$((y + height / 2))")
   [[ $pixel == '48 96 144' ]] || { echo "$label: popup content pixel was $pixel"; return 1; }
   for point in "$((x - 5)) $((y + 20))" "$((x + width + 5)) $((y + 20))"; do
     read -r px py <<< "$point"
-    pixel=$("$UMBRIEL_PIXEL_PROBE" "$image" pixel "$px" "$py")
+    pixel=$("$CANOPY_PIXEL_PROBE" "$image" pixel "$px" "$py")
     [[ $pixel == '0 255 0' ]] || { echo "$label: outside pixel at $px,$py was $pixel"; return 1; }
   done
 }
@@ -179,20 +179,20 @@ expect_pixels() {
 type_key() {
   local key=$1 before
   before=$(events "$client_log" "key code=$((key + 8)) state=pressed")
-  "$UMBRIEL_POINTER_CLIENT" 1280 720 tap "$key" > /dev/null
+  "$CANOPY_POINTER_CLIENT" 1280 720 tap "$key" > /dev/null
   await_lines "$client_log" "key code=$((key + 8)) state=pressed" "$((before + 1))" 0.025
 }
 
 type_key_to() {
   local key=$1 window=$2 before
   before=$(events "$client_log" "key code=$((key + 8)) state=pressed window=$window")
-  "$UMBRIEL_POINTER_CLIENT" 1280 720 tap "$key" > /dev/null
+  "$CANOPY_POINTER_CLIENT" 1280 720 tap "$key" > /dev/null
   await_lines "$client_log" "key code=$((key + 8)) state=pressed window=$window" "$((before + 1))" 0.025
 }
 
 # The passive utility floats at its client position over its maximized parent, which keeps the keyboard.
 expect_passive_utility() {
-  local label=$1 image="$UMBRIEL_RUNTIME_DIR/popup-$1.png" pixel
+  local label=$1 image="$CANOPY_RUNTIME_DIR/popup-$1.png" pixel
   expect_view_count 2
   for _ in $(seq 100); do
     if views | jq -e '(map(select(.floating)) | length == 1) and (map(select(.active and .maximized)) | length == 1)' \
@@ -203,11 +203,11 @@ expect_passive_utility() {
   done
   views | jq -e '(map(select(.floating)) | length == 1) and (map(select(.active and .maximized)) | length == 1)' \
     > /dev/null || { echo "$label: expected a floating utility over an active maximized parent: $(views)"; return 1; }
-  "$UMBRIEL" settle > /dev/null
+  "$CANOPY" settle > /dev/null
   grim -o HEADLESS-1 "$image"
-  pixel=$("$UMBRIEL_PIXEL_PROBE" "$image" pixel 350 230)
+  pixel=$("$CANOPY_PIXEL_PROBE" "$image" pixel 350 230)
   [[ $pixel == '48 96 144' ]] || { echo "$label: utility content pixel was $pixel"; return 1; }
-  pixel=$("$UMBRIEL_PIXEL_PROBE" "$image" pixel 510 230)
+  pixel=$("$CANOPY_PIXEL_PROBE" "$image" pixel 510 230)
   [[ $pixel == '192 128 64' ]] || { echo "$label: parent pixel was $pixel"; return 1; }
 }
 
@@ -286,7 +286,7 @@ fi
 
 # Seed both maximize atoms and fullscreen so popup conversion must discard
 # compositor-owned window state rather than merely keep absent flags absent.
-"$UMBRIEL" msg window-toggle-fullscreen > /dev/null
+"$CANOPY" msg window-toggle-fullscreen > /dev/null
 for _ in $(seq 100); do
   [[ $(views | jq -r '.[0].fullscreen') == true ]] && break
   sleep 0.025
@@ -295,7 +295,7 @@ if [[ $(views | jq -r '.[0].fullscreen') != true ]]; then
   echo "fixture did not enter fullscreen before popup conversion: $(views)"
   exit 1
 fi
-"$UMBRIEL" settle > /dev/null
+"$CANOPY" settle > /dev/null
 expect_managed_state fullscreen-seeded true
 
 # Publish only the type, with no configure or redraw command to rescue it.
@@ -321,7 +321,7 @@ type_key 33
 # Role changes while overview cards exist must drop the old View immediately.
 # At zoom 0.5 the maximized card covers this sample; the actual 320x180 popup
 # at 240,190 cannot reach it. No pointer hit-testing selects a card here.
-"$UMBRIEL" msg overview-open > /dev/null
+"$CANOPY" msg overview-open > /dev/null
 expect_output_pixel overview-managed 800 450 '48 96 144'
 send 'type popup'
 expect_view_count 0
@@ -330,14 +330,14 @@ expect_output_pixel overview-popup 800 450 '0 255 0'
 send 'type normal'
 expect_view_count 1
 expect_output_pixel overview-restored 800 450 '48 96 144'
-"$UMBRIEL" msg overview-close > /dev/null
+"$CANOPY" msg overview-close > /dev/null
 expect_managed
 expect_managed_state overview-closed
 type_key 37
 
 # Present a real frame before withdrawal, then remap the same X window. This
 # synchronizes lifecycle coverage with rendering rather than an arbitrary wait.
-image="$UMBRIEL_RUNTIME_DIR/popup-managed-before-remap.png"
+image="$CANOPY_RUNTIME_DIR/popup-managed-before-remap.png"
 grim -o HEADLESS-1 "$image"
 send unmap
 expect_state withdrawn 'map=0 override=false type=normal .* listed=false stacked=false max_horz=false max_vert=false fullscreen=false'
@@ -408,7 +408,7 @@ if [[ $(events "$NATIVE_LOG" keyboard-leave) != "$native_leaves" ]]; then
   exit 1
 fi
 native_keys_before=$(events "$NATIVE_LOG" 'keyboard-key code=39 state=pressed')
-"$UMBRIEL_POINTER_CLIENT" 1280 720 keyboard-only tap 39 > /dev/null
+"$CANOPY_POINTER_CLIENT" 1280 720 keyboard-only tap 39 > /dev/null
 await_lines "$NATIVE_LOG" 'keyboard-key code=39 state=pressed' "$((native_keys_before + 1))" 0.025
 if [[ $(events "$client_log" 'key code=47 state=pressed') != "$x_keys_before" ]]; then
   echo "native typing also reached the withdrawn X11 popup: $(cat "$client_log")"
