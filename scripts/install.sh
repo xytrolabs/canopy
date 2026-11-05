@@ -142,6 +142,14 @@ install_compositor() {
             "$XDG_DATA_HOME/canopy/compositor.toml"
     fi
     say "installed canopywc (Canopy compositor)"
+
+    # Same rule as the shell config: bring an existing compositor config up to
+    # the shipped values, touching only keys the user has not changed.
+    _user_compositor_config="${XDG_CONFIG_HOME:-$HOME/.config}/canopywc/config.toml"
+    if [ "$DRY_RUN" -eq 0 ] && [ -f "$_user_compositor_config" ] && command -v python3 >/dev/null 2>&1; then
+        python3 "$PROJECT_DIR/scripts/migrate-config.py" --compositor \
+            "$_user_compositor_config" || true
+    fi
 }
 
 # ------------------------------------------------------- session + portals ---

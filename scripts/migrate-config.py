@@ -46,6 +46,22 @@ MIGRATIONS: list[tuple[str, str, str, str]] = [
     ("notification", "background_opacity", "0.95", "0.92"),
 ]
 
+# The compositor config (canopywc) has its own shipped defaults and its own
+# lifetime: it is seeded on first session start and then belongs to the user.
+MIGRATIONS_COMPOSITOR: list[tuple[str, str, str, str]] = [
+    # Fluent corner scale.
+    ("appearance", "corner_radius", "12", "8"),
+    # Mica, not flat grey.
+    ("appearance.blur", "radius", "6", "8"),
+    ("appearance.blur", "noise", "0.0", "0.03"),
+    ("appearance.blur", "brightness", "1.0", "1.02"),
+    ("appearance.blur", "saturation", "1.0", "1.15"),
+    # 28 px macOS caption; traffic lights on the left, drawn as circles.
+    ("appearance.title_bar", "height", "30", "28"),
+    ("appearance.title_bar", "button_position", '"right"', '"left"'),
+    ("appearance.title_bar", "button_corner_radius", "12", "100"),
+]
+
 # Keys that did not exist in older configs. Added under their section when
 # missing, so a shipped default can appear without touching anything the user
 # wrote. (section, key, value)
@@ -59,8 +75,8 @@ SECTION_RE = re.compile(r"^\s*\[([^\]]+)\]\s*$")
 KEY_RE = re.compile(r"^(?P<indent>\s*)(?P<key>[A-Za-z0-9_]+)(?P<sep>\s*=\s*)(?P<value>[^#\n]*?)(?P<rest>\s*(?:#.*)?)$")
 
 
-def migrate_text(text: str) -> tuple[str, list[str]]:
-    updated, applied = _rewrite_values(text)
+def migrate_text(text: str, migrations=MIGRATIONS) -> tuple[str, list[str]]:
+    updated, applied = _rewrite_values(text, migrations)
     updated, added = _add_missing_keys(updated)
     return updated, applied + added
 
@@ -106,8 +122,8 @@ def _add_missing_keys(text: str) -> tuple[str, list[str]]:
     return "".join(lines), applied
 
 
-def _rewrite_values(text: str) -> tuple[str, list[str]]:
-    wanted = {(section, key): (old, new) for section, key, old, new in MIGRATIONS}
+def _rewrite_values(text: str, migrations=MIGRATIONS) -> tuple[str, list[str]]:
+    wanted = {(section, key): (old, new) for section, key, old, new in migrations}
     applied: list[str] = []
     section = ""
     out: list[str] = []
@@ -146,6 +162,7 @@ def _rewrite_values(text: str) -> tuple[str, list[str]]:
 
 def main(argv: list[str]) -> int:
     dry_run = "--dry-run" in argv
+    migrations = MIGRATIONS_COMPOSITOR if "--compositor" in argv else MIGRATIONS
     paths = [a for a in argv[1:] if not a.startswith("-")]
     if not paths:
         print("migrate-config: no path given", file=sys.stderr)
@@ -158,7 +175,7 @@ def main(argv: list[str]) -> int:
             continue
 
         original = path.read_text(encoding="utf-8")
-        updated, applied = migrate_text(original)
+        updated, applied = migrate_text(original, migrations)
         if not applied:
             print(f"migrate-config: {path} is up to date")
             continue
