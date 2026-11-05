@@ -186,11 +186,20 @@ namespace shell::dock {
         if (instance.panel != nullptr) {
           instance.panel->setOpacity(1.0F);
         }
+        if (instance.shadow != nullptr) {
+          instance.shadow->setOpacity(1.0F);
+        }
         return;
       }
 
       if (instance.panel != nullptr) {
         instance.panel->setOpacity(0.0F);
+      }
+      // The shadow follows the panel's rectangle, so leaving it visible draws a
+      // full-width rounded box behind the islands - a container that is not
+      // there. Each island carries its own hairline border instead.
+      if (instance.shadow != nullptr) {
+        instance.shadow->setOpacity(0.0F);
       }
       if (instance.slideRoot == nullptr) {
         return;
