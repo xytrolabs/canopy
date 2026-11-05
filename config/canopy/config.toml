@@ -201,8 +201,10 @@ opacity      = 0.88
 enabled             = true
 position            = "bottom"
 icon_size           = 44
-main_axis_padding   = 12
-cross_axis_padding  = 8
+# Room between the icons and the pill's own edge: without it the first and last
+# icon sit on the rounded end and the row looks like it is falling out.
+main_axis_padding   = 20
+cross_axis_padding  = 14
 item_spacing        = 8
 background_opacity  = 0.80
 compositor_blur     = true
@@ -217,7 +219,7 @@ shadow              = true
 show_running        = true
 # Three islands: pinned applications, running (unpinned), minimized windows.
 sections            = "islands"
-section_gap         = 18
+section_gap         = 10
 # The dock slides away as soon as the pointer leaves; only the side island has a
 # configurable delay (bar.auto_hide_delay_ms).
 auto_hide           = true
