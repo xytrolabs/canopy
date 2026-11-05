@@ -231,10 +231,17 @@ namespace shell::dock {
         applyPanelPaletteTo(*box, cfg);
         box->setRadius(static_cast<float>(cfg.radius));
 
-        // Shrink each island by half the gap on its own edges: two neighbouring
-        // islands end up exactly `sectionGap` pixels apart.
-        float start = spans[i].start - gap * 0.5F;
-        float end = spans[i].end + gap * 0.5F;
+        // Pull each island's edges in towards its icons: two neighbouring islands
+        // end up `sectionGap` pixels apart without a single icon moving.
+        //
+        // The trim is capped at the dock cell padding (kCellPad in dock_items.cpp)
+        // because anything larger would cut into the icon's own box and clip it.
+        // The visible separation is therefore itemSpacing + 2 * trim, so a
+        // sectionGap above 2 * kCellPad stops having an effect.
+        constexpr float kIslandTrim = 6.0F;
+        const float trim = std::min(gap * 0.5F, kIslandTrim);
+        float start = spans[i].start + trim;
+        float end = spans[i].end - trim;
         if (end - start < 4.0F) {
           end = start + 4.0F;
         }

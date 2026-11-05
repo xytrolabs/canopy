@@ -1,4 +1,4 @@
-# Willow — default desktop configuration
+# Canopy — default desktop configuration
 #
 # Power when you need it. Simple by default.
 #
@@ -9,7 +9,7 @@
 #   • Quick Settings— control centre, opens from the right
 #
 # Every value below is a normal Noctalia v5 setting; nothing here is a
-# Willow-only extension. Edit freely from Settings — the GUI writes back to
+# Canopy-only extension. Edit freely from Settings — the GUI writes back to
 # this same file.
 
 # ── Shell ─────────────────────────────────────────────────────────────────────
@@ -83,13 +83,13 @@ show_app_icon = true
 show_count    = false
 
 # ── Theme ─────────────────────────────────────────────────────────────────────
-# The Willow palette is a restrained purple accent on neutral surfaces, and it
+# The Canopy palette is a restrained purple accent on neutral surfaces, and it
 # works with blur and animations turned off.
 
 [theme]
 mode                = "dark"
 source              = "builtin"
-builtin             = "Willow"
+builtin             = "Canopy"
 pure_black_dark     = false
 
 [theme.templates]
@@ -114,7 +114,7 @@ margin_ends         = 0
 margin_edge         = 0
 padding             = 12
 widget_spacing      = 6
-border              = "outline"
+border              = "outline_variant"
 border_width        = 1.0
 background_opacity  = 0.78
 compositor_blur     = true
@@ -130,7 +130,7 @@ center = []
 end    = ["media", "clock", "control-center", "session"]
 
 # ── System Tray — vertical pill, left edge ────────────────────────────────────
-# Willow's own surface: launcher, settings and the quick system controls in one
+# Canopy's own surface: launcher, settings and the quick system controls in one
 # slim pill instead of a second row of duplicated indicators.
 
 [bar.tray]
@@ -169,7 +169,7 @@ capsule_opacity     = 0.88
 capsule_border      = "outline_variant"
 capsule_border_width = 1.0
 
-# The side pill is Willow's own surface: desktop functions plus the background
+# The side pill is Canopy's own surface: desktop functions plus the background
 # processes (StatusNotifierItem) of the session. Notifications and audio are
 # deliberately not here — they have their own panels.
 #
@@ -233,7 +233,7 @@ show_dots           = true
 show_instance_count = false
 launcher_position   = "start"
 launcher_icon       = "grid-dots"
-pinned              = ["firefox", "thunar", "kitty", "alacritty", "dev.canopy.Willow"]
+pinned              = ["firefox", "thunar", "kitty", "alacritty", "dev.canopy.Canopy"]
 
 # ── Quick Settings — right side ───────────────────────────────────────────────
 
@@ -262,7 +262,7 @@ blur_intensity  = 0.45
 tint_intensity  = 0.30
 
 [wallpaper.default]
-# Willow ships three gradient washes; the shell renders them itself, so there is
+# Canopy ships three gradient washes; the shell renders them itself, so there is
 # no wallpaper daemon to manage.
 path = ""
 
@@ -278,18 +278,18 @@ connection_notifications = false
 [brightness]
 enable_ddcutil = false
 # ── Widgets ───────────────────────────────────────────────────────────────────
-# The panel launcher shows the Willow mark instead of a generic search glyph.
+# The panel launcher shows the Canopy mark instead of a generic search glyph.
 # Installer copies the mark to ~/.local/share/icons; if it is missing the widget
 # falls back to the bundled glyph named below.
 
 [widget.wordmark]
 # The desktop names itself in the menu bar, right after its mark.
 type = "text"
-text = "Willow"
+text = "Canopy"
 
 [widget.launcher]
 # The mark carries the accent, like a Start button that is actually branded.
 color        = "primary"
 glyph        = "canopy"
-custom_image = "~/.local/share/icons/hicolor/scalable/apps/willow.png"
+custom_image = "~/.local/share/icons/hicolor/scalable/apps/canopy.png"
 custom_image_colorize = false
