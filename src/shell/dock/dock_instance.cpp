@@ -238,7 +238,11 @@ namespace shell::dock {
         }
         box->setOpacity(1.0F);
         applyPanelPaletteTo(*box, cfg);
-        box->setRadius(static_cast<float>(cfg.radius));
+        // Islands are pills, not rounded rectangles: the radius is half the
+        // pill's cross size, so the ends are true semicircles whatever the dock
+        // thickness is. cfg.radius stays the radius of the unified dock panel.
+        const float cross = vertical ? panelGeometry.panelW : panelGeometry.panelH;
+        box->setRadius(std::max(0.0F, cross * 0.5F));
 
         // Pull each island's edges in towards its icons: two neighbouring islands
         // end up `sectionGap` pixels apart without a single icon moving.
