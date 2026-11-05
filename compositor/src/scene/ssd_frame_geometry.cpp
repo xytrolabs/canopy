@@ -1,6 +1,7 @@
 #include "scene/ssd_frame_geometry.h"
 
 #include <algorithm>
+#include <cmath>
 #include <ranges>
 
 extern "C" {
@@ -9,7 +10,10 @@ extern "C" {
 
 namespace canopy {
   int titleBarButtonDiameter(int height) {
-    const int diameter = std::max(8, (height + 1) / 2);
+    // Modern traffic lights are 40-45% of the title bar height (macOS draws 12 px
+    // dots in a 28 px bar). Half the height reads as a chunky button from 2010.
+    const int target = std::max(8, static_cast<int>(std::lround(static_cast<double>(height) * 0.42)));
+    const int diameter = std::min(target, 14);
     if ((height - diameter) % 2 == 0)
       return diameter;
     return diameter > 8 ? diameter - 1 : diameter + 1;

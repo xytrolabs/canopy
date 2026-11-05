@@ -65,7 +65,9 @@ offset_y = 8
 # one. The buttons are macOS circles with Windows hover behaviour.
 [appearance.title_bar]
 mode = "on"
-height = 30
+# 28 px is the macOS caption height, and the traffic lights scale to 42% of it
+# (12 px dots, 8 px apart) rather than half the bar.
+height = 28
 font = "Inter 10"
 button_position = "left"
 buttons = ["maximize", "minimize", "close"]

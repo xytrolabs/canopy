@@ -18,37 +18,37 @@ namespace {
 
 CANOPY_TEST(rightButtonsPutLastListedOutermost) {
   const auto parts = titleBarLayout(480, 28, TitleBarButtonSide::Right, kAll);
-  CHECK_EQ(parts.button(TitleBarButton::Close)->x, 459);
-  CHECK_EQ(parts.button(TitleBarButton::Close)->y, 7);
-  CHECK_EQ(parts.button(TitleBarButton::Close)->width, 14);
-  CHECK_EQ(parts.button(TitleBarButton::Close)->height, 14);
-  CHECK_EQ(parts.button(TitleBarButton::Maximize)->x, 437);
-  CHECK_EQ(parts.button(TitleBarButton::Minimize)->x, 415);
-  CHECK_EQ(parts.title.x, 8);
-  CHECK_EQ(parts.title.width, 399);
+  CHECK_EQ(parts.button(TitleBarButton::Close)->x, 460);
+  CHECK_EQ(parts.button(TitleBarButton::Close)->y, 8);
+  CHECK_EQ(parts.button(TitleBarButton::Close)->width, 12);
+  CHECK_EQ(parts.button(TitleBarButton::Close)->height, 12);
+  CHECK_EQ(parts.button(TitleBarButton::Maximize)->x, 440);
+  CHECK_EQ(parts.button(TitleBarButton::Minimize)->x, 420);
+  CHECK_EQ(parts.title.x, 12);
+  CHECK_EQ(parts.title.width, 396);
 }
 
 CANOPY_TEST(leftButtonsMirror) {
   const auto parts = titleBarLayout(480, 28, TitleBarButtonSide::Left, kAll);
-  CHECK_EQ(parts.button(TitleBarButton::Close)->x, 7);
-  CHECK_EQ(parts.button(TitleBarButton::Maximize)->x, 29);
-  CHECK_EQ(parts.button(TitleBarButton::Minimize)->x, 51);
-  CHECK_EQ(parts.title.x, 73);
-  CHECK_EQ(parts.title.width, 399);
+  CHECK_EQ(parts.button(TitleBarButton::Close)->x, 8);
+  CHECK_EQ(parts.button(TitleBarButton::Maximize)->x, 28);
+  CHECK_EQ(parts.button(TitleBarButton::Minimize)->x, 48);
+  CHECK_EQ(parts.title.x, 72);
+  CHECK_EQ(parts.title.width, 396);
 }
 
 CANOPY_TEST(omittedButtonsLeaveNoGapAndWidenTheTitle) {
   constexpr std::array order{TitleBarButton::Close, TitleBarButton::Minimize};
   const auto parts = titleBarLayout(480, 28, TitleBarButtonSide::Right, order);
-  CHECK_EQ(parts.button(TitleBarButton::Minimize)->x, 459);
-  CHECK_EQ(parts.button(TitleBarButton::Close)->x, 437);
+  CHECK_EQ(parts.button(TitleBarButton::Minimize)->x, 460);
+  CHECK_EQ(parts.button(TitleBarButton::Close)->x, 440);
   CHECK(!parts.button(TitleBarButton::Maximize).has_value());
-  CHECK_EQ(parts.title.width, 421);
+  CHECK_EQ(parts.title.width, 416);
   for (const auto side : {TitleBarButtonSide::Right, TitleBarButtonSide::Left}) {
     const auto bare = titleBarLayout(480, 28, side, kNone);
     CHECK(!bare.button(TitleBarButton::Close).has_value());
-    CHECK_EQ(bare.title.x, 8);
-    CHECK_EQ(bare.title.width, 464);
+    CHECK_EQ(bare.title.x, 12);
+    CHECK_EQ(bare.title.width, 456);
   }
 }
 

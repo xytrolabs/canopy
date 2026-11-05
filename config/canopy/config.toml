@@ -244,7 +244,10 @@ inactive_opacity    = 0.92
 show_dots           = true
 show_instance_count = false
 launcher_position   = "start"
+# The dock's launcher button is the Canopy mark, not a generic grid glyph.
 launcher_icon       = "grid-dots"
+launcher_custom_image = "~/.local/share/icons/hicolor/scalable/apps/canopy.png"
+launcher_custom_image_colorize = true
 pinned              = ["firefox", "thunar", "kitty", "alacritty", "dev.canopy.Canopy"]
 
 # ── Quick Settings — right side ───────────────────────────────────────────────

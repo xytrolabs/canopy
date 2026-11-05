@@ -46,11 +46,67 @@ MIGRATIONS: list[tuple[str, str, str, str]] = [
     ("notification", "background_opacity", "0.95", "0.92"),
 ]
 
+# Keys that did not exist in older configs. Added under their section when
+# missing, so a shipped default can appear without touching anything the user
+# wrote. (section, key, value)
+ADDITIONS: list[tuple[str, str, str]] = [
+    # The dock launcher was a generic grid glyph; it is the Canopy mark now.
+    ("dock", "launcher_custom_image", '"~/.local/share/icons/hicolor/scalable/apps/canopy.png"'),
+    ("dock", "launcher_custom_image_colorize", "true"),
+]
+
 SECTION_RE = re.compile(r"^\s*\[([^\]]+)\]\s*$")
 KEY_RE = re.compile(r"^(?P<indent>\s*)(?P<key>[A-Za-z0-9_]+)(?P<sep>\s*=\s*)(?P<value>[^#\n]*?)(?P<rest>\s*(?:#.*)?)$")
 
 
 def migrate_text(text: str) -> tuple[str, list[str]]:
+    updated, applied = _rewrite_values(text)
+    updated, added = _add_missing_keys(updated)
+    return updated, applied + added
+
+
+def _add_missing_keys(text: str) -> tuple[str, list[str]]:
+    lines = text.splitlines(keepends=True)
+    applied: list[str] = []
+
+    for section, key, value in ADDITIONS:
+        header = f"[{section}]"
+        start = None
+        for index, line in enumerate(lines):
+            if line.strip() == header:
+                start = index
+                break
+        if start is None:
+            continue
+
+        end = len(lines)
+        for index in range(start + 1, len(lines)):
+            if SECTION_RE.match(lines[index]):
+                end = index
+                break
+
+        if any(KEY_RE.match(l.rstrip("\n")) and KEY_RE.match(l.rstrip("\n")).group("key") == key
+               for l in lines[start + 1 : end]):
+            continue
+
+        # Insert after the last setting in the section, before any trailing blanks.
+        insert_at = end
+        for index in range(end - 1, start, -1):
+            stripped = lines[index].strip()
+            if stripped.startswith("#") or not stripped:
+                continue
+            insert_at = index + 1
+            break
+        else:
+            insert_at = start + 1
+
+        lines.insert(insert_at, f"{key} = {value}\n")
+        applied.append(f"[{section}] {key}: added {value}")
+
+    return "".join(lines), applied
+
+
+def _rewrite_values(text: str) -> tuple[str, list[str]]:
     wanted = {(section, key): (old, new) for section, key, old, new in MIGRATIONS}
     applied: list[str] = []
     section = ""

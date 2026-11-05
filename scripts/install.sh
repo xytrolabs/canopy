@@ -118,9 +118,16 @@ install_binary() {
 # session falls back to labwc when it is missing, so a checkout that has never
 # been built still gives you a desktop instead of a black screen.
 install_compositor() {
-    _bin="${CANOPY_COMPOSITOR_BIN:-$PROJECT_DIR/build-compositor/canopywc}"
-    if [ ! -x "$_bin" ]; then
-        say "note: $_bin is not built; the Canopy session will fall back to labwc"
+    _bin="${CANOPY_COMPOSITOR_BIN:-}"
+    if [ -z "$_bin" ]; then
+        # A source tree, a release payload (compositor/canopywc) or a build dir.
+        for _candidate in "$PROJECT_DIR/compositor/canopywc" \
+                          "$PROJECT_DIR/build-compositor/canopywc"; do
+            [ -x "$_candidate" ] && { _bin="$_candidate"; break; }
+        done
+    fi
+    if [ -z "$_bin" ] || [ ! -x "$_bin" ]; then
+        say "note: canopywc is not built or packaged; the Canopy session will fall back to labwc"
         say "      build it with: sh scripts/build-compositor.sh"
         return 0
     fi

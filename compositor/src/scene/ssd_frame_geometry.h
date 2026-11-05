@@ -17,7 +17,7 @@ namespace canopy {
   enum class SsdFramePart : uint8_t { None, TitleBar, Close, Maximize, Minimize, Resize };
 
   constexpr int kTitleBarButtonGap = 8;
-  constexpr int kTitleBarTitlePadding = 8;
+  constexpr int kTitleBarTitlePadding = 12;
   constexpr int kSsdResizeBand = 6;
   constexpr int kSsdResizeCorner = 20;
 

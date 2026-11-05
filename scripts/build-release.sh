@@ -39,11 +39,31 @@ fi
 
 [ -x "$BUILD_DIR/canopy" ] || { say "error: $BUILD_DIR/canopy is missing" >&2; exit 1; }
 
+# The compositor is part of the desktop, not an optional extra: build it when it
+# is missing so a release never ships a session that falls back to labwc.
+COMPOSITOR_BUILD="${CANOPY_COMPOSITOR_BUILD:-$PROJECT_DIR/build-compositor}"
+if [ "${CANOPY_SKIP_COMPOSITOR:-0}" != "1" ] && [ ! -x "$COMPOSITOR_BUILD/canopywc" ]; then
+    say ">> building the compositor (canopywc)"
+    if [ -f "$COMPOSITOR_BUILD/build.ninja" ]; then
+        meson compile -C "$COMPOSITOR_BUILD"
+    else
+        meson setup "$COMPOSITOR_BUILD" "$PROJECT_DIR/compositor" --buildtype=release >/dev/null
+        meson compile -C "$COMPOSITOR_BUILD"
+    fi
+fi
+
 # ---- Stage ---------------------------------------------------------------
 rm -rf "$STAGE"
 mkdir -p "$STAGE/bin" "$STAGE/assets" "$STAGE/config" "$STAGE/scripts" "$STAGE/share"
 
 cp "$BUILD_DIR/canopy" "$STAGE/bin/canopy"
+if [ -x "$COMPOSITOR_BUILD/canopywc" ]; then
+    say ">> including canopywc"
+    mkdir -p "$STAGE/compositor"
+    cp "$COMPOSITOR_BUILD/canopywc" "$STAGE/compositor/canopywc"
+else
+    say "warning: canopywc is not built; the package will fall back to labwc"
+fi
 cp -a "$PROJECT_DIR"/assets/. "$STAGE/assets/"
 cp -a "$PROJECT_DIR"/config/. "$STAGE/config/"
 cp -a "$PROJECT_DIR"/scripts/. "$STAGE/scripts/"
