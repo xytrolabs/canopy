@@ -138,14 +138,19 @@ margin_ends         = 24
 margin_edge         = 10
 padding             = 4
 widget_spacing      = 2
-background_opacity  = 0.80
-compositor_blur     = true
-shadow              = true
+# The bar itself is invisible: a side bar always covers the full edge, and a
+# background there reads as a slab running the height of the screen. The one
+# visible surface is the capsule group below, which wraps the widget row and is
+# therefore exactly as tall as what is inside it.
+background_opacity  = 0.0
+compositor_blur     = false
+shadow              = false
 # Slide away with the pointer, come back when it touches the edge.
 auto_hide           = true
 auto_hide_delay_ms  = 400
 reserve_space       = false
-capsule             = true
+# Per-widget capsules would draw seven pills; the group draws one.
+capsule             = false
 capsule_fill        = "surface_container"
 capsule_radius      = 16
 capsule_opacity     = 0.88
@@ -162,8 +167,19 @@ capsule_border_width = 1.0
 # band at the top of the pill. One centered lane makes the pill size itself to
 # its content and stay visually balanced whatever the tray reports.
 start  = []
-center = ["launcher", "control-center", "tray", "network", "bluetooth", "battery", "settings"]
+center = ["group:island"]
 end    = []
+
+# One island around everything: fill, radius and padding are the visible pill.
+[[bar.tray.capsule_group]]
+id           = "island"
+members      = ["launcher", "control-center", "tray", "network", "bluetooth", "battery", "settings"]
+fill         = "surface_container"
+border       = "outline_variant"
+border_width = 1.0
+padding      = 6.0
+radius       = 20.0
+opacity      = 0.88
 
 # ── Dock — bottom centre ──────────────────────────────────────────────────────
 # Pinned ǀ running ǀ minimized. Pinned ordering is stored in `pinned`, running
@@ -205,7 +221,7 @@ show_dots           = true
 show_instance_count = false
 launcher_position   = "start"
 launcher_icon       = "grid-dots"
-pinned              = []
+pinned              = ["firefox", "thunar", "kitty", "alacritty", "dev.canopy.Canopy"]
 
 # ── Quick Settings — right side ───────────────────────────────────────────────
 

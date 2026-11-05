@@ -17,13 +17,20 @@
 #include "wayland/layer_surface.h"
 #include "wayland/surface.h"
 
+#include "core/log.h"
+
 #include <algorithm>
 #include <cmath>
+#include <cstdlib>
+#include <format>
+#include <string>
 #include <wayland-client-protocol.h>
 
 namespace shell::dock {
 
   namespace {
+
+    constexpr Logger kLog("dock");
 
     [[nodiscard]] bool dockUsesSlideAutoHide(const DockConfig& cfg, const DockInstance& instance) noexcept {
       if (cfg.smartAutoHide) {
@@ -161,6 +168,13 @@ namespace shell::dock {
       const bool islands = cfg.sections == "islands";
       auto& boxes = instance.sectionPanels;
 
+      if (const char* debug = std::getenv("CANOPY_DOCK_DEBUG"); debug != nullptr && debug[0] != '\0') {
+        kLog.info(
+            "dock islands: sections=\"{}\" enabled={} panel={} slideRoot={} items={}", cfg.sections, islands,
+            instance.panel != nullptr, instance.slideRoot != nullptr, instance.items.size()
+        );
+      }
+
       if (!islands) {
         for (auto* box : boxes) {
           box->setOpacity(0.0F);
@@ -179,6 +193,17 @@ namespace shell::dock {
       }
 
       const auto spans = computeIslandSpans(instance, cfg);
+      // Island layout is invisible in a bug report, so keep an opt-in trace of
+      // what the dock decided to draw.
+      if (const char* debug = std::getenv("CANOPY_DOCK_DEBUG"); debug != nullptr && debug[0] != '\0') {
+        std::string summary;
+        for (const auto& span : spans) {
+          summary += std::format(
+              " [{}{:.0f}-{:.0f}]", static_cast<int>(span.section), span.start, span.end
+          );
+        }
+        kLog.info("dock islands: {} section(s){}", spans.size(), summary);
+      }
       while (boxes.size() < spans.size()) {
         auto* box = static_cast<Box*>(instance.slideRoot->addChild(ui::box({})));
         box->setClipChildren(false);
