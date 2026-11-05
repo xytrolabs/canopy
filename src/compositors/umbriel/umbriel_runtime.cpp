@@ -455,9 +455,14 @@ namespace compositors::umbriel {
   void UmbrielRuntime::resolveSocketPath() const {
     m_resolved = true;
 
-    if (const char* socketPath = std::getenv("UMBRIEL_SOCKET"); socketPath != nullptr && socketPath[0] != '\0') {
-      m_socketPath = socketPath;
-      return;
+    // Our fork exports CANOPY_SOCKET, upstream exports UMBRIEL_SOCKET; both
+    // speak the same IPC, so either one points at a usable socket.
+    for (const char* var : {"CANOPY_SOCKET", "UMBRIEL_SOCKET"}) {
+      const char* socketPath = std::getenv(var);
+      if (socketPath != nullptr && socketPath[0] != '\0') {
+        m_socketPath = socketPath;
+        return;
+      }
     }
 
     const char* runtimeDir = std::getenv("XDG_RUNTIME_DIR");
@@ -466,9 +471,12 @@ namespace compositors::umbriel {
       return;
     }
 
-    const std::string fallback = std::string(runtimeDir) + "/umbriel-" + waylandDisplay + ".sock";
-    if (isSocketPath(fallback)) {
-      m_socketPath = fallback;
+    for (const char* prefix : {"/canopywc-", "/umbriel-"}) {
+      const std::string fallback = std::string(runtimeDir) + prefix + waylandDisplay + ".sock";
+      if (isSocketPath(fallback)) {
+        m_socketPath = fallback;
+        return;
+      }
     }
   }
 

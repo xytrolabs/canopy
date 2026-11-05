@@ -1,6 +1,6 @@
 # Forking Umbriel as Canopy's compositor
 
-Status: **assessment + plan.** Nothing is vendored yet.
+Status: **vendored and building.** `compositor/` is upstream Umbriel, unmodified.
 
 ## Why this is the right move
 
@@ -36,14 +36,48 @@ Checked on this machine (2026-11-04, Umbriel `b6c4b7d`):
 
 So the fork is not a research project; it compiles today.
 
+### In the tree
+
+It is vendored at `compositor/` (a squashed subtree of upstream `b6c4b7d`,
+12 MB) and builds from there with no changes:
+
+```sh
+sh scripts/build-compositor.sh            # configure + compile into build-compositor/
+sh scripts/canopy-session --compositor umbriel
+```
+
+`canopy-session` finds `canopywc` or `umbriel` on `PATH`, or a build via
+`CANOPY_COMPOSITOR_BUILD`. It seeds `~/.config/umbriel/config.toml` on first
+use and makes sure `autostart = ["canopy"]` is in `[general]`, so the shell
+comes up exactly as it does under labwc.
+
+Keeping up with upstream:
+
+```sh
+git fetch umbriel main
+git subtree pull --prefix=compositor umbriel <commit> --squash
+```
+
+### Smoke test
+
+Run headless with the real shell as its autostart, the fork brings Canopy up
+unchanged: the bar reserves its 32 px strip, the wallpaper loads, the shell
+registers its NetworkManager and BlueZ agents, and a screenshot shows the
+full-width accent hairline `#7C5CFC` on row 0 with the bar body below it. The
+only failures in the log are the ones a nested test cannot avoid (no PipeWire,
+polkit already owned by the host session).
+
 ### The integration already exists
 
 `src/compositors/umbriel/` in the Canopy shell is a complete backend:
 `umbriel_runtime`, `umbriel_event_handler`, `umbriel_workspace_backend`,
 `umbriel_output_backend`, `umbriel_keyboard_backend`, `umbriel_audio_provider`.
-Detection reads `UMBRIEL_SOCKET` (or the session's desktop name). Nothing in the
-shell has to be written for a first session — it is the compositor that needs
-rebranding.
+The backend now accepts both `CANOPY_SOCKET` and `UMBRIEL_SOCKET`, and both the
+`canopywc-<display>.sock` and `umbriel-<display>.sock` runtime paths, so a
+stock Umbriel session and the fork are the same thing to the shell.
+
+Nothing in the shell has to be written for a first session — it is the
+compositor that needs rebranding.
 
 ## What a fork actually costs
 

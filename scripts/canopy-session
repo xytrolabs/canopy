@@ -9,9 +9,13 @@
 #   canopy-session            start (or take over) the session
 #   canopy-session --nested   run nested inside an existing Wayland session
 #   canopy-session --compositor mangowc
+#   canopy-session --compositor umbriel
 #
 # labwc is the default compositor. MangoWC is a second, beta session that runs
-# the same shell - it does not replace labwc anywhere.
+# the same shell - it does not replace labwc anywhere. `umbriel` is Canopy's own
+# compositor fork (compositor/ in the source tree): it is what the identity work
+# is heading towards, but it is not the default until it passes its checklist.
+# See docs/COMPOSITOR_FORK.md.
 set -eu
 
 # --------------------------------------------------------------- compositor --
@@ -35,19 +39,37 @@ compositor_binary() {
     case "$1" in
         labwc) printf 'labwc\n' ;;
         mangowc|mango) printf 'mangowc\n' ;;
+        umbriel|canopywc) canopywc_binary ;;
         *) printf '\n' ;;
     esac
+}
+
+# The fork is built as `canopywc` once it has been rebranded and as plain
+# `umbriel` before that; a source checkout also has it in build-compositor/.
+canopywc_binary() {
+    for candidate in canopywc umbriel; do
+        if command -v "$candidate" >/dev/null 2>&1; then
+            printf '%s\n' "$candidate"
+            return 0
+        fi
+    done
+    if [ -n "${CANOPY_COMPOSITOR_BUILD:-}" ] && [ -x "$CANOPY_COMPOSITOR_BUILD/umbriel" ]; then
+        printf '%s\n' "$CANOPY_COMPOSITOR_BUILD/umbriel"
+        return 0
+    fi
+    printf 'canopywc\n'
 }
 
 if [ "$PRINT_LIST" -eq 1 ]; then
     printf 'labwc    default session, server-side decorations\n'
     printf 'mangowc  beta tiling session (package: mangowm)\n'
+    printf 'umbriel  beta Canopy compositor fork (compositor/, not yet default)\n'
     exit 0
 fi
 
 COMPOSITOR_BIN="$(compositor_binary "$COMPOSITOR")"
 if [ -z "$COMPOSITOR_BIN" ]; then
-    printf 'canopy-session: unknown compositor "%s" (use labwc or mangowc)\n' "$COMPOSITOR" >&2
+    printf 'canopy-session: unknown compositor "%s" (use labwc, mangowc or umbriel)\n' "$COMPOSITOR" >&2
     exit 2
 fi
 
@@ -109,6 +131,10 @@ if ! command -v "$COMPOSITOR_BIN" >/dev/null 2>&1; then
     printf 'canopy-session: %s is not installed\n' "$COMPOSITOR_BIN" >&2
     case "$COMPOSITOR" in
         mangowc) printf '  install it with your package manager (Arch: mangowm)\n' >&2 ;;
+        umbriel|canopywc)
+            printf '  build it from the source tree: sh scripts/build-compositor.sh\n' >&2
+            printf '  then: CANOPY_COMPOSITOR_BUILD=$PWD/build-compositor %s --compositor umbriel\n' "$0" >&2
+            ;;
         *) printf '  install it with your package manager, or run: sh scripts/deps.sh plan\n' >&2 ;;
     esac
     exit 1
@@ -127,10 +153,14 @@ if [ -n "$NESTED" ] && [ "$COMPOSITOR" = "labwc" ]; then
     exec labwc -S 'canopy' -t 'Canopy (nested)'
 fi
 
-if [ -n "$NESTED" ] && [ "$COMPOSITOR" != "labwc" ]; then
-    # Tiling compositors take their startup command from their own config, so
-    # there is no -S equivalent to pass here.
-    exec "$COMPOSITOR_BIN"
+if [ -n "$NESTED" ]; then
+    case "$COMPOSITOR" in
+        mangowc|mango)
+            # Tiling compositors take their startup command from their own
+            # config, so there is no -S equivalent to pass here.
+            exec "$COMPOSITOR_BIN"
+            ;;
+    esac
 fi
 
 # ------------------------------------------------------------ first login ----
@@ -167,6 +197,39 @@ fi
 
 if [ "$COMPOSITOR" = "labwc" ]; then
     exec labwc -S 'canopy' -t Canopy
+fi
+
+# ------------------------------------------------------------------ umbriel --
+# Canopy's compositor fork. It starts the shell through `autostart` in its own
+# TOML config and exports the IPC socket path, which the shell's backend picks
+# up. Seed a config on first use and make sure the shell is in it; never touch
+# the rest of a file the user has edited.
+if [ "$COMPOSITOR" = "umbriel" ] || [ "$COMPOSITOR" = "canopywc" ]; then
+    WC_CONFIG="${XDG_CONFIG_HOME:-$HOME/.config}/umbriel/config.toml"
+    if [ ! -f "$WC_CONFIG" ]; then
+        for candidate in \
+            /usr/local/share/canopy/umbriel/config.toml \
+            /usr/share/canopy/umbriel/config.toml
+        do
+            if [ -f "$candidate" ]; then
+                mkdir -p "$(dirname "$WC_CONFIG")"
+                cp "$candidate" "$WC_CONFIG"
+                printf 'canopy-session: seeded %s from %s\n' "$WC_CONFIG" "$candidate"
+                break
+            fi
+        done
+    fi
+    mkdir -p "$(dirname "$WC_CONFIG")"
+    [ -f "$WC_CONFIG" ] || : > "$WC_CONFIG"
+    if ! grep -q '^[[:space:]]*autostart[[:space:]]*=' "$WC_CONFIG" 2>/dev/null; then
+        if grep -q '^\[general\]' "$WC_CONFIG" 2>/dev/null; then
+            sed -i '/^\[general\]/a autostart = ["canopy"]' "$WC_CONFIG"
+        else
+            printf '\n[general]\nautostart = ["canopy"]\n' >> "$WC_CONFIG"
+        fi
+        printf 'canopy-session: added the shell to autostart in %s\n' "$WC_CONFIG"
+    fi
+    exec "$COMPOSITOR_BIN"
 fi
 
 # ------------------------------------------------------------------ mangowc --

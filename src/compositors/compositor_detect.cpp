@@ -26,9 +26,14 @@ namespace compositors {
     }
 
     [[nodiscard]] CompositorKind detectImpl() {
-      // Compositor-set env vars are the most reliable signal.
-      if (const char* v = std::getenv("UMBRIEL_SOCKET"); v != nullptr && v[0] != '\0') {
-        return CompositorKind::Umbriel;
+      // Compositor-set env vars are the most reliable signal. CANOPY_SOCKET is
+      // what our fork of Umbriel exports; keeping the upstream name means a
+      // stock Umbriel session keeps working against the same backend.
+      for (const char* var : {"CANOPY_SOCKET", "UMBRIEL_SOCKET"}) {
+        const char* v = std::getenv(var);
+        if (v != nullptr && v[0] != '\0') {
+          return CompositorKind::Umbriel;
+        }
       }
       if (const char* v = std::getenv("LABWC_PID"); v != nullptr && v[0] != '\0') {
         return CompositorKind::Labwc;
@@ -48,7 +53,7 @@ namespace compositors {
 
       // Fall back to the desktop env hint (covers dwl-style compositors that don't expose a socket var).
       const std::string hint = buildEnvHint();
-      if (StringUtils::containsInsensitive(hint, "umbriel")) {
+      if (StringUtils::containsInsensitive(hint, "umbriel") || StringUtils::containsInsensitive(hint, "canopywc")) {
         return CompositorKind::Umbriel;
       }
       if (StringUtils::containsInsensitive(hint, "niri")) {
