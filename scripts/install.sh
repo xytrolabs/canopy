@@ -402,43 +402,23 @@ seed_assets() {
 install_mangowc() {
     [ "$WITH_MANGOWC" -eq 1 ] || return 0
 
-    _pkgs="$(canopy_pkgs mangowc)"
-
-    if ! command -v mangowc >/dev/null 2>&1; then
-        if [ -z "$_pkgs" ]; then
-            say "mangowc: not packaged for $(canopy_family); build it from https://github.com/mangowm/mango"
-            say "         then re-run this installer with --with-mangowc"
-            return 0
-        fi
-        say "mangowc: installing $_pkgs"
-        if [ "$DRY_RUN" -eq 0 ]; then
-            if [ "$is_system" -eq 1 ]; then
-                _sudo=""
-            elif command -v sudo >/dev/null 2>&1; then
-                _sudo="sudo"
-            else
-                say "mangowc: install $_pkgs yourself, then re-run with --with-mangowc"
-                return 0
-            fi
-            case "$(canopy_family)" in
-                arch)   $_sudo pacman -S --needed --noconfirm $_pkgs ;;
-                fedora) $_sudo dnf install -y --skip-unavailable $_pkgs ;;
-                debian) $_sudo apt-get update && $_sudo apt-get install -y $_pkgs ;;
-                suse)   $_sudo zypper install -y $_pkgs ;;
-            esac
-        fi
-    fi
-
-    # The config the session seeds on first use.
+    # Files first. They need no root and must land even when the package cannot
+    # be installed (not packaged for this distribution, no sudo password, no
+    # network) - otherwise --with-mangowc looks like it did nothing.
     if [ "$is_system" -eq 1 ]; then
+        run install -Dm644 "$PROJECT_DIR/config/canopy-session-mangowc.desktop" \
+            /usr/local/share/wayland-sessions/canopy-mangowc.desktop
         run install -Dm644 "$PROJECT_DIR/config/mangowc/config.conf" \
             /usr/local/share/canopy/mangowc/config.conf
     else
-        run mkdir -p "$XDG_DATA_HOME/canopy/mangowc"
+        run mkdir -p "$XDG_DATA_HOME/wayland-sessions" "$XDG_DATA_HOME/canopy/mangowc"
+        run install -m644 "$PROJECT_DIR/config/canopy-session-mangowc.desktop" \
+            "$XDG_DATA_HOME/wayland-sessions/canopy-mangowc.desktop"
         run cp -f "$PROJECT_DIR/config/mangowc/config.conf" \
             "$XDG_DATA_HOME/canopy/mangowc/config.conf"
     fi
 
+    # The config MangoWC itself reads, seeded once and never overwritten.
     _mango_cfg="$XDG_CONFIG_HOME/mango/config.conf"
     if [ -f "$_mango_cfg" ]; then
         say "mangowc: keeping existing $_mango_cfg"
@@ -448,8 +428,53 @@ install_mangowc() {
         say "mangowc: wrote $_mango_cfg"
     fi
 
-    say "mangowc: session entry installed; pick \"Canopy (MangoWC, beta)\" at login"
-    say "         or run now with: canopy-session --compositor mangowc"
+    say "mangowc: session entry installed (Canopy (MangoWC, beta) at login)"
+
+    # Package last, and never fatal: a missing package must not abort the rest
+    # of the install or leave the session entry half-registered.
+    if command -v mangowc >/dev/null 2>&1; then
+        say "mangowc: mangowc already installed"
+        return 0
+    fi
+
+    _pkgs="$(canopy_pkgs mangowc)"
+    if [ -z "$_pkgs" ]; then
+        say "mangowc: no package for $(canopy_family); build it from https://github.com/mangowm/mango"
+        say "         the session entry and config are installed and will work once it is on PATH"
+        return 0
+    fi
+
+    if [ "$DRY_RUN" -eq 1 ]; then
+        say "mangowc: would install $_pkgs"
+        return 0
+    fi
+
+    _sudo=""
+    if [ "$is_system" -eq 0 ]; then
+        if ! command -v sudo >/dev/null 2>&1; then
+            say "mangowc: run 'pacman -S $_pkgs' (or your package manager) to finish the beta session"
+            return 0
+        fi
+        # Only install the package when sudo would not have to ask for a
+        # password: an installer must never leave a session half-done because a
+        # prompt nobody can answer appeared halfway through.
+        if ! sudo -n true 2>/dev/null; then
+            say "mangowc: the session and config are installed; to add the compositor run:"
+            say "         sudo $(canopy_install_cmd) $_pkgs"
+            return 0
+        fi
+        _sudo="sudo"
+    fi
+
+    say "mangowc: installing $_pkgs"
+    if ! case "$(canopy_family)" in
+        arch)   $_sudo pacman -S --needed --noconfirm $_pkgs ;;
+        fedora) $_sudo dnf install -y --skip-unavailable $_pkgs ;;
+        debian) $_sudo apt-get update && $_sudo apt-get install -y $_pkgs ;;
+        suse)   $_sudo zypper install -y $_pkgs ;;
+    esac; then
+        say "mangowc: installing $_pkgs failed; the session is installed but needs the compositor"
+    fi
 }
 
 # ---------------------------------------------------------------- greeter ----
