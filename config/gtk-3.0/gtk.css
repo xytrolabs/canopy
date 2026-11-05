@@ -1,0 +1,116 @@
+/* Canopy — GTK3 theme overlay
+ *
+ * Most applications on a Wayland desktop draw their own decorations (CSD), so
+ * the window they show is NOT the openbox theme in config/labwc/themes/canopy:
+ * it is their headerbar. Without this file those windows keep the stock
+ * Adwaita titlebar, which is what makes "the decorations never changed".
+ *
+ * Loaded from ~/.config/gtk-3.0/gtk.css, which GTK merges with the named theme.
+ * Colours are the Canopy palette (src/theme/builtin_palettes.cpp), kept as
+ * plain hex because GTK does not read our theme tokens.
+ */
+
+/* ---------------------------------------------------------------- headerbar -- */
+headerbar,
+.titlebar,
+.titlebar.background,
+headerbar.default-decoration {
+  background-image: none;
+  background-color: #201e2c;
+  color: #f2f0f7;
+  border: none;
+  box-shadow: none;
+  min-height: 30px;
+  padding: 0 6px;
+}
+
+/* Maximized / tiled windows keep the bar flat against the edges. */
+.maximized headerbar,
+.tiled headerbar,
+.tiled-top headerbar,
+.tiled-left headerbar,
+.tiled-right headerbar,
+.tiled-bottom headerbar {
+  border-radius: 0;
+}
+
+headerbar:backdrop,
+.titlebar:backdrop {
+  background-color: #1b1924;
+  color: #a9a5bb;
+}
+
+headerbar .title,
+headerbar .subtitle {
+  color: inherit;
+  font-weight: 600;
+}
+
+/* The hairline that separates the headerbar from the content. */
+headerbar,
+headerbar:first-child {
+  border-bottom: 1px solid #2e2b3d;
+}
+
+/* ------------------------------------------------------------ window buttons -- */
+/* Close / minimize / maximize, in the accent colour when hovered rather than
+ * the stock red, so the decoration matches the shell's palette. */
+headerbar button.titlebutton,
+.titlebar button.titlebutton {
+  min-width: 16px;
+  min-height: 16px;
+  padding: 0;
+  margin: 0 3px;
+  border-radius: 999px;
+  background-color: #3a3650;
+  background-image: none;
+  border: none;
+  box-shadow: none;
+}
+
+headerbar button.titlebutton:hover,
+.titlebar button.titlebutton:hover {
+  background-color: #4a4566;
+}
+
+headerbar button.titlebutton.close,
+.titlebar button.titlebutton.close {
+  background-color: #ff5f57;
+}
+
+headerbar button.titlebutton.close:hover,
+.titlebar button.titlebutton.close:hover {
+  background-color: #ff8a84;
+}
+
+headerbar button.titlebutton image {
+  opacity: 0.0;
+}
+
+headerbar button.titlebutton:hover image {
+  opacity: 0.85;
+}
+
+/* --------------------------------------------------------------- surfaces --- */
+/* Match the shell's rounded, translucent panels where the toolkit allows it. */
+window,
+window.background {
+  background-color: #16151f;
+  color: #f2f0f7;
+}
+
+popover,
+popover.background,
+menu,
+.menu {
+  background-color: #201e2c;
+  color: #f2f0f7;
+  border: 1px solid #2e2b3d;
+  border-radius: 12px;
+}
+
+selection,
+*:selected {
+  background-color: #7c5cfc;
+  color: #ffffff;
+}

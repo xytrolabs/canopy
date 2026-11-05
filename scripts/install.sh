@@ -256,6 +256,15 @@ seed_labwc() {
         run mkdir -p "$XDG_DATA_HOME/themes"
         run rm -rf "$XDG_DATA_HOME/themes/canopy"
         run cp -a "$PROJECT_DIR/config/labwc/themes/canopy" "$XDG_DATA_HOME/themes/canopy"
+        # Older Canopy installs wrote the theme to ~/.themes. labwc reads that
+        # location when the XDG data copy is missing, and a leftover copy keeps
+        # the old, never-loaded button images alive, which is why decorations
+        # could look unchanged after an upgrade.
+        if [ -d "$HOME/.themes/canopy" ]; then
+            run rm -rf "$HOME/.themes/canopy"
+            run cp -a "$PROJECT_DIR/config/labwc/themes/canopy" "$HOME/.themes/canopy"
+            say "refreshed the legacy theme copy in ~/.themes/canopy"
+        fi
     fi
 }
 
@@ -295,6 +304,22 @@ seed_toolkits() {
             "$PROJECT_DIR/config/qt6ct/qt6ct.conf" \
             > "$XDG_CONFIG_HOME/qt6ct/qt6ct.conf"
     fi
+
+    # Applications that draw their own decorations do not use the openbox
+    # theme, so their headerbar is styled here. Without this the windows of
+    # libadwaita/GTK apps keep the stock titlebar and the desktop looks like
+    # two different systems.
+    for v in 3.0 4.0; do
+        if [ -f "$PROJECT_DIR/config/gtk-$v/gtk.css" ]; then
+            run mkdir -p "$XDG_CONFIG_HOME/gtk-$v"
+            if [ -f "$XDG_CONFIG_HOME/gtk-$v/gtk.css" ] && [ "$REFRESH_CONFIG" -eq 0 ]; then
+                say "keeping existing gtk-$v/gtk.css (use --refresh-config to update)"
+            else
+                run cp -f "$PROJECT_DIR/config/gtk-$v/gtk.css" "$XDG_CONFIG_HOME/gtk-$v/gtk.css"
+                say "headerbar style -> gtk-$v/gtk.css"
+            fi
+        fi
+    done
 
     if [ -f "$XDG_CONFIG_HOME/mimeapps.list" ]; then
         say "keeping existing mimeapps.list"
@@ -470,15 +495,40 @@ seed_icon_theme() {
     # The session advertises XDG_CURRENT_DESKTOP=Canopy, so libsfdo looks for an
     # icon theme literally named "canopy". Without a theme by that name Labwc
     # logs "Failed to initialize icon loader" and every window icon is blank.
-    # This alias inherits the best theme actually installed.
     #
-    # libsfdo rejects a theme whose `Directories` list has no matching
-    # `[<dir>]` group ("Found only 0 directory groups out of 1"), so the alias
-    # declares one scalable group of its own and inherits everything else.
+    # The alias is a *symlink* to the real theme, not a stub with its own
+    # index.theme: a stub that declares a directory shadows that theme for
+    # lookups, so applications whose icons live in an inherited theme (Apollo's
+    # `apollo` icon sits in hicolor, Kora only ships `apollo-studio`) render
+    # blank. A symlink resolves every lookup through the real theme, inherits
+    # included, and costs no generated file to keep in sync.
     _parent="$(canopy_icon_theme)"
+    _parent_dir=""
+    for _dir in "$XDG_DATA_HOME/icons" /usr/local/share/icons /usr/share/icons; do
+        if [ -d "$_dir/$_parent" ]; then
+            _parent_dir="$_dir/$_parent"
+            break
+        fi
+    done
+
     for _dir in "$XDG_DATA_HOME/icons" /usr/local/share/icons /usr/share/icons; do
         [ -w "$_dir" ] || [ "$is_system" -eq 1 ] || continue
         _target="$_dir/canopy"
+        if [ -n "$_parent_dir" ]; then
+            if [ "$DRY_RUN" -eq 0 ]; then
+                # Replace a stub written by an older Canopy, but never a real
+                # theme directory the user put there themselves.
+                if [ -d "$_target" ] && [ ! -L "$_target" ] \
+                   && grep -qx 'Name=Canopy' "$_target/index.theme" 2>/dev/null; then
+                    rm -rf "$_target"
+                fi
+                [ -e "$_target" ] || ln -s "$_parent_dir" "$_target"
+            fi
+            say "icon theme -> $_target (symlink to $_parent)"
+            return 0
+        fi
+        # No real theme to point at: fall back to a valid stub, which at least
+        # keeps libsfdo's loader working.
         run mkdir -p "$_target/scalable/apps"
         if [ "$DRY_RUN" -eq 0 ]; then
             cat > "$_target/index.theme" <<EOF
@@ -495,7 +545,7 @@ MaxSize=512
 Type=Scalable
 EOF
         fi
-        say "icon theme -> $_target (inherits $_parent)"
+        say "icon theme -> $_target (stub inheriting $_parent)"
         return 0
     done
     return 0

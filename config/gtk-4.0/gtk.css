@@ -1,0 +1,86 @@
+/* Canopy — GTK4 theme overlay
+ *
+ * Same intent as config/gtk-3.0/gtk.css: applications that draw their own
+ * decorations (libadwaita and GTK4 apps) get a Canopy headerbar instead of the
+ * stock Adwaita one. Loaded from ~/.config/gtk-4.0/gtk.css.
+ *
+ * GTK4 renamed a few selectors, so this file is deliberately separate rather
+ * than shared with the GTK3 one.
+ */
+
+headerbar,
+.titlebar {
+  background-image: none;
+  background-color: #201e2c;
+  color: #f2f0f7;
+  border: none;
+  box-shadow: none;
+  min-height: 30px;
+  padding: 0 6px;
+  border-bottom: 1px solid #2e2b3d;
+}
+
+headerbar:backdrop,
+.titlebar:backdrop {
+  background-color: #1b1924;
+  color: #a9a5bb;
+}
+
+headerbar .title {
+  font-weight: 600;
+}
+
+window.background,
+window {
+  background-color: #16151f;
+  color: #f2f0f7;
+}
+
+/* Traffic-light style window buttons. */
+headerbar button.titlebutton,
+.titlebar button.titlebutton {
+  min-width: 16px;
+  min-height: 16px;
+  padding: 0;
+  margin: 0 3px;
+  border-radius: 999px;
+  background-color: #3a3650;
+  background-image: none;
+  border: none;
+  box-shadow: none;
+}
+
+headerbar button.titlebutton:hover {
+  background-color: #4a4566;
+}
+
+headerbar button.titlebutton.close {
+  background-color: #ff5f57;
+}
+
+headerbar button.titlebutton.close:hover {
+  background-color: #ff8a84;
+}
+
+headerbar button.titlebutton image {
+  opacity: 0.0;
+}
+
+headerbar button.titlebutton:hover image {
+  opacity: 0.85;
+}
+
+popover > contents,
+popover,
+menu {
+  background-color: #201e2c;
+  color: #f2f0f7;
+  border: 1px solid #2e2b3d;
+  border-radius: 12px;
+}
+
+selection,
+*:selected {
+  background-color: #7c5cfc;
+  color: #ffffff;
+}

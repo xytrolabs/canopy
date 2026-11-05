@@ -137,17 +137,21 @@ namespace shell::dock {
         }
       }
 
-      // The launcher belongs to the pinned island, which is where it is drawn.
+      // The launcher gets its own island instead of being folded into the
+      // pinned one: on a desktop with only pinned applications the dock would
+      // otherwise be a single surface, which reads as "the islands are gone".
+      // Two surfaces - launcher and its apps - are visible from the first run,
+      // and running/minimized windows add the rest.
       if (cfg.launcherPosition != DockLauncherPosition::None && instance.launcherArea != nullptr) {
         const float launcherStart = instance.launcherRestMainPos;
         const float launcherEnd = launcherStart + cell;
-        if (!spans.empty() && spans.front().section == DockSection::Pinned
-            && cfg.launcherPosition == DockLauncherPosition::Start)
-        {
-          spans.front().start = std::min(spans.front().start, launcherStart);
-          spans.front().end = std::max(spans.front().end, launcherEnd);
-        } else if (spans.empty()) {
-          spans.push_back(IslandSpan{.section = DockSection::Pinned, .start = launcherStart, .end = launcherEnd});
+        const IslandSpan launcherSpan{
+            .section = DockSection::Pinned, .start = launcherStart, .end = launcherEnd
+        };
+        if (cfg.launcherPosition == DockLauncherPosition::Start) {
+          spans.insert(spans.begin(), launcherSpan);
+        } else {
+          spans.push_back(launcherSpan);
         }
       }
 

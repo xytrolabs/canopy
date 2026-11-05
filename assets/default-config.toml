@@ -132,12 +132,19 @@ end    = ["media", "clock", "control-center", "session"]
 position            = "left"
 # Thickness is the pill's cross size, so it is sized to the widget row rather
 # than to a fixed slab: the island hugs what is inside it.
-thickness           = 40
-radius              = 20
+# Cross size and padding decide how much air the island has around its icons.
+# 40 px with 4 px padding read as cramped; 48 with 8 keeps the pill slim but
+# stops the icons touching the edges.
+thickness           = 48
+radius              = 24
 margin_ends         = 24
 margin_edge         = 10
-padding             = 4
-widget_spacing      = 2
+padding             = 8
+widget_spacing      = 4
+# The capsule is drawn at capsule_thickness x bar thickness (0.76 by default),
+# which is why raising the thickness alone barely widened the island. At 1.0
+# the pill is exactly as thick as the bar and the icons get real air.
+capsule_thickness   = 1.0
 # The bar itself is invisible: a side bar always covers the full edge, and a
 # background there reads as a slab running the height of the screen. The one
 # visible surface is the capsule group below, which wraps the widget row and is
@@ -177,8 +184,8 @@ members      = ["launcher", "control-center", "tray", "network", "bluetooth", "b
 fill         = "surface_container"
 border       = "outline_variant"
 border_width = 1.0
-padding      = 6.0
-radius       = 20.0
+padding      = 10.0
+radius       = 24.0
 opacity      = 0.88
 
 # ── Dock — bottom centre ──────────────────────────────────────────────────────
