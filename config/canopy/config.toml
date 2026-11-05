@@ -114,7 +114,7 @@ margin_ends         = 0
 margin_edge         = 0
 padding             = 12
 widget_spacing      = 6
-border              = "outline_variant"
+border              = "primary"
 border_width        = 1.0
 background_opacity  = 0.78
 compositor_blur     = true
@@ -205,7 +205,7 @@ icon_size           = 44
 # icon sit on the rounded end and the row looks like it is falling out.
 main_axis_padding   = 20
 cross_axis_padding  = 14
-item_spacing        = 8
+item_spacing        = 16
 background_opacity  = 0.80
 compositor_blur     = true
 radius              = 12
@@ -219,7 +219,7 @@ shadow              = true
 show_running        = true
 # Three islands: pinned applications, running (unpinned), minimized windows.
 sections            = "islands"
-section_gap         = 10
+section_gap         = 0
 # The dock slides away as soon as the pointer leaves; only the side island has a
 # configurable delay (bar.auto_hide_delay_ms).
 auto_hide           = true
@@ -294,4 +294,4 @@ text = "Canopy"
 color        = "primary"
 glyph        = "canopy"
 custom_image = "~/.local/share/icons/hicolor/scalable/apps/canopy.png"
-custom_image_colorize = false
+custom_image_colorize = true

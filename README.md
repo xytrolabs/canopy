@@ -69,7 +69,10 @@ seeded on first run or by the installer, never over an existing setup.
   placeholders, no magenta artefacts.
 - Short, purposeful transitions.
 
-Full notes: [docs/CANOPY_DESIGN.md](docs/CANOPY_DESIGN.md).
+Full notes: [docs/CANOPY_DESIGN.md](docs/CANOPY_DESIGN.md). What makes the
+desktop recognisably Canopy rather than the project it forked from — palette,
+materials, spacing, type, voice, and the surfaces that still need work — is
+[docs/IDENTITY.md](docs/IDENTITY.md).
 
 ## Install
 

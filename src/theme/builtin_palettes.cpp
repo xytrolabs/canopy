@@ -9,7 +9,7 @@ namespace noctalia::theme {
 
   namespace {
 
-    constexpr std::array<BuiltinPalette, 10> kPalettes =
+    constexpr std::array<BuiltinPalette, 11> kPalettes =
         {
             {
                 {
@@ -674,7 +674,116 @@ namespace noctalia::theme {
                                 FixedPalette{
                                     .primary = hex("#7C5CFC"),
                                     .onPrimary = hex("#FFFFFF"),
-                                    .secondary = hex("#8E72FF"),
+                                    .secondary = hex("#56CCF2"),
+                                    .onSecondary = hex("#04161F"),
+                                    .tertiary = hex("#F2C14E"),
+                                    .onTertiary = hex("#231905"),
+                                    .error = hex("#E5484D"),
+                                    .onError = hex("#FFFFFF"),
+                                    .surface = hex("#14131C"),
+                                    .onSurface = hex("#F2F0F7"),
+                                    .surfaceVariant = hex("#1E1C29"),
+                                    .onSurfaceVariant = hex("#A6A2B8"),
+                                    .outline = hex("#2C2939"),
+                                    .shadow = hex("#08070C"),
+                                    .hover = hex("#26233A"),
+                                    .onHover = hex("#F2F0F7"),
+                                },
+                            .terminal =
+                                TerminalPalette{
+                                    .normal =
+                                        TerminalAnsiColors{
+                                            .black = hex("#1E1C29"),
+                                            .red = hex("#E5484D"),
+                                            .green = hex("#4CC38A"),
+                                            .yellow = hex("#E0B341"),
+                                            .blue = hex("#6E8BFF"),
+                                            .magenta = hex("#A78BFA"),
+                                            .cyan = hex("#56CCF2"),
+                                            .white = hex("#C9C5D8"),
+                                        },
+                                    .bright =
+                                        TerminalAnsiColors{
+                                            .black = hex("#4A4660"),
+                                            .red = hex("#FF6369"),
+                                            .green = hex("#63D9A0"),
+                                            .yellow = hex("#F2C14E"),
+                                            .blue = hex("#8FA6FF"),
+                                            .magenta = hex("#C4B0FF"),
+                                            .cyan = hex("#7BDDF7"),
+                                            .white = hex("#F2F0F7"),
+                                        },
+                                    .foreground = hex("#F2F0F7"),
+                                    .background = hex("#14131C"),
+                                    .selectionFg = hex("#FFFFFF"),
+                                    .selectionBg = hex("#4C3AA8"),
+                                    .cursorText = hex("#14131C"),
+                                    .cursor = hex("#7C5CFC"),
+                                },
+                        },
+                    .light =
+                        FixedPaletteMode{
+                            .palette =
+                                FixedPalette{
+                                    .primary = hex("#6246EA"),
+                                    .onPrimary = hex("#FFFFFF"),
+                                    .secondary = hex("#1B7F9E"),
+                                    .onSecondary = hex("#FFFFFF"),
+                                    .tertiary = hex("#8A5B00"),
+                                    .onTertiary = hex("#FFFFFF"),
+                                    .error = hex("#C4262E"),
+                                    .onError = hex("#FFFFFF"),
+                                    .surface = hex("#FBFAFF"),
+                                    .onSurface = hex("#171622"),
+                                    .surfaceVariant = hex("#F1F0F7"),
+                                    .onSurfaceVariant = hex("#5B586C"),
+                                    .outline = hex("#DAD7E6"),
+                                    .shadow = hex("#B9B5CB"),
+                                    .hover = hex("#E9E6F5"),
+                                    .onHover = hex("#171622"),
+                                },
+                            .terminal =
+                                TerminalPalette{
+                                    .normal =
+                                        TerminalAnsiColors{
+                                            .black = hex("#F1F0F7"),
+                                            .red = hex("#C4262E"),
+                                            .green = hex("#1F8F58"),
+                                            .yellow = hex("#8A5B00"),
+                                            .blue = hex("#3B5BDB"),
+                                            .magenta = hex("#7048C8"),
+                                            .cyan = hex("#1B7F9E"),
+                                            .white = hex("#2A2733"),
+                                        },
+                                    .bright =
+                                        TerminalAnsiColors{
+                                            .black = hex("#6B6779"),
+                                            .red = hex("#E03C45"),
+                                            .green = hex("#27A768"),
+                                            .yellow = hex("#A2751B"),
+                                            .blue = hex("#4C6EF5"),
+                                            .magenta = hex("#8B5CF6"),
+                                            .cyan = hex("#2196B8"),
+                                            .white = hex("#14131C"),
+                                        },
+                                    .foreground = hex("#171622"),
+                                    .background = hex("#FBFAFF"),
+                                    .selectionFg = hex("#FFFFFF"),
+                                    .selectionBg = hex("#6246EA"),
+                                    .cursorText = hex("#FFFFFF"),
+                                    .cursor = hex("#6246EA"),
+                                },
+                        },
+                },
+                {
+                    .name = "Willow",
+                    .dark =
+                        FixedPaletteMode{
+                            .palette =
+                                FixedPalette{
+                                    .primary = hex("#57BE53"),
+                                    .onPrimary = hex("#FFFFFF"),
+                                    .secondary = hex("#0F7C8C"),
                                     .onSecondary = hex("#0B0A10"),
                                     .tertiary = hex("#30A46C"),
                                     .onTertiary = hex("#06130D"),
@@ -686,7 +795,7 @@ namespace noctalia::theme {
                                     .onSurfaceVariant = hex("#A9A5BB"),
                                     .outline = hex("#2E2B3D"),
                                     .shadow = hex("#0B0A10"),
-                                    .hover = hex("#262335"),
+                                    .hover = hex("#24282A"),
                                     .onHover = hex("#F2F0F7"),
                                 },
                             .terminal =
@@ -697,7 +806,7 @@ namespace noctalia::theme {
                                             .red = hex("#E5484D"),
                                             .green = hex("#30A46C"),
                                             .yellow = hex("#E0B341"),
-                                            .blue = hex("#7C5CFC"),
+                                            .blue = hex("#0F7C8C"),
                                             .magenta = hex("#B98CF0"),
                                             .cyan = hex("#63B8C7"),
                                             .white = hex("#F2F0F7"),
@@ -708,7 +817,7 @@ namespace noctalia::theme {
                                             .red = hex("#F27078"),
                                             .green = hex("#4CC98A"),
                                             .yellow = hex("#F0C96A"),
-                                            .blue = hex("#8E72FF"),
+                                            .blue = hex("#33A9B8"),
                                             .magenta = hex("#CDA8FF"),
                                             .cyan = hex("#8BD3DF"),
                                             .white = hex("#FFFFFF"),
@@ -716,18 +825,18 @@ namespace noctalia::theme {
                                     .foreground = hex("#F2F0F7"),
                                     .background = hex("#0B0A10"),
                                     .selectionFg = hex("#0B0A10"),
-                                    .selectionBg = hex("#7C5CFC"),
+                                    .selectionBg = hex("#57BE53"),
                                     .cursorText = hex("#0B0A10"),
-                                    .cursor = hex("#7C5CFC"),
+                                    .cursor = hex("#57BE53"),
                                 },
                         },
                     .light =
                         FixedPaletteMode{
                             .palette =
                                 FixedPalette{
-                                    .primary = hex("#7C5CFC"),
+                                    .primary = hex("#2F8F3A"),
                                     .onPrimary = hex("#FFFFFF"),
-                                    .secondary = hex("#6A4BE0"),
+                                    .secondary = hex("#0B6E7C"),
                                     .onSecondary = hex("#FFFFFF"),
                                     .tertiary = hex("#30A46C"),
                                     .onTertiary = hex("#FFFFFF"),
@@ -739,8 +848,8 @@ namespace noctalia::theme {
                                     .onSurfaceVariant = hex("#5A5A66"),
                                     .outline = hex("#D8D8E0"),
                                     .shadow = hex("#E6E6EC"),
-                                    .hover = hex("#F0EDFF"),
-                                    .onHover = hex("#2A1E63"),
+                                    .hover = hex("#EDF6EC"),
+                                    .onHover = hex("#16321C"),
                                 },
                             .terminal =
                                 TerminalPalette{
@@ -750,7 +859,7 @@ namespace noctalia::theme {
                                             .red = hex("#D93A40"),
                                             .green = hex("#1F8F58"),
                                             .yellow = hex("#A2751B"),
-                                            .blue = hex("#6A4BE0"),
+                                            .blue = hex("#0B6E7C"),
                                             .magenta = hex("#9B4FD0"),
                                             .cyan = hex("#1F7F91"),
                                             .white = hex("#1C1C1E"),
@@ -761,7 +870,7 @@ namespace noctalia::theme {
                                             .red = hex("#EF5A60"),
                                             .green = hex("#2AA96C"),
                                             .yellow = hex("#BE8C28"),
-                                            .blue = hex("#8E72FF"),
+                                            .blue = hex("#33A9B8"),
                                             .magenta = hex("#B06BE0"),
                                             .cyan = hex("#2E9CB2"),
                                             .white = hex("#0F0F12"),
@@ -769,9 +878,9 @@ namespace noctalia::theme {
                                     .foreground = hex("#1C1C1E"),
                                     .background = hex("#F3F3F7"),
                                     .selectionFg = hex("#FFFFFF"),
-                                    .selectionBg = hex("#7C5CFC"),
+                                    .selectionBg = hex("#2F8F3A"),
                                     .cursorText = hex("#FFFFFF"),
-                                    .cursor = hex("#7C5CFC"),
+                                    .cursor = hex("#2F8F3A"),
                                 },
                         },
                 },
