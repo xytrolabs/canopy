@@ -1,4 +1,4 @@
-# Canopy — default desktop configuration
+# Willow — default desktop configuration
 #
 # Power when you need it. Simple by default.
 #
@@ -9,7 +9,7 @@
 #   • Quick Settings— control centre, opens from the right
 #
 # Every value below is a normal Noctalia v5 setting; nothing here is a
-# Canopy-only extension. Edit freely from Settings — the GUI writes back to
+# Willow-only extension. Edit freely from Settings — the GUI writes back to
 # this same file.
 
 # ── Shell ─────────────────────────────────────────────────────────────────────
@@ -83,13 +83,13 @@ show_app_icon = true
 show_count    = false
 
 # ── Theme ─────────────────────────────────────────────────────────────────────
-# The Canopy palette is a restrained purple accent on neutral surfaces, and it
+# The Willow palette is a restrained purple accent on neutral surfaces, and it
 # works with blur and animations turned off.
 
 [theme]
 mode                = "dark"
 source              = "builtin"
-builtin             = "Canopy"
+builtin             = "Willow"
 pure_black_dark     = false
 
 [theme.templates]
@@ -105,12 +105,17 @@ enable_community_templates  = false
 # macOS menu bar: thin, full width, app on the left, status items and the clock
 # on the right. Windows 11 material: translucent fill, hairline border, shadow.
 position            = "top"
-thickness           = 30
-radius              = 14
-margin_ends         = 24
-margin_edge         = 8
-padding             = 10
+# A menu bar spans the screen edge. The margins and radius this used to carry
+# are what made it look like a floating panel: radius rounds the corners and
+# the margins inset the whole rect from the edges.
+thickness           = 32
+radius              = 0
+margin_ends         = 0
+margin_edge         = 0
+padding             = 12
 widget_spacing      = 6
+border              = "outline"
+border_width        = 1.0
 background_opacity  = 0.78
 compositor_blur     = true
 shadow              = false
@@ -125,7 +130,7 @@ center = []
 end    = ["media", "clock", "control-center", "session"]
 
 # ── System Tray — vertical pill, left edge ────────────────────────────────────
-# Canopy's own surface: launcher, settings and the quick system controls in one
+# Willow's own surface: launcher, settings and the quick system controls in one
 # slim pill instead of a second row of duplicated indicators.
 
 [bar.tray]
@@ -135,12 +140,12 @@ position            = "left"
 # Cross size and padding decide how much air the island has around its icons.
 # 40 px with 4 px padding read as cramped; 48 with 8 keeps the pill slim but
 # stops the icons touching the edges.
-thickness           = 48
-radius              = 24
+thickness           = 60
+radius              = 30
 margin_ends         = 24
 margin_edge         = 10
-padding             = 8
-widget_spacing      = 4
+padding             = 12
+widget_spacing      = 10
 # The capsule is drawn at capsule_thickness x bar thickness (0.76 by default),
 # which is why raising the thickness alone barely widened the island. At 1.0
 # the pill is exactly as thick as the bar and the icons get real air.
@@ -164,7 +169,7 @@ capsule_opacity     = 0.88
 capsule_border      = "outline_variant"
 capsule_border_width = 1.0
 
-# The side pill is Canopy's own surface: desktop functions plus the background
+# The side pill is Willow's own surface: desktop functions plus the background
 # processes (StatusNotifierItem) of the session. Notifications and audio are
 # deliberately not here — they have their own panels.
 #
@@ -184,8 +189,8 @@ members      = ["launcher", "control-center", "tray", "network", "bluetooth", "b
 fill         = "surface_container"
 border       = "outline_variant"
 border_width = 1.0
-padding      = 10.0
-radius       = 24.0
+padding      = 12.0
+radius       = 30.0
 opacity      = 0.88
 
 # ── Dock — bottom centre ──────────────────────────────────────────────────────
@@ -212,7 +217,7 @@ shadow              = true
 show_running        = true
 # Three islands: pinned applications, running (unpinned), minimized windows.
 sections            = "islands"
-section_gap         = 8
+section_gap         = 18
 # The dock slides away as soon as the pointer leaves; only the side island has a
 # configurable delay (bar.auto_hide_delay_ms).
 auto_hide           = true
@@ -228,7 +233,7 @@ show_dots           = true
 show_instance_count = false
 launcher_position   = "start"
 launcher_icon       = "grid-dots"
-pinned              = ["firefox", "thunar", "kitty", "alacritty", "dev.canopy.Canopy"]
+pinned              = ["firefox", "thunar", "kitty", "alacritty", "dev.canopy.Willow"]
 
 # ── Quick Settings — right side ───────────────────────────────────────────────
 
@@ -257,7 +262,7 @@ blur_intensity  = 0.45
 tint_intensity  = 0.30
 
 [wallpaper.default]
-# Canopy ships three gradient washes; the shell renders them itself, so there is
+# Willow ships three gradient washes; the shell renders them itself, so there is
 # no wallpaper daemon to manage.
 path = ""
 
@@ -273,18 +278,18 @@ connection_notifications = false
 [brightness]
 enable_ddcutil = false
 # ── Widgets ───────────────────────────────────────────────────────────────────
-# The panel launcher shows the Canopy mark instead of a generic search glyph.
+# The panel launcher shows the Willow mark instead of a generic search glyph.
 # Installer copies the mark to ~/.local/share/icons; if it is missing the widget
 # falls back to the bundled glyph named below.
 
 [widget.wordmark]
 # The desktop names itself in the menu bar, right after its mark.
 type = "text"
-text = "Canopy"
+text = "Willow"
 
 [widget.launcher]
 # The mark carries the accent, like a Start button that is actually branded.
 color        = "primary"
 glyph        = "canopy"
-custom_image = "~/.local/share/icons/hicolor/scalable/apps/canopy.png"
+custom_image = "~/.local/share/icons/hicolor/scalable/apps/willow.png"
 custom_image_colorize = false
