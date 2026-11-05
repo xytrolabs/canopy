@@ -400,24 +400,63 @@ seed_icon_theme() {
     # icon theme literally named "canopy". Without a theme by that name Labwc
     # logs "Failed to initialize icon loader" and every window icon is blank.
     # This alias inherits the best theme actually installed.
+    #
+    # libsfdo rejects a theme whose `Directories` list has no matching
+    # `[<dir>]` group ("Found only 0 directory groups out of 1"), so the alias
+    # declares one scalable group of its own and inherits everything else.
     _parent="$(canopy_icon_theme)"
     for _dir in "$XDG_DATA_HOME/icons" /usr/local/share/icons /usr/share/icons; do
         [ -w "$_dir" ] || [ "$is_system" -eq 1 ] || continue
         _target="$_dir/canopy"
-        run mkdir -p "$_target"
+        run mkdir -p "$_target/scalable/apps"
         if [ "$DRY_RUN" -eq 0 ]; then
             cat > "$_target/index.theme" <<EOF
 [Icon Theme]
 Name=Canopy
 Comment=Canopy desktop icon theme (inherits the installed theme)
 Inherits=$_parent
-Directories=
+Directories=scalable/apps
+
+[scalable/apps]
+Size=64
+MinSize=8
+MaxSize=512
+Type=Scalable
 EOF
         fi
         say "icon theme -> $_target (inherits $_parent)"
         return 0
     done
     return 0
+}
+
+# A malformed index.theme breaks libsfdo for *every* theme that inherits it, and
+# hicolor is inherited by nearly everything. The common breakage is a wrapped
+# `Directories=` value (the list ends up on the next line, which libsfdo rejects
+# with "Invalid key character"), leaving the whole icon loader dead.
+repair_icon_theme_index() {
+    [ "$DRY_RUN" -eq 1 ] && return 0
+    for _f in "$XDG_DATA_HOME/icons/hicolor/index.theme" \
+              /usr/local/share/icons/hicolor/index.theme; do
+        [ -f "$_f" ] || continue
+        _tmp="$_f.canopy-tmp"
+        if awk '
+            /^[[:space:]]*Directories=[[:space:]]*$/ {
+                if ((getline nxt) > 0) {
+                    if (nxt ~ /^[0-9]+x[0-9]+\//) { print "Directories=" nxt; fixed = 1; next }
+                    print; print nxt; next
+                }
+            }
+            { print }
+            END { exit fixed ? 0 : 1 }
+        ' "$_f" > "$_tmp"; then
+            cp "$_f" "$_f.bak-$(date +%Y%m%d-%H%M%S)"
+            mv "$_tmp" "$_f"
+            say "repaired malformed $_f (Directories value was wrapped onto its own line)"
+        else
+            rm -f "$_tmp"
+        fi
+    done
 }
 
 # ---------------------------------------------------------------- helpers ----
@@ -520,6 +559,7 @@ seed_labwc
 seed_toolkits
 seed_assets
 seed_icon_theme
+repair_icon_theme_index
 ensure_dependencies
 verify_install
 

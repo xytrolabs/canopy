@@ -190,9 +190,10 @@ show_running        = true
 # Three islands: pinned applications, running (unpinned), minimized windows.
 sections            = "islands"
 section_gap         = 8
+# The dock slides away as soon as the pointer leaves; only the side island has a
+# configurable delay (bar.auto_hide_delay_ms).
 auto_hide           = true
 smart_auto_hide     = false
-auto_hide_delay_ms  = 350
 reserve_space       = false
 layer               = "top"
 active_scale        = 1.0
