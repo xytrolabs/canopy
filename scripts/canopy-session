@@ -23,6 +23,19 @@ set -eu
 
 SCRIPT_DIR="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)"
 
+# A display manager starts the session with a minimal PATH that does not include
+# ~/.local/bin, where a user install puts canopy, canopywc and this script. Put it
+# first so the session always runs the installed desktop rather than whatever
+# happens to be in /usr/bin.
+PATH="$HOME/.local/bin:${PATH:-/usr/local/bin:/usr/bin:/bin}"
+export PATH
+
+log_note() {
+    _log_dir="${XDG_CACHE_HOME:-$HOME/.cache}"
+    mkdir -p "$_log_dir" 2>/dev/null || return 0
+    printf '%s %s\n' "$(date '+%Y-%m-%d %H:%M:%S')" "$*" >> "$_log_dir/canopy-session.log"
+}
+
 # --------------------------------------------------------------- compositor --
 COMPOSITOR="${CANOPY_COMPOSITOR:-canopywc}"
 PRINT_LIST=0
@@ -59,7 +72,8 @@ canopywc_binary() {
             return 0
         fi
     done
-    for build_dir in "${CANOPY_COMPOSITOR_BUILD:-}" "$SCRIPT_DIR/../build-compositor"; do
+    for build_dir in "${CANOPY_COMPOSITOR_BUILD:-}" "$SCRIPT_DIR/../build-compositor" \
+                     "$HOME/.local/bin" /usr/local/bin; do
         if [ -n "$build_dir" ] && [ -x "$build_dir/canopywc" ]; then
             printf '%s\n' "$build_dir/canopywc"
             return 0
@@ -87,6 +101,7 @@ fi
 if ! command -v "$COMPOSITOR_BIN" >/dev/null 2>&1 && [ "$COMPOSITOR" = "canopywc" ]; then
     printf 'canopy-session: canopywc is not built or installed; falling back to labwc\n' >&2
     printf '  build it with: sh scripts/build-compositor.sh\n' >&2
+    log_note "canopywc missing; fell back to labwc"
     COMPOSITOR=labwc
     COMPOSITOR_BIN=labwc
 fi
