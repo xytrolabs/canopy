@@ -46,7 +46,7 @@ namespace {
   constexpr std::size_t kRowOverscan = 3;
   // Minimum trimmed query length before prefixed opt-in providers join the global search.
   constexpr std::size_t kGlobalOptInMinChars = 2;
-  constexpr float kIconSizeDefault = 40.0F;
+  constexpr float kIconSizeDefault = 44.0F;
   constexpr float kIconSizeCompact = 28.0F;
   constexpr std::size_t kAppGridColumns = 5;
   constexpr float kLauncherHeight = 620.0F;
@@ -497,7 +497,9 @@ namespace {
     LauncherAppGridTile(LauncherListStyle style, AsyncTextureCache* asyncTextures)
         : m_style(style), m_asyncTextures(asyncTextures) {
       const float gap = Style::spaceXs * m_style.scale;
-      const float padding = Style::spaceSm * m_style.scale;
+      // Fluent tiles breathe on 12, not 8: the icon should read as a tile with
+      // padding around it, not a glyph squeezed into a cell.
+      const float padding = Style::spaceMd * m_style.scale;
       auto col = ui::column({
           .out = &m_col,
           .align = FlexAlign::Center,

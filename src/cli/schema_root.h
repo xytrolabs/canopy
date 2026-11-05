@@ -43,7 +43,7 @@ namespace noctalia::cli {
       "canopy",
       "A sleek, customizable desktop shell crafted for Wayland",
       {},
-      "For more information and documentation, visit:\n  https://noctalia.dev",
+      "For more information and documentation, visit:\n  https://github.com/xytrolabs/canopy",
       kRootFlags,
       {},
       kRootSubcommands,

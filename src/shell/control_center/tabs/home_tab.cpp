@@ -58,8 +58,9 @@ namespace {
   constexpr std::size_t kHomeShortcutGridColumns = 2;
   // At or below this count the shortcuts stack in a single narrow column instead of the 2-column grid.
   constexpr std::size_t kHomeStackedShortcutMax = 2;
-  // Square tiles are trimmed slightly (height = width * trim) so the grid stays compact.
-  constexpr float kHomeShortcutSquareTrim = 0.82F;
+  // Square tiles keep most of their height: trimming to 0.82 letterboxed the
+  // icon and read as a wide chip instead of a Windows-style tile.
+  constexpr float kHomeShortcutSquareTrim = 0.92F;
   constexpr auto kHomeTransientPositionRegressionWindow = std::chrono::milliseconds(1500);
   constexpr std::int64_t kHomeTransientPositionRegressionFloorUs = 5'000'000;
   constexpr std::int64_t kHomeTransientPositionRegressionCeilingUs = 1'500'000;
@@ -128,7 +129,7 @@ namespace {
 
   void applyHomeCardStyle(Flex& card, float scale, float fillOpacity) {
     applySectionCardStyle(card, scale, fillOpacity);
-    card.setGap(Style::spaceSm * scale);
+    card.setGap(Style::spaceMd * scale);
   }
 
   void applyShortcutButtonStyle(Button& button, bool enabled, bool active, float fillOpacity) {
