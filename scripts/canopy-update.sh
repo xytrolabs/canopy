@@ -11,7 +11,7 @@
 #   1. CANOPY_BASE_URL, if set      — a self-hosted mirror (and what the tests
 #                                     point at a local server)
 #   2. GitHub Releases              — the canonical source
-#   3. https://canopy.xytro.site    — mirror, used if GitHub is unreachable
+#   3. https://xytro.site/canopy    — mirror, used if GitHub is unreachable
 #
 # Override the repository with CANOPY_REPO, or force one source with
 # CANOPY_UPDATE_SOURCE=github|site.
@@ -23,7 +23,7 @@
 set -eu
 
 GH_REPO="${CANOPY_REPO:-xytrolabs/canopy}"
-SITE_URL="${CANOPY_SITE_URL:-https://canopy.xytro.site}"
+SITE_URL="${CANOPY_SITE_URL:-https://xytro.site/canopy}"
 BASE_URL="${CANOPY_BASE_URL:-}"
 SOURCE="${CANOPY_UPDATE_SOURCE:-auto}"
 PROJECT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
