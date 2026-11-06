@@ -158,6 +158,13 @@ install_session() {
         run install -Dm755 "$PROJECT_DIR/scripts/canopy-session" /usr/local/bin/canopy-session
         run install -Dm644 "$PROJECT_DIR/config/canopy-session.desktop" \
             /usr/local/share/wayland-sessions/canopy.desktop
+        # Absolute Exec/TryExec: the display manager runs this entry with its own
+        # PATH, and a bare name can resolve to a stale copy of the script.
+        if [ "$DRY_RUN" -eq 0 ]; then
+            sed -i -e 's|^Exec=.*|Exec=/usr/local/bin/canopy-session|' \
+                   -e 's|^TryExec=.*|TryExec=/usr/local/bin/canopy-session|' \
+                   /usr/local/share/wayland-sessions/canopy.desktop
+        fi
         # Second, beta session: the same shell on MangoWC. Installed alongside
         # the labwc entry, never instead of it.
         if [ "$WITH_MANGOWC" -eq 1 ]; then
@@ -249,6 +256,24 @@ install_session() {
         if [ "$WITH_MANGOWC" -eq 1 ]; then
             run install -m644 "$PROJECT_DIR/config/canopy-session-mangowc.desktop" \
                 "$XDG_DATA_HOME/wayland-sessions/canopy-mangowc.desktop"
+        fi
+
+        # SDDM, GDM and LightDM read only the system session directories. A user
+        # install therefore never appears at the login screen, however well it
+        # starts from a terminal. Say so here instead of at the next reboot.
+        _dm_entry=""
+        for _d in /usr/local/share/wayland-sessions /usr/share/wayland-sessions; do
+            [ -f "$_d/canopy.desktop" ] && _dm_entry="$_d/canopy.desktop"
+        done
+        if [ -z "$_dm_entry" ]; then
+            say ""
+            say "${Y}note${N}: this is a user install, and display managers only read system"
+            say "      session directories - Canopy will not be listed at the login"
+            say "      screen. Install the session entry system-wide to get it there:"
+            say "        sudo sh '$PROJECT_DIR/scripts/install.sh'"
+            say "      or just the entry:"
+            say "        sudo install -Dm644 '$XDG_DATA_HOME/wayland-sessions/canopy.desktop' \\"
+            say "             /usr/local/share/wayland-sessions/canopy.desktop"
         fi
     fi
 }
@@ -799,6 +824,20 @@ verify_install() {
     else
         _check_runs "$HOME/.local/bin/canopywc" "compositor"
         _check_runs "$HOME/.local/bin/canopy" "shell"
+    fi
+
+    # The session entry the display manager reads. A user install cannot provide
+    # it: every display manager ignores $XDG_DATA_HOME/wayland-sessions.
+    _dm_entry=""
+    for _d in /usr/local/share/wayland-sessions /usr/share/wayland-sessions; do
+        [ -f "$_d/canopy.desktop" ] && _dm_entry="$_d/canopy.desktop"
+    done
+    if [ -n "$_dm_entry" ]; then
+        say "  ok    display-manager session ($_dm_entry)"
+    else
+        say "  WARN  no display-manager session entry"
+        say "        Canopy starts from a terminal, but no login screen will list it."
+        say "        Fix: sudo sh scripts/install.sh   (system install)"
     fi
 
     if [ "$_fail" -gt 0 ]; then
