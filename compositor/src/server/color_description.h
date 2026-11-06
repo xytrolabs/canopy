@@ -9,7 +9,7 @@ extern "C" {
 #include <wlr/types/wlr_output.h>
 }
 
-namespace canopy {
+namespace mahogany {
 
   struct ColorLuminances {
     float min = 0.2F;
@@ -45,4 +45,4 @@ namespace canopy {
       const wlr_output_image_description* outputDescription, float effectiveSdrWhite, bool automaticHdrAvailable = false
   );
 
-} // namespace canopy
+} // namespace mahogany

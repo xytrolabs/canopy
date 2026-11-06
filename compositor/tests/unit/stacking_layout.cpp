@@ -6,7 +6,7 @@ extern "C" {
 #include <wlr/util/box.h>
 }
 
-using namespace canopy;
+using namespace mahogany;
 
 CANOPY_TEST(insertedViewsAreNeverMembers) {
   auto layout = createLayout(LayoutMode::Stacking);

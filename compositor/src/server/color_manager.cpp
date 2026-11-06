@@ -17,7 +17,7 @@
 #include <utility>
 #include <vector>
 
-namespace canopy {
+namespace mahogany {
 
   namespace {
 
@@ -1164,4 +1164,4 @@ namespace canopy {
 
   void ColorManager::updatePreferredDescriptions() { m_impl->updatePreferredDescriptions(); }
 
-} // namespace canopy
+} // namespace mahogany

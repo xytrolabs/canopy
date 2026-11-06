@@ -1,9 +1,9 @@
 #include "check.h"
 #include "output/frame_schedule.h"
 
-using canopy::OutputFrameFollowup;
-using canopy::outputFrameFollowup;
-using canopy::TearingCommitRecovery;
+using mahogany::OutputFrameFollowup;
+using mahogany::outputFrameFollowup;
+using mahogany::TearingCommitRecovery;
 
 CANOPY_TEST(nestedBackendCanScheduleFrames) {
   CHECK_EQ(outputFrameFollowup(false, nullptr, false, true), OutputFrameFollowup::Schedule);
@@ -88,19 +88,19 @@ CANOPY_TEST(ineligibleFramesNeverRequestTearing) {
 }
 
 CANOPY_TEST(effectFrameDelayFollowsRefreshOrCapsAtMaxFps) {
-  CHECK_EQ(canopy::effectFrameDelayMs(0, 1000, 990), uint64_t{0});
-  CHECK_EQ(canopy::effectFrameDelayMs(60, 1000, 1000), uint64_t{17});
-  CHECK_EQ(canopy::effectFrameDelayMs(60, 1010, 1000), uint64_t{7});
-  CHECK_EQ(canopy::effectFrameDelayMs(60, 1100, 1000), uint64_t{1});
-  CHECK_EQ(canopy::effectFrameDelayMs(1, 1000, 1000), uint64_t{1000});
+  CHECK_EQ(mahogany::effectFrameDelayMs(0, 1000, 990), uint64_t{0});
+  CHECK_EQ(mahogany::effectFrameDelayMs(60, 1000, 1000), uint64_t{17});
+  CHECK_EQ(mahogany::effectFrameDelayMs(60, 1010, 1000), uint64_t{7});
+  CHECK_EQ(mahogany::effectFrameDelayMs(60, 1100, 1000), uint64_t{1});
+  CHECK_EQ(mahogany::effectFrameDelayMs(1, 1000, 1000), uint64_t{1000});
 }
 
 CANOPY_TEST(effectFrameDelayWaitsAFullIntervalWhenTheLastFrameIsAhead) {
-  CHECK_EQ(canopy::effectFrameDelayMs(60, 990, 1000), uint64_t{17});
+  CHECK_EQ(mahogany::effectFrameDelayMs(60, 990, 1000), uint64_t{17});
 }
 
 CANOPY_TEST(effectFrameDelayNeverDropsBelowOneMillisecond) {
-  CHECK_EQ(canopy::effectFrameDelayMs(2000, 1000, 1000), uint64_t{1});
+  CHECK_EQ(mahogany::effectFrameDelayMs(2000, 1000, 1000), uint64_t{1});
 }
 
 int main() { return RUN_TESTS(); }

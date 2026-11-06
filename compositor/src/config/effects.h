@@ -10,7 +10,7 @@
 #include <string_view>
 #include <vector>
 
-namespace canopy {
+namespace mahogany {
 
   class Section;
 
@@ -120,4 +120,4 @@ namespace canopy {
       EffectReferenceConstraint constraint = EffectReferenceConstraint::PresetOnly
   );
 
-} // namespace canopy
+} // namespace mahogany

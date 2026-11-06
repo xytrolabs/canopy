@@ -33,7 +33,7 @@ extern "C" {
 #include <canopyfx/render/effect.h>
 }
 
-namespace canopy {
+namespace mahogany {
 
   namespace {
     constexpr Logger kLog("workspace");
@@ -3758,4 +3758,4 @@ namespace canopy {
     return result;
   }
 
-} // namespace canopy
+} // namespace mahogany

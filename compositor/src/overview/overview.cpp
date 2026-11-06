@@ -45,7 +45,7 @@ extern "C" {
 #include "workspace/workspace.h"
 #include "xwayland/xwayland.h"
 
-namespace canopy {
+namespace mahogany {
 
   namespace {
     constexpr Logger kLog("overview");
@@ -3808,4 +3808,4 @@ namespace canopy {
     }
   }
 
-} // namespace canopy
+} // namespace mahogany

@@ -45,7 +45,7 @@
 #include <utility>
 #include <vector>
 
-namespace canopy {
+namespace mahogany {
 
   namespace {
     constexpr Logger kLog("server");
@@ -4295,4 +4295,4 @@ namespace canopy {
 
     wlr_ext_foreign_toplevel_image_capture_source_manager_v1_request_accept(request, view->m_captureSource);
   }
-} // namespace canopy
+} // namespace mahogany

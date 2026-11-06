@@ -4,7 +4,7 @@
 #include <charconv>
 #include <ranges>
 
-namespace canopy {
+namespace mahogany {
 
   bool sameDrmPhysicalDevice(const DrmDeviceIdentity& first, const DrmDeviceIdentity& second) {
     if (first.pciAddress && second.pciAddress) {
@@ -118,4 +118,4 @@ namespace canopy {
     });
   }
 
-} // namespace canopy
+} // namespace mahogany

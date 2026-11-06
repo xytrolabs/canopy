@@ -13,7 +13,7 @@ extern "C" {
 #include <wlr/util/edges.h>
 }
 
-namespace canopy {
+namespace mahogany {
 
   namespace {
 
@@ -1872,4 +1872,4 @@ namespace canopy {
     );
   }
 
-} // namespace canopy
+} // namespace mahogany

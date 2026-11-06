@@ -2,7 +2,7 @@
 
 #include <cstddef>
 
-namespace canopy {
+namespace mahogany {
 
   struct AlignedBufferLayout {
     int stride = 0;
@@ -20,4 +20,4 @@ namespace canopy {
   // renderer has a DRM device file descriptor.
   bool wantsAlignedSoftwareAllocator(int backendDrmFd, int rendererDrmFd);
 
-} // namespace canopy
+} // namespace mahogany

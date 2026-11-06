@@ -7,7 +7,7 @@
 #include <optional>
 #include <string_view>
 
-namespace canopy {
+namespace mahogany {
 
   // Validation uses the same inventory rules as runtime resolution.
   bool workspaceRuleTargetExists(const Config& config, const WorkspaceConfig& rule);
@@ -53,4 +53,4 @@ namespace canopy {
   // Workspace count a dynamic output never shrinks below.
   size_t resolveDynamicWorkspaceMinimum(const Config& config, const OutputIdentity& identity);
 
-} // namespace canopy
+} // namespace mahogany

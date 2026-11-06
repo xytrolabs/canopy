@@ -12,7 +12,7 @@ extern "C" {
 
 struct wlr_scene_node;
 
-namespace canopy {
+namespace mahogany {
 
   struct BorderEffectGate {
     bool focused = false;
@@ -74,4 +74,4 @@ namespace canopy {
     std::vector<const void*> m_owners; // nodes registered in the ledger
   };
 
-} // namespace canopy
+} // namespace mahogany

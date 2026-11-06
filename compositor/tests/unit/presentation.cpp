@@ -23,7 +23,7 @@ CANOPY_TEST(fullscreenCenteringSurvivesSceneReconfiguration) {
     return;
   }
 
-  canopy::ViewPresentation presentation;
+  mahogany::ViewPresentation presentation;
   // Non-zero geometry origin, as a client with CSD shadows commits: the node
   // position is the centering offset minus that origin, not the offset alone.
   const wlr_box geometry{40, 30, 1920, 1080};

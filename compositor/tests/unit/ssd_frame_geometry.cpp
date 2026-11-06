@@ -9,7 +9,7 @@ extern "C" {
 #include <wlr/util/edges.h>
 }
 
-using namespace canopy;
+using namespace mahogany;
 
 namespace {
   constexpr std::array kAll{TitleBarButton::Minimize, TitleBarButton::Maximize, TitleBarButton::Close};

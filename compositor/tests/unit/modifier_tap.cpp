@@ -6,10 +6,10 @@ extern "C" {
 #include <wlr/types/wlr_keyboard.h>
 }
 
-using canopy::Keybind;
-using canopy::KeybindAction;
-using canopy::modifierTapPressMatches;
-using canopy::ModifierTapState;
+using mahogany::Keybind;
+using mahogany::KeybindAction;
+using mahogany::modifierTapPressMatches;
+using mahogany::ModifierTapState;
 
 namespace {
 

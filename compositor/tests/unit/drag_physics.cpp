@@ -6,7 +6,7 @@
 #include <cmath>
 #include <limits>
 
-using canopy::DragPhysics;
+using mahogany::DragPhysics;
 
 namespace {
   // Ticks round(seconds / step) times.

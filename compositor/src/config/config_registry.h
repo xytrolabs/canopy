@@ -18,11 +18,11 @@
 
 // Declared config keys. Each table of the config file is a list of Fields over the struct it fills. Reading walks the
 // list through Section; describing walks the same list, so the schema is the parser's own declaration.
-namespace canopy {
+namespace mahogany {
   struct Config;
-} // namespace canopy
+} // namespace mahogany
 
-namespace canopy::registry {
+namespace mahogany::registry {
 
   // What one load shares across tables. Defined by the loader; fields only pass it to the parsers that need it.
   struct ReadContext;
@@ -606,4 +606,4 @@ namespace canopy::registry {
     };
   }
 
-} // namespace canopy::registry
+} // namespace mahogany::registry

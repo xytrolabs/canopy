@@ -2,7 +2,7 @@
 
 #include <cmath>
 
-namespace canopy {
+namespace mahogany {
 
   void FloatingGeometry::rememberPositionFraction(FloatingPoint origin, const wlr_box& usable) {
     if (usable.width <= 0 || usable.height <= 0) {
@@ -60,4 +60,4 @@ namespace canopy {
     m_edges = 0;
   }
 
-} // namespace canopy
+} // namespace mahogany

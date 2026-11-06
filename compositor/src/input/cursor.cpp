@@ -37,7 +37,7 @@
 #include "workspace/workspace.h"
 #include "xwayland/xwayland.h"
 
-namespace canopy {
+namespace mahogany {
 
   namespace {
     constexpr Logger kLog("cursor");
@@ -3722,4 +3722,4 @@ namespace canopy {
     grab->workspace->markArrange(false);
   }
 
-} // namespace canopy
+} // namespace mahogany

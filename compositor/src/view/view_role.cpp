@@ -16,7 +16,7 @@
 
 // Every branch between the xdg-shell and the X11 role of a View lives here.
 
-namespace canopy {
+namespace mahogany {
 
   wlr_surface* View::rootSurface() const {
     return m_toplevel != nullptr ? m_toplevel->base->surface : m_xsurface->surface;
@@ -520,4 +520,4 @@ namespace canopy {
     setUrgent(m_xsurface->hints != nullptr && xcb_icccm_wm_hints_get_urgency(m_xsurface->hints) != 0);
   }
 
-} // namespace canopy
+} // namespace mahogany

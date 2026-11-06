@@ -8,9 +8,9 @@
 
 #include <cstdint>
 
-using canopy::EffectKind;
-using canopy::EffectPreset;
-using canopy::Effects;
+using mahogany::EffectKind;
+using mahogany::EffectPreset;
+using mahogany::Effects;
 
 namespace {
   Effects twoPresets() {
@@ -22,36 +22,36 @@ namespace {
 } // namespace
 
 CANOPY_TEST(effectKindsParseTheirCanonicalNamesOnly) {
-  CHECK(canopy::parseEffectKind("animation") == EffectKind::Animation);
-  CHECK(canopy::parseEffectKind("border") == EffectKind::Border);
-  CHECK(canopy::parseEffectKind("window") == EffectKind::Window);
-  CHECK(canopy::parseEffectKind("screen") == EffectKind::Screen);
-  CHECK(canopy::parseEffectKind("cursor") == EffectKind::Cursor);
-  CHECK(!canopy::parseEffectKind("Border"));
-  CHECK(!canopy::parseEffectKind("overlay"));
-  CHECK(!canopy::parseEffectKind(""));
-  CHECK_EQ(canopy::effectKindName(EffectKind::Cursor), std::string_view("cursor"));
+  CHECK(mahogany::parseEffectKind("animation") == EffectKind::Animation);
+  CHECK(mahogany::parseEffectKind("border") == EffectKind::Border);
+  CHECK(mahogany::parseEffectKind("window") == EffectKind::Window);
+  CHECK(mahogany::parseEffectKind("screen") == EffectKind::Screen);
+  CHECK(mahogany::parseEffectKind("cursor") == EffectKind::Cursor);
+  CHECK(!mahogany::parseEffectKind("Border"));
+  CHECK(!mahogany::parseEffectKind("overlay"));
+  CHECK(!mahogany::parseEffectKind(""));
+  CHECK_EQ(mahogany::effectKindName(EffectKind::Cursor), std::string_view("cursor"));
 }
 
 CANOPY_TEST(effectReferencesRequireAnExistingPresetOfTheRightKind) {
   const Effects effects = twoPresets();
-  CHECK(canopy::findEffectPreset(effects, "pulse") != nullptr);
-  CHECK(canopy::findEffectPreset(effects, "PULSE") == nullptr);
-  CHECK(!canopy::effectReferenceError(effects, "", EffectKind::Border, false));
-  CHECK(!canopy::effectReferenceError(effects, "pulse", EffectKind::Border, false));
-  CHECK(canopy::effectReferenceError(effects, "pulse", EffectKind::Window, false));
-  CHECK(canopy::effectReferenceError(effects, "pulse", EffectKind::Animation, false));
+  CHECK(mahogany::findEffectPreset(effects, "pulse") != nullptr);
+  CHECK(mahogany::findEffectPreset(effects, "PULSE") == nullptr);
+  CHECK(!mahogany::effectReferenceError(effects, "", EffectKind::Border, false));
+  CHECK(!mahogany::effectReferenceError(effects, "pulse", EffectKind::Border, false));
+  CHECK(mahogany::effectReferenceError(effects, "pulse", EffectKind::Window, false));
+  CHECK(mahogany::effectReferenceError(effects, "pulse", EffectKind::Animation, false));
   Effects fades;
   fades.presets.push_back(EffectPreset{.name = "fade", .kind = EffectKind::Animation, .shader = {.code = "z"}});
-  CHECK(!canopy::effectReferenceError(fades, "fade", EffectKind::Animation, false));
-  CHECK(canopy::effectReferenceError(fades, "fade", EffectKind::Border, false));
-  CHECK(canopy::effectReferenceError(effects, "missing", EffectKind::Window, false));
+  CHECK(!mahogany::effectReferenceError(fades, "fade", EffectKind::Animation, false));
+  CHECK(mahogany::effectReferenceError(fades, "fade", EffectKind::Border, false));
+  CHECK(mahogany::effectReferenceError(effects, "missing", EffectKind::Window, false));
 }
 
 CANOPY_TEST(offIsOnlyValidWhereAnOverrideCanDisableTheDefault) {
   const Effects effects = twoPresets();
-  CHECK(!canopy::effectReferenceError(effects, "off", EffectKind::Border, true));
-  CHECK(canopy::effectReferenceError(effects, "off", EffectKind::Border, false));
+  CHECK(!mahogany::effectReferenceError(effects, "off", EffectKind::Border, true));
+  CHECK(mahogany::effectReferenceError(effects, "off", EffectKind::Border, false));
 }
 
 CANOPY_TEST(clockSecondsKeepsMillisecondResolutionPastAFloatsExactRange) {
@@ -63,8 +63,8 @@ CANOPY_TEST(clockSecondsKeepsMillisecondResolutionPastAFloatsExactRange) {
   const float naiveBefore = static_cast<float>(epoch) / 1000.0F;
   CHECK_EQ(naiveAt, naiveBefore);
 
-  const float at = canopy::effectClockSeconds(epoch + 1, epoch);
-  const float before = canopy::effectClockSeconds(epoch, epoch);
+  const float at = mahogany::effectClockSeconds(epoch + 1, epoch);
+  const float before = mahogany::effectClockSeconds(epoch, epoch);
   CHECK(at != before);
 }
 
@@ -76,7 +76,7 @@ CANOPY_TEST(inertPresetsKeepTheirNameWithoutSource) {
 }
 
 CANOPY_TEST(ledgerCountsOnlyVisibleAdvancingTimeReaders) {
-  canopy::EffectLedger ledger;
+  mahogany::EffectLedger ledger;
   int outputA = 0;
   int outputB = 0;
   int viewOne = 0;
@@ -106,7 +106,7 @@ CANOPY_TEST(ledgerCountsOnlyVisibleAdvancingTimeReaders) {
 }
 
 CANOPY_TEST(ledgerSuspensionAndOutputRemovalClearEligibility) {
-  canopy::EffectLedger ledger;
+  mahogany::EffectLedger ledger;
   int output = 0;
   int screen = 0;
   int cursor = 0;
@@ -125,7 +125,7 @@ CANOPY_TEST(ledgerSuspensionAndOutputRemovalClearEligibility) {
 }
 
 CANOPY_TEST(ledgerUpdatesReplaceAnOwnersPreviousState) {
-  canopy::EffectLedger ledger;
+  mahogany::EffectLedger ledger;
   int output = 0;
   int owner = 0;
   for (int i = 0; i < 3; ++i) {
@@ -136,81 +136,81 @@ CANOPY_TEST(ledgerUpdatesReplaceAnOwnersPreviousState) {
 }
 
 CANOPY_TEST(borderEffectsNeedFocusDecorationAndCalmNotFullscreen) {
-  CHECK(canopy::borderEffectApplies({.focused = true, .decorated = true, .urgent = false, .fullscreen = false}));
-  CHECK(!canopy::borderEffectApplies({.focused = false, .decorated = true, .urgent = false, .fullscreen = false}));
-  CHECK(!canopy::borderEffectApplies({.focused = true, .decorated = false, .urgent = false, .fullscreen = false}));
-  CHECK(!canopy::borderEffectApplies({.focused = true, .decorated = true, .urgent = true, .fullscreen = false}));
-  CHECK(!canopy::borderEffectApplies({.focused = true, .decorated = true, .urgent = false, .fullscreen = true}));
+  CHECK(mahogany::borderEffectApplies({.focused = true, .decorated = true, .urgent = false, .fullscreen = false}));
+  CHECK(!mahogany::borderEffectApplies({.focused = false, .decorated = true, .urgent = false, .fullscreen = false}));
+  CHECK(!mahogany::borderEffectApplies({.focused = true, .decorated = false, .urgent = false, .fullscreen = false}));
+  CHECK(!mahogany::borderEffectApplies({.focused = true, .decorated = true, .urgent = true, .fullscreen = false}));
+  CHECK(!mahogany::borderEffectApplies({.focused = true, .decorated = true, .urgent = false, .fullscreen = true}));
 }
 
 CANOPY_TEST(borderUnfocusedStillNeedsDecorationAndCalmNotFullscreen) {
   // The opt-in widening (border_unfocused) opens only the focused gate; the
   // decorated, urgent and fullscreen gates still hold without focus.
   CHECK(
-      canopy::borderEffectApplies(
+      mahogany::borderEffectApplies(
           {.focused = false, .allowUnfocused = true, .decorated = true, .urgent = false, .fullscreen = false}
       )
   );
-  CHECK(!canopy::borderEffectApplies(
+  CHECK(!mahogany::borderEffectApplies(
       {.focused = false, .allowUnfocused = true, .decorated = false, .urgent = false, .fullscreen = false}
   ));
-  CHECK(!canopy::borderEffectApplies(
+  CHECK(!mahogany::borderEffectApplies(
       {.focused = false, .allowUnfocused = true, .decorated = true, .urgent = true, .fullscreen = false}
   ));
-  CHECK(!canopy::borderEffectApplies(
+  CHECK(!mahogany::borderEffectApplies(
       {.focused = false, .allowUnfocused = true, .decorated = true, .urgent = false, .fullscreen = true}
   ));
 }
 
 CANOPY_TEST(borderPaddingNeedsACompiledBorderPreset) {
   const EffectPreset border{.name = "ring", .kind = EffectKind::Border, .padding = 20};
-  CHECK_EQ(canopy::borderPresetPadding(&border, true), 20);
-  CHECK_EQ(canopy::borderPresetPadding(&border, false), 0);
-  CHECK_EQ(canopy::borderPresetPadding(nullptr, true), 0);
+  CHECK_EQ(mahogany::borderPresetPadding(&border, true), 20);
+  CHECK_EQ(mahogany::borderPresetPadding(&border, false), 0);
+  CHECK_EQ(mahogany::borderPresetPadding(nullptr, true), 0);
   const EffectPreset window{.name = "tint", .kind = EffectKind::Window, .padding = 20};
-  CHECK_EQ(canopy::borderPresetPadding(&window, true), 0);
+  CHECK_EQ(mahogany::borderPresetPadding(&window, true), 0);
 }
 
 CANOPY_TEST(effectPoolPoliciesAndReferenceConstraintsAreExplicit) {
-  using canopy::EffectReferenceConstraint;
-  using canopy::EffectSelectionPolicy;
+  using mahogany::EffectReferenceConstraint;
+  using mahogany::EffectSelectionPolicy;
   Effects effects = twoPresets();
   effects.pools.push_back({.name = "borders", .kind = EffectKind::Border, .members = {"pulse"}});
-  CHECK(canopy::parseEffectSelectionPolicy("unused_first") == EffectSelectionPolicy::UnusedFirst);
-  CHECK(canopy::parseEffectSelectionPolicy("round_robin") == EffectSelectionPolicy::RoundRobin);
-  CHECK(canopy::parseEffectSelectionPolicy("random") == EffectSelectionPolicy::Random);
-  CHECK(!canopy::parseEffectSelectionPolicy("Random"));
-  CHECK(!canopy::parseEffectSelectionPolicy(""));
-  CHECK_EQ(canopy::effectSelectionPolicyName(EffectSelectionPolicy::UnusedFirst), std::string_view("unused_first"));
-  CHECK_EQ(canopy::effectSelectionPolicyName(EffectSelectionPolicy::RoundRobin), std::string_view("round_robin"));
-  CHECK_EQ(canopy::effectSelectionPolicyName(EffectSelectionPolicy::Random), std::string_view("random"));
-  CHECK(canopy::findEffectPool(effects, "borders") != nullptr);
-  CHECK(canopy::findEffectPool(effects, "pulse") == nullptr);
-  CHECK(canopy::effectReferenceError(effects, "borders", EffectKind::Border, false));
-  CHECK(!canopy::effectReferenceError(
+  CHECK(mahogany::parseEffectSelectionPolicy("unused_first") == EffectSelectionPolicy::UnusedFirst);
+  CHECK(mahogany::parseEffectSelectionPolicy("round_robin") == EffectSelectionPolicy::RoundRobin);
+  CHECK(mahogany::parseEffectSelectionPolicy("random") == EffectSelectionPolicy::Random);
+  CHECK(!mahogany::parseEffectSelectionPolicy("Random"));
+  CHECK(!mahogany::parseEffectSelectionPolicy(""));
+  CHECK_EQ(mahogany::effectSelectionPolicyName(EffectSelectionPolicy::UnusedFirst), std::string_view("unused_first"));
+  CHECK_EQ(mahogany::effectSelectionPolicyName(EffectSelectionPolicy::RoundRobin), std::string_view("round_robin"));
+  CHECK_EQ(mahogany::effectSelectionPolicyName(EffectSelectionPolicy::Random), std::string_view("random"));
+  CHECK(mahogany::findEffectPool(effects, "borders") != nullptr);
+  CHECK(mahogany::findEffectPool(effects, "pulse") == nullptr);
+  CHECK(mahogany::effectReferenceError(effects, "borders", EffectKind::Border, false));
+  CHECK(!mahogany::effectReferenceError(
       effects, "borders", EffectKind::Border, false, EffectReferenceConstraint::PresetOrPool
   ));
-  CHECK(!canopy::effectReferenceError(
+  CHECK(!mahogany::effectReferenceError(
       effects, "borders", EffectKind::Border, false, EffectReferenceConstraint::PoolRequired
   ));
   CHECK(
-      canopy::effectReferenceError(
+      mahogany::effectReferenceError(
           effects, "borders", EffectKind::Window, false, EffectReferenceConstraint::PresetOrPool
       )
   );
   CHECK(
-      canopy::effectReferenceError(
+      mahogany::effectReferenceError(
           effects, "pulse", EffectKind::Border, false, EffectReferenceConstraint::PoolRequired
       )
   );
   CHECK(
-      !canopy::effectReferenceError(effects, "", EffectKind::Border, false, EffectReferenceConstraint::PresetOrPool)
+      !mahogany::effectReferenceError(effects, "", EffectKind::Border, false, EffectReferenceConstraint::PresetOrPool)
   );
   CHECK(
-      !canopy::effectReferenceError(effects, "off", EffectKind::Border, true, EffectReferenceConstraint::PresetOrPool)
+      !mahogany::effectReferenceError(effects, "off", EffectKind::Border, true, EffectReferenceConstraint::PresetOrPool)
   );
   CHECK(
-      canopy::effectReferenceError(effects, "off", EffectKind::Border, false, EffectReferenceConstraint::PresetOrPool)
+      mahogany::effectReferenceError(effects, "off", EffectKind::Border, false, EffectReferenceConstraint::PresetOrPool)
   );
 }
 

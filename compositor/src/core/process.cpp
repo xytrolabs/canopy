@@ -18,7 +18,7 @@
 
 extern "C" int canopyCloseRange(unsigned int first, unsigned int last, int flags);
 
-namespace canopy {
+namespace mahogany {
 
   namespace {
     void reapChildren(int /*signal*/) {
@@ -169,4 +169,4 @@ namespace canopy {
     return {};
   }
 
-} // namespace canopy
+} // namespace mahogany

@@ -3,10 +3,10 @@
 
 #include <array>
 
-using canopy::adjacentOutputIndex;
-using canopy::cyclicOutputIndex;
-using canopy::OutputBox;
-using canopy::OutputDirection;
+using mahogany::adjacentOutputIndex;
+using mahogany::cyclicOutputIndex;
+using mahogany::OutputBox;
+using mahogany::OutputDirection;
 
 CANOPY_TEST(scaledOutputsMayOverlapAtTheirSharedEdge) {
   // Reported layout: a 3840x2160 output at scale 1.6, with the scaled laptop

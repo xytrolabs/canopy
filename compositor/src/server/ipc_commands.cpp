@@ -33,7 +33,7 @@ extern "C" {
 #include <canopyfx/render/effect.h>
 }
 
-namespace canopy {
+namespace mahogany {
 
   nlohmann::json IpcCommands::inputCapturePermissions(Server& server, IpcArgs /*args*/) {
     auto result = nlohmann::json::array();
@@ -736,7 +736,7 @@ namespace canopy {
   // The view the window actions target. The qualified call keeps the shared
   // focus policy distinct from this command's own name.
   nlohmann::json IpcCommands::focusedWindow(Server& server, IpcArgs /*args*/) {
-    View* view = canopy::focusedWindow(server);
+    View* view = mahogany::focusedWindow(server);
     if (view == nullptr) {
       return nlohmann::json{{"err", "no focused window"}};
     }
@@ -1445,4 +1445,4 @@ namespace canopy {
     return nullptr;
   }
 
-} // namespace canopy
+} // namespace mahogany

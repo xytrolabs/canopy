@@ -19,7 +19,7 @@ extern "C" {
 #include <wlr/render/dmabuf.h>
 }
 
-namespace canopy {
+namespace mahogany {
   namespace {
 
     struct AlignedUdmabufAllocator {
@@ -190,4 +190,4 @@ namespace canopy {
     return wlr_allocator_autocreate(backend, renderer);
   }
 
-} // namespace canopy
+} // namespace mahogany

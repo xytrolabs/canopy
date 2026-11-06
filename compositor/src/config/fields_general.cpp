@@ -14,7 +14,7 @@
 #include <utility>
 #include <vector>
 
-namespace canopy {
+namespace mahogany {
 
   namespace {
 
@@ -462,4 +462,4 @@ namespace canopy {
     return registry::table("screencast", &Config::screenCast, screenCastFields());
   }
 
-} // namespace canopy
+} // namespace mahogany

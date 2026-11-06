@@ -3,7 +3,7 @@
 #include <algorithm>
 #include <cmath>
 
-namespace canopy {
+namespace mahogany {
 
   namespace {
 
@@ -43,4 +43,4 @@ namespace canopy {
         || (above(b.from, a.from) && above(b.to, a.to));
   }
 
-} // namespace canopy
+} // namespace mahogany

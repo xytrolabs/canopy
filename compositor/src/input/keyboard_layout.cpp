@@ -2,7 +2,7 @@
 
 #include <algorithm>
 
-namespace canopy {
+namespace mahogany {
   std::optional<xkb_layout_index_t> layoutGroupNamed(xkb_keymap* keymap, std::string_view name) {
     if (keymap == nullptr || name.empty()) {
       return std::nullopt;
@@ -50,4 +50,4 @@ namespace canopy {
     });
   }
 
-} // namespace canopy
+} // namespace mahogany

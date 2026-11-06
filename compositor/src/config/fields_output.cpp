@@ -15,7 +15,7 @@
 #include <utility>
 #include <vector>
 
-namespace canopy {
+namespace mahogany {
 
   namespace {
 
@@ -217,4 +217,4 @@ namespace canopy {
     return registry::namedTables<Config>("output", outputFields(), acceptOutput);
   }
 
-} // namespace canopy
+} // namespace mahogany

@@ -1,6 +1,6 @@
 #include "server/allocator_policy.h"
 
-namespace canopy {
+namespace mahogany {
 
   namespace {
     constexpr int rowAlignment = 64;
@@ -25,4 +25,4 @@ namespace canopy {
     return backendDrmFd < 0 && rendererDrmFd < 0;
   }
 
-} // namespace canopy
+} // namespace mahogany

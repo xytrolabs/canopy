@@ -32,7 +32,7 @@ extern "C" {
 #include <wlr/util/box.h>
 }
 
-namespace canopy {
+namespace mahogany {
 
   enum class FormatTier : uint8_t;
   enum class HdrMode;
@@ -325,4 +325,4 @@ namespace canopy {
     wl_listener m_destroy{};
   };
 
-} // namespace canopy
+} // namespace mahogany

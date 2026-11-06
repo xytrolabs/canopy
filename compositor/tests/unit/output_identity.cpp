@@ -3,12 +3,12 @@
 
 #include <string>
 
-using canopy::outputDescriptor;
-using canopy::OutputIdentity;
-using canopy::OutputNameMatch;
-using canopy::outputNameMatch;
-using canopy::outputNamesEqual;
-using canopy::validVirtualOutputName;
+using mahogany::outputDescriptor;
+using mahogany::OutputIdentity;
+using mahogany::OutputNameMatch;
+using mahogany::outputNameMatch;
+using mahogany::outputNamesEqual;
+using mahogany::validVirtualOutputName;
 
 namespace {
   // A display that fills in every EDID string.

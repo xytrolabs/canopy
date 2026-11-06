@@ -24,7 +24,7 @@ extern "C" {
 #include "workspace/workspace.h"
 #include "xwayland/xwayland.h"
 
-namespace canopy {
+namespace mahogany {
   int View::titleBarHeight() const {
     if (!wantsTitleBar(m_titleBarMode.value_or(config().appearance.titleBar.mode))
         || scheduledFullscreen()
@@ -428,4 +428,4 @@ namespace canopy {
     reloadBackdropColor();
     syncModalShade();
   }
-} // namespace canopy
+} // namespace mahogany

@@ -20,7 +20,7 @@ struct wlr_output;
 struct wlr_scene_node;
 struct wlr_renderer;
 
-namespace canopy {
+namespace mahogany {
 
   class Output;
   class Server;
@@ -136,4 +136,4 @@ namespace canopy {
     return static_cast<float>(static_cast<double>(nowMsec - epochMsec) / 1000.0);
   }
 
-} // namespace canopy
+} // namespace mahogany

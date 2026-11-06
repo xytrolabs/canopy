@@ -11,7 +11,7 @@ extern "C" {
 struct wlr_scene_rect;
 struct wlr_scene_tree;
 
-namespace canopy {
+namespace mahogany {
 
   class Output;
   class Server;
@@ -54,4 +54,4 @@ namespace canopy {
     bool m_visible = false;
   };
 
-} // namespace canopy
+} // namespace mahogany

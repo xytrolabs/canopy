@@ -14,8 +14,8 @@
 #include <unistd.h>
 #include <vector>
 
-using canopy::registry::Descriptions;
-using canopy::registry::KeyDescription;
+using mahogany::registry::Descriptions;
+using mahogany::registry::KeyDescription;
 
 namespace {
 
@@ -26,7 +26,7 @@ namespace {
   }
 
   struct Loaded {
-    canopy::Config config;
+    mahogany::Config config;
     std::vector<std::string> messages;
   };
 
@@ -35,9 +35,9 @@ namespace {
       std::ofstream out(configPath());
       out << document;
     }
-    canopy::loadConfig(configPath().c_str());
-    Loaded loaded{.config = canopy::config(), .messages = {}};
-    for (const auto& diagnostic : canopy::configDiagnostics()) {
+    mahogany::loadConfig(configPath().c_str());
+    Loaded loaded{.config = mahogany::config(), .messages = {}};
+    for (const auto& diagnostic : mahogany::configDiagnostics()) {
       loaded.messages.push_back(diagnostic.message);
     }
     std::filesystem::remove(configPath());
@@ -119,7 +119,7 @@ namespace {
 
 // Every stated default, written into a config, draws no diagnostic and loads as the built-in value.
 CANOPY_TEST(statedDefaultsLoadAsTheBuiltInValues) {
-  const Descriptions builtIn = canopy::registry::describeConfig(canopy::Config{});
+  const Descriptions builtIn = mahogany::registry::describeConfig(mahogany::Config{});
   toml::table document;
   int written = 0;
   for (const KeyDescription& key : builtIn) {
@@ -147,13 +147,13 @@ CANOPY_TEST(statedDefaultsLoadAsTheBuiltInValues) {
 
   const Loaded loaded = load(document);
   if (!loaded.messages.empty()) {
-    canopy::test::reportFailure(__FILE__, __LINE__, "stated defaults draw diagnostics:" + joined(loaded.messages));
+    mahogany::test::reportFailure(__FILE__, __LINE__, "stated defaults draw diagnostics:" + joined(loaded.messages));
   }
-  const Descriptions reloaded = canopy::registry::describeConfig(loaded.config);
+  const Descriptions reloaded = mahogany::registry::describeConfig(loaded.config);
   CHECK_EQ(reloaded.size(), builtIn.size());
   for (size_t index = 0; index < builtIn.size() && index < reloaded.size(); ++index) {
     if (reloaded[index].defaultValue != builtIn[index].defaultValue) {
-      canopy::test::reportFailure(
+      mahogany::test::reportFailure(
           __FILE__, __LINE__,
           std::format(
               "{} states {} but loads as {}", builtIn[index].path, builtIn[index].defaultValue.dump(),
@@ -164,8 +164,8 @@ CANOPY_TEST(statedDefaultsLoadAsTheBuiltInValues) {
   }
   // A default a declaration states by hand is checked by the config it loads into, not by describing that config
   // back through the same declaration. Colors are compared above: a built-in color is not an exact n/255.
-  canopy::Config withDefaults = loaded.config;
-  const canopy::Config empty = load(toml::table{}).config;
+  mahogany::Config withDefaults = loaded.config;
+  const mahogany::Config empty = load(toml::table{}).config;
   withDefaults.colors = empty.colors;
   CHECK(withDefaults == empty);
 }
@@ -174,7 +174,7 @@ CANOPY_TEST(statedDefaultsLoadAsTheBuiltInValues) {
 // keys, and no default where a key has none.
 CANOPY_TEST(jsonIsSortedAndTyped) {
   const auto json = nlohmann::ordered_json::parse(
-      canopy::configSchemaJson(canopy::registry::describeConfig(canopy::Config{}), "0.1.0", std::nullopt)
+      mahogany::configSchemaJson(mahogany::registry::describeConfig(mahogany::Config{}), "0.1.0", std::nullopt)
   );
   std::vector<std::string> roots;
   for (const auto& [key, value] : json.items()) {
@@ -187,12 +187,12 @@ CANOPY_TEST(jsonIsSortedAndTyped) {
   for (const auto& option : json["options"]) {
     const std::string path = option["path"];
     if (!(previous < path)) {
-      canopy::test::reportFailure(__FILE__, __LINE__, std::format("{} is out of order or repeated", path));
+      mahogany::test::reportFailure(__FILE__, __LINE__, std::format("{} is out of order or repeated", path));
     }
     previous = path;
     for (const char* bound : {"min", "max"}) {
       if (option["type"] == "int" && option.contains(bound) && !option[bound].is_number_integer()) {
-        canopy::test::reportFailure(__FILE__, __LINE__, std::format("{} has a non-integer {}", path, bound));
+        mahogany::test::reportFailure(__FILE__, __LINE__, std::format("{} has a non-integer {}", path, bound));
       }
     }
     if (path == "input.touchpad.natural_scroll") {
@@ -211,7 +211,7 @@ CANOPY_TEST(listedValuesAreAccepted) {
     shader << "vec4 animation(vec2 uv) { return canopy_sample(uv); }";
   }
   int tried = 0;
-  for (const KeyDescription& key : canopy::registry::describeConfig(canopy::Config{})) {
+  for (const KeyDescription& key : mahogany::registry::describeConfig(mahogany::Config{})) {
     for (const std::string_view value : key.values) {
       std::string concrete;
       // A string array lists the values its entries may take.
@@ -229,7 +229,7 @@ CANOPY_TEST(listedValuesAreAccepted) {
       ++tried;
       for (const std::string& message : loaded.messages) {
         if (message.contains(concrete)) {
-          canopy::test::reportFailure(
+          mahogany::test::reportFailure(
               __FILE__, __LINE__, std::format(R"({} = "{}" is listed but rejected: {})", key.path, value, message)
           );
         }
@@ -241,7 +241,7 @@ CANOPY_TEST(listedValuesAreAccepted) {
 }
 
 CANOPY_TEST(outputSdrTransferSchemaListsCanonicalValuesAndDefault) {
-  const auto descriptions = canopy::registry::describeConfig(canopy::Config{});
+  const auto descriptions = mahogany::registry::describeConfig(mahogany::Config{});
   bool found = false;
   for (const auto& key : descriptions) {
     if (key.path == "output.<name>.sdr_transfer") {
@@ -255,7 +255,7 @@ CANOPY_TEST(outputSdrTransferSchemaListsCanonicalValuesAndDefault) {
 }
 
 CANOPY_TEST(effectPoolSchemaReportsMembersPoliciesAndRequiredKind) {
-  const auto descriptions = canopy::registry::describeConfig(canopy::Config{});
+  const auto descriptions = mahogany::registry::describeConfig(mahogany::Config{});
   bool kind = false;
   bool choose = false;
   bool selection = false;

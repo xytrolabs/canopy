@@ -2,7 +2,7 @@
 
 #include "wlr.h"
 
-namespace canopy {
+namespace mahogany {
 
   SurfaceLayoutMemory::~SurfaceLayoutMemory() { clear(); }
 
@@ -57,4 +57,4 @@ namespace canopy {
     }
   }
 
-} // namespace canopy
+} // namespace mahogany

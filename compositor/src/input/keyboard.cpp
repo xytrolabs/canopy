@@ -19,7 +19,7 @@
 #include <algorithm>
 #include <optional>
 
-namespace canopy {
+namespace mahogany {
 
   namespace {
     constexpr Logger kLog("keyboard");
@@ -584,4 +584,4 @@ namespace canopy {
     return 0;
   }
 
-} // namespace canopy
+} // namespace mahogany

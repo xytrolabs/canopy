@@ -10,7 +10,7 @@ extern "C" {
 #include <wlr/types/wlr_keyboard.h>
 }
 
-namespace canopy {
+namespace mahogany {
 
   KeyboardLeds::KeyboardLeds(wl_event_loop* loop, std::function<bool(wlr_keyboard*)> canUseSource)
       : m_loop(loop), m_canUseSource(std::move(canUseSource)) {}
@@ -215,4 +215,4 @@ namespace canopy {
     }
   }
 
-} // namespace canopy
+} // namespace mahogany

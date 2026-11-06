@@ -3,7 +3,7 @@
 #include <string>
 #include <vector>
 
-namespace canopy {
+namespace mahogany {
 
   struct IpcCommandSpec;
 
@@ -17,4 +17,4 @@ namespace canopy {
   // when a name in `events` is not a subscribable family.
   int runIpcSubscribe(const std::vector<std::string>& events);
 
-} // namespace canopy
+} // namespace mahogany

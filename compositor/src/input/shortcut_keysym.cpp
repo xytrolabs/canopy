@@ -2,7 +2,7 @@
 
 #include <cstdint>
 
-namespace canopy {
+namespace mahogany {
 
   namespace {
 
@@ -44,4 +44,4 @@ namespace canopy {
     return active;
   }
 
-} // namespace canopy
+} // namespace mahogany

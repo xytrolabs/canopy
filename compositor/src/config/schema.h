@@ -6,7 +6,7 @@
 #include <string>
 #include <string_view>
 
-namespace canopy {
+namespace mahogany {
 
   // Options per top-level section, for `canopy config schema`. Tables, maps, and arrays of tables only group options
   // and are not counted.
@@ -17,4 +17,4 @@ namespace canopy {
       const registry::Descriptions& keys, std::string_view version, std::optional<std::string_view> revision
   );
 
-} // namespace canopy
+} // namespace mahogany

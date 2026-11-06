@@ -41,7 +41,7 @@ namespace {
   };
 } // namespace
 
-namespace canopy {
+namespace mahogany {
   wlr_buffer* createCairoBuffer(cairo_surface_t* surface) {
     auto* image = new CairoBuffer;
     image->surface = surface;
@@ -51,4 +51,4 @@ namespace canopy {
     );
     return &image->base;
   }
-} // namespace canopy
+} // namespace mahogany

@@ -5,10 +5,10 @@
 #include <cmath>
 #include <vector>
 
-using canopy::GammaOutputMode;
-using canopy::GammaTransitionOps;
-using canopy::hdrWhitePointFromGamma;
-using canopy::stageGammaForOutputMode;
+using mahogany::GammaOutputMode;
+using mahogany::GammaTransitionOps;
+using mahogany::hdrWhitePointFromGamma;
+using mahogany::stageGammaForOutputMode;
 
 namespace {
 

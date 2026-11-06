@@ -8,9 +8,9 @@ extern "C" {
 #include <wlr/interfaces/wlr_buffer.h>
 }
 
-using canopy::commitRenderedState;
-using canopy::HdrTransition;
-using canopy::RenderedStateCommitResult;
+using mahogany::commitRenderedState;
+using mahogany::HdrTransition;
+using mahogany::RenderedStateCommitResult;
 
 namespace {
 

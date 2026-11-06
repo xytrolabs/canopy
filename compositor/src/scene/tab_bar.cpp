@@ -8,7 +8,7 @@
 #include <cmath>
 #include <utility>
 
-namespace canopy {
+namespace mahogany {
 
   namespace {
 
@@ -329,4 +329,4 @@ namespace canopy {
     }
   }
 
-} // namespace canopy
+} // namespace mahogany

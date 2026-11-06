@@ -2,7 +2,7 @@
 
 #include <algorithm>
 
-namespace canopy {
+namespace mahogany {
 
   LidStateCoordinator::SourceId LidStateCoordinator::addSource(LidState initial) {
     const SourceId id = m_nextSource++;
@@ -47,4 +47,4 @@ namespace canopy {
     return current;
   }
 
-} // namespace canopy
+} // namespace mahogany

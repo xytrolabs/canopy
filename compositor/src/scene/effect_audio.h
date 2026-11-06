@@ -3,6 +3,6 @@
 #include <array>
 #include <canopyfx/render/audio.h>
 
-namespace canopy {
+namespace mahogany {
   using EffectAudio = std::array<float, FX_AUDIO_VALUES>;
 }

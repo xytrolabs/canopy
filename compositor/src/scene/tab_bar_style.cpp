@@ -1,6 +1,6 @@
 #include "scene/tab_bar_style.h"
 
-namespace canopy {
+namespace mahogany {
 
   TabBarStyle resolveTabBarStyle(const Config& config) {
     const Config::Appearance::TabBar& bar = config.appearance.tabBar;
@@ -17,4 +17,4 @@ namespace canopy {
     };
   }
 
-} // namespace canopy
+} // namespace mahogany

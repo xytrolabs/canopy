@@ -4,7 +4,7 @@
 
 struct wlr_scene_tree;
 
-namespace canopy {
+namespace mahogany {
   class Server;
 
   class Cheatsheet {
@@ -32,4 +32,4 @@ namespace canopy {
     SurfaceShadow m_shadow;
   };
 
-} // namespace canopy
+} // namespace mahogany

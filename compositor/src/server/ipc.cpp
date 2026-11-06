@@ -24,7 +24,7 @@
 #include <vector>
 #include <wayland-server-core.h>
 
-namespace canopy {
+namespace mahogany {
 
   namespace {
     constexpr Logger kLog("ipc");
@@ -775,4 +775,4 @@ namespace canopy {
 
   void Ipc::notifyOutputsChanged() { broadcastEvent(kEventOutputs, outputsEvent(*m_server)); }
 
-} // namespace canopy
+} // namespace mahogany

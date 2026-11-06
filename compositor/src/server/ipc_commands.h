@@ -9,7 +9,7 @@
 #include <string>
 #include <string_view>
 
-namespace canopy {
+namespace mahogany {
 
   class Server;
 
@@ -78,4 +78,4 @@ namespace canopy {
   // ("WIDTHxHEIGHT[@HZ]"). Returns false with `error` set on anything else.
   bool parseOutputCreateArgs(IpcArgs args, std::string& name, std::optional<OutputMode>& mode, std::string& error);
 
-} // namespace canopy
+} // namespace mahogany

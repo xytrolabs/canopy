@@ -4,7 +4,7 @@
 
 #include <string>
 
-namespace canopy {
+namespace mahogany {
 
   // Sorted, unique names reached by retained keybinds and enabled hot corners.
   std::vector<std::string> configuredEffectActionRoots(const Config& config);
@@ -120,4 +120,4 @@ namespace canopy {
     ConfigEffects effects;
   };
 
-} // namespace canopy
+} // namespace mahogany

@@ -18,11 +18,11 @@
 #error "CANOPY_DOCS_ACTIONS_MD must point at docs/user/actions.md"
 #endif
 
-using canopy::ActionSpec;
-using canopy::fixedGroupOrder;
-using canopy::Group;
-using canopy::groupForAction;
-using canopy::groupTitle;
+using mahogany::ActionSpec;
+using mahogany::fixedGroupOrder;
+using mahogany::Group;
+using mahogany::groupForAction;
+using mahogany::groupTitle;
 
 namespace {
 
@@ -166,10 +166,10 @@ CANOPY_TEST(actionsDocIsReadable) {
 
 CANOPY_TEST(everyActionSpecHasADocRowWithTheSameTextAndGroup) {
   const DocTables& doc = docTables();
-  for (const ActionSpec& spec : canopy::actionSpecs()) {
+  for (const ActionSpec& spec : mahogany::actionSpecs()) {
     const auto row = doc.rows.find(std::string(spec.name));
     if (row == doc.rows.end()) {
-      ::canopy::test::reportFailure(__FILE__, __LINE__, std::format("{} is missing from actions.md", spec.name));
+      ::mahogany::test::reportFailure(__FILE__, __LINE__, std::format("{} is missing from actions.md", spec.name));
       continue;
     }
     CHECK_EQ(row->second.param, std::string(spec.param));
@@ -180,13 +180,13 @@ CANOPY_TEST(everyActionSpecHasADocRowWithTheSameTextAndGroup) {
 
 CANOPY_TEST(actionsDocListsEveryActionOnceAndNothingElse) {
   for (const auto& name : docTables().duplicates) {
-    ::canopy::test::reportFailure(__FILE__, __LINE__, std::format("actions.md documents `{}` more than once", name));
+    ::mahogany::test::reportFailure(__FILE__, __LINE__, std::format("actions.md documents `{}` more than once", name));
   }
   for (const auto& [name, row] : docTables().rows) {
     const bool known =
-        std::ranges::any_of(canopy::actionSpecs(), [&name](const ActionSpec& spec) { return spec.name == name; });
+        std::ranges::any_of(mahogany::actionSpecs(), [&name](const ActionSpec& spec) { return spec.name == name; });
     if (!known) {
-      ::canopy::test::reportFailure(
+      ::mahogany::test::reportFailure(
           __FILE__, __LINE__, std::format("actions.md documents `{}`, which is not an action", name)
       );
     }

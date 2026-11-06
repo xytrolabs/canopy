@@ -2,7 +2,7 @@
 
 #include <chrono>
 
-namespace canopy {
+namespace mahogany {
 
   enum class FullscreenRequestDisposition {
     Acknowledge,
@@ -47,4 +47,4 @@ namespace canopy {
     TimePoint m_parkedAt;
   };
 
-} // namespace canopy
+} // namespace mahogany

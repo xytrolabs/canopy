@@ -8,7 +8,7 @@
 #include "wlr.h"
 // clang-format on
 
-namespace canopy {
+namespace mahogany {
 
   // Borders
   void ViewDecoration::ensureBorders(wlr_scene_tree* parent) {
@@ -212,4 +212,4 @@ namespace canopy {
     m_shadow.hide();
   }
 
-} // namespace canopy
+} // namespace mahogany

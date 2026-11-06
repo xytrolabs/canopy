@@ -9,7 +9,7 @@
 struct wlr_xcursor_manager;
 struct wlr_xcursor_theme;
 
-namespace canopy {
+namespace mahogany {
 
   // A packed DRM_FORMAT_ARGB8888 image. Rows may contain trailing padding.
   struct XcursorImageView {
@@ -35,4 +35,4 @@ namespace canopy {
   std::optional<std::string>
   matchXcursorManagerImage(wlr_xcursor_manager* manager, XcursorImageView image, std::string_view preferredName = {});
 
-} // namespace canopy
+} // namespace mahogany

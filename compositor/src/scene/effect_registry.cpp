@@ -13,7 +13,7 @@ extern "C" {
 #include <canopyfx/render/effect.h>
 }
 
-namespace canopy {
+namespace mahogany {
   namespace {
     // Event loops here and in change.cpp end at Overview; the slot table must agree.
     static_assert(static_cast<unsigned>(AnimationEvent::Overview) + 1 == FX_ANIMATION_SLOTS);
@@ -451,4 +451,4 @@ vec4 animation(vec2 uv) {
     bind(node, event, value, static_cast<float>(evaluateCurve(value.curve(), value.progress())), direction);
   }
 
-} // namespace canopy
+} // namespace mahogany

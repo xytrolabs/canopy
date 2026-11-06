@@ -6,7 +6,7 @@
 #include <cstddef>
 #include <system_error>
 
-namespace canopy {
+namespace mahogany {
 
   namespace {
 
@@ -100,4 +100,4 @@ namespace canopy {
     });
   }
 
-} // namespace canopy
+} // namespace mahogany

@@ -5,7 +5,7 @@
 #include <span>
 #include <vector>
 
-namespace canopy {
+namespace mahogany {
 
   class View;
 
@@ -40,4 +40,4 @@ namespace canopy {
     std::vector<std::unique_ptr<View>> m_views;
   };
 
-} // namespace canopy
+} // namespace mahogany

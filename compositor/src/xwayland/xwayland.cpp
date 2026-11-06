@@ -21,7 +21,7 @@
 #include <unistd.h>
 #include <vector>
 
-namespace canopy {
+namespace mahogany {
 
   namespace {
     constexpr Logger kLog("xwayland");
@@ -509,4 +509,4 @@ namespace canopy {
     );
   }
 
-} // namespace canopy
+} // namespace mahogany

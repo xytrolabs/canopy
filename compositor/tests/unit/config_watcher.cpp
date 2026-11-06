@@ -12,8 +12,8 @@
 #include <unistd.h>
 #include <wayland-server-core.h>
 
-using canopy::ConfigStore;
-using canopy::ConfigWatcher;
+using mahogany::ConfigStore;
+using mahogany::ConfigWatcher;
 
 namespace {
   class ScopedEnvironment {
@@ -142,7 +142,7 @@ namespace {
 CANOPY_TEST(anIncludedFileReloadsThroughASymlinkedConfigDirectory) {
   const SymlinkedConfigTree tree;
   const std::string root = tree.root().string();
-  ConfigStore& store = canopy::configStore();
+  ConfigStore& store = mahogany::configStore();
   store.load(root.c_str());
 
   CHECK_EQ(store.config().layout.gap, 5);
@@ -157,7 +157,7 @@ CANOPY_TEST(anIncludedFileReloadsThroughASymlinkedConfigDirectory) {
   int reloads = 0;
   std::unique_ptr<ConfigWatcher> watcher;
   watcher = std::make_unique<ConfigWatcher>(loop, [&] {
-    const canopy::ConfigReloadResult result = store.reload();
+    const mahogany::ConfigReloadResult result = store.reload();
     if (result.success) {
       ++reloads;
     }
@@ -180,7 +180,7 @@ CANOPY_TEST(anIncludedFileReloadsThroughASymlinkedConfigDirectory) {
 CANOPY_TEST(aRetargetedSymlinkedConfigDirectoryReloadsFromTheNewTarget) {
   const SymlinkedConfigTree tree;
   const std::string root = tree.root().string();
-  ConfigStore& store = canopy::configStore();
+  ConfigStore& store = mahogany::configStore();
   store.load(root.c_str());
 
   CHECK_EQ(store.config().layout.gap, 5);
@@ -194,7 +194,7 @@ CANOPY_TEST(aRetargetedSymlinkedConfigDirectoryReloadsFromTheNewTarget) {
   int reloads = 0;
   std::unique_ptr<ConfigWatcher> watcher;
   watcher = std::make_unique<ConfigWatcher>(loop, [&] {
-    const canopy::ConfigReloadResult result = store.reload();
+    const mahogany::ConfigReloadResult result = store.reload();
     if (result.success) {
       ++reloads;
     }
@@ -218,7 +218,7 @@ CANOPY_TEST(aNewHigherPriorityUserConfigIsAdoptedWithoutRestart) {
   const ScopedEnvironment configHome("XDG_CONFIG_HOME", tree.userHome().string());
   const ScopedEnvironment configDirs("XDG_CONFIG_DIRS", tree.systemDir().string());
 
-  ConfigStore& store = canopy::configStore();
+  ConfigStore& store = mahogany::configStore();
   store.load(nullptr);
 
   CHECK_EQ(store.rootPath(), tree.systemConfig());
@@ -233,7 +233,7 @@ CANOPY_TEST(aNewHigherPriorityUserConfigIsAdoptedWithoutRestart) {
   int adoptions = 0;
   std::unique_ptr<ConfigWatcher> watcher;
   watcher = std::make_unique<ConfigWatcher>(loop, [&] {
-    const canopy::ConfigReloadResult result = store.reload();
+    const mahogany::ConfigReloadResult result = store.reload();
     if (result.success && store.rootPath() == tree.userConfig() && store.config().layout.gap == 19) {
       ++adoptions;
     }
@@ -254,7 +254,7 @@ CANOPY_TEST(aDeletedSymlinkTargetIsRewatchedWhenItReappears) {
   const ScopedEnvironment configHome("XDG_CONFIG_HOME", tree.userHome().string());
   const ScopedEnvironment configDirs("XDG_CONFIG_DIRS", tree.systemDir().string());
 
-  ConfigStore& store = canopy::configStore();
+  ConfigStore& store = mahogany::configStore();
   store.load(nullptr);
 
   CHECK_EQ(store.rootPath(), tree.userConfig());
@@ -269,7 +269,7 @@ CANOPY_TEST(aDeletedSymlinkTargetIsRewatchedWhenItReappears) {
   int reloads = 0;
   std::unique_ptr<ConfigWatcher> watcher;
   watcher = std::make_unique<ConfigWatcher>(loop, [&] {
-    const canopy::ConfigReloadResult result = store.reload();
+    const mahogany::ConfigReloadResult result = store.reload();
     if (result.success) {
       ++reloads;
     }

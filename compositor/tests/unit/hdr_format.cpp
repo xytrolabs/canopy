@@ -5,7 +5,7 @@
 #include <optional>
 #include <vector>
 
-using canopy::selectHdrRenderFormat;
+using mahogany::selectHdrRenderFormat;
 
 CANOPY_TEST(rejectedXrgbFallsBackToXbgr) {
   std::vector<uint32_t> probed;

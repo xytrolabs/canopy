@@ -12,7 +12,7 @@ struct wlr_input_device;
 struct wlr_input_method_keyboard_grab_v2;
 struct wlr_keyboard;
 
-namespace canopy {
+namespace mahogany {
 
   class Server;
 
@@ -86,4 +86,4 @@ namespace canopy {
     std::unordered_set<uint32_t> m_consumedKeycodes;
   };
 
-} // namespace canopy
+} // namespace mahogany

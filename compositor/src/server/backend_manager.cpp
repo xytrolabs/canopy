@@ -27,7 +27,7 @@
 #include <xf86drmMode.h>
 #endif
 
-namespace canopy {
+namespace mahogany {
 
   namespace {
 
@@ -907,4 +907,4 @@ namespace canopy {
   bool BackendManager::verifyOpenDevices(std::string_view context) { return m_impl->verifyOpenDevices(context); }
   void BackendManager::markStarted() { m_impl->markStarted(); }
 
-} // namespace canopy
+} // namespace mahogany

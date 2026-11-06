@@ -1,6 +1,6 @@
 #include "view/border_ring.h"
 
-namespace canopy {
+namespace mahogany {
 
   BorderRing
   makeBorderRing(int contentWidth, int contentHeight, int outerRadius, int innerWidth, int outerWidth, int padding) {
@@ -20,4 +20,4 @@ namespace canopy {
     };
   }
 
-} // namespace canopy
+} // namespace mahogany

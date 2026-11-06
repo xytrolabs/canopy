@@ -5,7 +5,7 @@
 #include <array>
 #include <string_view>
 
-namespace canopy {
+namespace mahogany {
 
   struct OutputMode {
     int width = 0;
@@ -27,4 +27,4 @@ namespace canopy {
   // letters, digits, or underscores.
   bool isEnvironmentVariableName(std::string_view name);
 
-} // namespace canopy
+} // namespace mahogany

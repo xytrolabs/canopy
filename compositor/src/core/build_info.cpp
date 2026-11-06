@@ -6,10 +6,10 @@
 #define CANOPY_VERSION "unknown"
 #endif
 
-namespace canopy::build_info {
+namespace mahogany::build_info {
 
   std::string_view version() noexcept { return CANOPY_VERSION; }
 
   std::string_view revision() noexcept { return CANOPY_GIT_REVISION; }
 
-} // namespace canopy::build_info
+} // namespace mahogany::build_info

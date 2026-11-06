@@ -60,7 +60,7 @@ namespace {
     void stopObserving() { m_leds = nullptr; }
 
     void observe(
-        canopy::KeyboardLeds& leds, bool changesSource = true, bool virtualDevice = false, bool initialNumLock = false
+        mahogany::KeyboardLeds& leds, bool changesSource = true, bool virtualDevice = false, bool initialNumLock = false
     ) {
       m_leds = &leds;
       m_changesSource = changesSource;
@@ -80,11 +80,11 @@ namespace {
       }
       // Config replacement callbacks do not select a fresh input source.
       // Refresh shared locks after the state-preserving helper has returned.
-      canopy::KeyboardLeds* observer = m_leds;
+      mahogany::KeyboardLeds* observer = m_leds;
       if (preserveState) {
         m_leds = nullptr;
       }
-      const bool applied = preserveState ? canopy::setKeyboardKeymapPreservingState(&m_keyboard, keymap)
+      const bool applied = preserveState ? mahogany::setKeyboardKeymapPreservingState(&m_keyboard, keymap)
                                          : wlr_keyboard_set_keymap(&m_keyboard, keymap);
       m_leds = observer;
       if (preserveState && m_leds != nullptr) {
@@ -194,7 +194,7 @@ namespace {
 
     wlr_keyboard m_keyboard{};
     std::vector<uint32_t> m_writes;
-    canopy::KeyboardLeds* m_leds = nullptr;
+    mahogany::KeyboardLeds* m_leds = nullptr;
     wl_listener m_key{};
     wl_listener m_modifiers{};
     uint32_t m_time = 0;
@@ -206,7 +206,7 @@ namespace {
 
 CANOPY_TEST(ledlessSourceSharesTheFirstCapsAndNumTransitions) {
   EventLoop loop;
-  canopy::KeyboardLeds leds(loop.get());
+  mahogany::KeyboardLeds leds(loop.get());
   BackendKeyboard laptop;
   BackendKeyboard receiver;
   BackendKeyboard proxy(false);
@@ -243,7 +243,7 @@ CANOPY_TEST(ledlessSourceSharesTheFirstCapsAndNumTransitions) {
 
 CANOPY_TEST(alternatingOrdinaryInputPreservesNumLockWithoutLedFlicker) {
   EventLoop loop;
-  canopy::KeyboardLeds leds(loop.get());
+  mahogany::KeyboardLeds leds(loop.get());
   BackendKeyboard laptop;
   BackendKeyboard proxy(false);
   laptop.tap(69);
@@ -277,7 +277,7 @@ CANOPY_TEST(alternatingOrdinaryInputPreservesNumLockWithoutLedFlicker) {
 
 CANOPY_TEST(sharedLocksPreserveHeldModifiersLatchesLayoutsAndKeymaps) {
   EventLoop loop;
-  canopy::KeyboardLeds leds(loop.get());
+  mahogany::KeyboardLeds leds(loop.get());
   BackendKeyboard laptop(true, "de,us");
   BackendKeyboard proxy(false, "us,de");
   const uint32_t shift = laptop.modifierMask(XKB_MOD_NAME_SHIFT);
@@ -311,7 +311,7 @@ CANOPY_TEST(sharedLocksPreserveHeldModifiersLatchesLayoutsAndKeymaps) {
 
 CANOPY_TEST(hotplugAndKeymapReplacementInheritCurrentLocks) {
   EventLoop loop;
-  canopy::KeyboardLeds leds(loop.get());
+  mahogany::KeyboardLeds leds(loop.get());
   BackendKeyboard laptop;
   BackendKeyboard proxy(false);
   laptop.observe(leds);
@@ -347,7 +347,7 @@ CANOPY_TEST(hotplugAndKeymapReplacementInheritCurrentLocks) {
 
 CANOPY_TEST(aReplacementKeymapGainsSharedLocksThatTheOldMapCannotRepresent) {
   EventLoop loop;
-  canopy::KeyboardLeds leds(loop.get());
+  mahogany::KeyboardLeds leds(loop.get());
   BackendKeyboard laptop;
   BackendKeyboard secondary;
   secondary.renameNumModifier();
@@ -372,7 +372,7 @@ CANOPY_TEST(aReplacementKeymapGainsSharedLocksThatTheOldMapCannotRepresent) {
 
 CANOPY_TEST(numLockStartupPolicyDoesNotOverrideLaterHotplugOrReconnects) {
   EventLoop loop;
-  canopy::KeyboardLeds leds(loop.get());
+  mahogany::KeyboardLeds leds(loop.get());
   BackendKeyboard laptop;
   laptop.observe(leds, true, false, true);
   loop.flush();
@@ -403,7 +403,7 @@ CANOPY_TEST(numLockStartupPolicyDoesNotOverrideLaterHotplugOrReconnects) {
 
 CANOPY_TEST(sourceRemovalBeforeIdlePreservesSharedLocks) {
   EventLoop loop;
-  canopy::KeyboardLeds leds(loop.get());
+  mahogany::KeyboardLeds leds(loop.get());
   BackendKeyboard laptop;
   BackendKeyboard proxy(false);
   laptop.observe(leds);
@@ -431,7 +431,7 @@ CANOPY_TEST(sourceRemovalBeforeIdlePreservesSharedLocks) {
 
 CANOPY_TEST(staleVirtualSnapshotsOnlyChangeLocksTheyActuallyToggle) {
   EventLoop loop;
-  canopy::KeyboardLeds leds(loop.get());
+  mahogany::KeyboardLeds leds(loop.get());
   BackendKeyboard laptop;
   BackendKeyboard client;
   laptop.tap(69);
@@ -483,7 +483,7 @@ CANOPY_TEST(staleVirtualSnapshotsOnlyChangeLocksTheyActuallyToggle) {
 
 CANOPY_TEST(changedIndicatorNamesDoNotTurnInvalidIndexesIntoActiveLeds) {
   EventLoop loop;
-  canopy::KeyboardLeds leds(loop.get());
+  mahogany::KeyboardLeds leds(loop.get());
   BackendKeyboard laptop;
   BackendKeyboard proxy(false);
   laptop.observe(leds);
@@ -506,7 +506,7 @@ CANOPY_TEST(changedIndicatorNamesDoNotTurnInvalidIndexesIntoActiveLeds) {
 
 CANOPY_TEST(losingTheFinalUsableSourceClearsSurvivingIndicators) {
   EventLoop loop;
-  canopy::KeyboardLeds leds(loop.get());
+  mahogany::KeyboardLeds leds(loop.get());
   BackendKeyboard laptop;
   BackendKeyboard proxy(false);
   laptop.observe(leds);
@@ -525,7 +525,7 @@ CANOPY_TEST(losingTheFinalUsableSourceClearsSurvivingIndicators) {
 CANOPY_TEST(inputMethodEchoesCannotChangeSharedLocksOrVirtualKeymaps) {
   EventLoop loop;
   wlr_keyboard* excluded = nullptr;
-  canopy::KeyboardLeds leds(loop.get(), [&excluded](wlr_keyboard* source) { return source != excluded; });
+  mahogany::KeyboardLeds leds(loop.get(), [&excluded](wlr_keyboard* source) { return source != excluded; });
   BackendKeyboard laptop;
   BackendKeyboard proxy(false);
   BackendKeyboard inputMethod;
@@ -570,7 +570,7 @@ CANOPY_TEST(destroyingTheRelayCancelsPendingCallbacksAndRemovesListeners) {
   EventLoop loop;
   BackendKeyboard keyboard;
   {
-    canopy::KeyboardLeds leds(loop.get());
+    mahogany::KeyboardLeds leds(loop.get());
     keyboard.observe(leds);
   }
   keyboard.stopObserving();

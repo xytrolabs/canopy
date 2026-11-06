@@ -13,10 +13,10 @@ extern "C" {
 }
 // clang-format on
 
-using canopy::Layout;
-using canopy::MasterStackLayout;
-using canopy::ResolvedLayoutConfig;
-using canopy::View;
+using mahogany::Layout;
+using mahogany::MasterStackLayout;
+using mahogany::ResolvedLayoutConfig;
+using mahogany::View;
 
 namespace {
 
@@ -24,11 +24,11 @@ namespace {
 
   ResolvedLayoutConfig masterConfig() {
     ResolvedLayoutConfig config;
-    config.mode = canopy::LayoutMode::Master;
+    config.mode = mahogany::LayoutMode::Master;
     config.gap = 8;
     config.totalGap = 12;
     config.edgePad = 10;
-    config.master.position = canopy::MasterPosition::Left;
+    config.master.position = mahogany::MasterPosition::Left;
     config.master.defaultWidthFraction = 0.55;
     config.master.newOnTop = true;
     return config;
@@ -209,7 +209,7 @@ CANOPY_TEST(aWindowOpenedWithAnEmptyMasterBecomesMaster) {
 
 CANOPY_TEST(positionRightMirrorsTheAreas) {
   Fixture fixture;
-  fixture.config.master.position = canopy::MasterPosition::Right;
+  fixture.config.master.position = mahogany::MasterPosition::Right;
   fixture.addViews(2);
   fixture.layout.arrange(kUsable);
   const wlr_box stack = fixture.layout.targetBox(stub(1));
@@ -222,7 +222,7 @@ CANOPY_TEST(positionRightMirrorsTheAreas) {
 
 CANOPY_TEST(consumeUsesVisualDirectionWhenMasterIsRight) {
   Fixture fixture;
-  fixture.config.master.position = canopy::MasterPosition::Right;
+  fixture.config.master.position = mahogany::MasterPosition::Right;
   fixture.addViews(2);
   CHECK(fixture.layout.consume(stub(0), -1));
   CHECK_EQ(fixture.layout.columns().size(), size_t{1});
@@ -258,7 +258,7 @@ CANOPY_TEST(cycleWidthWalksThePresets) {
 CANOPY_TEST(cycleWidthWrapsWhenTheNextPresetIsOutOfReach) {
   // A centered side column tops out at 0.45, short of the 0.5 preset.
   Fixture fixture;
-  fixture.config.master.position = canopy::MasterPosition::Center;
+  fixture.config.master.position = mahogany::MasterPosition::Center;
   fixture.addViews(3);
   CHECK_NEAR(fixture.layout.widthFraction(0), 0.225, 1e-9);
   CHECK(fixture.layout.cycleWidth(0, 1));
@@ -579,7 +579,7 @@ namespace {
 
   // Content is 1260x700 with totalGap 12: available = 1236, master = round(0.55 * 1236) = 680, each side 278.
   struct CenterFixture : Fixture {
-    CenterFixture() { config.master.position = canopy::MasterPosition::Center; }
+    CenterFixture() { config.master.position = mahogany::MasterPosition::Center; }
   };
 
 } // namespace
@@ -678,7 +678,7 @@ CANOPY_TEST(centerRemovingTheMasterPromotesFromTheFullerSide) {
 CANOPY_TEST(centerSnapshotRoundTripsTheSecondStack) {
   CenterFixture source;
   source.addViews(3);
-  const canopy::LayoutCapture capture = source.layout.captureState();
+  const mahogany::LayoutCapture capture = source.layout.captureState();
 
   CenterFixture restored;
   CHECK(restored.layout.restoreState(*capture.snapshot, capture.members));
@@ -691,7 +691,7 @@ CANOPY_TEST(centerSnapshotRoundTripsTheSecondStack) {
 CANOPY_TEST(leavingCenterFoldsTheSecondStackOntoTheStack) {
   CenterFixture fixture;
   fixture.addViews(3);
-  fixture.config.master.position = canopy::MasterPosition::Left;
+  fixture.config.master.position = mahogany::MasterPosition::Left;
   fixture.layout.arrange(kUsable);
 
   CHECK_EQ(fixture.layout.columns().size(), size_t{2});
@@ -702,13 +702,13 @@ CANOPY_TEST(leavingCenterFoldsTheSecondStackOntoTheStack) {
 
 CANOPY_TEST(openStackLandsWhereItsEmptyStackSaidInEveryPosition) {
   for (const auto position :
-       {canopy::MasterPosition::Left, canopy::MasterPosition::Right, canopy::MasterPosition::Center}) {
+       {mahogany::MasterPosition::Left, mahogany::MasterPosition::Right, mahogany::MasterPosition::Center}) {
     Fixture probe;
     probe.config.master.position = position;
     probe.addViews(1);
     probe.layout.arrange(kUsable);
     const auto stacks = probe.layout.emptyStacks(kUsable);
-    CHECK_EQ(stacks.size(), position == canopy::MasterPosition::Center ? size_t{2} : size_t{1});
+    CHECK_EQ(stacks.size(), position == mahogany::MasterPosition::Center ? size_t{2} : size_t{1});
 
     for (const MasterStackLayout::EmptyStack& stack : stacks) {
       Fixture fixture;
@@ -759,7 +759,7 @@ CANOPY_TEST(emptyStacksOfferOnlyEmptySidesBesideAMaster) {
 
 CANOPY_TEST(emptyMasterBoxIsWhereTheFirstWindowLandsInEveryPosition) {
   for (const auto position :
-       {canopy::MasterPosition::Left, canopy::MasterPosition::Right, canopy::MasterPosition::Center}) {
+       {mahogany::MasterPosition::Left, mahogany::MasterPosition::Right, mahogany::MasterPosition::Center}) {
     Fixture fixture;
     fixture.config.master.position = position;
     const wlr_box expected = fixture.layout.emptyMasterBox(kUsable);

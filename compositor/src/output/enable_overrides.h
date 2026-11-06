@@ -6,7 +6,7 @@
 #include <string>
 #include <vector>
 
-namespace canopy {
+namespace mahogany {
 
   // Session-scoped logical enablement selected through output management.
   // Identified monitors can carry their choice to another connector. Outputs
@@ -28,4 +28,4 @@ namespace canopy {
     std::vector<Entry> m_entries;
   };
 
-} // namespace canopy
+} // namespace mahogany

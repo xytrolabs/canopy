@@ -10,7 +10,7 @@ extern "C" {
 #include <wlr/types/wlr_output.h>
 }
 
-namespace canopy {
+namespace mahogany {
 
   struct HdrStaticMetadata {
     double minLuminance = 0.0;
@@ -33,4 +33,4 @@ namespace canopy {
       const wlr_color_primaries* displayPrimaries, const std::optional<HdrStaticMetadata>& metadata
   );
 
-} // namespace canopy
+} // namespace mahogany

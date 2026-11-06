@@ -31,7 +31,7 @@ extern "C" {
 #include <wlr/interfaces/wlr_pointer.h>
 }
 
-namespace canopy {
+namespace mahogany {
 
   namespace {
     constexpr Logger kLog("eis");
@@ -681,4 +681,4 @@ namespace canopy {
     return source != nullptr ? source->wlr() : nullptr;
   }
 
-} // namespace canopy
+} // namespace mahogany

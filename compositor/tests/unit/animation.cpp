@@ -22,34 +22,34 @@ namespace {
 } // namespace
 
 CANOPY_TEST(curveParserAcceptsCanonicalFiniteForms) {
-  const auto bezier = canopy::CurveRegistry::parse("0.1, 0.2, 0.3, 1.0");
+  const auto bezier = mahogany::CurveRegistry::parse("0.1, 0.2, 0.3, 1.0");
   CHECK(bezier.has_value());
   if (bezier) {
-    CHECK(bezier->easing == canopy::Easing::CustomBezier);
+    CHECK(bezier->easing == mahogany::Easing::CustomBezier);
     CHECK_EQ(bezier->bezier.x1, 0.1);
     CHECK_EQ(bezier->bezier.y2, 1.0);
   }
 
-  const auto spring = canopy::CurveRegistry::parse("spring: 0.5, 200");
+  const auto spring = mahogany::CurveRegistry::parse("spring: 0.5, 200");
   CHECK(spring.has_value());
   if (spring) {
-    CHECK(spring->easing == canopy::Easing::Spring);
+    CHECK(spring->easing == mahogany::Easing::Spring);
     CHECK_EQ(spring->spring.damping, 0.5);
     CHECK_EQ(spring->spring.stiffness, 200.0);
   }
 }
 
 CANOPY_TEST(curveParserRejectsNonFiniteAndTrailingValues) {
-  CHECK(!canopy::CurveRegistry::parse("nan, 0.2, 0.3, 1.0").has_value());
-  CHECK(!canopy::CurveRegistry::parse("1.1, 0.2, 0.3, 1.0").has_value());
-  CHECK(!canopy::CurveRegistry::parse("0.1, 0.2, 0.3, 1.0 trailing").has_value());
-  CHECK(!canopy::CurveRegistry::parse("spring: nan, 200").has_value());
-  CHECK(!canopy::CurveRegistry::parse("spring: 0.5, 200 trailing").has_value());
+  CHECK(!mahogany::CurveRegistry::parse("nan, 0.2, 0.3, 1.0").has_value());
+  CHECK(!mahogany::CurveRegistry::parse("1.1, 0.2, 0.3, 1.0").has_value());
+  CHECK(!mahogany::CurveRegistry::parse("0.1, 0.2, 0.3, 1.0 trailing").has_value());
+  CHECK(!mahogany::CurveRegistry::parse("spring: nan, 200").has_value());
+  CHECK(!mahogany::CurveRegistry::parse("spring: 0.5, 200 trailing").has_value());
 }
 
 CANOPY_TEST(animatedValueReachesItsTargetOnTheConfiguredTimeline) {
-  canopy::AnimatedValue value{10.0};
-  value.retarget(20.0, 100, canopy::Easing::Linear);
+  mahogany::AnimatedValue value{10.0};
+  value.retarget(20.0, 100, mahogany::Easing::Linear);
 
   CHECK(value.tick(1000));
   CHECK_EQ(value.current(), 10.0);
@@ -65,18 +65,18 @@ CANOPY_TEST(animatedValueReachesItsTargetOnTheConfiguredTimeline) {
 }
 
 CANOPY_TEST(monotonicEasingPreservesSafeCurvesAndProjectsOvershootAcrossTheFullTimeline) {
-  const canopy::AnimationCurve ordinary{
-      .easing = canopy::Easing::CustomBezier,
+  const mahogany::AnimationCurve ordinary{
+      .easing = mahogany::Easing::CustomBezier,
       .bezier = {.x1 = 0.25, .y1 = 0.46, .x2 = 0.35, .y2 = 1.0},
   };
-  const canopy::MonotonicEasing ordinaryMotion{ordinary};
+  const mahogany::MonotonicEasing ordinaryMotion{ordinary};
   for (int step = 0; step <= 20; ++step) {
     const double linear = static_cast<double>(step) / 20.0;
-    CHECK_NEAR(ordinaryMotion.value(linear), canopy::evaluateCurve(ordinary, linear), 0.000001);
+    CHECK_NEAR(ordinaryMotion.value(linear), mahogany::evaluateCurve(ordinary, linear), 0.000001);
   }
 
-  const canopy::AnimationCurve snappy{.easing = canopy::Easing::Snappy};
-  const canopy::MonotonicEasing safeMotion{snappy};
+  const mahogany::AnimationCurve snappy{.easing = mahogany::Easing::Snappy};
+  const mahogany::MonotonicEasing safeMotion{snappy};
   double previous = 0.0;
   for (int step = 0; step <= 100; ++step) {
     const double linear = static_cast<double>(step) / 100.0;
@@ -93,19 +93,19 @@ CANOPY_TEST(monotonicEasingPreservesSafeCurvesAndProjectsOvershootAcrossTheFullT
 }
 
 CANOPY_TEST(monotonicEasingBoundsReversingPresets) {
-  for (const canopy::Easing easing : {
-           canopy::Easing::EaseInBack,
-           canopy::Easing::EaseOutBack,
-           canopy::Easing::EaseInOutBack,
-           canopy::Easing::EaseInElastic,
-           canopy::Easing::EaseOutElastic,
-           canopy::Easing::EaseInOutElastic,
-           canopy::Easing::EaseInBounce,
-           canopy::Easing::EaseOutBounce,
-           canopy::Easing::EaseInOutBounce,
-           canopy::Easing::Spring,
+  for (const mahogany::Easing easing : {
+           mahogany::Easing::EaseInBack,
+           mahogany::Easing::EaseOutBack,
+           mahogany::Easing::EaseInOutBack,
+           mahogany::Easing::EaseInElastic,
+           mahogany::Easing::EaseOutElastic,
+           mahogany::Easing::EaseInOutElastic,
+           mahogany::Easing::EaseInBounce,
+           mahogany::Easing::EaseOutBounce,
+           mahogany::Easing::EaseInOutBounce,
+           mahogany::Easing::Spring,
        }) {
-    const canopy::MonotonicEasing motion{canopy::AnimationCurve{.easing = easing}};
+    const mahogany::MonotonicEasing motion{mahogany::AnimationCurve{.easing = easing}};
     double previous = 0.0;
     for (int step = 0; step <= 200; ++step) {
       const double progress = motion.value(static_cast<double>(step) / 200.0);
@@ -120,10 +120,10 @@ CANOPY_TEST(monotonicEasingBoundsReversingPresets) {
 }
 
 CANOPY_TEST(animationTransitionIdentityIsStableAndRefreshesOnRetarget) {
-  canopy::AnimatedValue value{10.0};
+  mahogany::AnimatedValue value{10.0};
   CHECK_EQ(value.transitionId(), uint64_t{0});
 
-  value.retarget(20.0, 100, canopy::Easing::Linear);
+  value.retarget(20.0, 100, mahogany::Easing::Linear);
   const uint64_t firstId = value.transitionId();
   const auto firstSeed = value.shaderSeed();
   CHECK(firstId != 0);
@@ -136,20 +136,20 @@ CANOPY_TEST(animationTransitionIdentityIsStableAndRefreshesOnRetarget) {
   CHECK_EQ(value.transitionId(), firstId);
   CHECK(value.shaderSeed() == firstSeed);
 
-  value.retarget(value.current(), 100, canopy::Easing::Linear);
+  value.retarget(value.current(), 100, mahogany::Easing::Linear);
   CHECK(value.transitionId() != firstId);
   CHECK(value.shaderSeed() != firstSeed);
   checkShaderSeed(value.shaderSeed());
 
   const uint64_t retargetId = value.transitionId();
   const auto retargetSeed = value.shaderSeed();
-  value.settleSpring(value.current(), canopy::SpringConfig{}, 1.0);
+  value.settleSpring(value.current(), mahogany::SpringConfig{}, 1.0);
   CHECK(value.transitionId() != retargetId);
   CHECK(value.shaderSeed() != retargetSeed);
   checkShaderSeed(value.shaderSeed());
 
-  canopy::AnimatedValue otherValue;
-  canopy::AnimatedColor otherColor;
+  mahogany::AnimatedValue otherValue;
+  mahogany::AnimatedColor otherColor;
   otherValue.retarget(1.0, 100);
   otherColor.retarget({1.0F, 1.0F, 1.0F, 1.0F}, 100);
   CHECK(otherValue.transitionId() != value.transitionId());
@@ -159,17 +159,17 @@ CANOPY_TEST(animationTransitionIdentityIsStableAndRefreshesOnRetarget) {
 
 CANOPY_TEST(okLabConversionRoundTripsSrgbColor) {
   const std::array<float, 4> source{0.12F, 0.48F, 0.9F, 0.35F};
-  const canopy::OkLab converted = canopy::srgbToOkLab(source);
-  const std::array<float, 4> roundTrip = canopy::okLabToSrgb(converted, source[3]);
+  const mahogany::OkLab converted = mahogany::srgbToOkLab(source);
+  const std::array<float, 4> roundTrip = mahogany::okLabToSrgb(converted, source[3]);
 
   checkColorNear(roundTrip, source);
 }
 
 CANOPY_TEST(springSettleStartsFromTheReleaseVelocityAndStops) {
-  const canopy::SpringConfig spring{.damping = 1.0, .stiffness = 1000.0, .mass = 1.0};
+  const mahogany::SpringConfig spring{.damping = 1.0, .stiffness = 1000.0, .mass = 1.0};
   // Settling back onto the row it came from still has to move: the release velocity carries it past the target
   // before the spring pulls it back.
-  canopy::AnimatedValue value;
+  mahogany::AnimatedValue value;
   value.snap(0.3);
   value.settleSpring(0.3, spring, 4.0);
   CHECK(value.tick(1000));
@@ -201,8 +201,8 @@ CANOPY_TEST(springSettleStartsFromTheReleaseVelocityAndStops) {
 }
 
 CANOPY_TEST(animatedValueReportsItsCurvesSpeed) {
-  canopy::AnimatedValue value;
-  value.retarget(100.0, 1000, canopy::Easing::Linear);
+  mahogany::AnimatedValue value;
+  value.retarget(100.0, 1000, mahogany::Easing::Linear);
   CHECK(value.tick(1000));
   CHECK(value.tick(1500));
   CHECK_NEAR(value.velocity(), 100.0, 0.5);
@@ -210,8 +210,8 @@ CANOPY_TEST(animatedValueReportsItsCurvesSpeed) {
 
 CANOPY_TEST(animatedValueKeepsSubMillisecondTime) {
   // Frames tick at vblank instants that fall between milliseconds; the timeline must not round them away.
-  canopy::AnimatedValue value;
-  value.retarget(100.0, 10, canopy::Easing::Linear);
+  mahogany::AnimatedValue value;
+  value.retarget(100.0, 10, mahogany::Easing::Linear);
   CHECK(value.tick(1000.0));
   CHECK(value.tick(1000.5));
   CHECK_NEAR(value.current(), 5.0, 1e-9);
@@ -220,10 +220,10 @@ CANOPY_TEST(animatedValueKeepsSubMillisecondTime) {
 }
 
 CANOPY_TEST(interruptedSpringRetargetKeepsItsSpeed) {
-  const canopy::AnimationCurve spring{
-      .easing = canopy::Easing::Spring, .spring = {.damping = 1.0, .stiffness = 900.0, .mass = 1.0}
+  const mahogany::AnimationCurve spring{
+      .easing = mahogany::Easing::Spring, .spring = {.damping = 1.0, .stiffness = 900.0, .mass = 1.0}
   };
-  canopy::AnimatedValue value;
+  mahogany::AnimatedValue value;
   value.retarget(1000.0, 0, spring);
   CHECK(value.tick(1000));
   CHECK(value.tick(1050));
@@ -243,25 +243,25 @@ CANOPY_TEST(interruptedSpringRetargetKeepsItsSpeed) {
   CHECK(!value.animating());
 
   // A curve that cannot take a speed still starts the new target from rest.
-  value.retarget(0.0, 200, canopy::Easing::EaseOutCubic);
+  value.retarget(0.0, 200, mahogany::Easing::EaseOutCubic);
   value.tick(6000);
   CHECK(value.tick(6100));
-  value.retarget(500.0, 200, canopy::Easing::EaseOutCubic);
+  value.retarget(500.0, 200, mahogany::Easing::EaseOutCubic);
   CHECK_EQ(value.velocity(), 0.0);
 }
 
 CANOPY_TEST(springCurveTimescaleComesFromItsParameters) {
-  const auto stiff = canopy::CurveRegistry::parse("spring:1,4000");
-  const auto soft = canopy::CurveRegistry::parse("spring:1,250");
+  const auto stiff = mahogany::CurveRegistry::parse("spring:1,4000");
+  const auto soft = mahogany::CurveRegistry::parse("spring:1,250");
   CHECK(stiff.has_value());
   CHECK(soft.has_value());
   if (!stiff || !soft) {
     return;
   }
 
-  canopy::AnimatedValue fast;
+  mahogany::AnimatedValue fast;
   fast.retarget(1.0, 5000, *stiff);
-  canopy::AnimatedValue slow;
+  mahogany::AnimatedValue slow;
   slow.retarget(1.0, 5000, *soft);
 
   // duration_ms never reaches a spring; the sixteenfold stiffness quarters the settle time.
@@ -271,13 +271,13 @@ CANOPY_TEST(springCurveTimescaleComesFromItsParameters) {
   CHECK_NEAR(stiffnessRatio, 4.0, 0.05);
 
   // Mass is the other half of the timescale: four times the mass takes twice as long.
-  const int light = canopy::springDurationMs({.damping = 1.0, .stiffness = 1000.0, .mass = 1.0});
-  const int heavy = canopy::springDurationMs({.damping = 1.0, .stiffness = 1000.0, .mass = 4.0});
+  const int light = mahogany::springDurationMs({.damping = 1.0, .stiffness = 1000.0, .mass = 1.0});
+  const int heavy = mahogany::springDurationMs({.damping = 1.0, .stiffness = 1000.0, .mass = 4.0});
   const double massRatio = static_cast<double>(heavy) / static_cast<double>(light);
   CHECK_NEAR(massRatio, 2.0, 0.05);
 
   // Damping shapes the response instead: it must not leave the timescale untouched either.
-  CHECK(canopy::springDurationMs({.damping = 2.0, .stiffness = 1000.0, .mass = 1.0}) > light);
+  CHECK(mahogany::springDurationMs({.damping = 2.0, .stiffness = 1000.0, .mass = 1.0}) > light);
 }
 
 CANOPY_TEST(springCurveSettlesOnItsTargetBeforeTheTimelineEnds) {
@@ -288,16 +288,16 @@ CANOPY_TEST(springCurveSettlesOnItsTargetBeforeTheTimelineEnds) {
   // Underdamped, critically damped, and overdamped all have to be within a tenth of a percent of the target on the
   // last frame, otherwise the timeline's final snap is a visible jump.
   for (const Case& probe : {Case{"spring:0.4,600", true}, Case{"spring:1,600", false}, Case{"spring:2,600", false}}) {
-    const auto curve = canopy::CurveRegistry::parse(probe.text);
+    const auto curve = mahogany::CurveRegistry::parse(probe.text);
     CHECK(curve.has_value());
     if (!curve) {
       continue;
     }
-    CHECK_NEAR(canopy::applyEasing(*curve, 0.999), 1.0, 0.001);
+    CHECK_NEAR(mahogany::applyEasing(*curve, 0.999), 1.0, 0.001);
 
     double peak = 0.0;
     for (int sample = 0; sample <= 1000; ++sample) {
-      peak = std::max(peak, canopy::applyEasing(*curve, static_cast<double>(sample) / 1000.0));
+      peak = std::max(peak, mahogany::applyEasing(*curve, static_cast<double>(sample) / 1000.0));
     }
     CHECK_EQ(peak > 1.001, probe.overshoots);
   }
@@ -306,61 +306,61 @@ CANOPY_TEST(springCurveSettlesOnItsTargetBeforeTheTimelineEnds) {
 CANOPY_TEST(overdampedSpringVelocityMatchesItsPositionDerivative) {
   constexpr double sampleTime = 0.075;
   constexpr double delta = 0.000001;
-  const canopy::SpringConfig spring{.damping = 2.0, .stiffness = 100.0, .mass = 1.0};
+  const mahogany::SpringConfig spring{.damping = 2.0, .stiffness = 100.0, .mass = 1.0};
 
   double velocity = 0.0;
-  static_cast<void>(canopy::solveSpringPhysics(0.0, 1.0, 2.0, sampleTime, spring, &velocity));
-  const double before = canopy::solveSpringPhysics(0.0, 1.0, 2.0, sampleTime - delta, spring);
-  const double after = canopy::solveSpringPhysics(0.0, 1.0, 2.0, sampleTime + delta, spring);
+  static_cast<void>(mahogany::solveSpringPhysics(0.0, 1.0, 2.0, sampleTime, spring, &velocity));
+  const double before = mahogany::solveSpringPhysics(0.0, 1.0, 2.0, sampleTime - delta, spring);
+  const double after = mahogany::solveSpringPhysics(0.0, 1.0, 2.0, sampleTime + delta, spring);
   const double derivative = (after - before) / (2.0 * delta);
 
   CHECK_NEAR(velocity, derivative, 0.00001);
 }
 
 CANOPY_TEST(springDisplacementBoundIncludesPositionAndVelocityEnergy) {
-  const canopy::SpringConfig spring{.damping = 1.0, .stiffness = 100.0, .mass = 1.0};
+  const mahogany::SpringConfig spring{.damping = 1.0, .stiffness = 100.0, .mass = 1.0};
 
-  CHECK_NEAR(canopy::springDisplacementBound(1.25, 1.0, 0.0, spring), 0.25, 1e-12);
-  CHECK_NEAR(canopy::springDisplacementBound(1.0, 1.0, 2.0, spring), 0.2, 1e-12);
-  CHECK_NEAR(canopy::springDisplacementBound(1.15, 1.0, 2.0, spring), std::hypot(0.15, 0.2), 1e-12);
+  CHECK_NEAR(mahogany::springDisplacementBound(1.25, 1.0, 0.0, spring), 0.25, 1e-12);
+  CHECK_NEAR(mahogany::springDisplacementBound(1.0, 1.0, 2.0, spring), 0.2, 1e-12);
+  CHECK_NEAR(mahogany::springDisplacementBound(1.15, 1.0, 2.0, spring), std::hypot(0.15, 0.2), 1e-12);
 }
 
 CANOPY_TEST(springTailFinishesOnlyInsideTheTargetPixelsRoundingCell) {
-  const canopy::SpringConfig spring{.damping = 1.0, .stiffness = 100.0, .mass = 1.0};
+  const mahogany::SpringConfig spring{.damping = 1.0, .stiffness = 100.0, .mass = 1.0};
 
-  canopy::AnimatedValue halfPixel{0.5};
+  mahogany::AnimatedValue halfPixel{0.5};
   halfPixel.settleSpring(0.0, spring, 0.0);
   CHECK(halfPixel.tick(1000));
   CHECK(!halfPixel.finishSpringTail(1.0));
   CHECK(halfPixel.animating());
 
-  canopy::AnimatedValue insidePixel{0.49};
+  mahogany::AnimatedValue insidePixel{0.49};
   insidePixel.settleSpring(0.0, spring, 0.0);
   CHECK(insidePixel.tick(1000));
   CHECK(insidePixel.finishSpringTail(1.0));
   CHECK(!insidePixel.animating());
   CHECK_EQ(insidePixel.current(), 0.0);
 
-  canopy::AnimatedValue offCenter{0.8};
+  mahogany::AnimatedValue offCenter{0.8};
   offCenter.settleSpring(0.49, spring, 0.0);
   CHECK(offCenter.tick(1000));
   CHECK(!offCenter.finishSpringTail(1.0));
   CHECK(offCenter.animating());
 
-  canopy::AnimatedValue release{0.3};
+  mahogany::AnimatedValue release{0.3};
   release.settleSpring(0.3, spring, 4.0);
   CHECK(release.tick(1000));
   CHECK(!release.finishSpringTail(587.0));
   CHECK(release.animating());
 
-  canopy::AnimatedValue durationSpring{0.0};
-  durationSpring.retarget(0.1, 100, canopy::Easing::Spring);
+  mahogany::AnimatedValue durationSpring{0.0};
+  durationSpring.retarget(0.1, 100, mahogany::Easing::Spring);
   CHECK(durationSpring.tick(1000));
   CHECK(!durationSpring.finishSpringTail(1.0));
   CHECK(durationSpring.animating());
 
-  const canopy::SpringConfig overdamped{.damping = 2.0, .stiffness = 100.0, .mass = 1.0};
-  canopy::AnimatedValue overdampedRelease{0.0};
+  const mahogany::SpringConfig overdamped{.damping = 2.0, .stiffness = 100.0, .mass = 1.0};
+  mahogany::AnimatedValue overdampedRelease{0.0};
   overdampedRelease.settleSpring(0.0, overdamped, 30.0);
   CHECK(overdampedRelease.tick(1000));
   CHECK(overdampedRelease.tick(1012));
@@ -370,9 +370,9 @@ CANOPY_TEST(springTailFinishesOnlyInsideTheTargetPixelsRoundingCell) {
 
 CANOPY_TEST(springTailPresentationDeceleratesAtTheReportedRefreshRate) {
   constexpr double step = 587.0;
-  const canopy::SpringConfig spring{.damping = 1.0, .stiffness = 1000.0, .mass = 1.0};
+  const mahogany::SpringConfig spring{.damping = 1.0, .stiffness = 1000.0, .mass = 1.0};
   const auto checkDirection = [spring](double from, double target) {
-    canopy::AnimatedValue value{from};
+    mahogany::AnimatedValue value{from};
     value.settleSpring(target, spring, 0.0);
     CHECK(value.tick(1000));
 
@@ -419,8 +419,8 @@ CANOPY_TEST(springTailPresentationDeceleratesAtTheReportedRefreshRate) {
 }
 
 CANOPY_TEST(physicsSpringKeepsShaderIdentityWhenProgressReverses) {
-  canopy::AnimatedValue value;
-  value.settleSpring(1.0, canopy::SpringConfig{.damping = 0.1, .stiffness = 100.0, .mass = 1.0}, 0.0);
+  mahogany::AnimatedValue value;
+  value.settleSpring(1.0, mahogany::SpringConfig{.damping = 0.1, .stiffness = 100.0, .mass = 1.0}, 0.0);
   const uint64_t transitionId = value.transitionId();
   const auto seed = value.shaderSeed();
 
@@ -437,26 +437,26 @@ CANOPY_TEST(animatedColorRefreshesCachedEndpointsWhenRetargeted) {
   const std::array<float, 4> red{1.0F, 0.0F, 0.0F, 0.2F};
   const std::array<float, 4> green{0.0F, 1.0F, 0.0F, 0.6F};
   const std::array<float, 4> blue{0.0F, 0.0F, 1.0F, 0.8F};
-  canopy::AnimatedColor color{red};
+  mahogany::AnimatedColor color{red};
 
-  color.retarget(green, 100, canopy::Easing::Linear);
+  color.retarget(green, 100, mahogany::Easing::Linear);
   CHECK(color.tick(1000));
   CHECK(color.tick(1050));
   const std::array<float, 4> firstMidpoint = color.current();
 
-  color.retarget(blue, 100, canopy::Easing::Linear);
+  color.retarget(blue, 100, mahogany::Easing::Linear);
   CHECK(color.tick(2000));
   CHECK(color.tick(2050));
 
-  const canopy::OkLab expectedLab =
-      canopy::interpolateOkLab(canopy::srgbToOkLab(firstMidpoint), canopy::srgbToOkLab(blue), 0.5F);
-  const std::array<float, 4> expected = canopy::okLabToSrgb(expectedLab, std::lerp(firstMidpoint[3], blue[3], 0.5F));
+  const mahogany::OkLab expectedLab =
+      mahogany::interpolateOkLab(mahogany::srgbToOkLab(firstMidpoint), mahogany::srgbToOkLab(blue), 0.5F);
+  const std::array<float, 4> expected = mahogany::okLabToSrgb(expectedLab, std::lerp(firstMidpoint[3], blue[3], 0.5F));
   checkColorNear(color.current(), expected);
 }
 
 CANOPY_TEST(animatedColorRefreshesShaderIdentityOnlyWhenRetargeted) {
-  canopy::AnimatedColor color{1.0F, 0.0F, 0.0F};
-  color.retarget(0.0F, 1.0F, 0.0F, 1.0F, 100, canopy::AnimationCurve{});
+  mahogany::AnimatedColor color{1.0F, 0.0F, 0.0F};
+  color.retarget(0.0F, 1.0F, 0.0F, 1.0F, 100, mahogany::AnimationCurve{});
   const uint64_t firstId = color.transitionId();
   const auto firstSeed = color.shaderSeed();
   CHECK(firstId != 0);
@@ -468,7 +468,7 @@ CANOPY_TEST(animatedColorRefreshesShaderIdentityOnlyWhenRetargeted) {
   CHECK_EQ(color.transitionId(), firstId);
   CHECK(color.shaderSeed() == firstSeed);
 
-  color.retarget(color.current(), 100, canopy::Easing::Linear);
+  color.retarget(color.current(), 100, mahogany::Easing::Linear);
   CHECK(color.transitionId() != firstId);
   CHECK(color.shaderSeed() != firstSeed);
   checkShaderSeed(color.shaderSeed());

@@ -13,7 +13,7 @@ struct wlr_xwayland;
 struct wlr_xwayland_surface;
 struct xcb_connection_t;
 
-namespace canopy {
+namespace mahogany {
 
   // Reads SHAPE on the existing window-manager connection. Requests and replies stay asynchronous so an X client
   // cannot stall the Wayland event loop, and no extra X connection keeps the lazy server alive.
@@ -57,4 +57,4 @@ namespace canopy {
     wl_signal m_changed{};
   };
 
-} // namespace canopy
+} // namespace mahogany

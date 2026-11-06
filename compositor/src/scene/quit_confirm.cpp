@@ -24,7 +24,7 @@ namespace {
 
 } // namespace
 
-namespace canopy {
+namespace mahogany {
 
   QuitConfirm::QuitConfirm(Server& server, wlr_scene_tree* parent) : m_server(server), m_parent(parent) {}
 
@@ -188,4 +188,4 @@ namespace canopy {
     }
   }
 
-} // namespace canopy
+} // namespace mahogany

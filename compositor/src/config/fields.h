@@ -20,7 +20,7 @@
 #include <utility>
 #include <vector>
 
-namespace canopy {
+namespace mahogany {
 
   // A selector recorded while parsing and checked once every table is read, so forward and cross-include references
   // resolve.
@@ -165,4 +165,4 @@ namespace canopy {
   // Loaded. The caller has already found the file and reset the store for this load.
   ConfigParseOutcome parseConfig(Config& out, const std::filesystem::path& rootPath);
 
-} // namespace canopy
+} // namespace mahogany

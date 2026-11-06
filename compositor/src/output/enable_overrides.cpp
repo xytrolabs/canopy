@@ -2,7 +2,7 @@
 
 #include <algorithm>
 
-namespace canopy {
+namespace mahogany {
 
   namespace {
 
@@ -81,4 +81,4 @@ namespace canopy {
     return unique->enabled;
   }
 
-} // namespace canopy
+} // namespace mahogany

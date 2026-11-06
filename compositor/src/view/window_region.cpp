@@ -8,7 +8,7 @@ extern "C" {
 #include <wlr/util/edges.h>
 }
 
-namespace canopy {
+namespace mahogany {
   namespace {
     constexpr std::array kNames{"left",     "right",     "top",         "bottom",
                                 "top_left", "top_right", "bottom_left", "bottom_right"};
@@ -79,4 +79,4 @@ namespace canopy {
       return WindowRegion::Right;
     return std::nullopt;
   }
-} // namespace canopy
+} // namespace mahogany

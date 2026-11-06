@@ -5,7 +5,7 @@
 #include <cmath>
 #include <cstdint>
 
-namespace canopy {
+namespace mahogany {
 
   namespace {
     struct Edge {
@@ -136,4 +136,4 @@ namespace canopy {
     return nearest;
   }
 
-} // namespace canopy
+} // namespace mahogany

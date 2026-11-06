@@ -5,9 +5,9 @@
 #include <cmath>
 #include <cstdint>
 
-using canopy::GesturePhysics;
-using canopy::NavigationSource;
-using canopy::OverviewNavigation;
+using mahogany::GesturePhysics;
+using mahogany::NavigationSource;
+using mahogany::OverviewNavigation;
 
 namespace {
 

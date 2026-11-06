@@ -6,7 +6,7 @@ extern "C" {
 #include <wlr/util/edges.h>
 }
 
-using namespace canopy;
+using namespace mahogany;
 
 CANOPY_TEST(halvesShareABoundary) {
   const wlr_box area{8, 8, 1264, 704};

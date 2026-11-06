@@ -7,7 +7,7 @@
 
 struct wlr_surface;
 
-namespace canopy {
+namespace mahogany {
 
   class LayerSurface;
   class Output;
@@ -121,4 +121,4 @@ namespace canopy {
   // that remembered focus.
   View* focusedWindow(Server& server);
 
-} // namespace canopy
+} // namespace mahogany

@@ -5,11 +5,11 @@
 #include "layout/layout.h"
 #include "view/floating.h"
 
-using canopy::boundedPresets;
-using canopy::floatingFractionSize;
-using canopy::floatingSizeFraction;
-using canopy::nextFractionPreset;
-using canopy::presetSnappedFraction;
+using mahogany::boundedPresets;
+using mahogany::floatingFractionSize;
+using mahogany::floatingSizeFraction;
+using mahogany::nextFractionPreset;
+using mahogany::presetSnappedFraction;
 
 namespace {
   const std::vector<double> kPresets{1.0 / 3, 0.5, 2.0 / 3};

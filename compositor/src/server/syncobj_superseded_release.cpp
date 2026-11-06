@@ -9,7 +9,7 @@
 #include <vector>
 #include <xf86drm.h>
 
-namespace canopy {
+namespace mahogany {
 
   namespace {
 
@@ -244,4 +244,4 @@ namespace canopy {
     wl_signal_add(&watch->surface->events.destroy, &watch->destroy);
   }
 
-} // namespace canopy
+} // namespace mahogany

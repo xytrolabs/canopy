@@ -5,7 +5,7 @@
 #include <string>
 #include <vector>
 
-using canopy::shortcutLabels;
+using mahogany::shortcutLabels;
 
 namespace {
 

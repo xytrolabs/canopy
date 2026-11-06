@@ -7,7 +7,7 @@
 struct wlr_output;
 struct wlr_output_mode;
 
-namespace canopy {
+namespace mahogany {
 
   // Whether an output that has no matching config section exposes enough
   // information for Canopy to choose a safe initial mode automatically.
@@ -32,4 +32,4 @@ namespace canopy {
   // a modeset when the live mode is kept.
   bool colorChangeNeedsModeset(const wlr_output& output, uint32_t renderFormat, bool hdr);
 
-} // namespace canopy
+} // namespace mahogany

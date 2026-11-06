@@ -33,9 +33,9 @@ CANOPY_TEST(windowRuleOpacityDoesNotAttenuateBlur) {
     return;
   }
 
-  canopy::ResolvedWindowRule rule;
+  mahogany::ResolvedWindowRule rule;
   rule.blur = true;
-  canopy::ViewDecoration decoration;
+  mahogany::ViewDecoration decoration;
   decoration.applyRule(rule);
 
   const wlr_box box{0, 0, 100, 100};
@@ -61,9 +61,9 @@ CANOPY_TEST(transitionOpacityStillAttenuatesBlur) {
     return;
   }
 
-  canopy::ResolvedWindowRule rule;
+  mahogany::ResolvedWindowRule rule;
   rule.blur = true;
-  canopy::ViewDecoration decoration;
+  mahogany::ViewDecoration decoration;
   decoration.applyRule(rule);
 
   const wlr_box box{0, 0, 100, 100};

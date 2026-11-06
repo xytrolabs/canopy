@@ -7,7 +7,7 @@
 #include <string_view>
 #include <xkbcommon/xkbcommon.h>
 
-namespace canopy {
+namespace mahogany {
 
   std::optional<xkb_layout_index_t> layoutGroupNamed(xkb_keymap* keymap, std::string_view name);
 
@@ -32,4 +32,4 @@ namespace canopy {
   // Whether any keyboard, with or without a device rule, resolves to the system keymap.
   bool usesSystemXkbNames(const Config::Input& input);
 
-} // namespace canopy
+} // namespace mahogany

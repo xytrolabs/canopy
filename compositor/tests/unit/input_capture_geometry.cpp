@@ -5,10 +5,10 @@
 #include <array>
 #include <limits>
 
-using canopy::InputCaptureBarrier;
-using canopy::inputCaptureCrossing;
-using canopy::InputCaptureZone;
-using canopy::validInputCaptureBarrier;
+using mahogany::InputCaptureBarrier;
+using mahogany::inputCaptureCrossing;
+using mahogany::InputCaptureZone;
+using mahogany::validInputCaptureBarrier;
 
 CANOPY_TEST(exteriorBarriersUseLogicalCoordinatesAndInclusivePixelEndpoints) {
   const std::array zones{InputCaptureZone{-1280, -200, 1280, 720}, InputCaptureZone{0, 0, 1536, 864}};

@@ -10,7 +10,7 @@
 struct wl_event_loop;
 struct wl_event_source;
 
-namespace canopy {
+namespace mahogany {
 
   class ConfigWatcher {
   public:
@@ -34,4 +34,4 @@ namespace canopy {
     std::set<std::filesystem::path> m_files;
   };
 
-} // namespace canopy
+} // namespace mahogany

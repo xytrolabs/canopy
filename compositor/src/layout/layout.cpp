@@ -19,7 +19,7 @@ extern "C" {
 #include <wlr/util/edges.h>
 }
 
-namespace canopy {
+namespace mahogany {
 
   wlr_box applyLayoutStruts(const wlr_box& area, const LayoutStruts& struts) {
     const auto coordinate = [](int value, int offset) {
@@ -241,4 +241,4 @@ namespace canopy {
     return edges;
   }
 
-} // namespace canopy
+} // namespace mahogany

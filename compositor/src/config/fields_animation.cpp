@@ -14,7 +14,7 @@
 #include <utility>
 #include <vector>
 
-namespace canopy {
+namespace mahogany {
 
   namespace {
 
@@ -316,4 +316,4 @@ namespace canopy {
     return registry::table("animation", &Config::animation, animationFields());
   }
 
-} // namespace canopy
+} // namespace mahogany

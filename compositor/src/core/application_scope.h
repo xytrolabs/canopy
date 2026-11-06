@@ -8,7 +8,7 @@
 #include <sys/types.h>
 #include <utility>
 
-namespace canopy {
+namespace mahogany {
 
   // True only for the process systemd started directly. Descendants inherit
   // SYSTEMD_EXEC_PID, so comparing it with the current pid prevents nested or
@@ -47,4 +47,4 @@ namespace canopy {
       const char* afterProperty, const ApplicationScopeEnvironmentArguments& environmentArguments, const char* command
   );
 
-} // namespace canopy
+} // namespace mahogany

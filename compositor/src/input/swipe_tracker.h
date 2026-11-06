@@ -3,7 +3,7 @@
 #include <cstdint>
 #include <deque>
 
-namespace canopy {
+namespace mahogany {
 
   // Three-finger travel, in the accelerated motion libinput reports for gestures, for one full step: switching one
   // workspace, and scrolling the strip by one viewport. The overview reuses both so a swipe covers the same distance
@@ -38,4 +38,4 @@ namespace canopy {
     double m_pos = 0;
   };
 
-} // namespace canopy
+} // namespace mahogany

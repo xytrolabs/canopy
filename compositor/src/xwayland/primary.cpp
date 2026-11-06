@@ -11,7 +11,7 @@
 #include <xcb/randr.h>
 #include <xcb/xcbext.h>
 
-namespace canopy {
+namespace mahogany {
 
   namespace {
     constexpr Logger kLog("xwayland");
@@ -261,4 +261,4 @@ namespace canopy {
     }
   }
 
-} // namespace canopy
+} // namespace mahogany

@@ -7,7 +7,7 @@ struct wlr_scene_shadow;
 struct wlr_scene_tree;
 struct wlr_scene_node;
 
-namespace canopy {
+namespace mahogany {
 
   struct ShadowSnapshot {
     wlr_scene_tree* tree = nullptr;
@@ -48,4 +48,4 @@ namespace canopy {
     std::optional<bool> m_enabled;
   };
 
-} // namespace canopy
+} // namespace mahogany

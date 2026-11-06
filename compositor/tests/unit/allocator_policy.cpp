@@ -2,9 +2,9 @@
 
 #include "check.h"
 
-using canopy::AlignedBufferLayout;
-using canopy::alignedBufferLayout;
-using canopy::wantsAlignedSoftwareAllocator;
+using mahogany::AlignedBufferLayout;
+using mahogany::alignedBufferLayout;
+using mahogany::wantsAlignedSoftwareAllocator;
 
 namespace {
   constexpr long pageSize = 4096;

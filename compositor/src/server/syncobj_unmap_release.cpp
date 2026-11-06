@@ -4,7 +4,7 @@
 
 #include <cstdint>
 
-namespace canopy {
+namespace mahogany {
 
   namespace {
 
@@ -102,4 +102,4 @@ namespace canopy {
     wl_signal_add(&watch->surface->events.destroy, &watch->destroy);
   }
 
-} // namespace canopy
+} // namespace mahogany

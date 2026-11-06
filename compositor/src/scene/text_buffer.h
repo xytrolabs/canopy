@@ -5,7 +5,7 @@
 
 struct wlr_buffer;
 
-namespace canopy {
+namespace mahogany {
 
   struct TextBufferParams {
     std::string markup; // Pango markup
@@ -37,4 +37,4 @@ namespace canopy {
   // Returns a buffer the caller owns (drop after wlr_scene_buffer_create).
   TextBufferResult renderTextBuffer(const TextBufferParams& params);
 
-} // namespace canopy
+} // namespace mahogany

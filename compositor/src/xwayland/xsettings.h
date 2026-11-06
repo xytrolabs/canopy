@@ -5,7 +5,7 @@
 #include <string_view>
 #include <vector>
 
-namespace canopy {
+namespace mahogany {
 
   // What Canopy announces to X11 clients through the XSETTINGS protocol. DPI values are in 1/1024 dots per inch.
   struct XsettingsValues {
@@ -30,4 +30,4 @@ namespace canopy {
   // The _XSETTINGS_SETTINGS property contents, little endian, with every setting stamped with `serial`.
   std::vector<uint8_t> encodeXsettings(uint32_t serial, const XsettingsValues& values);
 
-} // namespace canopy
+} // namespace mahogany

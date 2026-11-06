@@ -13,7 +13,7 @@ struct wlr_scene_tree;
 struct wlr_surface;
 struct wlr_xdg_popup;
 
-namespace canopy {
+namespace mahogany {
 
   class Output;
   class Server;
@@ -99,4 +99,4 @@ namespace canopy {
     wl_listener m_sceneDestroy{};
   };
 
-} // namespace canopy
+} // namespace mahogany

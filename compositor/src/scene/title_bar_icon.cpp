@@ -5,7 +5,7 @@
 #include <algorithm>
 #include <cairo.h>
 
-namespace canopy {
+namespace mahogany {
   wlr_buffer* renderTitleBarIcon(TitleBarButton button, int pixels, const std::array<float, 4>& color) {
     pixels = std::max(1, pixels);
     cairo_surface_t* surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, pixels, pixels);
@@ -34,4 +34,4 @@ namespace canopy {
     cairo_destroy(cr);
     return createCairoBuffer(surface);
   }
-} // namespace canopy
+} // namespace mahogany

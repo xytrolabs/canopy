@@ -13,8 +13,8 @@
 
 namespace {
 
-  using canopy::encodeXsettings;
-  using canopy::xsettingsFor;
+  using mahogany::encodeXsettings;
+  using mahogany::xsettingsFor;
   using Value = std::variant<int32_t, std::string>;
 
   struct Decoded {

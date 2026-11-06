@@ -7,7 +7,7 @@
 #include <optional>
 #include <string_view>
 
-namespace canopy {
+namespace mahogany {
 
   class Output;
 
@@ -283,4 +283,4 @@ namespace canopy {
     bool m_animating = false;
   };
 
-} // namespace canopy
+} // namespace mahogany

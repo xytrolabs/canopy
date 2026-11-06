@@ -6,7 +6,7 @@
 #include <cstdint>
 #include <wayland-server-core.h>
 
-namespace canopy {
+namespace mahogany {
 
   class Output;
   class Server;
@@ -132,4 +132,4 @@ namespace canopy {
     wl_listener m_holdEnd{};
   };
 
-} // namespace canopy
+} // namespace mahogany

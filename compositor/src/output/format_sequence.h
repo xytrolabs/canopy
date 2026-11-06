@@ -7,7 +7,7 @@
 
 struct wlr_output_mode;
 
-namespace canopy {
+namespace mahogany {
   struct OutputMode;
 
   enum class FormatTier : uint8_t {
@@ -62,4 +62,4 @@ namespace canopy {
   };
 
   FormatSequenceResult runFormatSequence(const FormatSequenceParams& params, const FormatSequenceOps& ops);
-} // namespace canopy
+} // namespace mahogany

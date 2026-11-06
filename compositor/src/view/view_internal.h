@@ -5,7 +5,7 @@ struct wlr_scene_node;
 struct wlr_scene_tree;
 struct wlr_surface;
 
-namespace canopy {
+namespace mahogany {
 
   class Server;
   class Workspace;
@@ -22,4 +22,4 @@ namespace canopy {
     Workspace* windowRuleWorkspace(WorkspaceGroup* group, const ResolvedWindowRule& rule);
   } // namespace view_detail
 
-} // namespace canopy
+} // namespace mahogany

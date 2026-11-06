@@ -3,7 +3,7 @@
 #include <algorithm>
 #include <vector>
 
-namespace canopy {
+namespace mahogany {
 
   // What decides whether an effect instance asks for frames: it is drawn on an
   // output, its program reads canopy_time, and its clock is advancing. Frozen
@@ -57,4 +57,4 @@ namespace canopy {
     bool m_suspended = false;
   };
 
-} // namespace canopy
+} // namespace mahogany

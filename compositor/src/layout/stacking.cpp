@@ -4,7 +4,7 @@ extern "C" {
 #include <wlr/util/box.h>
 }
 
-namespace canopy {
+namespace mahogany {
   namespace {
     class StackingSnapshot final : public LayoutSnapshot {
     public:
@@ -22,4 +22,4 @@ namespace canopy {
     static const std::vector<Column> empty;
     return empty;
   }
-} // namespace canopy
+} // namespace mahogany

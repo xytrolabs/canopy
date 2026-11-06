@@ -1,8 +1,8 @@
 #include "check.h"
 #include "output/enable_overrides.h"
 
-using canopy::OutputEnableOverrides;
-using canopy::OutputIdentity;
+using mahogany::OutputEnableOverrides;
+using mahogany::OutputIdentity;
 
 namespace {
 

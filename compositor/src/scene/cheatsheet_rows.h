@@ -11,7 +11,7 @@
 #include <string_view>
 #include <vector>
 
-namespace canopy {
+namespace mahogany {
 
   // Column packing. The body is a list of lines split into columns. The atoms are blocks, one group plus the blank
   // spacer before it, so a group is never split and the only freedom is where the breaks between blocks go.
@@ -70,4 +70,4 @@ namespace canopy {
   // row carries the label and whose others carry a ditto mark.
   std::vector<CheatsheetRow> buildCheatsheetRows(std::span<const Keybind> keybinds);
 
-} // namespace canopy
+} // namespace mahogany

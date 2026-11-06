@@ -8,7 +8,7 @@
 
 struct wlr_surface;
 
-namespace canopy {
+namespace mahogany {
 
   // The named XKB layout last used by each keyboard-focusable surface when
   // input.keyboard.track_layout is "window".
@@ -44,4 +44,4 @@ namespace canopy {
     std::unordered_map<wlr_surface*, Entry*> m_entries;
   };
 
-} // namespace canopy
+} // namespace mahogany

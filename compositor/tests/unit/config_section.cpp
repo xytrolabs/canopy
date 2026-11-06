@@ -3,8 +3,8 @@
 
 #include <string>
 
-using canopy::ConfigDiagnostic;
-using canopy::Section;
+using mahogany::ConfigDiagnostic;
+using mahogany::Section;
 
 namespace {
 

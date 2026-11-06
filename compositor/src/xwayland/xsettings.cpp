@@ -3,7 +3,7 @@
 #include <algorithm>
 #include <cmath>
 
-namespace canopy {
+namespace mahogany {
 
   namespace {
     constexpr double kBaseDpi = 96.0 * 1024.0;
@@ -76,4 +76,4 @@ namespace canopy {
     return out;
   }
 
-} // namespace canopy
+} // namespace mahogany

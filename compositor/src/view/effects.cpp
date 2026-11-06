@@ -13,7 +13,7 @@ extern "C" {
 #include "wlr.h"
 // clang-format on
 
-namespace canopy {
+namespace mahogany {
 
   void clearWindowEffectSlots(wlr_scene_node* node) {
     if (node != nullptr) {
@@ -178,4 +178,4 @@ namespace canopy {
     untrack(border);
   }
 
-} // namespace canopy
+} // namespace mahogany

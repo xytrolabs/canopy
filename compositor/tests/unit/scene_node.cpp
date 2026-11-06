@@ -3,9 +3,9 @@
 
 #include <cstdint>
 
-using canopy::SceneNode;
-using canopy::sceneNodeFrom;
-using canopy::SceneNodeKind;
+using mahogany::SceneNode;
+using mahogany::sceneNodeFrom;
+using mahogany::SceneNodeKind;
 
 namespace {
 
@@ -88,7 +88,7 @@ CANOPY_TEST(sceneNodeDataRoundTripsThroughAPolymorphicDerivedClass) {
   // The premise: the object does not begin with its SceneNode subobject.
   CHECK(static_cast<void*>(&node) != static_cast<void*>(static_cast<SceneNode*>(&node)));
 
-  void* stored = canopy::sceneNodeData(&node);
+  void* stored = mahogany::sceneNodeData(&node);
   SceneNode* recovered = sceneNodeFrom(stored);
   CHECK(recovered != nullptr);
   CHECK(recovered != nullptr && recovered->kind == SceneNodeKind::View);
@@ -106,8 +106,8 @@ CANOPY_TEST(storingTheRawDerivedPointerIsRejected) {
 
 CANOPY_TEST(sceneNodeDataIsIdentityForASingleBase) {
   TaggedNode node(SceneNodeKind::LayerSurface);
-  CHECK(canopy::sceneNodeData(&node) == static_cast<void*>(&node));
-  CHECK(sceneNodeFrom(canopy::sceneNodeData(&node)) != nullptr);
+  CHECK(mahogany::sceneNodeData(&node) == static_cast<void*>(&node));
+  CHECK(sceneNodeFrom(mahogany::sceneNodeData(&node)) != nullptr);
 }
 
 int main() { return RUN_TESTS(); }

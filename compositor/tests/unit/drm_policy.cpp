@@ -5,13 +5,13 @@
 #include <sys/sysmacros.h>
 #include <vector>
 
-using canopy::DrmDeviceIdentity;
-using canopy::DrmExclusionMatch;
-using canopy::drmExclusionMatch;
-using canopy::isNvidiaGpuDeviceNode;
-using canopy::parseNvidiaDeviceMinor;
-using canopy::resolveDrmBackendEnvironment;
-using canopy::sameDrmPhysicalDevice;
+using mahogany::DrmDeviceIdentity;
+using mahogany::DrmExclusionMatch;
+using mahogany::drmExclusionMatch;
+using mahogany::isNvidiaGpuDeviceNode;
+using mahogany::parseNvidiaDeviceMinor;
+using mahogany::resolveDrmBackendEnvironment;
+using mahogany::sameDrmPhysicalDevice;
 
 namespace {
   const DrmDeviceIdentity kIntegrated{
@@ -88,7 +88,7 @@ CANOPY_TEST(pciAddressKeepsAReattachedGpuExcluded) {
 CANOPY_TEST(backendEnvironmentMatchesWlrootsPrecedence) {
   CHECK_EQ(
       resolveDrmBackendEnvironment(std::nullopt, false, false, false),
-      (canopy::DrmBackendEnvironment{
+      (mahogany::DrmBackendEnvironment{
           .native = true,
           .exclusionsSupported = true,
           .createLibinput = true,

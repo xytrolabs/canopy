@@ -3,7 +3,7 @@
 #include <string>
 #include <string_view>
 
-namespace canopy {
+namespace mahogany {
 
   // How a physical output identifies itself, as wlroots reports it on
   // wlr_output. Every field except the connector may be absent: make, model and
@@ -39,4 +39,4 @@ namespace canopy {
   // output would otherwise answer to "Unknown Unknown Unknown".
   OutputNameMatch outputNameMatch(const OutputIdentity& identity, std::string_view configured);
 
-} // namespace canopy
+} // namespace mahogany

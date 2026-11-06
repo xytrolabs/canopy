@@ -21,7 +21,7 @@
 #include "workspace/workspace.h"
 #include "xwayland/xwayland.h"
 
-namespace canopy {
+namespace mahogany {
   namespace {
     constexpr Logger kLog("view");
 
@@ -738,4 +738,4 @@ namespace canopy {
       m_server->refreshOutputPolicies();
     }
   }
-} // namespace canopy
+} // namespace mahogany

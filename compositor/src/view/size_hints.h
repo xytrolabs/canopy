@@ -4,7 +4,7 @@
 
 #include <algorithm>
 
-namespace canopy {
+namespace mahogany {
 
   struct SizeHints {
     int minWidth = 1;
@@ -85,4 +85,4 @@ namespace canopy {
     return std::max(1, height);
   }
 
-} // namespace canopy
+} // namespace mahogany

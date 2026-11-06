@@ -20,7 +20,7 @@ extern "C" {
 #include <system_error>
 #include <utility>
 
-namespace canopy {
+namespace mahogany {
 
   namespace {
 
@@ -1188,4 +1188,4 @@ namespace canopy {
     return keybinds;
   }
 
-} // namespace canopy
+} // namespace mahogany

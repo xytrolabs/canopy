@@ -3,7 +3,7 @@
 #include <algorithm>
 #include <iterator>
 
-namespace canopy {
+namespace mahogany {
 
   namespace {
     void assign(EffectSlot& slot, const EffectPool& pool, std::string name) {
@@ -241,4 +241,4 @@ namespace canopy {
     return std::nullopt;
   }
 
-} // namespace canopy
+} // namespace mahogany

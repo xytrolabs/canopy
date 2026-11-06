@@ -8,7 +8,7 @@
 
 struct wlr_box;
 
-namespace canopy {
+namespace mahogany {
 
   class View;
 
@@ -189,4 +189,4 @@ namespace canopy {
     int m_lastAvailableCross = 0;
   };
 
-} // namespace canopy
+} // namespace mahogany

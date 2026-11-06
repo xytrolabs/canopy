@@ -30,7 +30,7 @@ extern "C" {
 #include "workspace/workspace.h"
 #include "xwayland/xwayland.h"
 
-namespace canopy {
+namespace mahogany {
   namespace {
     constexpr Logger kLog("view");
     // Distance the built-in windows_in "slide" style starts an opener below its resting position.
@@ -1182,4 +1182,4 @@ namespace canopy {
     }
     m_server->removeView(this);
   }
-} // namespace canopy
+} // namespace mahogany

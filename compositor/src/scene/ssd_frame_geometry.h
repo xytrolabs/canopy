@@ -10,7 +10,7 @@ extern "C" {
 #include <wlr/util/box.h>
 }
 
-namespace canopy {
+namespace mahogany {
   enum class TitleBarButtonSide : uint8_t { Left, Right };
   enum class TitleBarButton : uint8_t { Minimize, Maximize, Close };
   inline constexpr size_t kTitleBarButtonCount = 3;
@@ -42,4 +42,4 @@ namespace canopy {
       double x, double y
   );
   wlr_box contentBoxInTile(const wlr_box& tile, int titleBarHeight);
-} // namespace canopy
+} // namespace mahogany

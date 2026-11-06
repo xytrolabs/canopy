@@ -17,13 +17,13 @@
 #include <variant>
 #include <vector>
 
-using canopy::ActionArgKind;
-using canopy::ActionSpec;
-using canopy::Keybind;
-using canopy::KeybindAction;
-using canopy::parseAction;
-using canopy::parseChord;
-using canopy::WheelDirection;
+using mahogany::ActionArgKind;
+using mahogany::ActionSpec;
+using mahogany::Keybind;
+using mahogany::KeybindAction;
+using mahogany::parseAction;
+using mahogany::parseChord;
+using mahogany::WheelDirection;
 
 namespace {
 
@@ -155,7 +155,7 @@ CANOPY_TEST(parsesMouseButtons) {
 
 CANOPY_TEST(parsesLayoutScrollDragAction) {
   Keybind bind;
-  CHECK(canopy::parseAction("layout-scroll-drag", bind));
+  CHECK(mahogany::parseAction("layout-scroll-drag", bind));
   CHECK(bind.action == KeybindAction::LayoutScrollDrag);
 }
 
@@ -208,12 +208,12 @@ CANOPY_TEST(parsesSessionQuitConfirmation) {
   Keybind bind;
   CHECK(parseAction("session-quit", bind));
   CHECK(bind.action == KeybindAction::SessionQuit);
-  const auto* plain = canopy::payloadIf<canopy::QuitArg>(bind);
+  const auto* plain = mahogany::payloadIf<mahogany::QuitArg>(bind);
   CHECK(plain != nullptr);
   CHECK(plain == nullptr || !plain->skipConfirmation);
 
   CHECK(parseAction("session-quit skip-confirmation", bind));
-  const auto* skip = canopy::payloadIf<canopy::QuitArg>(bind);
+  const auto* skip = mahogany::payloadIf<mahogany::QuitArg>(bind);
   CHECK(skip != nullptr);
   CHECK(skip == nullptr || skip->skipConfirmation);
 
@@ -225,7 +225,7 @@ CANOPY_TEST(parsesCommandActions) {
   Keybind bind;
   CHECK(parseAction("spawn foot -e htop", bind));
   CHECK(bind.action == KeybindAction::Spawn);
-  const auto* spawn = canopy::payloadIf<canopy::SpawnArg>(bind);
+  const auto* spawn = mahogany::payloadIf<mahogany::SpawnArg>(bind);
   CHECK(spawn != nullptr);
   CHECK_EQ(spawn != nullptr ? spawn->command : std::string{}, std::string{"foot -e htop"});
 }
@@ -235,37 +235,37 @@ CANOPY_TEST(submapNoLongerSharesStorageWithSpawn) {
   Keybind bind;
   CHECK(parseAction("submap resize", bind));
   CHECK(bind.action == KeybindAction::Submap);
-  const auto* submap = canopy::payloadIf<canopy::SubmapArg>(bind);
+  const auto* submap = mahogany::payloadIf<mahogany::SubmapArg>(bind);
   CHECK(submap != nullptr);
   CHECK_EQ(submap != nullptr ? submap->name : std::string{}, std::string{"resize"});
-  CHECK(canopy::payloadIf<canopy::SpawnArg>(bind) == nullptr);
+  CHECK(mahogany::payloadIf<mahogany::SpawnArg>(bind) == nullptr);
 
   CHECK(!parseAction("submap", bind));
   CHECK(!parseAction("submap ''", bind));
   CHECK(!parseAction("submap invalid]name", bind));
 
   CHECK(parseAction("spawn resize", bind));
-  CHECK(canopy::payloadIf<canopy::SubmapArg>(bind) == nullptr);
+  CHECK(mahogany::payloadIf<mahogany::SubmapArg>(bind) == nullptr);
 }
 
 CANOPY_TEST(onlyResetPopsASubmap) {
   Keybind bind;
   CHECK(parseAction("submap reset", bind));
-  CHECK(canopy::isSubmapResetBind(bind));
+  CHECK(mahogany::isSubmapResetBind(bind));
   CHECK(!parseAction("submap disable", bind));
   CHECK(parseAction("submap resize", bind));
-  CHECK(!canopy::isSubmapResetBind(bind));
+  CHECK(!mahogany::isSubmapResetBind(bind));
 
   // Only a submap bind can be a submap reset, whatever its payload says.
   CHECK(parseAction("spawn reset", bind));
-  CHECK(!canopy::isSubmapResetBind(bind));
+  CHECK(!mahogany::isSubmapResetBind(bind));
 }
 
 CANOPY_TEST(parsesPrimaryExtentFractions) {
   Keybind bind;
   CHECK(parseAction("window-set-primary-extent 0.5", bind));
   CHECK(bind.action == KeybindAction::WindowSetPrimaryExtent);
-  const auto* width = canopy::payloadIf<canopy::FractionArg>(bind);
+  const auto* width = mahogany::payloadIf<mahogany::FractionArg>(bind);
   CHECK(width != nullptr);
   if (width != nullptr) {
     CHECK_NEAR(width->fraction, 0.5, 1e-9);
@@ -294,7 +294,7 @@ CANOPY_TEST(rejectsOutOfRangePrimaryExtentFractions) {
 
 CANOPY_TEST(parsesPrimaryExtentDeltas) {
   const auto fraction = [](const Keybind& bind) {
-    const auto* width = canopy::payloadIf<canopy::FractionArg>(bind);
+    const auto* width = mahogany::payloadIf<mahogany::FractionArg>(bind);
     return width != nullptr ? width->fraction : 0.0;
   };
 
@@ -327,7 +327,7 @@ CANOPY_TEST(parsesSecondaryExtentActions) {
   Keybind bind;
   CHECK(parseAction("window-set-secondary-extent 0.5", bind));
   CHECK(bind.action == KeybindAction::WindowSetSecondaryExtent);
-  const auto* height = canopy::payloadIf<canopy::FractionArg>(bind);
+  const auto* height = mahogany::payloadIf<mahogany::FractionArg>(bind);
   CHECK(height != nullptr);
   if (height != nullptr) {
     CHECK_NEAR(height->fraction, 0.5, 1e-9);
@@ -335,14 +335,14 @@ CANOPY_TEST(parsesSecondaryExtentActions) {
 
   CHECK(parseAction("window-modify-secondary-extent -0.2", bind));
   CHECK(bind.action == KeybindAction::WindowModifySecondaryExtent);
-  height = canopy::payloadIf<canopy::FractionArg>(bind);
+  height = mahogany::payloadIf<mahogany::FractionArg>(bind);
   CHECK(height != nullptr);
   if (height != nullptr) {
     CHECK_NEAR(height->fraction, -0.2, 1e-9);
   }
 
   CHECK(parseAction("window-modify-secondary-extent +0.1", bind));
-  height = canopy::payloadIf<canopy::FractionArg>(bind);
+  height = mahogany::payloadIf<mahogany::FractionArg>(bind);
   CHECK(height != nullptr);
   if (height != nullptr) {
     CHECK_NEAR(height->fraction, 0.1, 1e-9);
@@ -367,36 +367,36 @@ CANOPY_TEST(parsesLayoutModeActions) {
   Keybind bind;
   CHECK(parseAction("workspace-set-layout scrolling", bind));
   CHECK(bind.action == KeybindAction::WorkspaceSetLayout);
-  const auto* scrolling = canopy::payloadIf<canopy::LayoutModeArg>(bind);
+  const auto* scrolling = mahogany::payloadIf<mahogany::LayoutModeArg>(bind);
   CHECK(scrolling != nullptr);
-  CHECK(scrolling != nullptr && scrolling->mode == canopy::LayoutMode::Scrolling);
+  CHECK(scrolling != nullptr && scrolling->mode == mahogany::LayoutMode::Scrolling);
 
   CHECK(parseAction("workspace-set-layout dwindle", bind));
-  const auto* dwindle = canopy::payloadIf<canopy::LayoutModeArg>(bind);
-  CHECK(dwindle != nullptr && dwindle->mode == canopy::LayoutMode::Dwindle);
+  const auto* dwindle = mahogany::payloadIf<mahogany::LayoutModeArg>(bind);
+  CHECK(dwindle != nullptr && dwindle->mode == mahogany::LayoutMode::Dwindle);
 
   CHECK(parseAction("workspace-set-layout master", bind));
-  const auto* master = canopy::payloadIf<canopy::LayoutModeArg>(bind);
-  CHECK(master != nullptr && master->mode == canopy::LayoutMode::Master);
+  const auto* master = mahogany::payloadIf<mahogany::LayoutModeArg>(bind);
+  CHECK(master != nullptr && master->mode == mahogany::LayoutMode::Master);
 
   CHECK(parseAction("workspace-set-layout toggle", bind));
-  const auto* toggle = canopy::payloadIf<canopy::LayoutModeArg>(bind);
+  const auto* toggle = mahogany::payloadIf<mahogany::LayoutModeArg>(bind);
   CHECK(toggle != nullptr && !toggle->mode.has_value());
   CHECK(toggle != nullptr && toggle->toggleSequence.empty());
 
   CHECK(parseAction("workspace-set-layout toggle scrolling master", bind));
-  const auto* twoMode = canopy::payloadIf<canopy::LayoutModeArg>(bind);
+  const auto* twoMode = mahogany::payloadIf<mahogany::LayoutModeArg>(bind);
   CHECK(twoMode != nullptr && !twoMode->mode.has_value());
   CHECK(twoMode != nullptr && twoMode->toggleSequence.size() == 2);
-  CHECK(twoMode != nullptr && twoMode->toggleSequence[0] == canopy::LayoutMode::Scrolling);
-  CHECK(twoMode != nullptr && twoMode->toggleSequence[1] == canopy::LayoutMode::Master);
+  CHECK(twoMode != nullptr && twoMode->toggleSequence[0] == mahogany::LayoutMode::Scrolling);
+  CHECK(twoMode != nullptr && twoMode->toggleSequence[1] == mahogany::LayoutMode::Master);
 
   CHECK(parseAction("workspace-set-layout toggle master scrolling dwindle", bind));
-  const auto* threeMode = canopy::payloadIf<canopy::LayoutModeArg>(bind);
+  const auto* threeMode = mahogany::payloadIf<mahogany::LayoutModeArg>(bind);
   CHECK(threeMode != nullptr && threeMode->toggleSequence.size() == 3);
-  CHECK(threeMode != nullptr && threeMode->toggleSequence[0] == canopy::LayoutMode::Master);
-  CHECK(threeMode != nullptr && threeMode->toggleSequence[1] == canopy::LayoutMode::Scrolling);
-  CHECK(threeMode != nullptr && threeMode->toggleSequence[2] == canopy::LayoutMode::Dwindle);
+  CHECK(threeMode != nullptr && threeMode->toggleSequence[0] == mahogany::LayoutMode::Master);
+  CHECK(threeMode != nullptr && threeMode->toggleSequence[1] == mahogany::LayoutMode::Scrolling);
+  CHECK(threeMode != nullptr && threeMode->toggleSequence[2] == mahogany::LayoutMode::Dwindle);
 }
 
 CANOPY_TEST(rejectsInvalidLayoutModeActions) {
@@ -511,7 +511,7 @@ CANOPY_TEST(parsesArgumentFreeNewActions) {
 }
 
 CANOPY_TEST(parsesWorkspaceSelectors) {
-  const auto selector = [](const Keybind& bind) { return canopy::payloadIf<canopy::WorkspaceArg>(bind); };
+  const auto selector = [](const Keybind& bind) { return mahogany::payloadIf<mahogany::WorkspaceArg>(bind); };
 
   Keybind bind;
   CHECK(parseAction("workspace-switch 3", bind));
@@ -519,7 +519,7 @@ CANOPY_TEST(parsesWorkspaceSelectors) {
   const auto* position = selector(bind);
   CHECK(position != nullptr);
   const auto* positionValue =
-      position != nullptr ? std::get_if<canopy::WorkspaceIndex>(&position->reference) : nullptr;
+      position != nullptr ? std::get_if<mahogany::WorkspaceIndex>(&position->reference) : nullptr;
   CHECK(positionValue != nullptr);
   CHECK(positionValue != nullptr && positionValue->value == 3);
   CHECK(position != nullptr && position->output.empty());
@@ -527,7 +527,7 @@ CANOPY_TEST(parsesWorkspaceSelectors) {
   CHECK(parseAction("workspace-switch web --output DP-1", bind));
   const auto* named = selector(bind);
   CHECK(named != nullptr);
-  const auto* nameValue = named != nullptr ? std::get_if<canopy::WorkspaceName>(&named->reference) : nullptr;
+  const auto* nameValue = named != nullptr ? std::get_if<mahogany::WorkspaceName>(&named->reference) : nullptr;
   CHECK(nameValue != nullptr);
   CHECK(nameValue != nullptr && nameValue->value == "web");
   CHECK(named != nullptr && named->output == "DP-1");
@@ -535,7 +535,7 @@ CANOPY_TEST(parsesWorkspaceSelectors) {
   CHECK(parseAction("window-move-to-workspace 2 --output HDMI-A-1", bind));
   CHECK(bind.action == KeybindAction::WindowMoveToWorkspace);
   position = selector(bind);
-  positionValue = position != nullptr ? std::get_if<canopy::WorkspaceIndex>(&position->reference) : nullptr;
+  positionValue = position != nullptr ? std::get_if<mahogany::WorkspaceIndex>(&position->reference) : nullptr;
   CHECK(positionValue != nullptr);
   CHECK(positionValue != nullptr && positionValue->value == 2);
   CHECK(position != nullptr && position->output == "HDMI-A-1");
@@ -543,7 +543,7 @@ CANOPY_TEST(parsesWorkspaceSelectors) {
   CHECK(parseAction("window-move-to-workspace-silent --output HDMI-A-1 2", bind));
   CHECK(bind.action == KeybindAction::WindowMoveToWorkspaceSilent);
   position = selector(bind);
-  positionValue = position != nullptr ? std::get_if<canopy::WorkspaceIndex>(&position->reference) : nullptr;
+  positionValue = position != nullptr ? std::get_if<mahogany::WorkspaceIndex>(&position->reference) : nullptr;
   CHECK(positionValue != nullptr);
   CHECK(positionValue != nullptr && positionValue->value == 2);
   CHECK(position != nullptr && position->output == "HDMI-A-1");
@@ -551,21 +551,21 @@ CANOPY_TEST(parsesWorkspaceSelectors) {
   CHECK(parseAction("column-move-to-workspace --name 2 --output DP-1", bind));
   CHECK(bind.action == KeybindAction::ColumnMoveToWorkspace);
   named = selector(bind);
-  nameValue = named != nullptr ? std::get_if<canopy::WorkspaceName>(&named->reference) : nullptr;
+  nameValue = named != nullptr ? std::get_if<mahogany::WorkspaceName>(&named->reference) : nullptr;
   CHECK(nameValue != nullptr);
   CHECK(nameValue != nullptr && nameValue->value == "2");
   CHECK(named != nullptr && named->output == "DP-1");
 
   CHECK(parseAction("workspace-switch 'My web'", bind));
   named = selector(bind);
-  nameValue = named != nullptr ? std::get_if<canopy::WorkspaceName>(&named->reference) : nullptr;
+  nameValue = named != nullptr ? std::get_if<mahogany::WorkspaceName>(&named->reference) : nullptr;
   CHECK(nameValue != nullptr);
   CHECK(nameValue != nullptr && nameValue->value == "My web");
 
   // A flag value may itself start with `--`.
   CHECK(parseAction("workspace-switch --name --web", bind));
   named = selector(bind);
-  nameValue = named != nullptr ? std::get_if<canopy::WorkspaceName>(&named->reference) : nullptr;
+  nameValue = named != nullptr ? std::get_if<mahogany::WorkspaceName>(&named->reference) : nullptr;
   CHECK(nameValue != nullptr && nameValue->value == "--web");
 }
 
@@ -591,7 +591,7 @@ CANOPY_TEST(rejectsMalformedWorkspaceSelectors) {
 
 CANOPY_TEST(parsesOptionalOutputActions) {
   const auto outputOf = [](const Keybind& bind) {
-    const auto* arg = canopy::payloadIf<canopy::OutputArg>(bind);
+    const auto* arg = mahogany::payloadIf<mahogany::OutputArg>(bind);
     return arg != nullptr ? arg->output : std::string{};
   };
 
@@ -628,11 +628,11 @@ CANOPY_TEST(parsesOptionalOutputActions) {
 
 CANOPY_TEST(parsesOutputSdrWhiteAction) {
   const auto sdrWhiteOf = [](const Keybind& bind) {
-    const auto* arg = canopy::payloadIf<canopy::SdrWhiteArg>(bind);
+    const auto* arg = mahogany::payloadIf<mahogany::SdrWhiteArg>(bind);
     return arg != nullptr ? arg->nits : -1.0;
   };
   const auto outputOf = [](const Keybind& bind) {
-    const auto* arg = canopy::payloadIf<canopy::SdrWhiteArg>(bind);
+    const auto* arg = mahogany::payloadIf<mahogany::SdrWhiteArg>(bind);
     return arg != nullptr ? arg->output : std::string{};
   };
 
@@ -671,7 +671,7 @@ CANOPY_TEST(rejectsMalformedOutputSdrWhiteArguments) {
 
 CANOPY_TEST(parsesOptionalScratchpadActions) {
   const auto scratchpadOf = [](const Keybind& bind) {
-    const auto* arg = canopy::payloadIf<canopy::ScratchpadArg>(bind);
+    const auto* arg = mahogany::payloadIf<mahogany::ScratchpadArg>(bind);
     return arg != nullptr ? arg->name : std::string{};
   };
 
@@ -680,8 +680,8 @@ CANOPY_TEST(parsesOptionalScratchpadActions) {
   CHECK(bind.action == KeybindAction::ScratchpadToggle);
   // The alternative is present even with no name, so the payload still says
   // which action shape it belongs to.
-  CHECK(canopy::payloadIf<canopy::ScratchpadArg>(bind) != nullptr);
-  CHECK(canopy::payloadIf<canopy::OutputArg>(bind) == nullptr);
+  CHECK(mahogany::payloadIf<mahogany::ScratchpadArg>(bind) != nullptr);
+  CHECK(mahogany::payloadIf<mahogany::OutputArg>(bind) == nullptr);
   CHECK(scratchpadOf(bind).empty());
 
   CHECK(parseAction("scratchpad-toggle terminal", bind));
@@ -715,36 +715,36 @@ CANOPY_TEST(parsesWindowIdActions) {
   CHECK(bind.action == KeybindAction::ScreenCastFollowStop);
   CHECK(parseAction("screencast-set-window", bind));
   CHECK(bind.action == KeybindAction::ScreenCastSetWindow);
-  CHECK_EQ(canopy::payloadIf<canopy::WindowIdArg>(bind)->id, std::string{});
+  CHECK_EQ(mahogany::payloadIf<mahogany::WindowIdArg>(bind)->id, std::string{});
   CHECK(parseAction("screencast-set-window abc123", bind));
-  CHECK_EQ(canopy::payloadIf<canopy::WindowIdArg>(bind)->id, std::string{"abc123"});
+  CHECK_EQ(mahogany::payloadIf<mahogany::WindowIdArg>(bind)->id, std::string{"abc123"});
   CHECK(!parseAction("dynamic-cast-window", bind));
   CHECK(!parseAction("dynamic-cast-output", bind));
   CHECK(!parseAction("dynamic-cast-clear", bind));
   CHECK(parseAction("window-close", bind));
-  CHECK_EQ(canopy::payloadIf<canopy::WindowIdArg>(bind)->id, std::string{});
+  CHECK_EQ(mahogany::payloadIf<mahogany::WindowIdArg>(bind)->id, std::string{});
   CHECK(parseAction("window-close abc123", bind));
   CHECK(bind.action == KeybindAction::WindowClose);
-  CHECK_EQ(canopy::payloadIf<canopy::WindowIdArg>(bind)->id, std::string{"abc123"});
+  CHECK_EQ(mahogany::payloadIf<mahogany::WindowIdArg>(bind)->id, std::string{"abc123"});
   CHECK(parseAction("window-kill", bind));
   CHECK(bind.action == KeybindAction::WindowKill);
-  CHECK_EQ(canopy::payloadIf<canopy::WindowIdArg>(bind)->id, std::string{});
+  CHECK_EQ(mahogany::payloadIf<mahogany::WindowIdArg>(bind)->id, std::string{});
   CHECK(parseAction("window-kill abc123", bind));
   CHECK(bind.action == KeybindAction::WindowKill);
-  CHECK_EQ(canopy::payloadIf<canopy::WindowIdArg>(bind)->id, std::string{"abc123"});
+  CHECK_EQ(mahogany::payloadIf<mahogany::WindowIdArg>(bind)->id, std::string{"abc123"});
   CHECK(!parseAction("window-kill ''", bind));
   CHECK(parseAction("window-focus abc123", bind));
   CHECK(bind.action == KeybindAction::WindowFocusId);
-  CHECK_EQ(canopy::payloadIf<canopy::WindowIdArg>(bind)->id, std::string{"abc123"});
+  CHECK_EQ(mahogany::payloadIf<mahogany::WindowIdArg>(bind)->id, std::string{"abc123"});
   CHECK(parseAction("window-focus-warp abc123", bind));
   CHECK(bind.action == KeybindAction::WindowFocusWarpId);
-  CHECK_EQ(canopy::payloadIf<canopy::WindowIdArg>(bind)->id, std::string{"abc123"});
+  CHECK_EQ(mahogany::payloadIf<mahogany::WindowIdArg>(bind)->id, std::string{"abc123"});
 }
 
 CANOPY_TEST(payloadAlternativeMatchesTheDeclaredArgKind) {
   // The whole point of the variant: the spec's argKind and the payload the
   // parser produces cannot drift apart.
-  for (const auto& spec : canopy::actionSpecs()) {
+  for (const auto& spec : mahogany::actionSpecs()) {
     Keybind bind;
     std::string input(spec.name);
     switch (spec.argKind) {
@@ -815,67 +815,67 @@ CANOPY_TEST(payloadAlternativeMatchesTheDeclaredArgKind) {
       CHECK(std::holds_alternative<std::monostate>(bind.payload));
       break;
     case ActionArgKind::Command:
-      CHECK(canopy::payloadIf<canopy::SpawnArg>(bind) != nullptr);
+      CHECK(mahogany::payloadIf<mahogany::SpawnArg>(bind) != nullptr);
       break;
     case ActionArgKind::Submap:
-      CHECK(canopy::payloadIf<canopy::SubmapArg>(bind) != nullptr);
+      CHECK(mahogany::payloadIf<mahogany::SubmapArg>(bind) != nullptr);
       break;
     case ActionArgKind::Fraction:
     case ActionArgKind::FractionDelta:
-      CHECK(canopy::payloadIf<canopy::FractionArg>(bind) != nullptr);
+      CHECK(mahogany::payloadIf<mahogany::FractionArg>(bind) != nullptr);
       break;
     case ActionArgKind::LayoutMode:
-      CHECK(canopy::payloadIf<canopy::LayoutModeArg>(bind) != nullptr);
+      CHECK(mahogany::payloadIf<mahogany::LayoutModeArg>(bind) != nullptr);
       break;
     case ActionArgKind::WindowRegion:
-      CHECK(canopy::payloadIf<canopy::WindowRegionArg>(bind) != nullptr);
+      CHECK(mahogany::payloadIf<mahogany::WindowRegionArg>(bind) != nullptr);
       break;
     case ActionArgKind::ColumnDisplay:
-      CHECK(canopy::payloadIf<canopy::ColumnDisplayArg>(bind) != nullptr);
+      CHECK(mahogany::payloadIf<mahogany::ColumnDisplayArg>(bind) != nullptr);
       break;
     case ActionArgKind::TabIndex:
-      CHECK(canopy::payloadIf<canopy::TabIndexArg>(bind) != nullptr);
+      CHECK(mahogany::payloadIf<mahogany::TabIndexArg>(bind) != nullptr);
       break;
     case ActionArgKind::WorkspaceMoveToOutput:
-      CHECK(canopy::payloadIf<canopy::WorkspaceMoveToOutputArg>(bind) != nullptr);
+      CHECK(mahogany::payloadIf<mahogany::WorkspaceMoveToOutputArg>(bind) != nullptr);
       break;
     case ActionArgKind::Workspace:
-      CHECK(canopy::payloadIf<canopy::WorkspaceArg>(bind) != nullptr);
+      CHECK(mahogany::payloadIf<mahogany::WorkspaceArg>(bind) != nullptr);
       break;
     case ActionArgKind::WindowEffectSet:
     case ActionArgKind::WindowEffectCycle:
-      CHECK(canopy::payloadIf<canopy::EffectWindowArg>(bind) != nullptr);
+      CHECK(mahogany::payloadIf<mahogany::EffectWindowArg>(bind) != nullptr);
       break;
     case ActionArgKind::ScreenEffectSet:
     case ActionArgKind::ScreenEffectCycle:
-      CHECK(canopy::payloadIf<canopy::EffectScreenArg>(bind) != nullptr);
+      CHECK(mahogany::payloadIf<mahogany::EffectScreenArg>(bind) != nullptr);
       break;
     case ActionArgKind::CursorEffectSet:
     case ActionArgKind::CursorEffectCycle:
-      CHECK(canopy::payloadIf<canopy::EffectCursorArg>(bind) != nullptr);
+      CHECK(mahogany::payloadIf<mahogany::EffectCursorArg>(bind) != nullptr);
       break;
     case ActionArgKind::Output:
     case ActionArgKind::OptionalOutput:
-      CHECK(canopy::payloadIf<canopy::OutputArg>(bind) != nullptr);
+      CHECK(mahogany::payloadIf<mahogany::OutputArg>(bind) != nullptr);
       break;
     case ActionArgKind::OptionalScratchpad:
-      CHECK(canopy::payloadIf<canopy::ScratchpadArg>(bind) != nullptr);
+      CHECK(mahogany::payloadIf<mahogany::ScratchpadArg>(bind) != nullptr);
       break;
     case ActionArgKind::WindowId:
     case ActionArgKind::OptionalWindowId:
-      CHECK(canopy::payloadIf<canopy::WindowIdArg>(bind) != nullptr);
+      CHECK(mahogany::payloadIf<mahogany::WindowIdArg>(bind) != nullptr);
       break;
     case ActionArgKind::SkipConfirmation:
-      CHECK(canopy::payloadIf<canopy::QuitArg>(bind) != nullptr);
+      CHECK(mahogany::payloadIf<mahogany::QuitArg>(bind) != nullptr);
       break;
     case ActionArgKind::SdrWhite:
-      CHECK(canopy::payloadIf<canopy::SdrWhiteArg>(bind) != nullptr);
+      CHECK(mahogany::payloadIf<mahogany::SdrWhiteArg>(bind) != nullptr);
       break;
     case ActionArgKind::WindowMoveTo:
-      CHECK(canopy::payloadIf<canopy::WindowMoveToArg>(bind) != nullptr);
+      CHECK(mahogany::payloadIf<mahogany::WindowMoveToArg>(bind) != nullptr);
       break;
     case ActionArgKind::WindowMoveBy:
-      CHECK(canopy::payloadIf<canopy::WindowMoveByArg>(bind) != nullptr);
+      CHECK(mahogany::payloadIf<mahogany::WindowMoveByArg>(bind) != nullptr);
       break;
     }
   }
@@ -901,7 +901,7 @@ CANOPY_TEST(rejectsUnknownActions) {
 CANOPY_TEST(everyActionSpecRoundTripsThroughParseAction) {
   // The registry is duplicated across the enum, this table, and the dispatch
   // switch. At minimum, every advertised name must parse back to its action.
-  for (const auto& spec : canopy::actionSpecs()) {
+  for (const auto& spec : mahogany::actionSpecs()) {
     Keybind bind;
     std::string input(spec.name);
     switch (spec.argKind) {
@@ -974,9 +974,9 @@ CANOPY_TEST(everyActionSpecRoundTripsThroughParseAction) {
 }
 
 CANOPY_TEST(actionSpecNamesAreUniqueAndSorted) {
-  const auto specs = canopy::actionSpecs();
+  const auto specs = mahogany::actionSpecs();
   CHECK(!specs.empty());
-  CHECK(std::ranges::is_sorted(specs, {}, &canopy::ActionSpec::name));
+  CHECK(std::ranges::is_sorted(specs, {}, &mahogany::ActionSpec::name));
   for (size_t i = 1; i < specs.size(); ++i) {
     CHECK(specs[i - 1].name != specs[i].name);
   }
@@ -986,7 +986,7 @@ CANOPY_TEST(everyActionHasASpec) {
   // actions.cpp guards the handler table with a consteval check; this guards the name table, so no action is
   // unbindable and unreachable over IPC.
   std::array<bool, static_cast<size_t>(KeybindAction::Count)> named{};
-  for (const auto& spec : canopy::actionSpecs()) {
+  for (const auto& spec : mahogany::actionSpecs()) {
     named[static_cast<size_t>(spec.action)] = true;
   }
   // Enumerator 0 is None, which is never bindable. On failure the reported
@@ -1002,7 +1002,7 @@ CANOPY_TEST(everyActionHasASpec) {
 }
 
 CANOPY_TEST(parameterizedSpecsDeclareAParam) {
-  for (const auto& spec : canopy::actionSpecs()) {
+  for (const auto& spec : mahogany::actionSpecs()) {
     if (spec.argKind == ActionArgKind::None) {
       CHECK(spec.param.empty());
     } else {
@@ -1014,7 +1014,7 @@ CANOPY_TEST(parameterizedSpecsDeclareAParam) {
 CANOPY_TEST(everySpecHasAOneLineSummary) {
   // `canopy msg --help` and docs/user/actions.md print these verbatim in a table cell, so a missing, multi-line, or
   // sentence-shaped summary shows up as broken output rather than a prose choice.
-  for (const auto& spec : canopy::actionSpecs()) {
+  for (const auto& spec : mahogany::actionSpecs()) {
     CHECK(!spec.summary.empty());
     CHECK(spec.summary.size() <= 60);
     CHECK(!spec.summary.ends_with('.'));
@@ -1026,7 +1026,7 @@ CANOPY_TEST(everySpecHasAOneLineSummary) {
 
 // defaults
 CANOPY_TEST(defaultKeybindsAreUsable) {
-  const auto binds = canopy::defaultKeybinds();
+  const auto binds = mahogany::defaultKeybinds();
   CHECK(!binds.empty());
 
   // Every default is Mod-based, so a bare keystroke always reaches the client.
@@ -1184,7 +1184,7 @@ CANOPY_TEST(everyAdvertisedActionParsesWithItsDeclaredArgument) {
   };
 
   size_t swept = 0;
-  for (const ActionSpec& spec : canopy::actionSpecs()) {
+  for (const ActionSpec& spec : mahogany::actionSpecs()) {
     Keybind bind;
     const std::string text = std::string(spec.name) + sampleFor(spec.argKind);
     CHECK(parseAction(text, bind));
@@ -1210,40 +1210,40 @@ CANOPY_TEST(effectActionsParseTypedTargets) {
   Keybind bind;
   for (const std::string kind : {"window", "border"}) {
     CHECK(parseAction("effect-" + kind + "-set scanlines --window window-1", bind));
-    const auto* selected = canopy::payloadIf<canopy::EffectWindowArg>(bind);
+    const auto* selected = mahogany::payloadIf<mahogany::EffectWindowArg>(bind);
     CHECK(selected != nullptr);
     CHECK_EQ(selected->name, std::string{"scanlines"});
     CHECK_EQ(selected->id, std::string{"window-1"});
     CHECK(parseAction("effect-" + kind + "-cycle --window window-1", bind));
-    selected = canopy::payloadIf<canopy::EffectWindowArg>(bind);
+    selected = mahogany::payloadIf<mahogany::EffectWindowArg>(bind);
     CHECK(selected->name.empty());
     CHECK_EQ(selected->id, std::string{"window-1"});
     CHECK(parseAction("effect-" + kind + "-cycle", bind));
-    CHECK(canopy::payloadIf<canopy::EffectWindowArg>(bind)->name.empty());
+    CHECK(mahogany::payloadIf<mahogany::EffectWindowArg>(bind)->name.empty());
     CHECK(parseAction("effect-" + kind + "-set off", bind));
-    CHECK_EQ(canopy::payloadIf<canopy::EffectWindowArg>(bind)->name, std::string{"off"});
+    CHECK_EQ(mahogany::payloadIf<mahogany::EffectWindowArg>(bind)->name, std::string{"off"});
     for (const std::string op : {"toggle", "reset"}) {
       CHECK(parseAction(std::format("effect-{}-{} window-1", kind, op), bind));
-      CHECK_EQ(canopy::payloadIf<canopy::WindowIdArg>(bind)->id, std::string{"window-1"});
+      CHECK_EQ(mahogany::payloadIf<mahogany::WindowIdArg>(bind)->id, std::string{"window-1"});
       CHECK(parseAction(std::format("effect-{}-{}", kind, op), bind));
     }
   }
   CHECK(parseAction("effect-screen-set cinema --output vendor/panel", bind));
-  const auto* screen = canopy::payloadIf<canopy::EffectScreenArg>(bind);
+  const auto* screen = mahogany::payloadIf<mahogany::EffectScreenArg>(bind);
   CHECK_EQ(screen->name, std::string{"cinema"});
   CHECK_EQ(screen->output, std::string{"vendor/panel"});
   CHECK(parseAction("effect-screen-cycle --output vendor/panel", bind));
-  screen = canopy::payloadIf<canopy::EffectScreenArg>(bind);
+  screen = mahogany::payloadIf<mahogany::EffectScreenArg>(bind);
   CHECK(screen->name.empty());
   CHECK_EQ(screen->output, std::string{"vendor/panel"});
   CHECK(parseAction("effect-screen-toggle vendor/panel", bind));
-  CHECK_EQ(canopy::payloadIf<canopy::OutputArg>(bind)->output, std::string{"vendor/panel"});
+  CHECK_EQ(mahogany::payloadIf<mahogany::OutputArg>(bind)->output, std::string{"vendor/panel"});
   CHECK(parseAction("effect-screen-reset vendor/panel", bind));
-  CHECK_EQ(canopy::payloadIf<canopy::OutputArg>(bind)->output, std::string{"vendor/panel"});
+  CHECK_EQ(mahogany::payloadIf<mahogany::OutputArg>(bind)->output, std::string{"vendor/panel"});
   CHECK(parseAction("effect-cursor-set halo", bind));
-  CHECK_EQ(canopy::payloadIf<canopy::EffectCursorArg>(bind)->name, std::string{"halo"});
+  CHECK_EQ(mahogany::payloadIf<mahogany::EffectCursorArg>(bind)->name, std::string{"halo"});
   CHECK(parseAction("effect-cursor-cycle", bind));
-  CHECK(canopy::payloadIf<canopy::EffectCursorArg>(bind)->name.empty());
+  CHECK(mahogany::payloadIf<mahogany::EffectCursorArg>(bind)->name.empty());
   CHECK(parseAction("effect-cursor-toggle", bind));
   CHECK(std::holds_alternative<std::monostate>(bind.payload));
   CHECK(parseAction("effect-cursor-reset", bind));
@@ -1278,12 +1278,12 @@ CANOPY_TEST(effectActionsRejectMalformedNamesAndTargets) {
 CANOPY_TEST(effectActionReferencesDescribeOnlyNamedRoots) {
   Keybind bind;
   for (const auto& [name, kind] : std::array{
-           std::pair{"window", canopy::EffectKind::Window}, std::pair{"border", canopy::EffectKind::Border},
-           std::pair{"screen", canopy::EffectKind::Screen}, std::pair{"cursor", canopy::EffectKind::Cursor}
+           std::pair{"window", mahogany::EffectKind::Window}, std::pair{"border", mahogany::EffectKind::Border},
+           std::pair{"screen", mahogany::EffectKind::Screen}, std::pair{"cursor", mahogany::EffectKind::Cursor}
        }) {
     for (const std::string op : {"set", "cycle"}) {
       CHECK(parseAction("effect-" + std::string(name) + "-" + op + " selected", bind));
-      const auto reference = canopy::effectActionReference(bind);
+      const auto reference = mahogany::effectActionReference(bind);
       CHECK(reference.has_value());
       CHECK_EQ(reference->name, std::string_view{"selected"});
       CHECK(reference->kind == kind);
@@ -1291,24 +1291,24 @@ CANOPY_TEST(effectActionReferencesDescribeOnlyNamedRoots) {
     }
     for (const std::string suffix : {"set off", "cycle", "toggle", "reset"}) {
       CHECK(parseAction("effect-" + std::string(name) + "-" + suffix, bind));
-      CHECK(!canopy::effectActionReference(bind));
+      CHECK(!mahogany::effectActionReference(bind));
     }
   }
   CHECK(parseAction("spawn hello", bind));
-  CHECK(!canopy::effectActionReference(bind));
+  CHECK(!mahogany::effectActionReference(bind));
 }
 
 CANOPY_TEST(windowMoveToActionParseArgs) {
-  using canopy::WindowMoveToArg;
-  using canopy::WindowPositionAnchor;
+  using mahogany::WindowMoveToArg;
+  using mahogany::WindowPositionAnchor;
   Keybind bind;
-  for (const auto& [name, anchor] : canopy::kWindowPositionAnchorNames) {
+  for (const auto& [name, anchor] : mahogany::kWindowPositionAnchorNames) {
     CHECK(parseAction("window-move-to " + std::string(name) + " 10 20 --window abc", bind));
-    const auto* arg = canopy::payloadIf<WindowMoveToArg>(bind);
+    const auto* arg = mahogany::payloadIf<WindowMoveToArg>(bind);
     CHECK((arg != nullptr && *arg == WindowMoveToArg{.id = "abc", .position = {.x = 10, .y = 20, .anchor = anchor}}));
   }
   const auto parsed = [&](std::string_view input) {
-    const auto* arg = parseAction(input, bind) ? canopy::payloadIf<WindowMoveToArg>(bind) : nullptr;
+    const auto* arg = parseAction(input, bind) ? mahogany::payloadIf<WindowMoveToArg>(bind) : nullptr;
     return arg != nullptr ? std::optional(*arg) : std::nullopt;
   };
   CHECK(
@@ -1343,10 +1343,10 @@ CANOPY_TEST(windowMoveToActionRejectMalformedArgs) {
 }
 
 CANOPY_TEST(windowMoveByActionParseArgs) {
-  using canopy::WindowMoveByArg;
+  using mahogany::WindowMoveByArg;
   Keybind bind;
   const auto parsed = [&](std::string_view input) {
-    const auto* arg = parseAction(input, bind) ? canopy::payloadIf<WindowMoveByArg>(bind) : nullptr;
+    const auto* arg = parseAction(input, bind) ? mahogany::payloadIf<WindowMoveByArg>(bind) : nullptr;
     return arg != nullptr ? std::optional(*arg) : std::nullopt;
   };
   CHECK((parsed("window-move-by 10 20") == WindowMoveByArg{.id = "", .deltaX = 10, .deltaY = 20}));
@@ -1375,14 +1375,14 @@ CANOPY_TEST(windowMoveByActionRejectMalformedArgs) {
 CANOPY_TEST(parsesStackingLayoutAndCustomCycle) {
   Keybind bind;
   CHECK(parseAction("workspace-set-layout stacking", bind));
-  const auto* arg = canopy::payloadIf<canopy::LayoutModeArg>(bind);
-  CHECK(arg != nullptr && arg->mode == canopy::LayoutMode::Stacking);
+  const auto* arg = mahogany::payloadIf<mahogany::LayoutModeArg>(bind);
+  CHECK(arg != nullptr && arg->mode == mahogany::LayoutMode::Stacking);
   CHECK(parseAction("workspace-set-layout toggle stacking scrolling", bind));
-  arg = canopy::payloadIf<canopy::LayoutModeArg>(bind);
+  arg = mahogany::payloadIf<mahogany::LayoutModeArg>(bind);
   CHECK(arg != nullptr && !arg->mode.has_value());
   CHECK(arg != nullptr && arg->toggleSequence.size() == 2);
-  CHECK(arg != nullptr && arg->toggleSequence[0] == canopy::LayoutMode::Stacking);
-  CHECK(arg != nullptr && arg->toggleSequence[1] == canopy::LayoutMode::Scrolling);
+  CHECK(arg != nullptr && arg->toggleSequence[0] == mahogany::LayoutMode::Stacking);
+  CHECK(arg != nullptr && arg->toggleSequence[1] == mahogany::LayoutMode::Scrolling);
   CHECK(!parseAction("workspace-set-layout floating", bind));
   CHECK(!parseAction("workspace-set-layout toggle scrolling floating", bind));
   CHECK(parseAction("window-toggle-floating", bind));
@@ -1393,14 +1393,14 @@ CANOPY_TEST(parsesRegionActionsAndRejectsRemovedNames) {
   Keybind bind;
   CHECK(parseAction("window-set-region top_left", bind));
   CHECK(bind.action == KeybindAction::WindowSetRegion);
-  const auto* arg = canopy::payloadIf<canopy::WindowRegionArg>(bind);
-  CHECK(arg != nullptr && arg->region == canopy::WindowRegion::TopLeft);
+  const auto* arg = mahogany::payloadIf<mahogany::WindowRegionArg>(bind);
+  CHECK(arg != nullptr && arg->region == mahogany::WindowRegion::TopLeft);
   CHECK(parseAction("window-set-region top", bind));
-  arg = canopy::payloadIf<canopy::WindowRegionArg>(bind);
-  CHECK(arg != nullptr && arg->region == canopy::WindowRegion::Top);
+  arg = mahogany::payloadIf<mahogany::WindowRegionArg>(bind);
+  CHECK(arg != nullptr && arg->region == mahogany::WindowRegion::Top);
   CHECK(parseAction("window-set-region bottom", bind));
-  arg = canopy::payloadIf<canopy::WindowRegionArg>(bind);
-  CHECK(arg != nullptr && arg->region == canopy::WindowRegion::Bottom);
+  arg = mahogany::payloadIf<mahogany::WindowRegionArg>(bind);
+  CHECK(arg != nullptr && arg->region == mahogany::WindowRegion::Bottom);
   CHECK(parseAction("window-clear-region", bind));
   CHECK(bind.action == KeybindAction::WindowClearRegion);
   CHECK(!parseAction("window-set-region top-left", bind));
@@ -1412,44 +1412,44 @@ CANOPY_TEST(parsesRegionActionsAndRejectsRemovedNames) {
 }
 
 CANOPY_TEST(splitsActionStringsLikeAShell) {
-  const auto words = canopy::splitActionString(R"(a 'b c' "d \"e\"" f\ g)");
+  const auto words = mahogany::splitActionString(R"(a 'b c' "d \"e\"" f\ g)");
   CHECK(words.has_value());
   CHECK((words == std::vector<std::string>{"a", "b c", "d \"e\"", "f g"}));
-  CHECK((canopy::splitActionString(R"(a"b c" '' "")") == std::vector<std::string>{"ab c", "", ""}));
-  CHECK(!canopy::splitActionString(R"("x)").has_value());
-  CHECK(!canopy::splitActionString(R"(x\)").has_value());
+  CHECK((mahogany::splitActionString(R"(a"b c" '' "")") == std::vector<std::string>{"ab c", "", ""}));
+  CHECK(!mahogany::splitActionString(R"("x)").has_value());
+  CHECK(!mahogany::splitActionString(R"(x\)").has_value());
 }
 
 CANOPY_TEST(spawnKeepsTheRawRestOfAConfigString) {
   Keybind bind;
   CHECK(parseAction(R"x(spawn grim -g "$(slurp)" out.png)x", bind));
-  const auto* spawn = canopy::payloadIf<canopy::SpawnArg>(bind);
+  const auto* spawn = mahogany::payloadIf<mahogany::SpawnArg>(bind);
   CHECK_EQ(spawn != nullptr ? spawn->command : std::string{}, std::string{R"x(grim -g "$(slurp)" out.png)x"});
   // Only the separating whitespace is dropped; a trailing escaped space belongs to the command.
   CHECK(parseAction(R"x(spawn printf '%s' foo\ )x", bind));
-  spawn = canopy::payloadIf<canopy::SpawnArg>(bind);
+  spawn = mahogany::payloadIf<mahogany::SpawnArg>(bind);
   CHECK_EQ(spawn != nullptr ? spawn->command : std::string{}, std::string{R"x(printf '%s' foo\ )x"});
 
   const std::vector<std::string> words{"spawn", "kitty", "-e", "htop"};
-  CHECK(canopy::parseActionWords(words, bind));
-  spawn = canopy::payloadIf<canopy::SpawnArg>(bind);
+  CHECK(mahogany::parseActionWords(words, bind));
+  spawn = mahogany::payloadIf<mahogany::SpawnArg>(bind);
   CHECK_EQ(spawn != nullptr ? spawn->command : std::string{}, std::string{"kitty -e htop"});
 }
 
 CANOPY_TEST(parsesActionWords) {
   Keybind bind;
-  CHECK(!canopy::parseActionWords(std::vector<std::string>{}, bind));
-  CHECK(!canopy::parseActionWords(std::vector<std::string>{"workspace-switch:2"}, bind));
-  CHECK(canopy::parseActionWords(std::vector<std::string>{"workspace-switch", "--name", "2"}, bind));
-  const auto* selector = canopy::payloadIf<canopy::WorkspaceArg>(bind);
-  const auto* name = selector != nullptr ? std::get_if<canopy::WorkspaceName>(&selector->reference) : nullptr;
+  CHECK(!mahogany::parseActionWords(std::vector<std::string>{}, bind));
+  CHECK(!mahogany::parseActionWords(std::vector<std::string>{"workspace-switch:2"}, bind));
+  CHECK(mahogany::parseActionWords(std::vector<std::string>{"workspace-switch", "--name", "2"}, bind));
+  const auto* selector = mahogany::payloadIf<mahogany::WorkspaceArg>(bind);
+  const auto* name = selector != nullptr ? std::get_if<mahogany::WorkspaceName>(&selector->reference) : nullptr;
   CHECK(name != nullptr && name->value == "2");
   // IPC words are not split again.
-  CHECK(canopy::parseActionWords(std::vector<std::string>{"workspace-switch", "My web"}, bind));
-  selector = canopy::payloadIf<canopy::WorkspaceArg>(bind);
-  name = selector != nullptr ? std::get_if<canopy::WorkspaceName>(&selector->reference) : nullptr;
+  CHECK(mahogany::parseActionWords(std::vector<std::string>{"workspace-switch", "My web"}, bind));
+  selector = mahogany::payloadIf<mahogany::WorkspaceArg>(bind);
+  name = selector != nullptr ? std::get_if<mahogany::WorkspaceName>(&selector->reference) : nullptr;
   CHECK(name != nullptr && name->value == "My web");
-  CHECK(!canopy::parseActionWords(std::vector<std::string>{"window-close", ""}, bind));
+  CHECK(!mahogany::parseActionWords(std::vector<std::string>{"window-close", ""}, bind));
 }
 
 CANOPY_TEST(effectCycleRejectsOffAndLayoutToggleNeedsTwoModes) {
@@ -1462,18 +1462,18 @@ CANOPY_TEST(effectCycleRejectsOffAndLayoutToggleNeedsTwoModes) {
 CANOPY_TEST(workspaceOutputTargetsReuseWorkspaceSelectors) {
   const struct {
     std::string_view input;
-    canopy::WorkspaceMoveToOutputArg expected;
+    mahogany::WorkspaceMoveToOutputArg expected;
   } cases[] = {
       {"DP-2", {"DP-2", std::nullopt}},
-      {"--output DP-1 current --name 3", {"current", canopy::WorkspaceArg{canopy::WorkspaceName{"3"}, "DP-1"}}},
+      {"--output DP-1 current --name 3", {"current", mahogany::WorkspaceArg{mahogany::WorkspaceName{"3"}, "DP-1"}}},
       {"'Vendor Model Serial' 'My web'",
-       {"Vendor Model Serial", canopy::WorkspaceArg{canopy::WorkspaceName{"My web"}, ""}}},
-      {"DP-2 3 --output DP-1", {"DP-2", canopy::WorkspaceArg{canopy::WorkspaceIndex{3}, "DP-1"}}},
+       {"Vendor Model Serial", mahogany::WorkspaceArg{mahogany::WorkspaceName{"My web"}, ""}}},
+      {"DP-2 3 --output DP-1", {"DP-2", mahogany::WorkspaceArg{mahogany::WorkspaceIndex{3}, "DP-1"}}},
   };
   for (const auto& [input, expected] : cases) {
     Keybind bind;
     CHECK(parseAction("workspace-move-to-output " + std::string(input), bind));
-    const auto* arg = canopy::payloadIf<canopy::WorkspaceMoveToOutputArg>(bind);
+    const auto* arg = mahogany::payloadIf<mahogany::WorkspaceMoveToOutputArg>(bind);
     CHECK(arg != nullptr && *arg == expected);
   }
   for (const std::string_view input :

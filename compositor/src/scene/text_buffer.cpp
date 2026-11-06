@@ -20,7 +20,7 @@ namespace {
 
 } // namespace
 
-namespace canopy {
+namespace mahogany {
 
   std::string escapeMarkup(std::string_view text) {
     gchar* escaped = g_markup_escape_text(text.data(), static_cast<gssize>(text.size()));
@@ -99,4 +99,4 @@ namespace canopy {
     };
   }
 
-} // namespace canopy
+} // namespace mahogany

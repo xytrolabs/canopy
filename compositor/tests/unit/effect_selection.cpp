@@ -4,7 +4,7 @@
 
 #include <array>
 
-using namespace canopy;
+using namespace mahogany;
 
 namespace {
   Effects configuration(EffectSelectionPolicy policy = EffectSelectionPolicy::UnusedFirst) {

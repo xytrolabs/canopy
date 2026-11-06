@@ -9,7 +9,7 @@ extern "C" {
 #include <wlr/xcursor.h>
 }
 
-namespace canopy {
+namespace mahogany {
   namespace {
 
     constexpr size_t kBytesPerPixel = 4;
@@ -138,4 +138,4 @@ namespace canopy {
     return std::nullopt;
   }
 
-} // namespace canopy
+} // namespace mahogany

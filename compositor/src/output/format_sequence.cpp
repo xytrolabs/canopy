@@ -8,7 +8,7 @@
 #include <format>
 #include <span>
 
-namespace canopy {
+namespace mahogany {
 
   namespace {
 
@@ -183,4 +183,4 @@ namespace canopy {
     return result;
   }
 
-} // namespace canopy
+} // namespace mahogany

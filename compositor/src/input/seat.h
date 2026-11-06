@@ -7,7 +7,7 @@ struct wlr_cursor_shape_manager_v1;
 struct wlr_seat;
 struct wlr_seat_client;
 
-namespace canopy {
+namespace mahogany {
 
   class Server;
   class ToplevelDragManager;
@@ -64,4 +64,4 @@ namespace canopy {
     wl_listener m_dragDestroy{};
   };
 
-} // namespace canopy
+} // namespace mahogany

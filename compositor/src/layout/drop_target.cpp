@@ -17,7 +17,7 @@
 #include "wlr.h"
 // clang-format on
 
-namespace canopy {
+namespace mahogany {
 
   namespace {
     constexpr int kColumnHintWidth = 300;
@@ -701,4 +701,4 @@ namespace canopy {
     }
   }
 
-} // namespace canopy
+} // namespace mahogany

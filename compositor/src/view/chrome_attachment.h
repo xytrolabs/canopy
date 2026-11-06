@@ -4,7 +4,7 @@
 
 struct wlr_scene_tree;
 
-namespace canopy {
+namespace mahogany {
 
   // Where a view's content sits inside its frame, and what decides how chrome around it is drawn.
   struct ViewChromeGeometry {
@@ -51,4 +51,4 @@ namespace canopy {
     virtual void syncPreview(ViewChromeAttachment& /*preview*/) const {}
   };
 
-} // namespace canopy
+} // namespace mahogany

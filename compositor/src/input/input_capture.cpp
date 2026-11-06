@@ -23,7 +23,7 @@
 #include <utility>
 #include <vector>
 
-namespace canopy {
+namespace mahogany {
 
   namespace {
     constexpr Logger kLog("input-capture");
@@ -1127,4 +1127,4 @@ namespace canopy {
     return true;
   }
 
-} // namespace canopy
+} // namespace mahogany

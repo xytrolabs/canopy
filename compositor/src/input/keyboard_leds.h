@@ -9,7 +9,7 @@
 struct wlr_keyboard;
 struct xkb_state;
 
-namespace canopy {
+namespace mahogany {
 
   // Share named locks across backend keyboards and publish consistent indicators,
   // including input from LED-less proxies. Virtual keyboards retain their own state.
@@ -61,4 +61,4 @@ namespace canopy {
     bool m_syncing = false;
   };
 
-} // namespace canopy
+} // namespace mahogany

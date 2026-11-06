@@ -9,7 +9,7 @@ struct wlr_scene_blur;
 struct wlr_scene_tree;
 struct wlr_surface;
 
-namespace canopy {
+namespace mahogany {
 
   struct SurfaceBlurOptions {
     float ignoreAlpha = 0.0F;
@@ -51,4 +51,4 @@ namespace canopy {
     float m_alpha = 1.0F;
   };
 
-} // namespace canopy
+} // namespace mahogany

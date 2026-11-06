@@ -14,7 +14,7 @@
 #include <utility>
 #include <vector>
 
-namespace canopy {
+namespace mahogany {
 
   namespace {
 
@@ -446,4 +446,4 @@ namespace canopy {
     );
   }
 
-} // namespace canopy
+} // namespace mahogany

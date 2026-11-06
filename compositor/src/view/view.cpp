@@ -30,7 +30,7 @@ extern "C" {
 #include "workspace/workspace.h"
 #include "xwayland/xwayland.h"
 
-namespace canopy {
+namespace mahogany {
   namespace {
     constexpr Logger kLog("view");
 
@@ -1078,4 +1078,4 @@ namespace canopy {
       applyDynamicRules();
     }
   }
-} // namespace canopy
+} // namespace mahogany

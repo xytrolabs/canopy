@@ -16,7 +16,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
-using canopy::InputCapturePermissions;
+using mahogany::InputCapturePermissions;
 
 namespace {
   constexpr std::string_view kId = "11111111111111111111111111111111";

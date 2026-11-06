@@ -9,7 +9,7 @@ extern "C" {
 #include "wlr.h"
 // clang-format on
 
-namespace canopy {
+namespace mahogany {
 
   void applyBorderGeometry(wlr_scene_border* border, const BorderRing& ring, int innerWidth, int outerWidth) {
     if (border == nullptr) {
@@ -45,4 +45,4 @@ namespace canopy {
     out.push_back(ring);
   }
 
-} // namespace canopy
+} // namespace mahogany

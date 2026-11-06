@@ -13,7 +13,7 @@ extern "C" {
 }
 #endif
 
-namespace canopy {
+namespace mahogany {
 
 #if CANOPY_HAS_DRM_BACKEND
   namespace {
@@ -181,4 +181,4 @@ namespace canopy {
 
   void DrmLeaseManager::setActive(bool active) { m_impl->setActive(active); }
 
-} // namespace canopy
+} // namespace mahogany

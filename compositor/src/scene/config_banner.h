@@ -7,7 +7,7 @@
 struct wl_event_source;
 struct wlr_scene_tree;
 
-namespace canopy {
+namespace mahogany {
   struct ConfigDiagnostic;
   class Server;
 
@@ -39,4 +39,4 @@ namespace canopy {
     bool m_persistent = false; // true when errors present
   };
 
-} // namespace canopy
+} // namespace mahogany

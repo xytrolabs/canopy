@@ -48,7 +48,7 @@ extern "C" {
 #include <set>
 #endif
 
-namespace canopy {
+namespace mahogany {
 
   namespace {
     constexpr Logger kLog("output");
@@ -2255,4 +2255,4 @@ namespace canopy {
     m_server->removeOutput(this);
   }
 
-} // namespace canopy
+} // namespace mahogany

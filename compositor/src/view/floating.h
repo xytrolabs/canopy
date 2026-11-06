@@ -13,7 +13,7 @@ extern "C" {
 #include <span>
 #include <vector>
 
-namespace canopy {
+namespace mahogany {
 
   struct FloatingPoint {
     int x = 0;
@@ -257,4 +257,4 @@ namespace canopy {
     bool m_resizeActive = false;
   };
 
-} // namespace canopy
+} // namespace mahogany

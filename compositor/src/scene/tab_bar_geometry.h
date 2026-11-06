@@ -4,7 +4,7 @@
 #include <cstddef>
 #include <cstdint>
 
-namespace canopy {
+namespace mahogany {
 
   struct TabSlot {
     int x = 0;
@@ -157,4 +157,4 @@ namespace canopy {
     return {.row = std::min(strip.first + position, tabs), .boundary = parts.slotsX + boundary};
   }
 
-} // namespace canopy
+} // namespace mahogany

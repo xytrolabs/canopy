@@ -3,7 +3,7 @@
 #include <algorithm>
 #include <cmath>
 
-namespace canopy {
+namespace mahogany {
   namespace {
     // The sheet's spring model is tuned through DragPhysics::Tuning
     // ([animation.windows_drag]); only the integration and stability
@@ -287,4 +287,4 @@ namespace canopy {
 
   float DragPhysics::maxVelocity() const { return largestComponent(m_velocity); }
 
-} // namespace canopy
+} // namespace mahogany

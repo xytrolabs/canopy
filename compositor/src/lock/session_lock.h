@@ -13,7 +13,7 @@ struct wlr_session_lock_surface_v1;
 struct wlr_session_lock_v1;
 struct wlr_surface;
 
-namespace canopy {
+namespace mahogany {
 
   class Output;
   class Server;
@@ -126,4 +126,4 @@ namespace canopy {
     std::vector<OutputPresentation> m_outputPresentations;
   };
 
-} // namespace canopy
+} // namespace mahogany

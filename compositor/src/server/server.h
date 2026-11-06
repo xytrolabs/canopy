@@ -92,7 +92,7 @@ struct wlr_virtual_keyboard_manager_v1;
 struct wlr_virtual_pointer_manager_v1;
 struct wlr_virtual_pointer_v1;
 
-namespace canopy {
+namespace mahogany {
   enum class ContentType;
   struct ConfigEffects;
 
@@ -1038,4 +1038,4 @@ namespace canopy {
     std::vector<std::unique_ptr<LayerSurface>> m_layerSurfaces;
   };
 
-} // namespace canopy
+} // namespace mahogany

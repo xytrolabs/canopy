@@ -10,7 +10,7 @@
 
 struct wlr_xwayland;
 
-namespace canopy {
+namespace mahogany {
 
   // Publishes a stable RandR primary on the XWM connection, without keeping the lazy Xwayland alive or waiting for
   // X11 replies in the Wayland event loop.
@@ -62,4 +62,4 @@ namespace canopy {
     std::chrono::steady_clock::time_point m_requested;
   };
 
-} // namespace canopy
+} // namespace mahogany

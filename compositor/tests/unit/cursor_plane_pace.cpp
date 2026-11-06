@@ -4,10 +4,10 @@
 
 #include <cstdint>
 
-using canopy::cursorPlaneAdvance;
-using canopy::CursorPlaneDamage;
-using canopy::cursorPlaneDamageFor;
-using canopy::CursorPlaneState;
+using mahogany::cursorPlaneAdvance;
+using mahogany::CursorPlaneDamage;
+using mahogany::cursorPlaneDamageFor;
+using mahogany::CursorPlaneState;
 
 namespace {
   const void* imageToken(std::uintptr_t value) { return reinterpret_cast<const void*>(value); }

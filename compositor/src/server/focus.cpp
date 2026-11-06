@@ -17,7 +17,7 @@
 
 #include <algorithm>
 
-namespace canopy {
+namespace mahogany {
 
   namespace {
     constexpr Logger kLog("focus");
@@ -576,4 +576,4 @@ namespace canopy {
     return workspace != nullptr ? workspace->focusedView() : nullptr;
   }
 
-} // namespace canopy
+} // namespace mahogany

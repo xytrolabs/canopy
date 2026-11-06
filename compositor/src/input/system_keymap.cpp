@@ -8,7 +8,7 @@
 #include <systemd/sd-bus.h>
 #endif
 
-namespace canopy {
+namespace mahogany {
 
 #if CANOPY_HAS_SD_BUS
   namespace {
@@ -92,4 +92,4 @@ namespace canopy {
 #endif
   }
 
-} // namespace canopy
+} // namespace mahogany

@@ -9,7 +9,7 @@
 #include "wlr.h"
 // clang-format on
 
-namespace canopy {
+namespace mahogany {
 
   // Presented size
   void ViewPresentation::setSize(int width, int height) {
@@ -180,4 +180,4 @@ namespace canopy {
     );
   }
 
-} // namespace canopy
+} // namespace mahogany

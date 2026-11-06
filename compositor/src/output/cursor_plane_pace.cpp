@@ -2,7 +2,7 @@
 
 #include <cstdint>
 
-namespace canopy {
+namespace mahogany {
   bool cursorPlaneAdvance(CursorPlaneState* state, CursorPlaneState now, CursorPlaneState* previous) {
     *previous = *state;
 
@@ -47,4 +47,4 @@ namespace canopy {
 
     return result;
   }
-} // namespace canopy
+} // namespace mahogany

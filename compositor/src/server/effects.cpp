@@ -10,7 +10,7 @@
 #include <algorithm>
 #include <cassert>
 
-namespace canopy {
+namespace mahogany {
   namespace {
     constexpr Logger kLog("effects");
   } // namespace
@@ -147,4 +147,4 @@ namespace canopy {
     const EffectHoldCounts counts = pool != nullptr ? effectHoldCounts(*pool, &slot) : EffectHoldCounts{};
     return m_effectSelection.apply(slot, config().effects, kind, action, argument, counts);
   }
-} // namespace canopy
+} // namespace mahogany

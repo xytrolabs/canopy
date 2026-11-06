@@ -20,16 +20,16 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
-using canopy::ApplicationScopeEnvironmentArguments;
-using canopy::applicationScopeEnvironmentArguments;
-using canopy::captureSystemdControlEnvironment;
-using canopy::closeChildFileDescriptors;
-using canopy::currentSystemdUnit;
-using canopy::execApplicationInScope;
-using canopy::isDirectSystemdService;
-using canopy::resolveExecutable;
-using canopy::restoreSystemdControlEnvironment;
-using canopy::systemdUnitFromCgroup;
+using mahogany::ApplicationScopeEnvironmentArguments;
+using mahogany::applicationScopeEnvironmentArguments;
+using mahogany::captureSystemdControlEnvironment;
+using mahogany::closeChildFileDescriptors;
+using mahogany::currentSystemdUnit;
+using mahogany::execApplicationInScope;
+using mahogany::isDirectSystemdService;
+using mahogany::resolveExecutable;
+using mahogany::restoreSystemdControlEnvironment;
+using mahogany::systemdUnitFromCgroup;
 
 namespace {
   bool gForceCloseRangeFailure = false;

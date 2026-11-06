@@ -4,9 +4,9 @@
 #include <cstdint>
 #include <limits>
 
-using canopy::DirectScanoutState;
-using canopy::DirectScanoutTracker;
-using Observation = canopy::DirectScanoutTracker::Observation;
+using mahogany::DirectScanoutState;
+using mahogany::DirectScanoutTracker;
+using Observation = mahogany::DirectScanoutTracker::Observation;
 
 namespace {
   DirectScanoutState scannedOut(const char* windowId) {

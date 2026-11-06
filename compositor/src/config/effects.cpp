@@ -11,7 +11,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
-namespace canopy {
+namespace mahogany {
 
   ShaderReadResult
   readShaderSource(Section& section, std::string_view key, std::vector<ConfigDiagnostic>& diagnostics) {
@@ -208,4 +208,4 @@ namespace canopy {
     return std::nullopt;
   }
 
-} // namespace canopy
+} // namespace mahogany

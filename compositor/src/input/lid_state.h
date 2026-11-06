@@ -4,7 +4,7 @@
 #include <optional>
 #include <vector>
 
-namespace canopy {
+namespace mahogany {
 
   enum class LidState : uint8_t {
     Open,
@@ -42,4 +42,4 @@ namespace canopy {
     bool m_ready = false;
   };
 
-} // namespace canopy
+} // namespace mahogany

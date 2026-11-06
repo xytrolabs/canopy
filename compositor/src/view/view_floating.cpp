@@ -23,7 +23,7 @@ extern "C" {
 #include "workspace/workspace.h"
 #include "xwayland/xwayland.h"
 
-namespace canopy {
+namespace mahogany {
   wlr_box View::floatingUsableArea() const {
     if (m_workspace != nullptr && m_workspace->group() != nullptr && m_workspace->group()->output() != nullptr) {
       return m_workspace->group()->output()->usableArea();
@@ -649,4 +649,4 @@ namespace canopy {
     updateBlur();
     updateShadow();
   }
-} // namespace canopy
+} // namespace mahogany

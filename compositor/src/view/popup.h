@@ -6,7 +6,7 @@
 struct wlr_xdg_popup;
 struct wlr_scene_tree;
 
-namespace canopy {
+namespace mahogany {
 
   class Popup {
   public:
@@ -38,4 +38,4 @@ namespace canopy {
     wl_listener m_destroy{};
   };
 
-} // namespace canopy
+} // namespace mahogany

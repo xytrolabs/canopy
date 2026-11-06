@@ -9,7 +9,7 @@ extern "C" {
 #include <wlr/util/box.h>
 }
 
-namespace canopy {
+namespace mahogany {
 
   class Server;
   class View;
@@ -90,4 +90,4 @@ namespace canopy {
   // when the drag was cancelled, else back home without `view`, showing the tab before it as a closed tab would.
   void landTabGroup(View& view, const LiftedTabGroup& lifted, bool closing);
 
-} // namespace canopy
+} // namespace mahogany

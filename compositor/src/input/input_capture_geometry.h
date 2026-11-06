@@ -4,7 +4,7 @@
 #include <optional>
 #include <span>
 
-namespace canopy {
+namespace mahogany {
 
   struct InputCaptureZone {
     int32_t x = 0;
@@ -36,4 +36,4 @@ namespace canopy {
       double dx, double dy
   );
 
-} // namespace canopy
+} // namespace mahogany

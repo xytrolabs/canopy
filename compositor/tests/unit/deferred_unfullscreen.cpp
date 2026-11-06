@@ -2,8 +2,8 @@
 
 #include "check.h"
 
-using canopy::DeferredUnfullscreen;
-using canopy::FullscreenRequestDisposition;
+using mahogany::DeferredUnfullscreen;
+using mahogany::FullscreenRequestDisposition;
 
 namespace {
   using namespace std::chrono_literals;

@@ -21,7 +21,7 @@ struct wlr_scene_tree;
 struct wlr_scene_rect;
 struct wlr_scene_blur;
 
-namespace canopy {
+namespace mahogany {
 
   class Output;
   class Server;
@@ -183,4 +183,4 @@ namespace canopy {
     View* m_focusedView = nullptr;
   };
 
-} // namespace canopy
+} // namespace mahogany

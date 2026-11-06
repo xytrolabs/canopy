@@ -16,7 +16,7 @@ namespace {
 CANOPY_TEST(manualInhibitionIsIndependentPerSurface) {
   TestSurface first;
   TestSurface second;
-  canopy::ManualShortcutsInhibit inhibition;
+  mahogany::ManualShortcutsInhibit inhibition;
 
   CHECK(!inhibition.enabled(&first.surface));
   inhibition.enable(&first.surface);
@@ -32,7 +32,7 @@ CANOPY_TEST(manualInhibitionIsIndependentPerSurface) {
 CANOPY_TEST(surfaceDestructionClearsManualInhibition) {
   TestSurface first;
   TestSurface second;
-  canopy::ManualShortcutsInhibit inhibition;
+  mahogany::ManualShortcutsInhibit inhibition;
   inhibition.enable(&first.surface);
   inhibition.enable(&second.surface);
   CHECK(inhibition.enabled(&first.surface));
@@ -47,7 +47,7 @@ CANOPY_TEST(surfaceDestructionClearsManualInhibition) {
 CANOPY_TEST(manualInhibitionUnlinksListenersOnClearAndShutdown) {
   TestSurface surface;
   {
-    canopy::ManualShortcutsInhibit inhibition;
+    mahogany::ManualShortcutsInhibit inhibition;
     inhibition.enable(&surface.surface);
     inhibition.enable(&surface.surface);
     CHECK_EQ(wl_list_length(&surface.surface.events.destroy.listener_list), 1);

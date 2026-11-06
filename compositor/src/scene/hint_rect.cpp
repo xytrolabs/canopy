@@ -11,7 +11,7 @@
 #include "wlr.h"
 // clang-format on
 
-namespace canopy {
+namespace mahogany {
 
   namespace {
     constexpr int kFadeMs = 100;
@@ -125,4 +125,4 @@ namespace canopy {
     wlr_scene_rect_set_color(m_rect, color);
   }
 
-} // namespace canopy
+} // namespace mahogany

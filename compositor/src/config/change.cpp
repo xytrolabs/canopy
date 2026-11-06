@@ -5,7 +5,7 @@
 #include <algorithm>
 #include <string_view>
 
-namespace canopy {
+namespace mahogany {
   namespace {
 
     const OutputRule* findOutputRule(const Config& config, const std::string& name) {
@@ -390,4 +390,4 @@ namespace canopy {
     add(dialogAttachment, "dialog attachment");
     return out;
   }
-} // namespace canopy
+} // namespace mahogany

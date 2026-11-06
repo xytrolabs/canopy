@@ -11,7 +11,7 @@ extern "C" {
 #include "wlr.h"
 // clang-format on
 
-namespace canopy {
+namespace mahogany {
 
   void SurfaceShadow::update(
       wlr_scene_tree* parent, int contentWidth, int contentHeight, int borderTotal, int cornerRadius, int topExtension
@@ -138,4 +138,4 @@ namespace canopy {
     std::copy_n(m_node->color, 4, result.color.begin());
     return result;
   }
-} // namespace canopy
+} // namespace mahogany

@@ -8,7 +8,7 @@ extern "C" {
 #include <wlr/util/edges.h>
 }
 
-namespace canopy {
+namespace mahogany {
   int titleBarButtonDiameter(int height) {
     // Modern traffic lights are 40-45% of the title bar height (macOS draws 12 px
     // dots in a 28 px bar). Half the height reads as a chunky button from 2010.
@@ -103,4 +103,4 @@ namespace canopy {
   wlr_box contentBoxInTile(const wlr_box& tile, int titleBarHeight) {
     return {tile.x, tile.y + titleBarHeight, tile.width, std::max(1, tile.height - titleBarHeight)};
   }
-} // namespace canopy
+} // namespace mahogany

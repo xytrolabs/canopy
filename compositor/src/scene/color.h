@@ -6,7 +6,7 @@
 #include <format>
 #include <string>
 
-namespace canopy {
+namespace mahogany {
   struct OkLab {
     float lightness = 0.0F;
     float a = 0.0F;
@@ -101,4 +101,4 @@ namespace canopy {
     return std::format("#{:02X}{:02X}{:02X}{:02X}", byte(color[0]), byte(color[1]), byte(color[2]), byte(color[3]));
   }
 
-} // namespace canopy
+} // namespace mahogany

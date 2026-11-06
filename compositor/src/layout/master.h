@@ -12,7 +12,7 @@ extern "C" {
 #include <wlr/util/box.h>
 }
 
-namespace canopy {
+namespace mahogany {
 
   class View;
 
@@ -139,4 +139,4 @@ namespace canopy {
     bool m_geometryStale = true;
   };
 
-} // namespace canopy
+} // namespace mahogany

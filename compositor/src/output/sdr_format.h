@@ -6,7 +6,7 @@
 #include <optional>
 #include <utility>
 
-namespace canopy {
+namespace mahogany {
 
   template <typename Probe> std::optional<uint32_t> selectSdr10RenderFormat(uint32_t currentFormat, Probe&& accepts) {
     std::array candidates{DRM_FORMAT_XRGB2101010, DRM_FORMAT_XBGR2101010};
@@ -25,4 +25,4 @@ namespace canopy {
     return enabled && !hdrActive && (renderFormat == DRM_FORMAT_XRGB2101010 || renderFormat == DRM_FORMAT_XBGR2101010);
   }
 
-} // namespace canopy
+} // namespace mahogany

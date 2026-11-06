@@ -7,7 +7,7 @@
 #include "wlr.h"
 #include "xwayland/xwayland.h"
 
-namespace canopy {
+namespace mahogany {
 
   namespace {
 
@@ -204,4 +204,4 @@ namespace canopy {
     syncPosition();
   }
 
-} // namespace canopy
+} // namespace mahogany

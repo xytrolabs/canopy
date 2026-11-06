@@ -16,7 +16,7 @@
 #include <utility>
 #include <vector>
 
-namespace canopy {
+namespace mahogany {
 
   namespace {
 
@@ -144,4 +144,4 @@ namespace canopy {
     return found == devices.end() ? nullptr : &*found;
   }
 
-} // namespace canopy
+} // namespace mahogany

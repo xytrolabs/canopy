@@ -6,7 +6,7 @@
 #include <optional>
 #include <string>
 
-namespace canopy {
+namespace mahogany {
 
   // The IPC form of an action: {"cmd":"action","action":"<name>", ...} with one typed field per argument, as
   // docs/user/ipc.md lists. It carries the same payloads as the word grammar without going through text, so programs
@@ -19,4 +19,4 @@ namespace canopy {
   // Encodes a parsed action as a request. Empty optional payload fields are left out.
   nlohmann::json actionRequest(const Keybind& bind);
 
-} // namespace canopy
+} // namespace mahogany

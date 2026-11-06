@@ -13,7 +13,7 @@
 #include <optional>
 #include <stdexcept>
 
-namespace canopy {
+namespace mahogany {
   namespace {
     // wlroots 0.20's wl_data_source resource stores wlr_client_data_source,
     // whose first member is wlr_data_source. Keep this prefix assumption in
@@ -279,4 +279,4 @@ namespace canopy {
       }
     }
   }
-} // namespace canopy
+} // namespace mahogany

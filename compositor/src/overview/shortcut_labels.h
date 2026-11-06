@@ -5,7 +5,7 @@
 #include <string_view>
 #include <vector>
 
-namespace canopy {
+namespace mahogany {
 
   // Prefix-free shortcut labels over keys in favorite-first order.
   // The first labels are single favorite keys. When count exceeds the key set,
@@ -13,4 +13,4 @@ namespace canopy {
   // Fewer than two keys yields an empty result.
   std::vector<std::string> shortcutLabels(size_t count, std::string_view keys);
 
-} // namespace canopy
+} // namespace mahogany

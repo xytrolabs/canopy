@@ -8,7 +8,7 @@
 
 #include <algorithm>
 
-namespace canopy {
+namespace mahogany {
 
   namespace {
     constexpr Logger kLog("lock");
@@ -486,4 +486,4 @@ namespace canopy {
     return presentation != m_outputPresentations.end() ? &*presentation : nullptr;
   }
 
-} // namespace canopy
+} // namespace mahogany

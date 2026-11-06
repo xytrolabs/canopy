@@ -17,7 +17,7 @@
 #include <vector>
 #include <wayland-server-core.h>
 
-namespace canopy {
+namespace mahogany {
 
   namespace {
     constexpr Logger kLog("eis");
@@ -368,4 +368,4 @@ namespace canopy {
   EisSocket::~EisSocket() = default;
   int EisSocket::fd() const { return m_impl->endpoint; }
 
-} // namespace canopy
+} // namespace mahogany

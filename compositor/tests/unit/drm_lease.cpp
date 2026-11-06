@@ -132,7 +132,7 @@ namespace {
     State inventory;
     wl_display* display = nullptr;
     wlr_backend* multi = nullptr;
-    std::unique_ptr<canopy::DrmLeaseManager> manager;
+    std::unique_ptr<mahogany::DrmLeaseManager> manager;
 
     Fixture() {
       state = &inventory;
@@ -166,7 +166,7 @@ namespace {
       return &backend->base;
     }
 
-    void initialize() { manager = std::make_unique<canopy::DrmLeaseManager>(display, multi); }
+    void initialize() { manager = std::make_unique<mahogany::DrmLeaseManager>(display, multi); }
 
     void request(std::initializer_list<Output*> outputs) {
       CHECK(outputs.size() != 0);

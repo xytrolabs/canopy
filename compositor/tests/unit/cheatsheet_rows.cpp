@@ -16,10 +16,10 @@ extern "C" {
 #include <utility>
 #include <vector>
 
-using canopy::buildCheatsheetRows;
-using canopy::CheatsheetRow;
-using canopy::Keybind;
-using canopy::KeybindAction;
+using mahogany::buildCheatsheetRows;
+using mahogany::CheatsheetRow;
+using mahogany::Keybind;
+using mahogany::KeybindAction;
 
 namespace {
 
@@ -34,7 +34,7 @@ namespace {
 
   Keybind spawnBind(uint32_t keysym, const std::string& command) {
     Keybind result = bind(KeybindAction::Spawn, keysym);
-    canopy::SpawnArg spawn;
+    mahogany::SpawnArg spawn;
     spawn.command = command;
     result.payload = std::move(spawn);
     return result;
@@ -42,23 +42,23 @@ namespace {
 
   Keybind workspaceIndexBind(uint32_t keysym, size_t index, uint32_t modifiers = 0) {
     Keybind result = bind(KeybindAction::WorkspaceSwitch, keysym, modifiers);
-    canopy::WorkspaceArg workspace;
-    workspace.reference = canopy::WorkspaceIndex{index};
+    mahogany::WorkspaceArg workspace;
+    workspace.reference = mahogany::WorkspaceIndex{index};
     result.payload = std::move(workspace);
     return result;
   }
 
   Keybind workspaceNameBind(uint32_t keysym, const std::string& name, uint32_t modifiers = 0) {
     Keybind result = bind(KeybindAction::WorkspaceSwitch, keysym, modifiers);
-    canopy::WorkspaceArg workspace;
-    workspace.reference = canopy::WorkspaceName{name};
+    mahogany::WorkspaceArg workspace;
+    workspace.reference = mahogany::WorkspaceName{name};
     result.payload = std::move(workspace);
     return result;
   }
 
-  Keybind layoutBind(uint32_t keysym, canopy::LayoutMode mode) {
+  Keybind layoutBind(uint32_t keysym, mahogany::LayoutMode mode) {
     Keybind result = bind(KeybindAction::WorkspaceSetLayout, keysym);
-    result.payload = canopy::LayoutModeArg{.mode = mode, .toggleSequence = {}};
+    result.payload = mahogany::LayoutModeArg{.mode = mode, .toggleSequence = {}};
     return result;
   }
 
@@ -76,8 +76,8 @@ namespace {
 CANOPY_TEST(anEmptyBindListProducesNoRows) { CHECK(buildCheatsheetRows({}).empty()); }
 
 CANOPY_TEST(utf8ArrowOccupiesOneCheatsheetColumn) {
-  CHECK_EQ(canopy::cheatsheetChordColumns("Mod+\xe2\x86\x93"), size_t{5});
-  CHECK_EQ(canopy::cheatsheetChordColumns("Mod+WheelDown"), size_t{13});
+  CHECK_EQ(mahogany::cheatsheetChordColumns("Mod+\xe2\x86\x93"), size_t{5});
+  CHECK_EQ(mahogany::cheatsheetChordColumns("Mod+WheelDown"), size_t{13});
 }
 
 CANOPY_TEST(bindsWithNoActionAreSkipped) {
@@ -112,7 +112,7 @@ CANOPY_TEST(oneRowPerBindWhenActionsDiffer) {
 }
 
 CANOPY_TEST(masterLayoutModeIsNamedInTheActionLabel) {
-  const std::vector<Keybind> binds = {layoutBind(XKB_KEY_m, canopy::LayoutMode::Master)};
+  const std::vector<Keybind> binds = {layoutBind(XKB_KEY_m, mahogany::LayoutMode::Master)};
   const auto rows = buildCheatsheetRows(binds);
   CHECK_EQ(rows.size(), size_t{1});
   CHECK(rows[0].action.contains("master"));
@@ -120,7 +120,7 @@ CANOPY_TEST(masterLayoutModeIsNamedInTheActionLabel) {
 
 CANOPY_TEST(unnamedSubmapIsNamedInTheActionLabel) {
   Keybind unnamed = bind(KeybindAction::Submap, XKB_KEY_s);
-  unnamed.payload = canopy::SubmapArg{};
+  unnamed.payload = mahogany::SubmapArg{};
   const auto rows = buildCheatsheetRows(std::vector<Keybind>{unnamed});
   CHECK_EQ(rows.size(), size_t{1});
   CHECK_EQ(rows[0].action, std::string{"submap unnamed"});
@@ -236,7 +236,7 @@ CANOPY_TEST(workspaceRunsKeepPostActionSubmapTransitions) {
   std::vector<Keybind> binds;
   for (int i = 0; i < 9; ++i) {
     Keybind workspace = workspaceIndexBind(static_cast<uint32_t>(XKB_KEY_1 + i), static_cast<size_t>(i + 1));
-    workspace.submapAfter = canopy::SubmapArg{.name = "inner"};
+    workspace.submapAfter = mahogany::SubmapArg{.name = "inner"};
     binds.push_back(std::move(workspace));
   }
 
@@ -261,9 +261,9 @@ CANOPY_TEST(submapBindsCarryTheirSubmap) {
 
 CANOPY_TEST(postActionSubmapsRemainDistinctAndVisible) {
   Keybind resets = bind(KeybindAction::WindowFocusLeft, XKB_KEY_h);
-  resets.submapAfter = canopy::SubmapArg{.name = "reset"};
+  resets.submapAfter = mahogany::SubmapArg{.name = "reset"};
   Keybind enters = bind(KeybindAction::WindowFocusLeft, XKB_KEY_Left);
-  enters.submapAfter = canopy::SubmapArg{.name = "inner"};
+  enters.submapAfter = mahogany::SubmapArg{.name = "inner"};
 
   const std::vector<CheatsheetRow> rows = buildCheatsheetRows(std::vector<Keybind>{resets, enters});
   CHECK_EQ(rows.size(), size_t{2});
@@ -275,7 +275,7 @@ CANOPY_TEST(groupTitlesArePlainTextNotMarkup) {
   // This layer is content; escaping belongs to whatever draws it. A title carrying its own entities gets escaped a
   // second time and the reader sees the entity: "Move &amp; size" was rendered exactly like that.
   for (int i = 0; i < 32; ++i) {
-    const char* title = canopy::groupTitle(static_cast<canopy::Group>(i));
+    const char* title = mahogany::groupTitle(static_cast<mahogany::Group>(i));
     if (title == nullptr) {
       continue;
     }
@@ -287,18 +287,18 @@ CANOPY_TEST(groupTitlesArePlainTextNotMarkup) {
 }
 
 CANOPY_TEST(crossWorkspaceDirectionalActionsUseExpectedGroups) {
-  CHECK(canopy::groupForAction(KeybindAction::WindowFocusOrWorkspaceUp) == canopy::Group::Focus);
-  CHECK(canopy::groupForAction(KeybindAction::WindowFocusOrWorkspaceDown) == canopy::Group::Focus);
-  CHECK(canopy::groupForAction(KeybindAction::WindowMoveOrWorkspaceUp) == canopy::Group::MoveSize);
-  CHECK(canopy::groupForAction(KeybindAction::WindowMoveOrWorkspaceDown) == canopy::Group::MoveSize);
+  CHECK(mahogany::groupForAction(KeybindAction::WindowFocusOrWorkspaceUp) == mahogany::Group::Focus);
+  CHECK(mahogany::groupForAction(KeybindAction::WindowFocusOrWorkspaceDown) == mahogany::Group::Focus);
+  CHECK(mahogany::groupForAction(KeybindAction::WindowMoveOrWorkspaceUp) == mahogany::Group::MoveSize);
+  CHECK(mahogany::groupForAction(KeybindAction::WindowMoveOrWorkspaceDown) == mahogany::Group::MoveSize);
 }
 
 CANOPY_TEST(everyActionMapsToAGroupWithATitle) {
   // groupForAction has no default arm to fall through to, so a new action that
   // is never grouped would show up here.
-  for (const auto& spec : canopy::actionSpecs()) {
-    const canopy::Group group = canopy::groupForAction(spec.action);
-    const char* title = canopy::groupTitle(group);
+  for (const auto& spec : mahogany::actionSpecs()) {
+    const mahogany::Group group = mahogany::groupForAction(spec.action);
+    const char* title = mahogany::groupTitle(group);
     CHECK(title != nullptr);
     CHECK(title != nullptr && title[0] != '\0');
   }
@@ -307,26 +307,26 @@ CANOPY_TEST(everyActionMapsToAGroupWithATitle) {
 CANOPY_TEST(everyActionsGroupIsInTheFixedDisplayOrder) {
   // The overlay, `canopy msg --help`, and the action reference all walk fixedGroupOrder(). A group that exists but is
   // not listed there drops every action it owns from all three at once.
-  const auto order = canopy::fixedGroupOrder();
-  for (const auto& spec : canopy::actionSpecs()) {
-    const canopy::Group group = canopy::groupForAction(spec.action);
+  const auto order = mahogany::fixedGroupOrder();
+  for (const auto& spec : mahogany::actionSpecs()) {
+    const mahogany::Group group = mahogany::groupForAction(spec.action);
     CHECK(std::ranges::find(order, group) != order.end());
   }
 }
 
 CANOPY_TEST(scratchpadActionsHaveTheirOwnGroup) {
-  CHECK(canopy::groupForAction(KeybindAction::WindowMoveToScratchpad) == canopy::Group::Scratchpad);
-  CHECK(canopy::groupForAction(KeybindAction::ScratchpadToggle) == canopy::Group::Scratchpad);
-  CHECK(canopy::groupForAction(KeybindAction::WindowToggleScratchpad) == canopy::Group::Scratchpad);
-  CHECK(canopy::groupForAction(KeybindAction::WindowRestoreFromScratchpad) == canopy::Group::Scratchpad);
-  CHECK(canopy::groupForAction(KeybindAction::ScratchpadFocusNext) == canopy::Group::Scratchpad);
+  CHECK(mahogany::groupForAction(KeybindAction::WindowMoveToScratchpad) == mahogany::Group::Scratchpad);
+  CHECK(mahogany::groupForAction(KeybindAction::ScratchpadToggle) == mahogany::Group::Scratchpad);
+  CHECK(mahogany::groupForAction(KeybindAction::WindowToggleScratchpad) == mahogany::Group::Scratchpad);
+  CHECK(mahogany::groupForAction(KeybindAction::WindowRestoreFromScratchpad) == mahogany::Group::Scratchpad);
+  CHECK(mahogany::groupForAction(KeybindAction::ScratchpadFocusNext) == mahogany::Group::Scratchpad);
 }
 
 CANOPY_TEST(scrollAndPinActionsGroupWithTheirPeers) {
-  CHECK(canopy::groupForAction(KeybindAction::LayoutScrollUp) == canopy::Group::MoveSize);
-  CHECK(canopy::groupForAction(KeybindAction::LayoutScrollDown) == canopy::Group::MoveSize);
-  CHECK(canopy::groupForAction(KeybindAction::LayoutScrollDrag) == canopy::Group::MoveSize);
-  CHECK(canopy::groupForAction(KeybindAction::TogglePinned) == canopy::Group::Windows);
+  CHECK(mahogany::groupForAction(KeybindAction::LayoutScrollUp) == mahogany::Group::MoveSize);
+  CHECK(mahogany::groupForAction(KeybindAction::LayoutScrollDown) == mahogany::Group::MoveSize);
+  CHECK(mahogany::groupForAction(KeybindAction::LayoutScrollDrag) == mahogany::Group::MoveSize);
+  CHECK(mahogany::groupForAction(KeybindAction::TogglePinned) == mahogany::Group::Windows);
 }
 
 // column packing: Groups are indivisible, so the panel is as tall as the tallest column and the only lever is where the
@@ -334,33 +334,33 @@ CANOPY_TEST(scrollAndPinActionsGroupWithTheirPeers) {
 
 CANOPY_TEST(oneColumnHoldsEverything) {
   const std::vector<int> blocks{4, 9, 2};
-  CHECK_EQ(canopy::balancedColumnHeight(blocks, 1), 15);
+  CHECK_EQ(mahogany::balancedColumnHeight(blocks, 1), 15);
 }
 
 CANOPY_TEST(anEvenSplitIsFound) {
   const std::vector<int> blocks{5, 5, 5, 5};
-  CHECK_EQ(canopy::balancedColumnHeight(blocks, 2), 10);
+  CHECK_EQ(mahogany::balancedColumnHeight(blocks, 2), 10);
 }
 
 CANOPY_TEST(noColumnIsShorterThanItsLargestGroup) {
   // 20 cannot be split, so no number of columns gets the tallest below it.
   const std::vector<int> blocks{2, 20, 2};
-  CHECK_EQ(canopy::balancedColumnHeight(blocks, 3), 20);
-  CHECK_EQ(canopy::balancedColumnHeight(blocks, 99), 20);
+  CHECK_EQ(mahogany::balancedColumnHeight(blocks, 3), 20);
+  CHECK_EQ(mahogany::balancedColumnHeight(blocks, 99), 20);
 }
 
 CANOPY_TEST(aShortGroupLetsItsNeighbourShareTheColumn) {
   // The naive lineCount/numCols target is 22/2 = 11, and snapping back to a group boundary would cut the first column
   // at 10 and leave 12 in the second. Packing 10 + 2 together is better, and is what this must find.
   const std::vector<int> blocks{10, 2, 10};
-  CHECK_EQ(canopy::balancedColumnHeight(blocks, 2), 12);
+  CHECK_EQ(mahogany::balancedColumnHeight(blocks, 2), 12);
 }
 
 CANOPY_TEST(moreColumnsAreNeverTaller) {
   const std::vector<int> blocks{3, 7, 2, 8, 4, 6, 1};
-  int previous = canopy::balancedColumnHeight(blocks, 1);
+  int previous = mahogany::balancedColumnHeight(blocks, 1);
   for (int columns = 2; columns <= 8; ++columns) {
-    const int height = canopy::balancedColumnHeight(blocks, columns);
+    const int height = mahogany::balancedColumnHeight(blocks, columns);
     CHECK(height <= previous);
     previous = height;
   }
@@ -370,18 +370,18 @@ CANOPY_TEST(theAnswerIsActuallyAchievable) {
   // A height nobody can pack into is not an answer: the optimum must be
   // reachable, and one line less must not be.
   const std::vector<int> blocks{3, 7, 2, 8, 4, 6, 1};
-  const int height = canopy::balancedColumnHeight(blocks, 3);
-  CHECK(canopy::columnsNeededFor(blocks, height) <= 3);
-  CHECK(canopy::columnsNeededFor(blocks, height - 1) > 3);
+  const int height = mahogany::balancedColumnHeight(blocks, 3);
+  CHECK(mahogany::columnsNeededFor(blocks, height) <= 3);
+  CHECK(mahogany::columnsNeededFor(blocks, height - 1) > 3);
 }
 
 CANOPY_TEST(degenerateInputsAreSafe) {
   const std::vector<int> empty;
-  CHECK_EQ(canopy::balancedColumnHeight(empty, 3), 0);
+  CHECK_EQ(mahogany::balancedColumnHeight(empty, 3), 0);
   const std::vector<int> blocks{5, 5};
   // Nonsense column counts fall back to one column rather than dividing by it.
-  CHECK_EQ(canopy::balancedColumnHeight(blocks, 0), 10);
-  CHECK_EQ(canopy::balancedColumnHeight(blocks, -3), 10);
+  CHECK_EQ(mahogany::balancedColumnHeight(blocks, 0), 10);
+  CHECK_EQ(mahogany::balancedColumnHeight(blocks, -3), 10);
 }
 
 CANOPY_TEST(effectActionLabelsPreserveSelectorsAndTargets) {
@@ -393,8 +393,8 @@ CANOPY_TEST(effectActionLabelsPreserveSelectorsAndTargets) {
            {"effect-cursor-cycle", "effect-cursor-cycle"}
        }) {
     Keybind binding;
-    CHECK(canopy::parseChord("Mod+e", binding));
-    CHECK(canopy::parseAction(action, binding));
+    CHECK(mahogany::parseChord("Mod+e", binding));
+    CHECK(mahogany::parseAction(action, binding));
     const auto rows = buildCheatsheetRows(std::vector{binding});
     CHECK_EQ(rows.size(), size_t{1});
     CHECK_EQ(rows.front().action, label);
@@ -402,7 +402,7 @@ CANOPY_TEST(effectActionLabelsPreserveSelectorsAndTargets) {
 }
 
 CANOPY_TEST(stackingLayoutModeIsNamedInTheActionLabel) {
-  const std::vector<Keybind> binds = {layoutBind(XKB_KEY_f, canopy::LayoutMode::Stacking)};
+  const std::vector<Keybind> binds = {layoutBind(XKB_KEY_f, mahogany::LayoutMode::Stacking)};
   const auto rows = buildCheatsheetRows(binds);
   CHECK_EQ(rows.size(), size_t{1});
   CHECK_EQ(rows[0].action, std::string{"workspace-set-layout stacking"});
@@ -410,7 +410,7 @@ CANOPY_TEST(stackingLayoutModeIsNamedInTheActionLabel) {
 
 CANOPY_TEST(regionActionLabelsNameTheRegion) {
   Keybind binding = bind(KeybindAction::WindowSetRegion, XKB_KEY_h);
-  binding.payload = canopy::WindowRegionArg{.region = canopy::WindowRegion::BottomLeft};
+  binding.payload = mahogany::WindowRegionArg{.region = mahogany::WindowRegion::BottomLeft};
   const auto rows = buildCheatsheetRows(std::vector<Keybind>{binding});
   CHECK_EQ(rows.size(), size_t{1});
   CHECK_EQ(rows[0].action, std::string{"window-set-region bottom_left"});

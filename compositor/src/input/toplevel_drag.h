@@ -8,7 +8,7 @@ struct wlr_data_source;
 struct wlr_drag;
 struct wlr_xdg_toplevel;
 
-namespace canopy {
+namespace mahogany {
   class Server;
   class View;
 
@@ -48,4 +48,4 @@ namespace canopy {
     std::vector<Drag*> m_drags;
     Drag* m_active = nullptr;
   };
-} // namespace canopy
+} // namespace mahogany

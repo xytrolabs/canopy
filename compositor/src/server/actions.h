@@ -4,7 +4,7 @@
 
 #include <string>
 
-namespace canopy {
+namespace mahogany {
 
   class Server;
 
@@ -20,4 +20,4 @@ namespace canopy {
   // non-sentinel action is advertised.
   bool actionRegistryComplete();
 
-} // namespace canopy
+} // namespace mahogany

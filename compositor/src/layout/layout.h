@@ -12,7 +12,7 @@
 
 struct wlr_box;
 
-namespace canopy {
+namespace mahogany {
 
   class View;
   class Layout;
@@ -398,4 +398,4 @@ namespace canopy {
 
   [[nodiscard]] std::unique_ptr<Layout> createLayout(LayoutMode mode);
 
-} // namespace canopy
+} // namespace mahogany

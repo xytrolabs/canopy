@@ -21,7 +21,7 @@
 #include <variant>
 #include <vector>
 
-namespace canopy {
+namespace mahogany {
 
   struct ConfigReloadResult;
 
@@ -1309,4 +1309,4 @@ namespace canopy {
   const std::filesystem::path& configRootPath();
   bool configFileMissing();
   bool configHasMissingIncludes();
-} // namespace canopy
+} // namespace mahogany

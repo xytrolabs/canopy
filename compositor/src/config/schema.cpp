@@ -6,7 +6,7 @@
 #include <map>
 #include <vector>
 
-namespace canopy {
+namespace mahogany {
 
   namespace {
 
@@ -77,4 +77,4 @@ namespace canopy {
     return root.dump(2) + "\n";
   }
 
-} // namespace canopy
+} // namespace mahogany

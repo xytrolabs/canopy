@@ -9,7 +9,7 @@
 
 struct wlr_keyboard;
 
-namespace canopy {
+namespace mahogany {
 
   class Server;
 
@@ -61,4 +61,4 @@ namespace canopy {
     std::unique_ptr<Impl> m_impl;
   };
 
-} // namespace canopy
+} // namespace mahogany

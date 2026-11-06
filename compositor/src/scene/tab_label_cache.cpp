@@ -11,7 +11,7 @@ extern "C" {
 #include <format>
 #include <utility>
 
-namespace canopy {
+namespace mahogany {
 
   TabLabelCache::TabLabelCache(size_t capacity) : m_capacity(std::max<size_t>(1, capacity)) {}
 
@@ -68,4 +68,4 @@ namespace canopy {
     return cache;
   }
 
-} // namespace canopy
+} // namespace mahogany

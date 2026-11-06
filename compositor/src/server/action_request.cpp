@@ -12,7 +12,7 @@
 #include <utility>
 #include <vector>
 
-namespace canopy {
+namespace mahogany {
 
   namespace {
 
@@ -523,4 +523,4 @@ namespace canopy {
     return request;
   }
 
-} // namespace canopy
+} // namespace mahogany

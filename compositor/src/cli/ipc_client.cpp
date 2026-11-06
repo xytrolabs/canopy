@@ -17,7 +17,7 @@
 #include <utility>
 #include <vector>
 
-namespace canopy {
+namespace mahogany {
 
   namespace {
     std::string resolveSocketPath() {
@@ -240,4 +240,4 @@ namespace canopy {
     return EXIT_SUCCESS;
   }
 
-} // namespace canopy
+} // namespace mahogany

@@ -14,7 +14,7 @@
 #include <system_error>
 #include <utility>
 
-namespace canopy::configmerge {
+namespace mahogany::configmerge {
 
   namespace {
 
@@ -473,4 +473,4 @@ namespace canopy::configmerge {
     return result;
   }
 
-} // namespace canopy::configmerge
+} // namespace mahogany::configmerge

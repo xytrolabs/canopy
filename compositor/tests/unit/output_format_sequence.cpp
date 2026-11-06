@@ -16,12 +16,12 @@ extern "C" {
 #undef static
 }
 
-using canopy::FormatCommitResult;
-using canopy::FormatSequenceOps;
-using canopy::FormatSequenceParams;
-using canopy::FormatSequenceResult;
-using canopy::FormatTier;
-using canopy::runFormatSequence;
+using mahogany::FormatCommitResult;
+using mahogany::FormatSequenceOps;
+using mahogany::FormatSequenceParams;
+using mahogany::FormatSequenceResult;
+using mahogany::FormatTier;
+using mahogany::runFormatSequence;
 
 namespace {
 
@@ -653,7 +653,7 @@ CANOPY_TEST(tierTestsDoNotCommit) {
 // Each mode spends up to two commits on HDR, two on SDR10, and two on SDR8.
 CANOPY_TEST(worstCaseCommitCountIsBounded) {
   static wlr_output_mode preferred{};
-  static const canopy::OutputMode spec{1280, 720, 60000};
+  static const mahogany::OutputMode spec{1280, 720, 60000};
 
   MockOps m;
   m.testResults = {true};
@@ -682,7 +682,7 @@ CANOPY_TEST(modeFallbackRetriesOnPreferredMode) {
   m.testResults = {true};
   m.commitResults = {false, true};
 
-  static const canopy::OutputMode spec{1280, 720, 60000};
+  static const mahogany::OutputMode spec{1280, 720, 60000};
   FormatSequenceParams p = sdr8Params();
   p.configuredModeSpec = &spec;
   p.preferredMode = &preferred;
@@ -703,7 +703,7 @@ CANOPY_TEST(rejectedSdr8SwapchainReachesPreferredModeBeforeSceneBuild) {
   preferred.width = 3440;
   preferred.height = 1440;
   preferred.refresh = 59973;
-  const canopy::OutputMode spec{3440, 1440, 360097};
+  const mahogany::OutputMode spec{3440, 1440, 360097};
 
   MockOps m;
   m.nonPrimaryFormats = {DRM_FORMAT_XRGB2101010};
@@ -756,7 +756,7 @@ CANOPY_TEST(rejectedSdr8SwapchainReachesPreferredModeBeforeSceneBuild) {
 // same mode, instead of downgrading to the preferred mode.
 CANOPY_TEST(retryableSdr8SceneFailureDoesNotChangeMode) {
   wlr_output_mode preferred{};
-  const canopy::OutputMode spec{3440, 1440, 360097};
+  const mahogany::OutputMode spec{3440, 1440, 360097};
   MockOps m;
   m.testResults = {true};
   m.retryCommitIndices = {0};
@@ -794,7 +794,7 @@ CANOPY_TEST(modeFallbackRerunsFullSequenceAndResetsReasons) {
   };
   m.commitResults = {false, true}; // Mode 1: SDR8 XR24. Mode 2: SDR10 XB30.
 
-  static const canopy::OutputMode spec{1280, 720, 60000};
+  static const mahogany::OutputMode spec{1280, 720, 60000};
   FormatSequenceParams p = sdr8Params();
   p.hdrRequested = true;
   p.imageDescAvailable = true;
@@ -828,7 +828,7 @@ CANOPY_TEST(modeFallbackClearsSdr10ReasonOnPreferredCommit) {
   m.testResults = {false, false, true, true}; // Mode 1: XR30, XB30, XR24. Mode 2: XR30.
   m.commitResults = {false, true};            // Mode 1: XR24. Mode 2: XR30.
 
-  static const canopy::OutputMode spec{1280, 720, 60000};
+  static const mahogany::OutputMode spec{1280, 720, 60000};
   FormatSequenceParams p = sdr8Params();
   p.bitDepth = 10;
   p.configuredModeSpec = &spec;
@@ -851,7 +851,7 @@ CANOPY_TEST(modeFallbackClearsSdr10ReasonOnPreferredCommit) {
 CANOPY_TEST(rejectedKeptLiveModeRetriesWithTheModeStaged) {
   static wlr_output_mode live{};
   static wlr_output_mode preferred{};
-  static const canopy::OutputMode spec{1280, 720, 60000};
+  static const mahogany::OutputMode spec{1280, 720, 60000};
 
   MockOps m;
   m.testResults = {false, true};
@@ -873,7 +873,7 @@ CANOPY_TEST(rejectedKeptLiveModeRetriesWithTheModeStaged) {
 CANOPY_TEST(rejectedRetryOnKeptLiveModeFallsBackToPreferredMode) {
   static wlr_output_mode live{};
   static wlr_output_mode preferred{};
-  static const canopy::OutputMode spec{1280, 720, 60000};
+  static const mahogany::OutputMode spec{1280, 720, 60000};
 
   MockOps m;
   m.testResults = {false, false, true};
@@ -917,7 +917,7 @@ CANOPY_TEST(noPreferredModeYieldsUncommitted) {
   m.testResults = {true};
   m.commitResults = {false};
 
-  static const canopy::OutputMode spec{1280, 720, 60000};
+  static const mahogany::OutputMode spec{1280, 720, 60000};
   FormatSequenceParams p = sdr8Params();
   p.configuredModeSpec = &spec;
   p.preferredMode = nullptr;

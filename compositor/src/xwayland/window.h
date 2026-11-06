@@ -6,7 +6,7 @@
 
 struct wlr_xwayland_surface;
 
-namespace canopy {
+namespace mahogany {
 
   class Server;
   class View;
@@ -72,4 +72,4 @@ namespace canopy {
     wl_listener m_requestConfigure{};
   };
 
-} // namespace canopy
+} // namespace mahogany

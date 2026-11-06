@@ -2,7 +2,7 @@
 
 #include <cmath>
 
-namespace canopy {
+namespace mahogany {
 
   namespace {
 
@@ -144,4 +144,4 @@ namespace canopy {
     return description;
   }
 
-} // namespace canopy
+} // namespace mahogany

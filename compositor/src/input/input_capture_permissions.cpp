@@ -12,7 +12,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
-namespace canopy {
+namespace mahogany {
 
   namespace {
     constexpr size_t kMaxGrants = 128;
@@ -425,4 +425,4 @@ namespace canopy {
     });
   }
 
-} // namespace canopy
+} // namespace mahogany

@@ -28,14 +28,14 @@ namespace {
 
 CANOPY_TEST(hdrReferenceWhiteChangesIndependentlyOfDisplayMetadata) {
   const wlr_output_image_description output = hdrOutputDescription();
-  const canopy::ColorDescription original = canopy::outputColorDescription(&output, 203.0F);
-  const canopy::ColorDescription brighter = canopy::outputColorDescription(&output, 500.0F);
-  const canopy::ColorDescription restored = canopy::outputColorDescription(&output, 203.0F);
+  const mahogany::ColorDescription original = mahogany::outputColorDescription(&output, 203.0F);
+  const mahogany::ColorDescription brighter = mahogany::outputColorDescription(&output, 500.0F);
+  const mahogany::ColorDescription restored = mahogany::outputColorDescription(&output, 203.0F);
 
   CHECK_EQ(original.luminances.reference, 203.0F);
   CHECK_EQ(brighter.luminances.reference, 500.0F);
-  CHECK(!canopy::colorDescriptionsEqual(original, brighter));
-  CHECK(canopy::colorDescriptionsEqual(original, restored));
+  CHECK(!mahogany::colorDescriptionsEqual(original, brighter));
+  CHECK(mahogany::colorDescriptionsEqual(original, restored));
 
   for (const auto* description : {&original, &brighter, &restored}) {
     CHECK_EQ(description->data.tf_named, WP_COLOR_MANAGER_V1_TRANSFER_FUNCTION_ST2084_PQ);
@@ -59,10 +59,10 @@ CANOPY_TEST(hdrReferenceWhiteChangesIndependentlyOfDisplayMetadata) {
 }
 
 CANOPY_TEST(sdrFeedbackKeepsNominalWhiteAcrossConfiguredWhiteChanges) {
-  const canopy::ColorDescription original = canopy::outputColorDescription(nullptr, 203.0F);
-  const canopy::ColorDescription changed = canopy::outputColorDescription(nullptr, 500.0F);
+  const mahogany::ColorDescription original = mahogany::outputColorDescription(nullptr, 203.0F);
+  const mahogany::ColorDescription changed = mahogany::outputColorDescription(nullptr, 500.0F);
 
-  CHECK(canopy::colorDescriptionsEqual(original, changed));
+  CHECK(mahogany::colorDescriptionsEqual(original, changed));
   CHECK_EQ(changed.data.tf_named, WP_COLOR_MANAGER_V1_TRANSFER_FUNCTION_COMPOUND_POWER_2_4);
   CHECK_EQ(
       wlr_color_manager_v1_transfer_function_to_wlr(
@@ -81,7 +81,7 @@ CANOPY_TEST(sdrFeedbackKeepsNominalWhiteAcrossConfiguredWhiteChanges) {
 }
 
 CANOPY_TEST(protocolSrgbEncodingPreservesRendererSemanticsAcrossVersions) {
-  const canopy::ColorDescription description = canopy::outputColorDescription(nullptr, 203.0F);
+  const mahogany::ColorDescription description = mahogany::outputColorDescription(nullptr, 203.0F);
   struct Version {
     uint32_t number;
     uint32_t wireTransfer;
@@ -92,10 +92,10 @@ CANOPY_TEST(protocolSrgbEncodingPreservesRendererSemanticsAcrossVersions) {
   };
 
   for (const auto& version : versions) {
-    const uint32_t wireTransfer = canopy::colorTransferFunctionToWire(description.data.tf_named, version.number);
+    const uint32_t wireTransfer = mahogany::colorTransferFunctionToWire(description.data.tf_named, version.number);
     CHECK_EQ(wireTransfer, version.wireTransfer);
     CHECK(wp_color_manager_v1_transfer_function_is_valid(wireTransfer, version.number));
-    const uint32_t canonicalTransfer = canopy::colorTransferFunctionFromWire(wireTransfer, version.number);
+    const uint32_t canonicalTransfer = mahogany::colorTransferFunctionFromWire(wireTransfer, version.number);
     CHECK_EQ(canonicalTransfer, description.data.tf_named);
     CHECK_EQ(
         wlr_color_manager_v1_transfer_function_to_wlr(
@@ -106,7 +106,7 @@ CANOPY_TEST(protocolSrgbEncodingPreservesRendererSemanticsAcrossVersions) {
   }
 
   CHECK_EQ(
-      canopy::colorTransferFunctionFromWire(WP_COLOR_MANAGER_V1_TRANSFER_FUNCTION_SRGB, 2),
+      mahogany::colorTransferFunctionFromWire(WP_COLOR_MANAGER_V1_TRANSFER_FUNCTION_SRGB, 2),
       WP_COLOR_MANAGER_V1_TRANSFER_FUNCTION_SRGB
   );
 }
@@ -121,19 +121,19 @@ CANOPY_TEST(protocolVersionDoesNotChangeOtherTransferFunctions) {
 
   for (const uint32_t version : {1U, 2U}) {
     for (const uint32_t transfer : transfers) {
-      CHECK_EQ(canopy::colorTransferFunctionToWire(transfer, version), transfer);
-      CHECK_EQ(canopy::colorTransferFunctionFromWire(transfer, version), transfer);
+      CHECK_EQ(mahogany::colorTransferFunctionToWire(transfer, version), transfer);
+      CHECK_EQ(mahogany::colorTransferFunctionFromWire(transfer, version), transfer);
     }
   }
 }
 
 CANOPY_TEST(automaticHdrFeedbackKeepsClientHeadroomAcrossScanoutTransitions) {
   const wlr_output_image_description output = hdrOutputDescription();
-  const canopy::ColorDescription disabled = canopy::outputColorDescription(nullptr, 203.0F);
-  const canopy::ColorDescription idle = canopy::outputColorDescription(nullptr, 203.0F, true);
-  const canopy::ColorDescription active = canopy::outputColorDescription(&output, 203.0F, true);
-  const canopy::ColorDescription returnedIdle = canopy::outputColorDescription(nullptr, 203.0F, true);
-  const canopy::ColorDescription unavailable = canopy::outputColorDescription(nullptr, 203.0F, false);
+  const mahogany::ColorDescription disabled = mahogany::outputColorDescription(nullptr, 203.0F);
+  const mahogany::ColorDescription idle = mahogany::outputColorDescription(nullptr, 203.0F, true);
+  const mahogany::ColorDescription active = mahogany::outputColorDescription(&output, 203.0F, true);
+  const mahogany::ColorDescription returnedIdle = mahogany::outputColorDescription(nullptr, 203.0F, true);
+  const mahogany::ColorDescription unavailable = mahogany::outputColorDescription(nullptr, 203.0F, false);
 
   // Wine detects HDR from primary luminance headroom before it submits HDR content.
   CHECK(!(disabled.luminances.max > disabled.luminances.reference));
@@ -141,10 +141,10 @@ CANOPY_TEST(automaticHdrFeedbackKeepsClientHeadroomAcrossScanoutTransitions) {
   CHECK(active.luminances.max > active.luminances.reference);
   CHECK(returnedIdle.luminances.max > returnedIdle.luminances.reference);
   CHECK(!(unavailable.luminances.max > unavailable.luminances.reference));
-  CHECK(!canopy::colorDescriptionsEqual(disabled, idle));
-  CHECK(!canopy::colorDescriptionsEqual(idle, active));
-  CHECK(canopy::colorDescriptionsEqual(idle, returnedIdle));
-  CHECK(canopy::colorDescriptionsEqual(disabled, unavailable));
+  CHECK(!mahogany::colorDescriptionsEqual(disabled, idle));
+  CHECK(!mahogany::colorDescriptionsEqual(idle, active));
+  CHECK(mahogany::colorDescriptionsEqual(idle, returnedIdle));
+  CHECK(mahogany::colorDescriptionsEqual(disabled, unavailable));
 
   // Reusing the logical HDR encoding without an SDR content limit remains eligible for automatic HDR.
   CHECK_EQ(idle.data.tf_named, WP_COLOR_MANAGER_V1_TRANSFER_FUNCTION_ST2084_PQ);
@@ -168,104 +168,104 @@ CANOPY_TEST(automaticHdrFeedbackKeepsClientHeadroomAcrossScanoutTransitions) {
 }
 
 CANOPY_TEST(automaticHdrWhiteChangeUpdatesEncodingWithoutChangingSdrTarget) {
-  const canopy::ColorDescription original = canopy::outputColorDescription(nullptr, 203.0F, true);
-  const canopy::ColorDescription brighter = canopy::outputColorDescription(nullptr, 500.0F, true);
-  const canopy::ColorDescription restored = canopy::outputColorDescription(nullptr, 203.0F, true);
+  const mahogany::ColorDescription original = mahogany::outputColorDescription(nullptr, 203.0F, true);
+  const mahogany::ColorDescription brighter = mahogany::outputColorDescription(nullptr, 500.0F, true);
+  const mahogany::ColorDescription restored = mahogany::outputColorDescription(nullptr, 203.0F, true);
 
   CHECK_EQ(original.luminances.reference, 203.0F);
   CHECK_EQ(brighter.luminances.reference, 500.0F);
   CHECK(original.customLuminances);
   CHECK(brighter.customLuminances);
   CHECK(brighter.luminances.max > brighter.luminances.reference);
-  CHECK(!canopy::colorDescriptionsEqual(original, brighter));
-  CHECK(canopy::colorDescriptionsEqual(original, restored));
+  CHECK(!mahogany::colorDescriptionsEqual(original, brighter));
+  CHECK(mahogany::colorDescriptionsEqual(original, restored));
   CHECK_EQ(original.data.mastering_luminance.max, 80.0F);
   CHECK_EQ(brighter.data.mastering_luminance.max, 80.0F);
   CHECK_EQ(brighter.data.mastering_display_primaries.red.x, original.data.mastering_display_primaries.red.x);
 }
 
 CANOPY_TEST(sdrContentInsidePqEncodingDoesNotRequestHdrOutput) {
-  canopy::ColorDescription description = canopy::outputColorDescription(nullptr, 203.0F, true);
-  CHECK(canopy::colorDescriptionRequestsHdrOutput(description));
+  mahogany::ColorDescription description = mahogany::outputColorDescription(nullptr, 203.0F, true);
+  CHECK(mahogany::colorDescriptionRequestsHdrOutput(description));
 
   // SDR desktop renderers can use the offered PQ encoding while explicitly
   // limiting the content to SDR white. The encoding still decodes as PQ.
   description.data.max_cll = 203;
   description.data.max_fall = 203;
-  CHECK(!canopy::colorDescriptionRequestsHdrOutput(description));
+  CHECK(!mahogany::colorDescriptionRequestsHdrOutput(description));
   CHECK_EQ(description.data.tf_named, WP_COLOR_MANAGER_V1_TRANSFER_FUNCTION_ST2084_PQ);
   CHECK_EQ(description.luminances.max, 10000.0F);
   CHECK(description.requiresHdrOutput);
 
   description.data.max_cll = 1000;
-  CHECK(canopy::colorDescriptionRequestsHdrOutput(description));
+  CHECK(mahogany::colorDescriptionRequestsHdrOutput(description));
   description.data.max_cll = 203;
-  CHECK(!canopy::colorDescriptionRequestsHdrOutput(description));
+  CHECK(!mahogany::colorDescriptionRequestsHdrOutput(description));
 }
 
 CANOPY_TEST(contentPeakUsesItsOwnReferenceWhiteRatherThanAConstant) {
-  canopy::ColorDescription description = canopy::outputColorDescription(nullptr, 350.0F, true);
+  mahogany::ColorDescription description = mahogany::outputColorDescription(nullptr, 350.0F, true);
   description.data.max_cll = 203;
-  CHECK(!canopy::colorDescriptionRequestsHdrOutput(description));
+  CHECK(!mahogany::colorDescriptionRequestsHdrOutput(description));
   description.data.max_cll = 350;
-  CHECK(!canopy::colorDescriptionRequestsHdrOutput(description));
+  CHECK(!mahogany::colorDescriptionRequestsHdrOutput(description));
   description.data.max_cll = 351;
-  CHECK(canopy::colorDescriptionRequestsHdrOutput(description));
+  CHECK(mahogany::colorDescriptionRequestsHdrOutput(description));
   description.data.max_cll = 349;
-  CHECK(!canopy::colorDescriptionRequestsHdrOutput(description));
+  CHECK(!mahogany::colorDescriptionRequestsHdrOutput(description));
 }
 
 CANOPY_TEST(unknownContentPeakAndLowFrameAveragePreserveHdrRequests) {
-  canopy::ColorDescription description = canopy::outputColorDescription(nullptr, 203.0F, true);
+  mahogany::ColorDescription description = mahogany::outputColorDescription(nullptr, 203.0F, true);
   description.data.max_cll = 1000;
   description.data.max_fall = 203;
-  CHECK(canopy::colorDescriptionRequestsHdrOutput(description));
+  CHECK(mahogany::colorDescriptionRequestsHdrOutput(description));
   description.data.max_cll = 0;
-  CHECK(canopy::colorDescriptionRequestsHdrOutput(description));
+  CHECK(mahogany::colorDescriptionRequestsHdrOutput(description));
   description.data.max_fall = 0;
-  CHECK(canopy::colorDescriptionRequestsHdrOutput(description));
+  CHECK(mahogany::colorDescriptionRequestsHdrOutput(description));
 }
 
 CANOPY_TEST(explicitMasteringHeadroomPreservesHdrWhenContentPeakDefaultsToSdrWhite) {
-  canopy::ColorDescription description = canopy::outputColorDescription(nullptr, 203.0F, true);
+  mahogany::ColorDescription description = mahogany::outputColorDescription(nullptr, 203.0F, true);
   description.data.max_cll = 203;
   description.data.max_fall = 203;
-  CHECK(!canopy::colorDescriptionRequestsHdrOutput(description));
+  CHECK(!mahogany::colorDescriptionRequestsHdrOutput(description));
   description.data.has_mastering_luminance = true;
   description.data.mastering_luminance = {.min = 0.0F, .max = 1000.0F};
-  CHECK(canopy::colorDescriptionRequestsHdrOutput(description));
+  CHECK(mahogany::colorDescriptionRequestsHdrOutput(description));
   description.data.mastering_luminance.max = 203.0F;
-  CHECK(!canopy::colorDescriptionRequestsHdrOutput(description));
+  CHECK(!mahogany::colorDescriptionRequestsHdrOutput(description));
   description.data.mastering_luminance.max = 100.0F;
-  CHECK(!canopy::colorDescriptionRequestsHdrOutput(description));
+  CHECK(!mahogany::colorDescriptionRequestsHdrOutput(description));
   description.data.mastering_luminance.max = 1000.0F;
   description.data.has_mastering_luminance = false;
-  CHECK(!canopy::colorDescriptionRequestsHdrOutput(description));
+  CHECK(!mahogany::colorDescriptionRequestsHdrOutput(description));
 }
 
 CANOPY_TEST(contentLightMetadataDoesNotInventHdrForSdrEncoding) {
-  canopy::ColorDescription description = canopy::outputColorDescription(nullptr, 203.0F);
+  mahogany::ColorDescription description = mahogany::outputColorDescription(nullptr, 203.0F);
   description.data.max_cll = 1000;
   description.data.max_fall = 203;
-  CHECK(!canopy::colorDescriptionRequestsHdrOutput(description));
+  CHECK(!mahogany::colorDescriptionRequestsHdrOutput(description));
   description.data.max_cll = 0;
-  CHECK(!canopy::colorDescriptionRequestsHdrOutput(description));
+  CHECK(!mahogany::colorDescriptionRequestsHdrOutput(description));
 }
 
 CANOPY_TEST(absoluteScrgbContentPeakKeepsItsReferenceSeparateFromUnitLuminance) {
-  canopy::ColorDescription description;
+  mahogany::ColorDescription description;
   description.data.tf_named = WP_COLOR_MANAGER_V1_TRANSFER_FUNCTION_EXT_LINEAR;
   description.data.primaries_named = WP_COLOR_MANAGER_V1_PRIMARIES_SRGB;
   description.luminances = {.min = 0.0F, .max = 10000.0F, .reference = 203.0F};
   description.luminanceMultiplier = 80.0F / 203.0F;
   description.absoluteLuminance = true;
   description.requiresHdrOutput = true;
-  CHECK(canopy::colorDescriptionRequestsHdrOutput(description));
+  CHECK(mahogany::colorDescriptionRequestsHdrOutput(description));
   description.data.max_cll = 203;
-  CHECK(!canopy::colorDescriptionRequestsHdrOutput(description));
+  CHECK(!mahogany::colorDescriptionRequestsHdrOutput(description));
   description.data.max_cll = 1000;
   description.data.max_fall = 203;
-  CHECK(canopy::colorDescriptionRequestsHdrOutput(description));
+  CHECK(mahogany::colorDescriptionRequestsHdrOutput(description));
 }
 
 CANOPY_TEST(hdrWithoutDisplayMetadataStillUsesConfiguredWhite) {
@@ -277,7 +277,7 @@ CANOPY_TEST(hdrWithoutDisplayMetadataStillUsesConfiguredWhite) {
       .max_cll = 0.0,
       .max_fall = 0.0,
   };
-  const canopy::ColorDescription description = canopy::outputColorDescription(&output, 350.0F);
+  const mahogany::ColorDescription description = mahogany::outputColorDescription(&output, 350.0F);
 
   CHECK_EQ(description.luminances.reference, 350.0F);
   CHECK_EQ(description.luminances.max, 10000.0F);
@@ -289,10 +289,10 @@ CANOPY_TEST(hdrWithoutDisplayMetadataStillUsesConfiguredWhite) {
 
 CANOPY_TEST(hdrToSdrDropsHdrTargetAndRestoresNominalWhite) {
   const wlr_output_image_description output = hdrOutputDescription();
-  const canopy::ColorDescription hdr = canopy::outputColorDescription(&output, 500.0F);
-  const canopy::ColorDescription sdr = canopy::outputColorDescription(nullptr, 500.0F);
+  const mahogany::ColorDescription hdr = mahogany::outputColorDescription(&output, 500.0F);
+  const mahogany::ColorDescription sdr = mahogany::outputColorDescription(nullptr, 500.0F);
 
-  CHECK(!canopy::colorDescriptionsEqual(hdr, sdr));
+  CHECK(!mahogany::colorDescriptionsEqual(hdr, sdr));
   CHECK_EQ(sdr.luminances.reference, 80.0F);
   CHECK(!sdr.data.has_mastering_display_primaries);
   CHECK(!sdr.data.has_mastering_luminance);
@@ -309,7 +309,7 @@ CANOPY_TEST(nonPqOutputKeepsTransferFunctionLuminanceDefaults) {
       .max_cll = 0.0,
       .max_fall = 0.0,
   };
-  const canopy::ColorDescription description = canopy::outputColorDescription(&output, 500.0F);
+  const mahogany::ColorDescription description = mahogany::outputColorDescription(&output, 500.0F);
 
   CHECK_EQ(description.data.tf_named, WP_COLOR_MANAGER_V1_TRANSFER_FUNCTION_BT1886);
   CHECK_EQ(description.luminances.min, 0.01F);
@@ -319,8 +319,8 @@ CANOPY_TEST(nonPqOutputKeepsTransferFunctionLuminanceDefaults) {
 
 CANOPY_TEST(preferredDescriptionComparisonIncludesReferenceWhiteAndTargetMetadata) {
   const wlr_output_image_description output = hdrOutputDescription();
-  const canopy::ColorDescription original = canopy::outputColorDescription(&output, 203.0F);
-  std::array<canopy::ColorDescription, 7> changed;
+  const mahogany::ColorDescription original = mahogany::outputColorDescription(&output, 203.0F);
+  std::array<mahogany::ColorDescription, 7> changed;
   changed.fill(original);
   changed[0].luminances.reference = 500.0F;
   changed[1].data.mastering_luminance.max = 800.0F;
@@ -331,7 +331,7 @@ CANOPY_TEST(preferredDescriptionComparisonIncludesReferenceWhiteAndTargetMetadat
   changed[6].requiresHdrOutput = false;
 
   for (const auto& description : changed) {
-    CHECK(!canopy::colorDescriptionsEqual(original, description));
+    CHECK(!mahogany::colorDescriptionsEqual(original, description));
   }
 }
 

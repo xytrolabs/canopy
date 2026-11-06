@@ -17,25 +17,25 @@ extern "C" {
 }
 // clang-format on
 
-using canopy::Column;
-using canopy::ColumnDisplay;
-using canopy::ColumnTabs;
-using canopy::MasterStackLayout;
-using canopy::NewTabPosition;
-using canopy::ResolvedLayoutConfig;
-using canopy::ScrollingDirection;
-using canopy::ScrollingLayout;
-using canopy::TabBarPosition;
-using canopy::TabGroup;
-using canopy::TabState;
-using canopy::View;
+using mahogany::Column;
+using mahogany::ColumnDisplay;
+using mahogany::ColumnTabs;
+using mahogany::MasterStackLayout;
+using mahogany::NewTabPosition;
+using mahogany::ResolvedLayoutConfig;
+using mahogany::ScrollingDirection;
+using mahogany::ScrollingLayout;
+using mahogany::TabBarPosition;
+using mahogany::TabGroup;
+using mahogany::TabState;
+using mahogany::View;
 
 namespace {
 
   View* stub(int id) { return reinterpret_cast<View*>(static_cast<uintptr_t>(0x5000 + (id * 0x10))); }
 
   // totalGap = gap + 2 * border = 12, edgePad = gap + border = 10, so a tab bar reserves 24 + 8 = 32.
-  ResolvedLayoutConfig tabConfig(canopy::LayoutMode mode) {
+  ResolvedLayoutConfig tabConfig(mahogany::LayoutMode mode) {
     ResolvedLayoutConfig config;
     config.mode = mode;
     config.gap = 8;
@@ -51,7 +51,7 @@ namespace {
   constexpr int kReserve = 32;
 
   struct ScrollingFixture {
-    ResolvedLayoutConfig config = tabConfig(canopy::LayoutMode::Scrolling);
+    ResolvedLayoutConfig config = tabConfig(mahogany::LayoutMode::Scrolling);
     ScrollingLayout layout;
 
     explicit ScrollingFixture(ScrollingDirection direction = ScrollingDirection::Horizontal) {
@@ -72,7 +72,7 @@ namespace {
   };
 
   struct MasterFixture {
-    ResolvedLayoutConfig config = tabConfig(canopy::LayoutMode::Master);
+    ResolvedLayoutConfig config = tabConfig(mahogany::LayoutMode::Master);
     MasterStackLayout layout;
 
     MasterFixture() { layout.setConfig(&config); }
@@ -167,10 +167,10 @@ CANOPY_TEST(slotsAndGapsTileTheBarExactly) {
     for (const size_t count : {size_t{1}, size_t{3}, size_t{7}}) {
       int covered = 0;
       for (size_t index = 0; index < count; ++index) {
-        const canopy::TabSlot slot = canopy::tabSlot(width, count, index, 2);
+        const mahogany::TabSlot slot = mahogany::tabSlot(width, count, index, 2);
         covered += slot.width;
         if (index + 1 < count) {
-          CHECK_EQ(canopy::tabSlot(width, count, index + 1, 2).x, slot.x + slot.width + 2);
+          CHECK_EQ(mahogany::tabSlot(width, count, index + 1, 2).x, slot.x + slot.width + 2);
         } else {
           CHECK_EQ(slot.x + slot.width, width);
         }
@@ -181,90 +181,90 @@ CANOPY_TEST(slotsAndGapsTileTheBarExactly) {
 }
 
 CANOPY_TEST(aBarTooNarrowForItsGapsDropsThem) {
-  const canopy::TabSlot last = canopy::tabSlot(4, 4, 3, 2);
+  const mahogany::TabSlot last = mahogany::tabSlot(4, 4, 3, 2);
   CHECK_EQ(last.x, 3);
   CHECK_EQ(last.width, 1);
 }
 
 CANOPY_TEST(hitTestingGivesAGapToTheTabBeforeIt) {
   // Slots of 32 at 0, 34, and 68 across 100 pixels.
-  CHECK_EQ(canopy::tabIndexAt(100, 3, 0.0, 2), 0);
-  CHECK_EQ(canopy::tabIndexAt(100, 3, 33.5, 2), 0);
-  CHECK_EQ(canopy::tabIndexAt(100, 3, 34.0, 2), 1);
-  CHECK_EQ(canopy::tabIndexAt(100, 3, 99.9, 2), 2);
-  CHECK_EQ(canopy::tabIndexAt(100, 3, -0.1, 2), -1);
-  CHECK_EQ(canopy::tabIndexAt(100, 3, 100.0, 2), -1);
-  CHECK_EQ(canopy::tabIndexAt(100, 0, 10.0, 2), -1);
+  CHECK_EQ(mahogany::tabIndexAt(100, 3, 0.0, 2), 0);
+  CHECK_EQ(mahogany::tabIndexAt(100, 3, 33.5, 2), 0);
+  CHECK_EQ(mahogany::tabIndexAt(100, 3, 34.0, 2), 1);
+  CHECK_EQ(mahogany::tabIndexAt(100, 3, 99.9, 2), 2);
+  CHECK_EQ(mahogany::tabIndexAt(100, 3, -0.1, 2), -1);
+  CHECK_EQ(mahogany::tabIndexAt(100, 3, 100.0, 2), -1);
+  CHECK_EQ(mahogany::tabIndexAt(100, 0, 10.0, 2), -1);
 }
 
 CANOPY_TEST(aDropLandsBesideTheTabUnderIt) {
-  CHECK_EQ(canopy::tabInsertionAt(100, 3, 5.0, 2), size_t{0});
-  CHECK_EQ(canopy::tabInsertionAt(100, 3, 20.0, 2), size_t{1});
-  CHECK_EQ(canopy::tabInsertionAt(100, 3, 40.0, 2), size_t{1});
-  CHECK_EQ(canopy::tabInsertionAt(100, 3, 95.0, 2), size_t{3});
-  CHECK_EQ(canopy::tabInsertionAt(100, 3, 500.0, 2), size_t{3});
+  CHECK_EQ(mahogany::tabInsertionAt(100, 3, 5.0, 2), size_t{0});
+  CHECK_EQ(mahogany::tabInsertionAt(100, 3, 20.0, 2), size_t{1});
+  CHECK_EQ(mahogany::tabInsertionAt(100, 3, 40.0, 2), size_t{1});
+  CHECK_EQ(mahogany::tabInsertionAt(100, 3, 95.0, 2), size_t{3});
+  CHECK_EQ(mahogany::tabInsertionAt(100, 3, 500.0, 2), size_t{3});
 }
 
 CANOPY_TEST(aStripWithinItsLimitShowsEveryTab) {
-  CHECK(canopy::tabStrip(4, 3, 0, 2) == (canopy::TabStrip{.first = 0, .count = 4}));
-  CHECK(canopy::tabStrip(4, 3, 4, 2) == (canopy::TabStrip{.first = 0, .count = 4}));
-  CHECK(canopy::tabStrip(0, 0, 3, 0) == (canopy::TabStrip{.first = 0, .count = 0}));
+  CHECK(mahogany::tabStrip(4, 3, 0, 2) == (mahogany::TabStrip{.first = 0, .count = 4}));
+  CHECK(mahogany::tabStrip(4, 3, 4, 2) == (mahogany::TabStrip{.first = 0, .count = 4}));
+  CHECK(mahogany::tabStrip(0, 0, 3, 0) == (mahogany::TabStrip{.first = 0, .count = 0}));
 }
 
 CANOPY_TEST(aScrollingStripMovesOnlyAsFarAsTheActiveTabNeeds) {
   // Eight tabs, five slots: stepping right inside the strip leaves it where it is.
-  CHECK(canopy::tabStrip(8, 4, 5, 0) == (canopy::TabStrip{.first = 0, .count = 5}));
+  CHECK(mahogany::tabStrip(8, 4, 5, 0) == (mahogany::TabStrip{.first = 0, .count = 5}));
   // One past its end moves it by one, not by a page.
-  CHECK(canopy::tabStrip(8, 5, 5, 0) == (canopy::TabStrip{.first = 1, .count = 5}));
+  CHECK(mahogany::tabStrip(8, 5, 5, 0) == (mahogany::TabStrip{.first = 1, .count = 5}));
   // Back to its start pulls it back just enough.
-  CHECK(canopy::tabStrip(8, 1, 5, 3) == (canopy::TabStrip{.first = 1, .count = 5}));
+  CHECK(mahogany::tabStrip(8, 1, 5, 3) == (mahogany::TabStrip{.first = 1, .count = 5}));
   // Inside it again, it stays.
-  CHECK(canopy::tabStrip(8, 4, 5, 3) == (canopy::TabStrip{.first = 3, .count = 5}));
+  CHECK(mahogany::tabStrip(8, 4, 5, 3) == (mahogany::TabStrip{.first = 3, .count = 5}));
 }
 
 CANOPY_TEST(aScrollingStripStaysWithinItsTabs) {
   // A strip left past the end by closed tabs is pulled back to show a full run.
-  CHECK(canopy::tabStrip(6, 5, 4, 9) == (canopy::TabStrip{.first = 2, .count = 4}));
+  CHECK(mahogany::tabStrip(6, 5, 4, 9) == (mahogany::TabStrip{.first = 2, .count = 4}));
   // An active index past the end is treated as the last tab.
-  CHECK(canopy::tabStrip(6, 40, 4, 0) == (canopy::TabStrip{.first = 2, .count = 4}));
+  CHECK(mahogany::tabStrip(6, 40, 4, 0) == (mahogany::TabStrip{.first = 2, .count = 4}));
 }
 
 CANOPY_TEST(aScrollingBarPutsAButtonAtEachEnd) {
   // 400 wide, 24 tall, gap 2: square 24-pixel buttons, the slots between them.
   CHECK(
-      canopy::tabBarParts(400, 24, 2, true)
-      == (canopy::TabBarParts{.buttonWidth = 24, .slotsX = 26, .slotsWidth = 348})
+      mahogany::tabBarParts(400, 24, 2, true)
+      == (mahogany::TabBarParts{.buttonWidth = 24, .slotsX = 26, .slotsWidth = 348})
   );
   // A bar showing every tab has no buttons.
   CHECK(
-      canopy::tabBarParts(400, 24, 2, false)
-      == (canopy::TabBarParts{.buttonWidth = 0, .slotsX = 0, .slotsWidth = 400})
+      mahogany::tabBarParts(400, 24, 2, false)
+      == (mahogany::TabBarParts{.buttonWidth = 0, .slotsX = 0, .slotsWidth = 400})
   );
   // A wide side bar keeps its buttons short.
-  CHECK_EQ(canopy::tabBarParts(600, 160, 0, true).buttonWidth, canopy::kTabCycleButtonMaxWidth);
+  CHECK_EQ(mahogany::tabBarParts(600, 160, 0, true).buttonWidth, mahogany::kTabCycleButtonMaxWidth);
   // A thin indicator still gets buttons wide enough to hit.
-  CHECK_EQ(canopy::tabBarParts(400, 4, 0, true).buttonWidth, canopy::kTabCycleButtonMinWidth);
+  CHECK_EQ(mahogany::tabBarParts(400, 4, 0, true).buttonWidth, mahogany::kTabCycleButtonMinWidth);
 }
 
 CANOPY_TEST(pointsOnAScrollingBarFindItsButtonsAndShownTabs) {
   // Tabs 2 and 3 of 6 show in two 173-pixel slots between 24-pixel buttons.
-  const canopy::TabStrip strip{.first = 2, .count = 2};
-  const auto at = [&](double x) { return canopy::tabBarPointAt(400, 24, 2, strip, 6, x); };
-  CHECK(at(10.0) == (canopy::TabBarPoint{.part = canopy::TabBarPart::PreviousTab, .index = 0}));
-  CHECK(at(390.0) == (canopy::TabBarPoint{.part = canopy::TabBarPart::NextTab, .index = 0}));
-  CHECK(at(30.0) == (canopy::TabBarPoint{.part = canopy::TabBarPart::Tab, .index = 2}));
-  CHECK(at(370.0) == (canopy::TabBarPoint{.part = canopy::TabBarPart::Tab, .index = 3}));
+  const mahogany::TabStrip strip{.first = 2, .count = 2};
+  const auto at = [&](double x) { return mahogany::tabBarPointAt(400, 24, 2, strip, 6, x); };
+  CHECK(at(10.0) == (mahogany::TabBarPoint{.part = mahogany::TabBarPart::PreviousTab, .index = 0}));
+  CHECK(at(390.0) == (mahogany::TabBarPoint{.part = mahogany::TabBarPart::NextTab, .index = 0}));
+  CHECK(at(30.0) == (mahogany::TabBarPoint{.part = mahogany::TabBarPart::Tab, .index = 2}));
+  CHECK(at(370.0) == (mahogany::TabBarPoint{.part = mahogany::TabBarPart::Tab, .index = 3}));
   // The gap between a button and the slots is nothing.
-  CHECK(at(25.0) == canopy::TabBarPoint{});
-  CHECK(at(-1.0) == canopy::TabBarPoint{});
+  CHECK(at(25.0) == mahogany::TabBarPoint{});
+  CHECK(at(-1.0) == mahogany::TabBarPoint{});
 }
 
 CANOPY_TEST(dropsOnAScrollingBarLandAmongItsShownTabs) {
-  const canopy::TabStrip strip{.first = 2, .count = 2};
+  const mahogany::TabStrip strip{.first = 2, .count = 2};
   // The leading half of the first shown slot inserts before tab 2, the trailing half of the last after tab 3.
-  CHECK_EQ(canopy::tabBarDropAt(400, 24, 2, strip, 6, 40.0).row, size_t{2});
-  CHECK_EQ(canopy::tabBarDropAt(400, 24, 2, strip, 6, 360.0).row, size_t{4});
-  CHECK_EQ(canopy::tabBarDropAt(400, 24, 2, strip, 6, 40.0).boundary, 26);
+  CHECK_EQ(mahogany::tabBarDropAt(400, 24, 2, strip, 6, 40.0).row, size_t{2});
+  CHECK_EQ(mahogany::tabBarDropAt(400, 24, 2, strip, 6, 360.0).row, size_t{4});
+  CHECK_EQ(mahogany::tabBarDropAt(400, 24, 2, strip, 6, 40.0).boundary, 26);
 }
 
 // tab groups
@@ -388,7 +388,7 @@ CANOPY_TEST(resizingATabbedColumnStartsFromTheColumnNotItsTabs) {
   fixture.layout.setTabbed(stub(0), true);
   fixture.layout.arrange(kUsable);
   const double before = fixture.layout.widthFraction(0);
-  std::unique_ptr<canopy::ResizeGrab> grab = fixture.layout.beginResize(stub(0), WLR_EDGE_RIGHT, kUsable);
+  std::unique_ptr<mahogany::ResizeGrab> grab = fixture.layout.beginResize(stub(0), WLR_EDGE_RIGHT, kUsable);
   CHECK(grab != nullptr);
   if (grab != nullptr) {
     grab->applyDelta(0.0, 0.0, kUsable);
@@ -463,8 +463,8 @@ CANOPY_TEST(selectingReportsOnlyAChangeOfTheShownTab) {
   CHECK_EQ(shownTab(fixture.column()), stub(1));
   CHECK(!fixture.layout.selectTab(stub(1)));
   CHECK(fixture.layout.selectTab(stub(2)));
-  CHECK(canopy::hiddenTab(fixture.column(), stub(1)));
-  CHECK(!canopy::hiddenTab(fixture.column(), stub(2)));
+  CHECK(mahogany::hiddenTab(fixture.column(), stub(1)));
+  CHECK(!mahogany::hiddenTab(fixture.column(), stub(2)));
 }
 
 CANOPY_TEST(closingTheShownTabShowsItsPredecessor) {
@@ -486,7 +486,7 @@ CANOPY_TEST(consumeJoinsTabsWhereNewTabsGo) {
   fixture.layout.insertView(stub(3), 1);
   CHECK(fixture.layout.consume(stub(3), -1));
   CHECK_EQ(fixture.layout.rowOf(stub(3)), 1);
-  CHECK(canopy::tabGroupOf(fixture.column(), stub(3)) != nullptr);
+  CHECK(mahogany::tabGroupOf(fixture.column(), stub(3)) != nullptr);
   CHECK_EQ(shownTab(fixture.column()), stub(0));
 }
 
@@ -497,7 +497,7 @@ CANOPY_TEST(consumeBelowAStandaloneRowStandsAlone) {
   CHECK(fixture.layout.moveViewVertical(stub(2), 1));
   fixture.layout.insertView(stub(3), 1);
   CHECK(fixture.layout.consume(stub(3), -1));
-  CHECK(canopy::tabGroupOf(fixture.column(), stub(3)) == nullptr);
+  CHECK(mahogany::tabGroupOf(fixture.column(), stub(3)) == nullptr);
   CHECK_EQ(fixture.column().tabs.unitCount(fixture.column().views.size()), size_t{3});
 }
 
@@ -559,7 +559,7 @@ CANOPY_TEST(consumeFromPullsTheShownTabOfATabbedColumn) {
   CHECK(fixture.layout.consume(stub(2), -1));
   CHECK(fixture.layout.setTabbed(stub(2), true));
   // The source column shows its second tab, so that is the window that comes over; the hidden one stays.
-  CHECK_EQ(canopy::columnEntry(fixture.layout.columns()[1]), stub(2));
+  CHECK_EQ(mahogany::columnEntry(fixture.layout.columns()[1]), stub(2));
   CHECK(fixture.layout.consumeFrom(stub(0), 1));
   CHECK_EQ(fixture.layout.columnOf(stub(2)), 0);
   CHECK_EQ(fixture.layout.rowOf(stub(2)), 1);
@@ -591,7 +591,7 @@ CANOPY_TEST(consumeFromAppendsATabAtTheGroupsEndByDefault) {
   CHECK(fixture.layout.setTabbed(stub(0), true));
   CHECK(fixture.layout.consumeFrom(stub(0), 1));
   // The pulled window is one more tab of the focused group, last, and the focused window keeps showing.
-  CHECK(canopy::tabGroupOf(fixture.column(), stub(2)) != nullptr);
+  CHECK(mahogany::tabGroupOf(fixture.column(), stub(2)) != nullptr);
   CHECK_EQ(fixture.column().tabs.groups().front().count, size_t{3});
   CHECK_EQ(fixture.layout.rowOf(stub(2)), 2);
   CHECK_EQ(shownTab(fixture.column()), stub(0));
@@ -603,12 +603,12 @@ CANOPY_TEST(consumeFromBelowAStandaloneRowStandsBeforeTheGroup) {
   CHECK(fixture.layout.setTabbed(stub(1), true));
   // The last tab steps out ahead of the group and stands alone at the top.
   CHECK(fixture.layout.moveViewVertical(stub(2), -1));
-  CHECK(canopy::tabGroupOf(fixture.column(), stub(2)) == nullptr);
+  CHECK(mahogany::tabGroupOf(fixture.column(), stub(2)) == nullptr);
   CHECK_EQ(fixture.layout.rowOf(stub(2)), 0);
   fixture.layout.insertView(stub(3), 1);
   CHECK(fixture.layout.consumeFrom(stub(2), 1));
   // The pulled window takes the row below it and stays out of the group it meets.
-  CHECK(canopy::tabGroupOf(fixture.column(), stub(3)) == nullptr);
+  CHECK(mahogany::tabGroupOf(fixture.column(), stub(3)) == nullptr);
   CHECK_EQ(fixture.layout.rowOf(stub(3)), 1);
   CHECK_EQ(fixture.column().tabs.unitCount(fixture.column().views.size()), size_t{3});
   CHECK_EQ(shownTab(fixture.column()), stub(0));
@@ -621,13 +621,13 @@ CANOPY_TEST(movingATabStepsOutOfItsGroup) {
   // Down from the middle: the tab leaves for the row below the group, which keeps its other tabs in order.
   CHECK(fixture.layout.moveViewVertical(stub(1), 1));
   CHECK_EQ(fixture.layout.rowOf(stub(1)), 2);
-  CHECK(canopy::tabGroupOf(fixture.column(), stub(1)) == nullptr);
+  CHECK(mahogany::tabGroupOf(fixture.column(), stub(1)) == nullptr);
   CHECK_EQ(fixture.column().views[0], stub(0));
   CHECK_EQ(fixture.column().views[1], stub(2));
   CHECK_EQ(fixture.column().tabs.groups().front().count, size_t{2});
   // Back up: it meets the group and joins it as its last tab, on show.
   CHECK(fixture.layout.moveViewVertical(stub(1), -1));
-  CHECK(canopy::tabGroupOf(fixture.column(), stub(1)) != nullptr);
+  CHECK(mahogany::tabGroupOf(fixture.column(), stub(1)) != nullptr);
   CHECK_EQ(shownTab(fixture.column()), stub(1));
   CHECK_EQ(fixture.layout.rowOf(stub(1)), 2);
 }
@@ -715,7 +715,7 @@ CANOPY_TEST(draggingTheBoundaryBelowAGroupResizesIt) {
   fixture.layout.setTabbed(stub(0), true);
   CHECK(fixture.layout.moveViewVertical(stub(2), 1));
   fixture.layout.arrange(kUsable);
-  std::unique_ptr<canopy::ResizeGrab> grab = fixture.layout.beginResize(stub(1), WLR_EDGE_BOTTOM, kUsable);
+  std::unique_ptr<mahogany::ResizeGrab> grab = fixture.layout.beginResize(stub(1), WLR_EDGE_BOTTOM, kUsable);
   CHECK(grab != nullptr);
   if (grab != nullptr) {
     grab->applyDelta(0.0, 100.0, kUsable);
@@ -742,10 +742,10 @@ CANOPY_TEST(aDropJoinsTheGroupItNames) {
   fixture.stack(2);
   fixture.layout.setTabbed(stub(0), true);
   CHECK(fixture.layout.insertTab(stub(7), 0, 2, stub(0)));
-  CHECK(canopy::tabGroupOf(fixture.column(), stub(7)) != nullptr);
+  CHECK(mahogany::tabGroupOf(fixture.column(), stub(7)) != nullptr);
   // A row at a group's end stands beside it unless the drop asks to join.
   fixture.layout.insertViewIntoColumn(stub(8), 0, 3);
-  CHECK(canopy::tabGroupOf(fixture.column(), stub(8)) == nullptr);
+  CHECK(mahogany::tabGroupOf(fixture.column(), stub(8)) == nullptr);
   CHECK(!fixture.layout.insertTab(stub(9), 0, 5, stub(0)));
 }
 
@@ -758,8 +758,8 @@ CANOPY_TEST(aDropAtAnAdjacentGroupsStartJoinsThatGroup) {
   CHECK(fixture.layout.insertTab(stub(7), 0, 2, stub(2)));
   const Column& column = fixture.column();
   CHECK_EQ(column.tabs.groups().front().count, size_t{2});
-  CHECK(canopy::tabGroupOf(column, stub(7)) == canopy::tabGroupOf(column, stub(2)));
-  CHECK(canopy::tabGroupOf(column, stub(7)) != canopy::tabGroupOf(column, stub(0)));
+  CHECK(mahogany::tabGroupOf(column, stub(7)) == mahogany::tabGroupOf(column, stub(2)));
+  CHECK(mahogany::tabGroupOf(column, stub(7)) != mahogany::tabGroupOf(column, stub(0)));
 }
 
 CANOPY_TEST(aDropAtAnAdjacentGroupsEndJoinsThatGroup) {
@@ -771,8 +771,8 @@ CANOPY_TEST(aDropAtAnAdjacentGroupsEndJoinsThatGroup) {
   CHECK(fixture.layout.insertTab(stub(7), 0, 2, stub(0)));
   const Column& column = fixture.column();
   CHECK_EQ(column.tabs.groups().back().count, size_t{1});
-  CHECK(canopy::tabGroupOf(column, stub(7)) == canopy::tabGroupOf(column, stub(0)));
-  CHECK(canopy::tabGroupOf(column, stub(7)) != canopy::tabGroupOf(column, stub(2)));
+  CHECK(mahogany::tabGroupOf(column, stub(7)) == mahogany::tabGroupOf(column, stub(0)));
+  CHECK(mahogany::tabGroupOf(column, stub(7)) != mahogany::tabGroupOf(column, stub(2)));
 }
 
 CANOPY_TEST(rebuiltColumnsReplaceTheDestinationsDefaultTabs) {
@@ -837,7 +837,7 @@ CANOPY_TEST(newColumnsTakeTheConfiguredDisplay) {
   fixture.config.tabs.defaultDisplay = ColumnDisplay::Tabbed;
   fixture.stack(2);
   CHECK(tabbed(fixture.column()));
-  CHECK(canopy::tabGroupOf(fixture.column(), stub(1)) != nullptr);
+  CHECK(mahogany::tabGroupOf(fixture.column(), stub(1)) != nullptr);
   CHECK(fixture.layout.expel(stub(1), 1));
   CHECK(tabbed(fixture.column(1)));
 }
@@ -847,9 +847,9 @@ CANOPY_TEST(snapshotsKeepTabsAndLetMissingMembersLeave) {
   fixture.stack(3);
   fixture.layout.setTabbed(stub(0), true);
   fixture.layout.selectTab(stub(2));
-  canopy::LayoutCapture capture = fixture.layout.captureState();
+  mahogany::LayoutCapture capture = fixture.layout.captureState();
   // The shown tab does not come back: its predecessor shows, as after a close.
-  std::erase_if(capture.members, [](const canopy::LayoutMember& member) { return member.view == stub(2); });
+  std::erase_if(capture.members, [](const mahogany::LayoutMember& member) { return member.view == stub(2); });
   ScrollingFixture restored;
   CHECK(restored.layout.restoreState(*capture.snapshot, capture.members));
   CHECK(tabbed(restored.column()));
@@ -864,7 +864,7 @@ CANOPY_TEST(enteringATabbedColumnLandsOnItsShownTab) {
   const std::vector<View*> peers = fixture.layout.focusPeers(stub(3), stub(0));
   CHECK_EQ(peers.size(), size_t{1});
   CHECK(!peers.empty() && peers.front() == stub(1));
-  CHECK_EQ(canopy::columnEntry(fixture.column()), stub(1));
+  CHECK_EQ(mahogany::columnEntry(fixture.column()), stub(1));
 }
 
 // master
@@ -975,7 +975,7 @@ CANOPY_TEST(aJoiningStackRowIsSizedForTheTabbedArea) {
   MasterFixture fixture;
   fixture.addViews(2);
   fixture.layout.setTabbed(fixture.layout.columns()[1].views[0], true);
-  const canopy::Layout::InitialSize size =
+  const mahogany::Layout::InitialSize size =
       fixture.layout.initialSize(kUsable, false, std::nullopt, std::nullopt, nullptr);
   CHECK_EQ(size.height, 700 - kReserve);
 }

@@ -8,7 +8,7 @@
 #include <string>
 #include <vector>
 
-namespace canopy {
+namespace mahogany {
 
   // One loaded configuration and everything learned while loading it: `Config`, diagnostics, the set of files to watch
   // (a config that stops `include`-ing a file must stop watching it), and whether a config file exists. A reload
@@ -78,4 +78,4 @@ namespace canopy {
   // settings as arguments and do not reach for this.
   ConfigStore& configStore();
 
-} // namespace canopy
+} // namespace mahogany

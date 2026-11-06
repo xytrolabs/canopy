@@ -19,7 +19,7 @@
 #include <string>
 #include <string_view>
 
-namespace canopy {
+namespace mahogany {
   namespace {
     uint32_t modifierMaskForKeysym(uint32_t keysym) {
       switch (keysym) {
@@ -421,4 +421,4 @@ namespace canopy {
     }
   }
 
-} // namespace canopy
+} // namespace mahogany

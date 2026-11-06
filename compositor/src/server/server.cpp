@@ -63,7 +63,7 @@ extern "C" {
 #include <unistd.h>
 #include <vector>
 
-namespace canopy {
+namespace mahogany {
 
   namespace {
 
@@ -2193,4 +2193,4 @@ namespace canopy {
     const auto diff = std::chrono::steady_clock::now() - m_startTime;
     return std::chrono::duration_cast<std::chrono::milliseconds>(diff).count();
   }
-} // namespace canopy
+} // namespace mahogany

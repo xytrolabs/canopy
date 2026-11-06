@@ -6,7 +6,7 @@
 #include "wlr.h"
 // clang-format on
 
-namespace canopy {
+namespace mahogany {
 
   // Raster bounds, content hole, and nested radii for a single-pass border.
   struct BorderRing {
@@ -31,4 +31,4 @@ namespace canopy {
   BorderRing
   makeBorderRing(int contentWidth, int contentHeight, int outerRadius, int innerWidth, int outerWidth, int padding = 0);
 
-} // namespace canopy
+} // namespace mahogany

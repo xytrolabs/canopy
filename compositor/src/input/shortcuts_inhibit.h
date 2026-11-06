@@ -6,7 +6,7 @@
 
 struct wlr_surface;
 
-namespace canopy {
+namespace mahogany {
 
   // Manual passthrough belongs to an exact keyboard-focusable surface. The
   // surface's destruction removes its state, even when it is not focused.
@@ -35,4 +35,4 @@ namespace canopy {
     std::unordered_map<wlr_surface*, std::unique_ptr<Entry>> m_entries;
   };
 
-} // namespace canopy
+} // namespace mahogany

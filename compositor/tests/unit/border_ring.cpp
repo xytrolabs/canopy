@@ -2,8 +2,8 @@
 
 #include "check.h"
 
-using canopy::makeBorderRing;
-using canopy::nestedRadius;
+using mahogany::makeBorderRing;
+using mahogany::nestedRadius;
 
 CANOPY_TEST(nestedRadiusStaysRounded) {
   CHECK_EQ(nestedRadius(0, 4), 0);

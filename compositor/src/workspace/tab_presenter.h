@@ -12,7 +12,7 @@ extern "C" {
 #include <wlr/util/box.h>
 }
 
-namespace canopy {
+namespace mahogany {
 
   class TabBar;
   class TabLabelCache;
@@ -103,4 +103,4 @@ namespace canopy {
     std::vector<View*> m_members;
   };
 
-} // namespace canopy
+} // namespace mahogany

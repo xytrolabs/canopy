@@ -7,7 +7,7 @@
 #include <string>
 #include <vector>
 
-namespace canopy::configmerge {
+namespace mahogany::configmerge {
 
   struct EffectDeclaration {
     std::string name;
@@ -29,4 +29,4 @@ namespace canopy::configmerge {
   MergeResult mergeWithIncludes(const std::filesystem::path& rootFile);
   void deepMerge(toml::table& base, toml::table&& overlay);
 
-} // namespace canopy::configmerge
+} // namespace mahogany::configmerge

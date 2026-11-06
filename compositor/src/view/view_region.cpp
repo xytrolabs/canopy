@@ -7,7 +7,7 @@
 #include "workspace/scratchpad.h"
 #include "workspace/workspace.h"
 
-namespace canopy {
+namespace mahogany {
   bool View::canUseRegionGeometry() const {
     const ScratchpadManager* scratchpad = m_server->scratchpadManager();
     return m_mapped
@@ -156,4 +156,4 @@ namespace canopy {
     setPosition(box->x, box->y);
     syncFloatingSurfaceClip();
   }
-} // namespace canopy
+} // namespace mahogany

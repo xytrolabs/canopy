@@ -1,6 +1,6 @@
 #pragma once
 
-namespace canopy {
+namespace mahogany {
 
   // HDR policy changes are committed with the next rendered output frame. A
   // failed commit leaves the request pending so a later frame can retry it.
@@ -20,4 +20,4 @@ namespace canopy {
     bool m_committedRequest = false;
   };
 
-} // namespace canopy
+} // namespace mahogany

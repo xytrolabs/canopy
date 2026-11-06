@@ -32,7 +32,7 @@
 #include <utility>
 #include <vector>
 
-namespace canopy {
+namespace mahogany {
 
   namespace {
 
@@ -2412,4 +2412,4 @@ namespace canopy {
     return std::ranges::all_of(advertised.begin() + 1, advertised.end(), [](bool present) { return present; });
   }
 
-} // namespace canopy
+} // namespace mahogany

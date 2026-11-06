@@ -8,7 +8,7 @@
 
 #include <cassert>
 
-namespace canopy {
+namespace mahogany {
 
   Popup::Popup(wlr_xdg_popup* popup, wlr_scene_tree* parentTree, wlr_scene_tree* captureTree) : m_popup(popup) {
     if (parentTree == nullptr) {
@@ -135,4 +135,4 @@ namespace canopy {
     delete this;
   }
 
-} // namespace canopy
+} // namespace mahogany

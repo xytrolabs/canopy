@@ -18,7 +18,7 @@
 
 namespace {
 
-  std::string captureHumanOutput(const canopy::IpcCommandSpec& spec, const nlohmann::json& ok) {
+  std::string captureHumanOutput(const mahogany::IpcCommandSpec& spec, const nlohmann::json& ok) {
     FILE* output = std::tmpfile();
     CHECK(output != nullptr);
     if (output == nullptr) {
@@ -87,7 +87,7 @@ namespace {
 } // namespace
 
 CANOPY_TEST(keyboardLayoutsHumanOutputListsAndMarksCurrentLayout) {
-  const canopy::IpcCommandSpec* spec = canopy::findIpcCommand("keyboard-layouts");
+  const mahogany::IpcCommandSpec* spec = mahogany::findIpcCommand("keyboard-layouts");
   CHECK(spec != nullptr);
   if (spec == nullptr) {
     return;
@@ -106,7 +106,7 @@ CANOPY_TEST(keyboardLayoutsHumanOutputListsAndMarksCurrentLayout) {
 }
 
 CANOPY_TEST(colorHumanDisabledOutputHasNoActiveDepth) {
-  const canopy::IpcCommandSpec* spec = canopy::findIpcCommand("color");
+  const mahogany::IpcCommandSpec* spec = mahogany::findIpcCommand("color");
   CHECK(spec != nullptr && spec->printHuman != nullptr);
   if (spec == nullptr || spec->printHuman == nullptr) {
     return;
@@ -119,7 +119,7 @@ CANOPY_TEST(colorHumanDisabledOutputHasNoActiveDepth) {
 }
 
 CANOPY_TEST(colorHumanSdr10LineUsesCommittedFormatForDepth) {
-  const canopy::IpcCommandSpec* spec = canopy::findIpcCommand("color");
+  const mahogany::IpcCommandSpec* spec = mahogany::findIpcCommand("color");
   CHECK(spec != nullptr && spec->printHuman != nullptr);
   if (spec == nullptr || spec->printHuman == nullptr) {
     return;
@@ -138,7 +138,7 @@ CANOPY_TEST(colorHumanSdr10LineUsesCommittedFormatForDepth) {
 }
 
 CANOPY_TEST(colorHumanSdr10FallbackShowsReason) {
-  const canopy::IpcCommandSpec* spec = canopy::findIpcCommand("color");
+  const mahogany::IpcCommandSpec* spec = mahogany::findIpcCommand("color");
   CHECK(spec != nullptr && spec->printHuman != nullptr);
   if (spec == nullptr || spec->printHuman == nullptr) {
     return;
@@ -157,7 +157,7 @@ CANOPY_TEST(colorHumanSdr10FallbackShowsReason) {
 }
 
 CANOPY_TEST(colorHumanDepthIgnoresActivityFlags) {
-  const canopy::IpcCommandSpec* spec = canopy::findIpcCommand("color");
+  const mahogany::IpcCommandSpec* spec = mahogany::findIpcCommand("color");
   CHECK(spec != nullptr && spec->printHuman != nullptr);
   if (spec == nullptr || spec->printHuman == nullptr) {
     return;
@@ -170,7 +170,7 @@ CANOPY_TEST(colorHumanDepthIgnoresActivityFlags) {
 }
 
 CANOPY_TEST(colorHumanShowsCommittedHdrOutputMetadata) {
-  const canopy::IpcCommandSpec* spec = canopy::findIpcCommand("color");
+  const mahogany::IpcCommandSpec* spec = mahogany::findIpcCommand("color");
   CHECK(spec != nullptr && spec->printHuman != nullptr);
   if (spec == nullptr || spec->printHuman == nullptr) {
     return;
@@ -191,16 +191,16 @@ CANOPY_TEST(colorHumanShowsCommittedHdrOutputMetadata) {
 namespace {
 
   bool parseOutputCreate(
-      std::vector<std::string> args, std::string& name, std::optional<canopy::OutputMode>& mode, std::string& error
+      std::vector<std::string> args, std::string& name, std::optional<mahogany::OutputMode>& mode, std::string& error
   ) {
-    return canopy::parseOutputCreateArgs(args, name, mode, error);
+    return mahogany::parseOutputCreateArgs(args, name, mode, error);
   }
 
 } // namespace
 
 CANOPY_TEST(parsesOutputCreateNameOnly) {
   std::string name;
-  std::optional<canopy::OutputMode> mode;
+  std::optional<mahogany::OutputMode> mode;
   std::string error;
   CHECK(parseOutputCreate({"stream"}, name, mode, error));
   CHECK_EQ(name, "stream");
@@ -210,7 +210,7 @@ CANOPY_TEST(parsesOutputCreateNameOnly) {
 
 CANOPY_TEST(parsesOutputCreateMode) {
   std::string name;
-  std::optional<canopy::OutputMode> mode;
+  std::optional<mahogany::OutputMode> mode;
   std::string error;
   CHECK(parseOutputCreate({"stream", "2560x1440@120"}, name, mode, error));
   CHECK_EQ(name, "stream");
@@ -225,7 +225,7 @@ CANOPY_TEST(parsesOutputCreateMode) {
 
 CANOPY_TEST(parsesOutputCreateModeWithoutRefresh) {
   std::string name;
-  std::optional<canopy::OutputMode> mode;
+  std::optional<mahogany::OutputMode> mode;
   std::string error;
   CHECK(parseOutputCreate({"stream", "400x300"}, name, mode, error));
   CHECK(mode.has_value());
@@ -238,7 +238,7 @@ CANOPY_TEST(parsesOutputCreateModeWithoutRefresh) {
 
 CANOPY_TEST(rejectsOutputCreateInvalidMode) {
   std::string name;
-  std::optional<canopy::OutputMode> mode;
+  std::optional<mahogany::OutputMode> mode;
   std::string error;
   CHECK(!parseOutputCreate({"stream", "1920x1080p"}, name, mode, error));
   CHECK(!error.empty());
@@ -247,7 +247,7 @@ CANOPY_TEST(rejectsOutputCreateInvalidMode) {
 
 CANOPY_TEST(rejectsOutputCreateExtraArguments) {
   std::string name;
-  std::optional<canopy::OutputMode> mode;
+  std::optional<mahogany::OutputMode> mode;
   std::string error;
   CHECK(!parseOutputCreate({"stream", "1920x1080", "extra"}, name, mode, error));
   CHECK(!error.empty());
@@ -262,8 +262,8 @@ CANOPY_TEST(rejectsOutputCreateExtraArguments) {
 }
 
 CANOPY_TEST(effectsCommandReportsStatesSuppressionAndDeclarationOrder) {
-  const auto* spec = canopy::findIpcCommand("effects");
-  CHECK(spec != nullptr && spec->printHuman != nullptr && spec->handle == &canopy::IpcCommands::effects);
+  const auto* spec = mahogany::findIpcCommand("effects");
+  CHECK(spec != nullptr && spec->printHuman != nullptr && spec->handle == &mahogany::IpcCommands::effects);
   if (spec == nullptr || spec->printHuman == nullptr) {
     return;
   }
@@ -304,7 +304,7 @@ CANOPY_TEST(effectsCommandReportsStatesSuppressionAndDeclarationOrder) {
 }
 
 CANOPY_TEST(audioRequestsAcceptOnlyTheCompleteBoundedSpectrumContract) {
-  using canopy::IpcCommands;
+  using mahogany::IpcCommands;
   auto bands = nlohmann::json::array();
   for (int i = 0; i < FX_AUDIO_BANDS; ++i) {
     bands.push_back(static_cast<double>(i) / (FX_AUDIO_BANDS - 1));
@@ -348,8 +348,8 @@ CANOPY_TEST(audioRequestsAcceptOnlyTheCompleteBoundedSpectrumContract) {
 namespace {
 
   // Word-grammar samples for every argument kind, with optional fields both set and left out.
-  std::vector<std::string> actionSamples(canopy::ActionArgKind kind) {
-    using canopy::ActionArgKind;
+  std::vector<std::string> actionSamples(mahogany::ActionArgKind kind) {
+    using mahogany::ActionArgKind;
     switch (kind) {
     case ActionArgKind::None:
       return {""};
@@ -409,8 +409,8 @@ namespace {
     return {};
   }
 
-  std::optional<canopy::Keybind> decode(std::string_view text, std::string& error) {
-    return canopy::actionFromRequest(nlohmann::json::parse(text), error);
+  std::optional<mahogany::Keybind> decode(std::string_view text, std::string& error) {
+    return mahogany::actionFromRequest(nlohmann::json::parse(text), error);
   }
 
 } // namespace
@@ -418,12 +418,12 @@ namespace {
 // The CLI parses words and sends the structured request, so every payload the word grammar produces must survive the
 // trip through the request unchanged.
 CANOPY_TEST(everyWordFormRoundTripsThroughTheActionRequest) {
-  for (const auto& spec : canopy::actionSpecs()) {
+  for (const auto& spec : mahogany::actionSpecs()) {
     for (const auto& sample : actionSamples(spec.argKind)) {
-      canopy::Keybind words;
-      CHECK(canopy::parseAction(std::string(spec.name) + sample, words));
+      mahogany::Keybind words;
+      CHECK(mahogany::parseAction(std::string(spec.name) + sample, words));
       std::string error;
-      const auto decoded = canopy::actionFromRequest(canopy::actionRequest(words), error);
+      const auto decoded = mahogany::actionFromRequest(mahogany::actionRequest(words), error);
       CHECK(decoded.has_value());
       CHECK(error.empty());
       if (decoded) {
@@ -438,14 +438,14 @@ CANOPY_TEST(actionRequestWorkspaceTypeSelectsPositionOrName) {
   std::string error;
   const auto position = decode(R"({"cmd":"action","action":"workspace-switch","workspace":2})", error);
   const auto* index = position
-      ? std::get_if<canopy::WorkspaceIndex>(&std::get<canopy::WorkspaceArg>(position->payload).reference)
+      ? std::get_if<mahogany::WorkspaceIndex>(&std::get<mahogany::WorkspaceArg>(position->payload).reference)
       : nullptr;
   CHECK(index != nullptr && index->value == 2);
   const auto named = decode(R"({"cmd":"action","action":"workspace-switch","workspace":"2","output":"DP-1"})", error);
   CHECK(named.has_value());
   if (named) {
-    const auto& workspace = std::get<canopy::WorkspaceArg>(named->payload);
-    const auto* name = std::get_if<canopy::WorkspaceName>(&workspace.reference);
+    const auto& workspace = std::get<mahogany::WorkspaceArg>(named->payload);
+    const auto* name = std::get_if<mahogany::WorkspaceName>(&workspace.reference);
     CHECK(name != nullptr && name->value == "2");
     CHECK_EQ(workspace.output, std::string{"DP-1"});
   }
@@ -499,7 +499,7 @@ CANOPY_TEST(workspaceOutputRequestRejectsMalformedFields) {
     auto bad = invalid;
     bad["cmd"] = "action";
     bad["action"] = "workspace-move-to-output";
-    CHECK(!canopy::actionFromRequest(bad, error));
+    CHECK(!mahogany::actionFromRequest(bad, error));
   }
 }
 

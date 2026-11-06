@@ -8,7 +8,7 @@
 
 struct wlr_box;
 
-namespace canopy {
+namespace mahogany {
 
   class View;
 
@@ -134,4 +134,4 @@ namespace canopy {
     mutable std::vector<LayoutTarget> m_targets;
   };
 
-} // namespace canopy
+} // namespace mahogany

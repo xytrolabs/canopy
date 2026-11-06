@@ -6,7 +6,7 @@
 #include <string>
 #include <vector>
 
-namespace canopy {
+namespace mahogany {
 
   namespace {
 
@@ -607,4 +607,4 @@ namespace canopy {
     return result;
   }
 
-} // namespace canopy
+} // namespace mahogany

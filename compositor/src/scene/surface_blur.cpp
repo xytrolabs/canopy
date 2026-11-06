@@ -7,7 +7,7 @@
 // clang-format on
 #include <pixman.h>
 
-namespace canopy {
+namespace mahogany {
 
   namespace {
 
@@ -156,4 +156,4 @@ namespace canopy {
     }
   }
 
-} // namespace canopy
+} // namespace mahogany

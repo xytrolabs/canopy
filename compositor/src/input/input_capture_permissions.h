@@ -7,7 +7,7 @@
 #include <string_view>
 #include <vector>
 
-namespace canopy {
+namespace mahogany {
 
   struct InputCapturePermission {
     std::string id;
@@ -53,4 +53,4 @@ namespace canopy {
     bool m_loaded = false;
   };
 
-} // namespace canopy
+} // namespace mahogany

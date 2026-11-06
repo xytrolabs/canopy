@@ -30,7 +30,7 @@ namespace {
   constexpr int kHangingIndent = 18;
 
   // Make a diagnostic file path short relative to the config root's directory.
-  std::string shortPath(const canopy::ConfigDiagnostic& diag, const std::filesystem::path& configDir) {
+  std::string shortPath(const mahogany::ConfigDiagnostic& diag, const std::filesystem::path& configDir) {
     if (diag.file.empty()) {
       return {};
     }
@@ -53,14 +53,14 @@ namespace {
   }
 
   int onHideTimer(void* data) {
-    auto* banner = static_cast<canopy::ConfigBanner*>(data);
+    auto* banner = static_cast<mahogany::ConfigBanner*>(data);
     banner->hide();
     return 0; // disarm
   }
 
 } // namespace
 
-namespace canopy {
+namespace mahogany {
 
   ConfigBanner::ConfigBanner(Server& server, wlr_scene_tree* parent) : m_server(server), m_parent(parent) {}
 
@@ -252,4 +252,4 @@ namespace canopy {
     }
   }
 
-} // namespace canopy
+} // namespace mahogany

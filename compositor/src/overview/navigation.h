@@ -6,7 +6,7 @@
 #include <cmath>
 #include <cstdint>
 
-namespace canopy {
+namespace mahogany {
 
   // Which touchpad stream drives an overview gesture. libinput reports two-finger scrolling as unaccelerated scroll
   // units and three-finger swipes as pointer-accelerated motion, so the same physical travel arrives as different
@@ -66,4 +66,4 @@ namespace canopy {
     Axis m_axis = Axis::Pending;
   };
 
-} // namespace canopy
+} // namespace mahogany

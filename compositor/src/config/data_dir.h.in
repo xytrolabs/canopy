@@ -1,5 +1,5 @@
 #pragma once
 
-namespace canopy {
+namespace mahogany {
   inline constexpr char kDataDir[] = @CANOPY_DATA_DIR@;
 }

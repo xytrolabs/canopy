@@ -10,7 +10,7 @@ extern "C" {
 #include <wlr/types/wlr_keyboard.h>
 }
 
-namespace canopy {
+namespace mahogany {
 
   namespace {
     constexpr std::array<std::string_view, 8> kRealModifiers{"Shift", "Lock", "Control", "Mod1",
@@ -136,4 +136,4 @@ namespace canopy {
     return true;
   }
 
-} // namespace canopy
+} // namespace mahogany

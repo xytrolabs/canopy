@@ -7,7 +7,7 @@
 
 struct wlr_keyboard;
 
-namespace canopy {
+namespace mahogany {
 
   // Modifier encodings belong to one keymap. Keep names when carrying state
   // to another keymap, preferring semantic virtual names to backing real
@@ -26,4 +26,4 @@ namespace canopy {
   // A null replacement or a wlroots failure leaves the old state untouched.
   [[nodiscard]] bool setKeyboardKeymapPreservingState(wlr_keyboard* keyboard, xkb_keymap* keymap);
 
-} // namespace canopy
+} // namespace mahogany

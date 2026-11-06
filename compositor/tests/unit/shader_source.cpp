@@ -31,11 +31,11 @@ namespace {
       CHECK(stream.good());
     }
 
-    canopy::ShaderReadResult read(const std::string& text, std::string_view relative = "theme/config.toml") {
+    mahogany::ShaderReadResult read(const std::string& text, std::string_view relative = "theme/config.toml") {
       diagnostics.clear();
       const auto table = toml::parse(text, (directory / relative).string());
-      canopy::Section section(table, "animation.windows_in", diagnostics);
-      return canopy::readShaderSource(section, "shader", diagnostics);
+      mahogany::Section section(table, "animation.windows_in", diagnostics);
+      return mahogany::readShaderSource(section, "shader", diagnostics);
     }
 
     bool warned(std::string_view text) const {
@@ -45,7 +45,7 @@ namespace {
     }
 
     std::filesystem::path directory;
-    std::vector<canopy::ConfigDiagnostic> diagnostics;
+    std::vector<mahogany::ConfigDiagnostic> diagnostics;
   };
 } // namespace
 
@@ -131,9 +131,9 @@ CANOPY_TEST(shaderInputIsBoundedAndRejectsBlankNulAndNonRegularFiles) {
   CHECK(!fixture.read("shader = 'effect.glsl'").source);
   CHECK(fixture.warned("NUL"));
 
-  fixture.write("theme/effect.glsl", std::string(canopy::kShaderSourceLimit, 'x'));
+  fixture.write("theme/effect.glsl", std::string(mahogany::kShaderSourceLimit, 'x'));
   CHECK(fixture.read("shader = 'effect.glsl'").source.has_value());
-  fixture.write("theme/effect.glsl", std::string(canopy::kShaderSourceLimit + 1, 'x'));
+  fixture.write("theme/effect.glsl", std::string(mahogany::kShaderSourceLimit + 1, 'x'));
   CHECK(!fixture.read("shader = 'effect.glsl'").source);
   CHECK(fixture.warned("exceeds 256 KiB"));
 

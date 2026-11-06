@@ -16,7 +16,7 @@
 #include <utility>
 #include <vector>
 
-namespace canopy {
+namespace mahogany {
 
   namespace {
 
@@ -250,7 +250,7 @@ namespace canopy {
       const auto& diags = configDiagnostics();
 
       for (const auto& d : diags) {
-        if (d.severity == canopy::ConfigDiagnostic::Severity::Error) {
+        if (d.severity == mahogany::ConfigDiagnostic::Severity::Error) {
           const std::string loc = d.location();
           errors += loc.empty() ? d.message : loc + ": " + d.message + "\n";
         }
@@ -308,4 +308,4 @@ namespace canopy {
 
   const std::vector<std::filesystem::path>& configWatchPaths() { return configStore().watchPaths(); }
 
-} // namespace canopy
+} // namespace mahogany

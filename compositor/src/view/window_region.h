@@ -8,7 +8,7 @@ extern "C" {
 #include <wlr/util/box.h>
 }
 
-namespace canopy {
+namespace mahogany {
   enum class WindowRegion : uint8_t { Left, Right, Top, Bottom, TopLeft, TopRight, BottomLeft, BottomRight };
   constexpr int kDropZoneEdge = 16;
   constexpr int kDropZoneCornerSpan = 100;
@@ -19,4 +19,4 @@ namespace canopy {
   wlr_box windowRegionBox(const wlr_box& area, WindowRegion region, int spacing);
   // Output coordinates and thresholds are logical. Shared edges are excluded until the drag dwell expires.
   std::optional<WindowRegion> dropZoneAt(const wlr_box& output, double x, double y, uint32_t closedEdges);
-} // namespace canopy
+} // namespace mahogany

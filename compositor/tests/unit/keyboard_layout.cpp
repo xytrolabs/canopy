@@ -2,7 +2,7 @@
 
 #include "check.h"
 
-using canopy::matchingLayoutGroup;
+using mahogany::matchingLayoutGroup;
 
 namespace {
 
@@ -72,43 +72,43 @@ CANOPY_TEST(rejectsAnInvalidSourceGroup) {
 }
 
 namespace {
-  const canopy::XkbNames kSystem{
+  const mahogany::XkbNames kSystem{
       .layout = "us", .variant = "intl", .options = "terminate:ctrl_alt_bksp", .model = "pc105"
   };
 } // namespace
 
 CANOPY_TEST(systemKeymapAppliesWhenConfigSetsNoXkbNames) {
-  const canopy::Config::Input input;
-  CHECK(canopy::usesSystemXkbNames(input));
-  CHECK(canopy::resolveXkbNames(input.keyboard, nullptr, kSystem) == kSystem);
+  const mahogany::Config::Input input;
+  CHECK(mahogany::usesSystemXkbNames(input));
+  CHECK(mahogany::resolveXkbNames(input.keyboard, nullptr, kSystem) == kSystem);
 }
 
 CANOPY_TEST(anyConfiguredXkbNameReplacesTheWholeSystemKeymap) {
-  canopy::Config::Input input;
+  mahogany::Config::Input input;
   input.keyboard.options = "caps:escape";
-  CHECK(!canopy::usesSystemXkbNames(input));
-  const canopy::XkbNames expected{.layout = "", .variant = "", .options = "caps:escape", .model = ""};
-  CHECK(canopy::resolveXkbNames(input.keyboard, nullptr, kSystem) == expected);
+  CHECK(!mahogany::usesSystemXkbNames(input));
+  const mahogany::XkbNames expected{.layout = "", .variant = "", .options = "caps:escape", .model = ""};
+  CHECK(mahogany::resolveXkbNames(input.keyboard, nullptr, kSystem) == expected);
 }
 
 CANOPY_TEST(deviceXkbNamesReplaceTheSystemKeymap) {
-  const canopy::Config::Input input;
-  canopy::Config::Input::Device device;
+  const mahogany::Config::Input input;
+  mahogany::Config::Input::Device device;
   device.name = "kbd";
   device.layout = "de";
-  const canopy::XkbNames expected{.layout = "de", .variant = "", .options = "", .model = ""};
-  CHECK(canopy::resolveXkbNames(input.keyboard, &device, kSystem) == expected);
+  const mahogany::XkbNames expected{.layout = "de", .variant = "", .options = "", .model = ""};
+  CHECK(mahogany::resolveXkbNames(input.keyboard, &device, kSystem) == expected);
 }
 
 CANOPY_TEST(deviceClearingEveryXkbNameFallsBackToTheSystemKeymap) {
-  canopy::Config::Input input;
+  mahogany::Config::Input input;
   input.keyboard.layout = "fr";
-  canopy::Config::Input::Device device;
+  mahogany::Config::Input::Device device;
   device.name = "kbd";
   device.layout = "";
   input.devices.push_back(device);
-  CHECK(canopy::usesSystemXkbNames(input));
-  CHECK(canopy::resolveXkbNames(input.keyboard, input.devices.data(), kSystem) == kSystem);
+  CHECK(mahogany::usesSystemXkbNames(input));
+  CHECK(mahogany::resolveXkbNames(input.keyboard, input.devices.data(), kSystem) == kSystem);
 }
 
 int main() { return RUN_TESTS(); }

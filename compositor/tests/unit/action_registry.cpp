@@ -4,9 +4,9 @@
 
 #include <cstddef>
 
-using canopy::actionHandlerFor;
-using canopy::actionRegistryComplete;
-using canopy::KeybindAction;
+using mahogany::actionHandlerFor;
+using mahogany::actionRegistryComplete;
+using mahogany::KeybindAction;
 
 CANOPY_TEST(everyAdvertisedActionHasExactlyOneHandler) { CHECK(actionRegistryComplete()); }
 

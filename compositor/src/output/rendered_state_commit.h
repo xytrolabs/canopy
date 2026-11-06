@@ -8,7 +8,7 @@ extern "C" {
 #include <wlr/types/wlr_output.h>
 }
 
-namespace canopy {
+namespace mahogany {
 
   enum class [[nodiscard]] RenderedStateCommitResult {
     BuildFailed,
@@ -29,4 +29,4 @@ namespace canopy {
                                                : RenderedStateCommitResult::CommitFailed;
   }
 
-} // namespace canopy
+} // namespace mahogany

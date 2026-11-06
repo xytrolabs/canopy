@@ -6,7 +6,7 @@
 #include <cmath>
 #include <format>
 
-namespace canopy {
+namespace mahogany {
 
   namespace {
 
@@ -246,4 +246,4 @@ namespace canopy {
     return *this;
   }
 
-} // namespace canopy
+} // namespace mahogany

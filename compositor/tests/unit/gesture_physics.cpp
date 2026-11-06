@@ -3,8 +3,8 @@
 #include "check.h"
 #include "input/swipe_tracker.h"
 
-using canopy::GesturePhysics;
-using canopy::SwipeTracker;
+using mahogany::GesturePhysics;
+using mahogany::SwipeTracker;
 
 namespace {
 

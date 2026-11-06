@@ -6,7 +6,7 @@
 #include "server/server.h"
 #include "wlr.h"
 
-namespace canopy {
+namespace mahogany {
 
   namespace {
     void removeListener(wl_listener& listener) {
@@ -457,4 +457,4 @@ namespace canopy {
     }
   }
 
-} // namespace canopy
+} // namespace mahogany

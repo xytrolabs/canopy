@@ -6,7 +6,7 @@
 #include <random>
 #include <span>
 
-namespace canopy {
+namespace mahogany {
 
   enum class EffectSelectorSource : std::uint8_t { Default, Rule, Runtime };
   std::string_view effectSelectorSourceName(EffectSelectorSource source);
@@ -86,4 +86,4 @@ namespace canopy {
     std::mt19937_64 m_random;
   };
 
-} // namespace canopy
+} // namespace mahogany

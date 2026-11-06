@@ -5,8 +5,8 @@
 #include <optional>
 #include <vector>
 
-using canopy::deriveTenBitSdrActive;
-using canopy::selectSdr10RenderFormat;
+using mahogany::deriveTenBitSdrActive;
+using mahogany::selectSdr10RenderFormat;
 
 CANOPY_TEST(sdr10XR30AcceptedShortCircuits) {
   std::vector<uint32_t> probed;

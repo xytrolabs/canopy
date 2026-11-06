@@ -11,7 +11,7 @@
 #include <cmath>
 #include <utility>
 
-namespace canopy {
+namespace mahogany {
   namespace {
     bool rejectInput(wlr_scene_buffer*, double*, double*) { return false; }
   } // namespace
@@ -401,4 +401,4 @@ namespace canopy {
       frame->reloadConfig();
     }
   }
-} // namespace canopy
+} // namespace mahogany

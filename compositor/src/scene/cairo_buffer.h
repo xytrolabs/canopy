@@ -4,7 +4,7 @@
 
 struct wlr_buffer;
 
-namespace canopy {
+namespace mahogany {
   // Takes ownership of an ARGB32 image surface. The caller drops the returned buffer after handing it to the scene.
   [[nodiscard]] wlr_buffer* createCairoBuffer(cairo_surface_t* surface);
-} // namespace canopy
+} // namespace mahogany

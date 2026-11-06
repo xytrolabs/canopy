@@ -11,7 +11,7 @@
 #include <algorithm>
 #include <string_view>
 
-namespace canopy {
+namespace mahogany {
 
   namespace {
 
@@ -332,4 +332,4 @@ namespace canopy {
     return ref->column->views[ref->group->first + static_cast<size_t>(target)];
   }
 
-} // namespace canopy
+} // namespace mahogany

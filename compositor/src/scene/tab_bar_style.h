@@ -4,7 +4,7 @@
 
 #include <string>
 
-namespace canopy {
+namespace mahogany {
 
   // Everything about how a tab bar looks, resolved from [appearance.tab_bar] and [colors.tab_bar]. The bar draws from
   // this alone, so its drawing never reads the global configuration.
@@ -24,4 +24,4 @@ namespace canopy {
 
   TabBarStyle resolveTabBarStyle(const Config& config);
 
-} // namespace canopy
+} // namespace mahogany

@@ -3,7 +3,7 @@
 #include <array>
 #include <cstdint>
 
-namespace canopy {
+namespace mahogany {
 
   // A dragged window deforms as an elastic sheet pinned at the grab point and
   // relaxes back to rest after release. A 4x4 grid of point masses (kPoints,
@@ -87,4 +87,4 @@ namespace canopy {
     bool m_active = false;
   };
 
-} // namespace canopy
+} // namespace mahogany

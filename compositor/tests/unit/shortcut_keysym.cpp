@@ -5,7 +5,7 @@
 #include <cstdint>
 #include <linux/input-event-codes.h>
 
-using canopy::rawShortcutKeysym;
+using mahogany::rawShortcutKeysym;
 
 namespace {
 

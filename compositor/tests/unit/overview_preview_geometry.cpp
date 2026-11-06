@@ -13,17 +13,17 @@ namespace {
 } // namespace
 
 CANOPY_TEST(previewGridKeepsFractionalOutputsOnWholePixels) {
-  const canopy::PreviewGrid grid = canopy::previewGrid(0, 0, kOutputWidth, kOutputHeight, kZoom, false);
+  const mahogany::PreviewGrid grid = mahogany::previewGrid(0, 0, kOutputWidth, kOutputHeight, kZoom, false);
   CHECK_EQ(grid.step(false), 587);
   // Whole rows of scroll land every preview on the lattice the grid defines.
   for (size_t index = 0; index < 5; ++index) {
     for (int scroll = 0; scroll < 5; ++scroll) {
-      const int origin = canopy::previewAxisOrigin(grid, false, index, scroll);
+      const int origin = mahogany::previewAxisOrigin(grid, false, index, scroll);
       CHECK_EQ(origin, grid.baseY + (static_cast<int>(index) - scroll) * grid.step(false));
     }
   }
 
-  const canopy::PreviewGrid offset = canopy::previewGrid(1707, 0, kOutputWidth, kOutputHeight, kZoom, true);
+  const mahogany::PreviewGrid offset = mahogany::previewGrid(1707, 0, kOutputWidth, kOutputHeight, kZoom, true);
   CHECK_EQ(offset.baseX - 1707, grid.baseX);
   CHECK_EQ(offset.step(true), offset.width + offset.gap);
 }
@@ -31,21 +31,21 @@ CANOPY_TEST(previewGridKeepsFractionalOutputsOnWholePixels) {
 // A filmstrip spring that settles four rows away reaches the target row's pixel and never leaves it again, and every
 // frame on the way moves toward it.
 CANOPY_TEST(settlingFilmstripReachesAndHoldsItsRowOnFractionalOutputs) {
-  const canopy::PreviewGrid grid = canopy::previewGrid(0, 0, kOutputWidth, kOutputHeight, kZoom, false);
+  const mahogany::PreviewGrid grid = mahogany::previewGrid(0, 0, kOutputWidth, kOutputHeight, kZoom, false);
   const int step = grid.step(false);
-  const canopy::SpringConfig spring{.damping = 1.0, .stiffness = 1000.0, .mass = 1.0};
+  const mahogany::SpringConfig spring{.damping = 1.0, .stiffness = 1000.0, .mass = 1.0};
   constexpr size_t kTargetRow = 4;
 
-  canopy::AnimatedValue scroll{0.0};
+  mahogany::AnimatedValue scroll{0.0};
   scroll.settleSpring(static_cast<double>(kTargetRow), spring, 0.0);
   CHECK(scroll.tick(1000));
-  int previous = canopy::previewAxisOrigin(grid, false, kTargetRow, scroll.current());
+  int previous = mahogany::previewAxisOrigin(grid, false, kTargetRow, scroll.current());
   bool arrived = false;
   int frames = 0;
   for (int frame = 1; frame < 400 && scroll.animating(); ++frame) {
     scroll.tick(1000 + static_cast<uint64_t>(frame * 1000 / kRefreshHz));
     static_cast<void>(scroll.finishSpringTail(step));
-    const int origin = canopy::previewAxisOrigin(grid, false, kTargetRow, scroll.current());
+    const int origin = mahogany::previewAxisOrigin(grid, false, kTargetRow, scroll.current());
     CHECK(origin <= previous);
     CHECK(origin >= grid.baseY);
     if (arrived) {
@@ -58,7 +58,7 @@ CANOPY_TEST(settlingFilmstripReachesAndHoldsItsRowOnFractionalOutputs) {
   CHECK(arrived);
   CHECK(!scroll.animating());
   CHECK(frames > 3);
-  CHECK_EQ(canopy::previewAxisOrigin(grid, false, kTargetRow, scroll.current()), grid.baseY);
+  CHECK_EQ(mahogany::previewAxisOrigin(grid, false, kTargetRow, scroll.current()), grid.baseY);
 }
 
 int main() { return RUN_TESTS(); }

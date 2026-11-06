@@ -6,7 +6,7 @@
 #include <optional>
 #include <utility>
 
-namespace canopy {
+namespace mahogany {
 
   template <typename Probe> std::optional<uint32_t> selectHdrRenderFormat(uint32_t currentFormat, Probe&& accepts) {
     std::array candidates{
@@ -24,4 +24,4 @@ namespace canopy {
     return std::nullopt;
   }
 
-} // namespace canopy
+} // namespace mahogany

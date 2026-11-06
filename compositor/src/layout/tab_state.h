@@ -6,7 +6,7 @@
 #include <optional>
 #include <vector>
 
-namespace canopy {
+namespace mahogany {
 
   // How a column presents its views: stacked rows that share the column, or tabs that each get the whole column while
   // only one of them shows.
@@ -319,4 +319,4 @@ namespace canopy {
     std::vector<TabGroup> m_groups;
   };
 
-} // namespace canopy
+} // namespace mahogany

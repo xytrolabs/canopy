@@ -2,7 +2,7 @@
 
 #include <string_view>
 
-namespace canopy::build_info {
+namespace mahogany::build_info {
 
   // build_info.cpp is the only unit that sees the generated revision header, so
   // a new commit recompiles it alone.
@@ -10,4 +10,4 @@ namespace canopy::build_info {
 
   std::string_view revision() noexcept;
 
-} // namespace canopy::build_info
+} // namespace mahogany::build_info

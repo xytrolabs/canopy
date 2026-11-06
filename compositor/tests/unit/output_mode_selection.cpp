@@ -12,13 +12,13 @@ extern "C" {
 #undef static
 }
 
-using canopy::colorChangeNeedsModeset;
-using canopy::liveModeMatches;
-using canopy::outputCanAutoEnable;
-using canopy::outputEnableNeedsStaging;
-using canopy::OutputMode;
-using canopy::preferredFallbackMode;
-using canopy::selectOutputMode;
+using mahogany::colorChangeNeedsModeset;
+using mahogany::liveModeMatches;
+using mahogany::outputCanAutoEnable;
+using mahogany::outputEnableNeedsStaging;
+using mahogany::OutputMode;
+using mahogany::preferredFallbackMode;
+using mahogany::selectOutputMode;
 
 namespace {
   wlr_output_mode outputMode(int width, int height, int refresh, bool preferred = false) {

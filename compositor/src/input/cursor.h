@@ -25,7 +25,7 @@ struct wlr_tablet_tool;
 struct wlr_tablet_v2_tablet_tool;
 struct wlr_xcursor_manager;
 
-namespace canopy {
+namespace mahogany {
 
   class LayerSurface;
   class Layout;
@@ -534,4 +534,4 @@ namespace canopy {
     wl_listener m_clientCursorCommit{};
   };
 
-} // namespace canopy
+} // namespace mahogany

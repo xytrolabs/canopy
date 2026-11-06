@@ -90,9 +90,9 @@ namespace {
 CANOPY_TEST(logicalScreenIsTheLayoutMovedToTheOrigin) {
   Fixture fixture;
   CHECK(fixture.setUp(kMixedScales));
-  const canopy::XwaylandOutputs outputs(fixture.display, fixture.layout, false);
+  const mahogany::XwaylandOutputs outputs(fixture.display, fixture.layout, false);
 
-  const canopy::XwaylandRegion main = outputs.region(fixture.outputs[0], 0, 0);
+  const mahogany::XwaylandRegion main = outputs.region(fixture.outputs[0], 0, 0);
   CHECK_EQ(main.x.x, 0);
   CHECK_EQ(main.x.y, 1440);
   CHECK_EQ(main.x.width, 3072);
@@ -105,7 +105,7 @@ CANOPY_TEST(logicalScreenIsTheLayoutMovedToTheOrigin) {
 CANOPY_TEST(nativeScreenKeepsTheArrangementWithoutOverlap) {
   Fixture fixture;
   CHECK(fixture.setUp(kMixedScales));
-  const canopy::XwaylandOutputs outputs(fixture.display, fixture.layout, true);
+  const mahogany::XwaylandOutputs outputs(fixture.display, fixture.layout, true);
 
   std::vector<wlr_box> boxes;
   boxes.reserve(fixture.outputs.size());
@@ -131,9 +131,9 @@ CANOPY_TEST(nativeScreenKeepsTheArrangementWithoutOverlap) {
 CANOPY_TEST(nativeScreenMapsWindowsThroughTheirOutputScale) {
   Fixture fixture;
   CHECK(fixture.setUp(kMixedScales));
-  const canopy::XwaylandOutputs outputs(fixture.display, fixture.layout, true);
+  const mahogany::XwaylandOutputs outputs(fixture.display, fixture.layout, true);
 
-  const canopy::XwaylandRegion main = outputs.region(fixture.outputs[0], 0, 0);
+  const mahogany::XwaylandRegion main = outputs.region(fixture.outputs[0], 0, 0);
   CHECK_EQ(main.scale, 1.25);
   CHECK_EQ(main.toX(800), main.x.x + 1000);
   CHECK_EQ(main.toLayoutX(main.x.x + 1000), 800);
@@ -142,7 +142,7 @@ CANOPY_TEST(nativeScreenMapsWindowsThroughTheirOutputScale) {
 
   // An X point in the gap between outputs belongs to the nearest one; one inside an output to that output.
   CHECK_EQ(outputs.regionAtX(main.x.x + 10, main.x.y + 10).scale, 1.25);
-  const canopy::XwaylandRegion right = outputs.region(fixture.outputs[2], 0, 0);
+  const mahogany::XwaylandRegion right = outputs.region(fixture.outputs[2], 0, 0);
   CHECK_EQ(outputs.regionAtX(right.x.x + 10, right.x.y + 10).scale, 1.0);
 }
 
@@ -150,9 +150,9 @@ CANOPY_TEST(wholeOutputMapsExactlyAtFractionalScale) {
   // 2560 / 1.5 rounds, so scaling the logical width back by 1.5 lands one pixel off the physical width.
   Fixture fixture;
   CHECK(fixture.setUp({{.width = 2560, .height = 1440, .scale = 1.5F, .x = 0, .y = 0}}));
-  const canopy::XwaylandOutputs outputs(fixture.display, fixture.layout, true);
+  const mahogany::XwaylandOutputs outputs(fixture.display, fixture.layout, true);
 
-  const canopy::XwaylandRegion region = outputs.region(fixture.outputs[0], 0, 0);
+  const mahogany::XwaylandRegion region = outputs.region(fixture.outputs[0], 0, 0);
   CHECK_EQ(region.toXWidth(region.layout.width), 2560);
   CHECK_EQ(region.toXHeight(region.layout.height), 1440);
   CHECK_EQ(region.toLayoutWidth(2560), region.layout.width);
@@ -162,7 +162,7 @@ CANOPY_TEST(wholeOutputMapsExactlyAtFractionalScale) {
 CANOPY_TEST(primarySelectorFollowsIdentityAndLayoutMembership) {
   Fixture fixture;
   CHECK(fixture.setUp(kMixedScales));
-  const canopy::XwaylandOutputs outputs(fixture.display, fixture.layout, false);
+  const mahogany::XwaylandOutputs outputs(fixture.display, fixture.layout, false);
   wlr_output* main = fixture.outputs[0];
   std::free(main->make);
   std::free(main->model);

@@ -16,9 +16,9 @@ extern "C" {
 #include <wlr/xcursor.h>
 }
 
-using canopy::matchXcursorManagerImage;
-using canopy::matchXcursorThemeImage;
-using canopy::XcursorImageView;
+using mahogany::matchXcursorManagerImage;
+using mahogany::matchXcursorThemeImage;
+using mahogany::XcursorImageView;
 
 namespace {
 
@@ -84,7 +84,7 @@ CANOPY_TEST(comparesRowsWithoutReadingStridePadding) {
   XcursorImageView paddedView = view(padded, 2, 2);
   paddedView.stride = 3 * sizeof(uint32_t);
 
-  CHECK(canopy::xcursorImagesEqual(view(packed, 2, 2), paddedView));
+  CHECK(mahogany::xcursorImagesEqual(view(packed, 2, 2), paddedView));
 }
 
 CANOPY_TEST(normalizesRgbOnlyWhenAlphaIsFullyTransparent) {
@@ -92,15 +92,15 @@ CANOPY_TEST(normalizesRgbOnlyWhenAlphaIsFullyTransparent) {
   std::array<uint32_t, 2> transparentDifference{0x00abcdefU, 0x01445566U};
   std::array<uint32_t, 2> partialDifference{0x00112233U, 0x01445567U};
 
-  CHECK(canopy::xcursorImagesEqual(view(first, 2, 1), view(transparentDifference, 2, 1)));
-  CHECK(!canopy::xcursorImagesEqual(view(first, 2, 1), view(partialDifference, 2, 1)));
+  CHECK(mahogany::xcursorImagesEqual(view(first, 2, 1), view(transparentDifference, 2, 1)));
+  CHECK(!mahogany::xcursorImagesEqual(view(first, 2, 1), view(partialDifference, 2, 1)));
 }
 
 CANOPY_TEST(requiresDimensionsAndHotspotToMatch) {
   std::array<uint32_t, 4> pixels{0xff000001U, 0xff000002U, 0xff000003U, 0xff000004U};
 
-  CHECK(!canopy::xcursorImagesEqual(view(pixels, 2, 2), view(pixels, 1, 4)));
-  CHECK(!canopy::xcursorImagesEqual(view(pixels, 2, 2, 0, 0), view(pixels, 2, 2, 1, 0)));
+  CHECK(!mahogany::xcursorImagesEqual(view(pixels, 2, 2), view(pixels, 1, 4)));
+  CHECK(!mahogany::xcursorImagesEqual(view(pixels, 2, 2, 0, 0), view(pixels, 2, 2, 1, 0)));
 }
 
 CANOPY_TEST(rejectsMissingPixelsAndShortRows) {
@@ -110,8 +110,8 @@ CANOPY_TEST(rejectsMissingPixelsAndShortRows) {
   XcursorImageView shortRow = view(pixels, 1, 1);
   shortRow.stride = sizeof(uint32_t) - 1;
 
-  CHECK(!canopy::xcursorImagesEqual(view(pixels, 1, 1), missing));
-  CHECK(!canopy::xcursorImagesEqual(view(pixels, 1, 1), shortRow));
+  CHECK(!mahogany::xcursorImagesEqual(view(pixels, 1, 1), missing));
+  CHECK(!mahogany::xcursorImagesEqual(view(pixels, 1, 1), shortRow));
 }
 
 CANOPY_TEST(preferredSemanticNameWinsIdenticalAliases) {

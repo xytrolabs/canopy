@@ -18,7 +18,7 @@ extern "C" {
 #include <algorithm>
 #include <cstdlib>
 
-namespace canopy {
+namespace mahogany {
 
   namespace {
     constexpr Logger kLog("layer");
@@ -586,4 +586,4 @@ namespace canopy {
     new Popup(popup, m_popupTree);
   }
 
-} // namespace canopy
+} // namespace mahogany

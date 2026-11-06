@@ -8,7 +8,7 @@
 #include <cmath>
 #include <limits>
 
-namespace canopy {
+namespace mahogany {
 
   namespace {
     constexpr uint32_t kVersion = 3;
@@ -247,4 +247,4 @@ namespace canopy {
     std::erase_if(m_entries, [entry](const std::unique_ptr<Entry>& candidate) { return candidate.get() == entry; });
   }
 
-} // namespace canopy
+} // namespace mahogany

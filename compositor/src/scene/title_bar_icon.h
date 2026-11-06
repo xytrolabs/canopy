@@ -6,7 +6,7 @@
 
 struct wlr_buffer;
 
-namespace canopy {
+namespace mahogany {
   // Rasterizes geometric button strokes into a transparent square at the requested device resolution.
   [[nodiscard]] wlr_buffer* renderTitleBarIcon(TitleBarButton button, int pixels, const std::array<float, 4>& color);
-} // namespace canopy
+} // namespace mahogany

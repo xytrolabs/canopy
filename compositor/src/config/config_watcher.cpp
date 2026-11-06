@@ -9,7 +9,7 @@
 #include <utility>
 #include <wayland-server-core.h>
 
-namespace canopy {
+namespace mahogany {
 
   namespace {
     constexpr Logger kLog("config");
@@ -223,4 +223,4 @@ namespace canopy {
     return 0;
   }
 
-} // namespace canopy
+} // namespace mahogany

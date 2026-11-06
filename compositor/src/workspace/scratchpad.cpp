@@ -19,7 +19,7 @@
 #include <set>
 #include <utility>
 
-namespace canopy {
+namespace mahogany {
 
   namespace {
     constexpr std::string_view kImplicitScratchpad = "default";
@@ -1485,4 +1485,4 @@ namespace canopy {
     return restored;
   }
 
-} // namespace canopy
+} // namespace mahogany

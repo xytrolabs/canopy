@@ -14,7 +14,7 @@ namespace {
 } // namespace
 
 CANOPY_TEST(remembersNamedLayoutsPerSurface) {
-  canopy::SurfaceLayoutMemory memory;
+  mahogany::SurfaceLayoutMemory memory;
   TestSurface first;
   TestSurface second;
 
@@ -31,7 +31,7 @@ CANOPY_TEST(remembersNamedLayoutsPerSurface) {
 }
 
 CANOPY_TEST(forgetsDestroyedSurfaces) {
-  canopy::SurfaceLayoutMemory memory;
+  mahogany::SurfaceLayoutMemory memory;
   TestSurface first;
   TestSurface second;
   memory.remember(&first.surface, "English (US)");

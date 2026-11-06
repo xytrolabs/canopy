@@ -22,7 +22,7 @@
 #include <utility>
 #include <vector>
 
-namespace canopy {
+namespace mahogany {
 
   namespace {
 
@@ -431,4 +431,4 @@ namespace canopy {
 
   registry::Field<Config> inputTable() { return registry::table("input", &Config::input, inputFields()); }
 
-} // namespace canopy
+} // namespace mahogany

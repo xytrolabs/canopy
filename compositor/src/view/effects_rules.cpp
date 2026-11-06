@@ -1,6 +1,6 @@
 #include "view/effects.h"
 
-namespace canopy {
+namespace mahogany {
 
   bool borderEffectApplies(const BorderEffectGate& gate) {
     return (gate.focused || gate.allowUnfocused) && gate.decorated && !gate.urgent && !gate.fullscreen;
@@ -10,4 +10,4 @@ namespace canopy {
     return compiled && preset != nullptr && preset->kind == EffectKind::Border ? preset->padding : 0;
   }
 
-} // namespace canopy
+} // namespace mahogany

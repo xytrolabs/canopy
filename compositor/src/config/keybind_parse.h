@@ -17,7 +17,7 @@
 #include <variant>
 #include <vector>
 
-namespace canopy {
+namespace mahogany {
 
   inline constexpr size_t kMaxWorkspaces = 64;
 
@@ -465,4 +465,4 @@ namespace canopy {
   // The binds used when no config file supplies any.
   std::vector<Keybind> defaultKeybinds();
 
-} // namespace canopy
+} // namespace mahogany

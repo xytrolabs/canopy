@@ -17,17 +17,17 @@
 #include <variant>
 #include <vector>
 
-using canopy::ConfigDiagnostic;
-using canopy::ConfigStore;
-using canopy::ContentType;
-using canopy::HdrMode;
-using canopy::LayoutMode;
-using canopy::ModifierKey;
-using canopy::ModRightDoubleClick;
-using canopy::SdrTransfer;
-using canopy::TrackLayout;
-using canopy::VrrMode;
-using canopy::WindowDragToggle;
+using mahogany::ConfigDiagnostic;
+using mahogany::ConfigStore;
+using mahogany::ContentType;
+using mahogany::HdrMode;
+using mahogany::LayoutMode;
+using mahogany::ModifierKey;
+using mahogany::ModRightDoubleClick;
+using mahogany::SdrTransfer;
+using mahogany::TrackLayout;
+using mahogany::VrrMode;
+using mahogany::WindowDragToggle;
 
 namespace {
   bool containsDiagnostic(const ConfigStore& store, const std::string& text) {
@@ -125,7 +125,7 @@ CANOPY_TEST(defaultConfigLookupPrefersUserThenSystem) {
   const ScopedEnvironment configHome("XDG_CONFIG_HOME", userHome.string());
   const ScopedEnvironment configDirs("XDG_CONFIG_DIRS", systemDir.string());
 
-  ConfigStore& store = canopy::configStore();
+  ConfigStore& store = mahogany::configStore();
   store.load(nullptr);
 
   CHECK_EQ(store.rootPath(), systemConfig);
@@ -150,21 +150,21 @@ CANOPY_TEST(implicitConfigReloadAdoptsAndReleasesHigherPriorityUserPath) {
   const ScopedEnvironment configHome("XDG_CONFIG_HOME", userHome.string());
   const ScopedEnvironment configDirs("XDG_CONFIG_DIRS", systemDir.string());
 
-  ConfigStore& store = canopy::configStore();
+  ConfigStore& store = mahogany::configStore();
   store.load(nullptr);
 
   CHECK_EQ(store.rootPath(), systemConfig);
   CHECK_EQ(store.config().layout.gap, 17);
 
   tree.write("user/canopywc/config.toml", "[layout]\ngap = 19\n");
-  const canopy::ConfigReloadResult adopted = store.reload();
+  const mahogany::ConfigReloadResult adopted = store.reload();
 
   CHECK(adopted.success);
   CHECK_EQ(store.rootPath(), userConfig);
   CHECK_EQ(store.config().layout.gap, 19);
 
   std::filesystem::remove(userConfig);
-  const canopy::ConfigReloadResult released = store.reload();
+  const mahogany::ConfigReloadResult released = store.reload();
 
   CHECK(released.success);
   CHECK_EQ(store.rootPath(), systemConfig);
@@ -181,12 +181,12 @@ CANOPY_TEST(malformedNewUserConfigKeepsActiveSystemConfigAndRetriesAfterCorrecti
   const ScopedEnvironment configHome("XDG_CONFIG_HOME", userHome.string());
   const ScopedEnvironment configDirs("XDG_CONFIG_DIRS", systemDir.string());
 
-  ConfigStore& store = canopy::configStore();
+  ConfigStore& store = mahogany::configStore();
   store.load(nullptr);
   const uint64_t generation = store.generation();
 
   tree.write("user/canopywc/config.toml", "[layout\n");
-  const canopy::ConfigReloadResult malformed = store.reload();
+  const mahogany::ConfigReloadResult malformed = store.reload();
 
   CHECK(!malformed.success);
   CHECK_EQ(store.rootPath(), systemConfig);
@@ -196,7 +196,7 @@ CANOPY_TEST(malformedNewUserConfigKeepsActiveSystemConfigAndRetriesAfterCorrecti
   CHECK(std::ranges::find(store.watchPaths(), systemConfig) != store.watchPaths().end());
 
   tree.write("user/canopywc/config.toml", "[layout]\ngap = 19\n");
-  const canopy::ConfigReloadResult corrected = store.reload();
+  const mahogany::ConfigReloadResult corrected = store.reload();
 
   CHECK(corrected.success);
   CHECK_EQ(store.rootPath(), userConfig);
@@ -215,13 +215,13 @@ CANOPY_TEST(implicitConfigReloadKeepsCandidatesCapturedAtInitialLoad) {
   const ScopedEnvironment configHome("XDG_CONFIG_HOME", initialUserHome.string());
   const ScopedEnvironment configDirs("XDG_CONFIG_DIRS", systemDir.string());
 
-  ConfigStore& store = canopy::configStore();
+  ConfigStore& store = mahogany::configStore();
   store.load(nullptr);
   const std::vector<std::filesystem::path> initialWatchPaths = store.watchPaths();
 
   tree.write("changed-user/canopy/config.toml", "[layout]\ngap = 29\n");
   const ScopedEnvironment changedConfigHome("XDG_CONFIG_HOME", changedUserHome.string());
-  const canopy::ConfigReloadResult result = store.reload();
+  const mahogany::ConfigReloadResult result = store.reload();
 
   CHECK(result.success);
   CHECK_EQ(store.rootPath(), systemConfig);
@@ -240,7 +240,7 @@ CANOPY_TEST(explicitConfigReloadStaysPinnedWhenUserConfigAppears) {
   const ScopedEnvironment configHome("XDG_CONFIG_HOME", userHome.string());
   const ScopedEnvironment configDirs("XDG_CONFIG_DIRS", systemDir.string());
 
-  ConfigStore& store = canopy::configStore();
+  ConfigStore& store = mahogany::configStore();
   const std::string explicitPath = explicitConfig.string();
   store.load(explicitPath.c_str());
 
@@ -248,7 +248,7 @@ CANOPY_TEST(explicitConfigReloadStaysPinnedWhenUserConfigAppears) {
   CHECK_EQ(store.config().layout.gap, 23);
 
   tree.write("user/canopywc/config.toml", "[layout]\ngap = 29\n");
-  const canopy::ConfigReloadResult result = store.reload();
+  const mahogany::ConfigReloadResult result = store.reload();
 
   CHECK(result.success);
   CHECK_EQ(store.rootPath(), explicitConfig);
@@ -293,9 +293,9 @@ center_underfull_strip = true
 preserve_split = false
 )");
 
-  ConfigStore& store = canopy::configStore();
+  ConfigStore& store = mahogany::configStore();
   store.setRootPath(file.path(), true);
-  const canopy::ConfigReloadResult result = store.reload();
+  const mahogany::ConfigReloadResult result = store.reload();
 
   CHECK(result.success);
   CHECK(store.config().layout.mode == LayoutMode::Dwindle);
@@ -326,7 +326,7 @@ CANOPY_TEST(rejectsRemovedWidthPresetKey) {
   const TempConfig file;
   file.write("[layout]\nwidth_presets = [0.75]\n");
 
-  ConfigStore& store = canopy::configStore();
+  ConfigStore& store = mahogany::configStore();
   store.setRootPath(file.path(), true);
   CHECK(store.reload().success);
   CHECK_EQ(store.config().layout.extentPresets.size(), size_t{3});
@@ -334,7 +334,7 @@ CANOPY_TEST(rejectsRemovedWidthPresetKey) {
 }
 
 CANOPY_TEST(backgroundDefaultsOpaque) {
-  const canopy::Config config;
+  const mahogany::Config config;
   CHECK_EQ(config.colors.background[3], 1.0F);
 }
 
@@ -348,9 +348,9 @@ name = "term"
 name = "music"
 )");
 
-  ConfigStore& store = canopy::configStore();
+  ConfigStore& store = mahogany::configStore();
   store.setRootPath(file.path(), true);
-  const canopy::ConfigReloadResult result = store.reload();
+  const mahogany::ConfigReloadResult result = store.reload();
 
   CHECK(result.success);
   CHECK_EQ(store.config().scratchpads.size(), size_t{2});
@@ -374,9 +374,9 @@ name = "todo"
 spawn_when_empty = 7
 )");
 
-  ConfigStore& store = canopy::configStore();
+  ConfigStore& store = mahogany::configStore();
   store.setRootPath(file.path(), true);
-  const canopy::ConfigReloadResult result = store.reload();
+  const mahogany::ConfigReloadResult result = store.reload();
 
   CHECK(result.success);
   CHECK_EQ(store.config().scratchpads.size(), size_t{3});
@@ -405,7 +405,7 @@ name = "invalid"
 proportional_size = "true"
 )");
 
-  ConfigStore& store = canopy::configStore();
+  ConfigStore& store = mahogany::configStore();
   store.setRootPath(file.path(), true);
   CHECK(store.reload().success);
   CHECK_EQ(store.config().scratchpads.size(), size_t{4});
@@ -420,10 +420,10 @@ CANOPY_TEST(scratchpadDefinitionsRequireValidUniqueNames) {
   const TempConfig file;
   file.write("[[scratchpad]]\nname = \"kept\"\n");
 
-  ConfigStore& store = canopy::configStore();
+  ConfigStore& store = mahogany::configStore();
   store.setRootPath(file.path(), true);
   CHECK(store.reload().success);
-  const canopy::Config previous = store.config();
+  const mahogany::Config previous = store.config();
 
   const std::array invalid{
       std::pair{
@@ -444,7 +444,7 @@ CANOPY_TEST(scratchpadDefinitionsRequireValidUniqueNames) {
 
   for (const auto& [contents, expectedDiagnostic] : invalid) {
     file.write(contents);
-    const canopy::ConfigReloadResult result = store.reload();
+    const mahogany::ConfigReloadResult result = store.reload();
     CHECK(!result.success);
     CHECK(store.config() == previous);
     CHECK(containsDiagnostic(store, expectedDiagnostic));
@@ -459,9 +459,9 @@ name = "term"
 output = "DP-1"
 )");
 
-  ConfigStore& store = canopy::configStore();
+  ConfigStore& store = mahogany::configStore();
   store.setRootPath(file.path(), true);
-  const canopy::ConfigReloadResult result = store.reload();
+  const mahogany::ConfigReloadResult result = store.reload();
 
   CHECK(result.success);
   CHECK_EQ(store.config().scratchpads.size(), size_t{1});
@@ -478,14 +478,14 @@ CANOPY_TEST(implicitScratchpadActionsAcceptOnlyTheDefaultTarget) {
 "Mod+3" = "scratchpad-focus-next other"
 )");
 
-  ConfigStore& store = canopy::configStore();
+  ConfigStore& store = mahogany::configStore();
   store.setRootPath(file.path(), true);
-  const canopy::ConfigReloadResult result = store.reload();
+  const mahogany::ConfigReloadResult result = store.reload();
 
   const auto countTarget = [&](std::string_view name) {
     size_t count = 0;
     for (const auto& keybind : store.config().keybinds) {
-      const auto* target = canopy::payloadIf<canopy::ScratchpadArg>(keybind);
+      const auto* target = mahogany::payloadIf<mahogany::ScratchpadArg>(keybind);
       count += target != nullptr && target->name == name ? 1U : 0U;
     }
     return count;
@@ -512,14 +512,14 @@ name = "term"
 "Mod+4" = "window-move-to-scratchpad default"
 )");
 
-  ConfigStore& store = canopy::configStore();
+  ConfigStore& store = mahogany::configStore();
   store.setRootPath(file.path(), true);
-  const canopy::ConfigReloadResult result = store.reload();
+  const mahogany::ConfigReloadResult result = store.reload();
 
   const auto countTarget = [&](std::string_view name) {
     size_t count = 0;
     for (const auto& keybind : store.config().keybinds) {
-      const auto* target = canopy::payloadIf<canopy::ScratchpadArg>(keybind);
+      const auto* target = mahogany::payloadIf<mahogany::ScratchpadArg>(keybind);
       count += target != nullptr && target->name == name ? 1U : 0U;
     }
     return count;
@@ -539,7 +539,7 @@ name = "term"
 CANOPY_TEST(dwindlePreserveSplitDefaultsToFalse) {
   const TempConfig file;
   file.write("[layout]\n");
-  ConfigStore& store = canopy::configStore();
+  ConfigStore& store = mahogany::configStore();
   store.setRootPath(file.path(), true);
   CHECK(store.reload().success);
   CHECK(!store.config().layout.dwindle.preserveSplit);
@@ -566,9 +566,9 @@ left = 50
 bottom = -8
 )");
 
-  ConfigStore& store = canopy::configStore();
+  ConfigStore& store = mahogany::configStore();
   store.setRootPath(file.path(), true);
-  const canopy::ConfigReloadResult result = store.reload();
+  const mahogany::ConfigReloadResult result = store.reload();
 
   CHECK(result.success);
   CHECK_EQ(store.config().layout.struts.left, -12);
@@ -612,18 +612,18 @@ new_on_top = true
 new_becomes_master = false
 )");
 
-  ConfigStore& store = canopy::configStore();
+  ConfigStore& store = mahogany::configStore();
   store.setRootPath(file.path(), true);
-  const canopy::ConfigReloadResult result = store.reload();
+  const mahogany::ConfigReloadResult result = store.reload();
 
   CHECK(result.success);
   CHECK(store.config().layout.mode == LayoutMode::Master);
-  CHECK(store.config().layout.master.position == canopy::MasterPosition::Right);
+  CHECK(store.config().layout.master.position == mahogany::MasterPosition::Right);
   CHECK_EQ(store.config().layout.master.defaultWidthFraction, 0.1);
   CHECK(!store.config().layout.master.newOnTop);
   CHECK(store.config().layout.master.newBecomesMaster);
   CHECK_EQ(store.config().workspaceRules.size(), size_t{1});
-  CHECK(store.config().workspaceRules[0].layout.master.position == canopy::MasterPosition::Left);
+  CHECK(store.config().workspaceRules[0].layout.master.position == mahogany::MasterPosition::Left);
   CHECK(store.config().workspaceRules[0].layout.master.defaultWidthFraction.has_value());
   CHECK_EQ(*store.config().workspaceRules[0].layout.master.defaultWidthFraction, 0.7);
   CHECK(store.config().workspaceRules[0].layout.master.newOnTop == true);
@@ -674,61 +674,61 @@ match.app_id = "^firefox$"
 default_column_display = "tabbed"
 )");
 
-  ConfigStore& store = canopy::configStore();
+  ConfigStore& store = mahogany::configStore();
   store.setRootPath(file.path(), true);
-  const canopy::ConfigReloadResult result = store.reload();
+  const mahogany::ConfigReloadResult result = store.reload();
 
   CHECK(result.success);
-  const canopy::Config& config = store.config();
-  CHECK(config.layout.tabs.defaultDisplay == canopy::ColumnDisplay::Tabbed);
-  CHECK(config.layout.tabs.newTabPosition == canopy::NewTabPosition::AfterActive);
+  const mahogany::Config& config = store.config();
+  CHECK(config.layout.tabs.defaultDisplay == mahogany::ColumnDisplay::Tabbed);
+  CHECK(config.layout.tabs.newTabPosition == mahogany::NewTabPosition::AfterActive);
   CHECK(!config.layout.tabs.wrapFocus);
   CHECK(!config.layout.tabs.scrollSwitchesTabs);
   CHECK(config.layout.tabs.middleClickCloses);
-  CHECK(config.appearance.tabBar.style == canopy::TabBarLook::Indicator);
-  CHECK(config.appearance.tabBar.position == canopy::TabBarPosition::Bottom);
+  CHECK(config.appearance.tabBar.style == mahogany::TabBarLook::Indicator);
+  CHECK(config.appearance.tabBar.position == mahogany::TabBarPosition::Bottom);
   CHECK_EQ(config.appearance.tabBar.height, 4);
   CHECK_EQ(config.appearance.tabBar.font, std::string{"Inter Bold 9"});
   CHECK_EQ(config.appearance.tabBar.tabGap, 0);
   CHECK_EQ(config.appearance.tabBar.gap, 3);
   CHECK_EQ(config.appearance.tabBar.cornerRadius, 1);
   CHECK_EQ(config.appearance.tabBar.titleFormat, std::string{"{index}: {title}"});
-  CHECK(config.appearance.tabBar.titleAlign == canopy::TitleAlign::Left);
+  CHECK(config.appearance.tabBar.titleAlign == mahogany::TitleAlign::Left);
   CHECK(config.appearance.tabBar.hideWhenSingle);
   CHECK_EQ(config.appearance.tabBar.maxTabs, 5);
-  CHECK(config.appearance.tabBar.overflow == canopy::TabOverflow::Shrink);
+  CHECK(config.appearance.tabBar.overflow == mahogany::TabOverflow::Shrink);
   CHECK_EQ(config.colors.tabBar.urgent[3], 128.0F / 255.0F);
   CHECK_EQ(config.workspaceRules.size(), size_t{1});
-  CHECK(config.workspaceRules[0].layout.tabs.defaultDisplay == canopy::ColumnDisplay::Normal);
+  CHECK(config.workspaceRules[0].layout.tabs.defaultDisplay == mahogany::ColumnDisplay::Normal);
   CHECK_EQ(config.windowRules.size(), size_t{1});
-  CHECK(config.windowRules[0].defaultColumnDisplay == canopy::ColumnDisplay::Tabbed);
+  CHECK(config.windowRules[0].defaultColumnDisplay == mahogany::ColumnDisplay::Tabbed);
 
   // The bar's space is part of the layout, so resolution carries it with the behavior keys.
-  const canopy::ResolvedLayoutConfig resolved = canopy::resolveGlobalLayout(config);
-  CHECK(resolved.tabs.defaultDisplay == canopy::ColumnDisplay::Tabbed);
+  const mahogany::ResolvedLayoutConfig resolved = mahogany::resolveGlobalLayout(config);
+  CHECK(resolved.tabs.defaultDisplay == mahogany::ColumnDisplay::Tabbed);
   CHECK_EQ(resolved.tabs.barHeight, 4);
   CHECK_EQ(resolved.tabs.barGap, 3);
-  CHECK(resolved.tabs.barPosition == canopy::TabBarPosition::Bottom);
+  CHECK(resolved.tabs.barPosition == mahogany::TabBarPosition::Bottom);
   CHECK(resolved.tabs.hideWhenSingle);
 }
 
 CANOPY_TEST(masterPositionAcceptsCenterAndRejectsOtherValues) {
   const TempConfig file;
-  ConfigStore& store = canopy::configStore();
+  ConfigStore& store = mahogany::configStore();
   store.setRootPath(file.path(), true);
 
   file.write("[layout.master]\nposition = \"center\"\n");
   CHECK(store.reload().success);
-  CHECK(store.config().layout.master.position == canopy::MasterPosition::Center);
+  CHECK(store.config().layout.master.position == mahogany::MasterPosition::Center);
 
   file.write("[layout.master]\nposition = \"middle\"\n");
   CHECK(store.reload().success);
-  CHECK(store.config().layout.master.position == canopy::MasterPosition::Left);
+  CHECK(store.config().layout.master.position == mahogany::MasterPosition::Left);
 }
 
 CANOPY_TEST(scrollingDefaultExtentIsOptional) {
   const TempConfig file;
-  ConfigStore& store = canopy::configStore();
+  ConfigStore& store = mahogany::configStore();
   store.setRootPath(file.path(), true);
 
   file.write("[layout.scrolling]\ncenter_underfull_strip = false\n");
@@ -752,7 +752,7 @@ CANOPY_TEST(scrollingDefaultExtentIsOptional) {
 
 CANOPY_TEST(outputScrollingDefaultExtentUsesNarrowLayoutScope) {
   const TempConfig file;
-  ConfigStore& store = canopy::configStore();
+  ConfigStore& store = mahogany::configStore();
   store.setRootPath(file.path(), true);
 
   file.write(R"(
@@ -782,32 +782,32 @@ center_focused = true
 
 CANOPY_TEST(outputWorkspaceAxisAcceptsOnlyItsTwoNames) {
   const TempConfig file;
-  ConfigStore& store = canopy::configStore();
+  ConfigStore& store = mahogany::configStore();
   store.setRootPath(file.path(), true);
 
   file.write("[output.DP-1]\nworkspace_axis = \"horizontal\"\n");
   CHECK(store.reload().success);
   CHECK_EQ(store.config().outputs.size(), size_t{1});
-  CHECK(store.config().outputs[0].workspaceAxis == canopy::WorkspaceAxis::Horizontal);
+  CHECK(store.config().outputs[0].workspaceAxis == mahogany::WorkspaceAxis::Horizontal);
   CHECK(!containsDiagnostic(store, "unknown key output.DP-1.workspace_axis"));
 
   file.write("[output.DP-1]\nworkspace_axis = \"sideways\"\n");
   CHECK(store.reload().success);
-  CHECK(store.config().outputs[0].workspaceAxis == canopy::WorkspaceAxis::Vertical);
+  CHECK(store.config().outputs[0].workspaceAxis == mahogany::WorkspaceAxis::Vertical);
 
   file.write("[output.DP-1]\nworkspace_axis = true\n");
   CHECK(store.reload().success);
-  CHECK(store.config().outputs[0].workspaceAxis == canopy::WorkspaceAxis::Vertical);
+  CHECK(store.config().outputs[0].workspaceAxis == mahogany::WorkspaceAxis::Vertical);
 
   file.write("[output.DP-1]\nenabled = true\n");
   CHECK(store.reload().success);
-  CHECK(store.config().outputs[0].workspaceAxis == canopy::WorkspaceAxis::Vertical);
+  CHECK(store.config().outputs[0].workspaceAxis == mahogany::WorkspaceAxis::Vertical);
 }
 
 // The configurable strip direction is gone: both spellings are ordinary unknown keys.
 CANOPY_TEST(scrollingDirectionKeysAreUnknown) {
   const TempConfig file;
-  ConfigStore& store = canopy::configStore();
+  ConfigStore& store = mahogany::configStore();
   store.setRootPath(file.path(), true);
 
   file.write(R"(
@@ -825,7 +825,7 @@ layout.scrolling.direction = "vertical"
 
 CANOPY_TEST(centerFocusedReadsItsModeVocabulary) {
   const TempConfig file;
-  ConfigStore& store = canopy::configStore();
+  ConfigStore& store = mahogany::configStore();
   store.setRootPath(file.path(), true);
 
   file.write(R"(
@@ -837,19 +837,19 @@ index = 1
 layout.scrolling.center_focused = "always"
 )");
   CHECK(store.reload().success);
-  CHECK(store.config().layout.scrolling.centerFocused == canopy::CenterFocusedColumn::OnOverflow);
+  CHECK(store.config().layout.scrolling.centerFocused == mahogany::CenterFocusedColumn::OnOverflow);
   CHECK_EQ(store.config().workspaceRules.size(), size_t{1});
-  CHECK(store.config().workspaceRules[0].layout.scrolling.centerFocused == canopy::CenterFocusedColumn::Always);
+  CHECK(store.config().workspaceRules[0].layout.scrolling.centerFocused == mahogany::CenterFocusedColumn::Always);
 
   file.write("[layout.scrolling]\ncenter_focused = \"sometimes\"\n");
   CHECK(store.reload().success);
-  CHECK(store.config().layout.scrolling.centerFocused == canopy::CenterFocusedColumn::Never);
+  CHECK(store.config().layout.scrolling.centerFocused == mahogany::CenterFocusedColumn::Never);
   CHECK(!containsDiagnostic(store, "unknown key layout.scrolling.center_focused"));
 }
 
 CANOPY_TEST(modKeyIsUserConfigurable) {
   const TempConfig file;
-  ConfigStore& store = canopy::configStore();
+  ConfigStore& store = mahogany::configStore();
   store.setRootPath(file.path(), true);
 
   file.write("[general]\nmod_key = \"Ctrl\"\n");
@@ -867,7 +867,7 @@ CANOPY_TEST(modKeyIsUserConfigurable) {
 
 CANOPY_TEST(keybindTableLoadsAllowWhenLocked) {
   const TempConfig file;
-  ConfigStore& store = canopy::configStore();
+  ConfigStore& store = mahogany::configStore();
   store.setRootPath(file.path(), true);
 
   file.write(
@@ -891,7 +891,7 @@ CANOPY_TEST(keybindTableLoadsAllowWhenLocked) {
 
 CANOPY_TEST(keybindTableLoadsAllowWhenInhibited) {
   const TempConfig file;
-  ConfigStore& store = canopy::configStore();
+  ConfigStore& store = mahogany::configStore();
   store.setRootPath(file.path(), true);
 
   file.write(
@@ -915,7 +915,7 @@ CANOPY_TEST(keybindTableLoadsAllowWhenInhibited) {
 
 CANOPY_TEST(keybindTablePreservesWorkspaceReferenceKinds) {
   const TempConfig file;
-  ConfigStore& store = canopy::configStore();
+  ConfigStore& store = mahogany::configStore();
   store.setRootPath(file.path(), true);
 
   file.write(
@@ -929,14 +929,14 @@ CANOPY_TEST(keybindTablePreservesWorkspaceReferenceKinds) {
   bool foundPosition = false;
   bool foundNumericName = false;
   for (const auto& bind : store.config().keybinds) {
-    const auto* workspace = canopy::payloadIf<canopy::WorkspaceArg>(bind);
+    const auto* workspace = mahogany::payloadIf<mahogany::WorkspaceArg>(bind);
     if (workspace == nullptr) {
       continue;
     }
-    if (const auto* index = std::get_if<canopy::WorkspaceIndex>(&workspace->reference)) {
+    if (const auto* index = std::get_if<mahogany::WorkspaceIndex>(&workspace->reference)) {
       foundPosition = foundPosition || index->value == 2;
     }
-    if (const auto* name = std::get_if<canopy::WorkspaceName>(&workspace->reference)) {
+    if (const auto* name = std::get_if<mahogany::WorkspaceName>(&workspace->reference)) {
       foundNumericName = foundNumericName || name->value == "2";
     }
   }
@@ -946,7 +946,7 @@ CANOPY_TEST(keybindTablePreservesWorkspaceReferenceKinds) {
 
 CANOPY_TEST(keybindTableLoadsCooldown) {
   const TempConfig file;
-  ConfigStore& store = canopy::configStore();
+  ConfigStore& store = mahogany::configStore();
   store.setRootPath(file.path(), true);
 
   file.write("[keybinds]\n\"Mod+Return\" = { action = \"spawn terminal\", cooldown_ms = 150 }\n");
@@ -962,7 +962,7 @@ CANOPY_TEST(keybindTableLoadsCooldown) {
 
 CANOPY_TEST(keybindTableLoadsPostActionSubmaps) {
   const TempConfig file;
-  ConfigStore& store = canopy::configStore();
+  ConfigStore& store = mahogany::configStore();
   store.setRootPath(file.path(), true);
 
   file.write(
@@ -982,7 +982,7 @@ CANOPY_TEST(keybindTableLoadsPostActionSubmaps) {
       continue;
     }
     CHECK(!bind.repeat);
-    resets = resets || canopy::isSubmapReset(*bind.submapAfter);
+    resets = resets || mahogany::isSubmapReset(*bind.submapAfter);
     entersInner = entersInner || bind.submapAfter->name == "inner";
   }
   CHECK(resets);
@@ -1003,7 +1003,7 @@ CANOPY_TEST(keybindTableLoadsPostActionSubmaps) {
 
 CANOPY_TEST(hotCornersLoadActionsAndValidate) {
   const TempConfig file;
-  ConfigStore& store = canopy::configStore();
+  ConfigStore& store = mahogany::configStore();
   store.setRootPath(file.path(), true);
 
   file.write(
@@ -1016,7 +1016,7 @@ CANOPY_TEST(hotCornersLoadActionsAndValidate) {
   CHECK(store.config().hotCorners.corners[0].action.has_value());
   CHECK(
       store.config().hotCorners.corners[0].action
-      && store.config().hotCorners.corners[0].action->action == canopy::KeybindAction::OverviewOpen
+      && store.config().hotCorners.corners[0].action->action == mahogany::KeybindAction::OverviewOpen
   );
   CHECK(!store.config().hotCorners.corners[1].enabled);
   CHECK(!store.config().hotCorners.corners[2].enabled);
@@ -1025,7 +1025,7 @@ CANOPY_TEST(hotCornersLoadActionsAndValidate) {
   CHECK(store.config().hotCorners.corners[3].action.has_value());
   CHECK(
       store.config().hotCorners.corners[3].action
-      && store.config().hotCorners.corners[3].action->action == canopy::KeybindAction::Spawn
+      && store.config().hotCorners.corners[3].action->action == mahogany::KeybindAction::Spawn
   );
 
   file.write("[hot_corners.top_right]\nenabled = true\ndelay_ms = -1\naction = \"not-an-action\"\n");
@@ -1038,7 +1038,7 @@ CANOPY_TEST(hotCornersLoadActionsAndValidate) {
 
 CANOPY_TEST(implicitScratchpadHotCornersAcceptOnlyTheDefaultTarget) {
   const TempConfig file;
-  ConfigStore& store = canopy::configStore();
+  ConfigStore& store = mahogany::configStore();
   store.setRootPath(file.path(), true);
 
   file.write(R"(
@@ -1060,9 +1060,9 @@ action = "scratchpad-focus-next missing"
   CHECK(corners[0].action.has_value());
   CHECK(corners[1].action.has_value());
   CHECK(!corners[2].action.has_value());
-  const auto* bare = corners[0].action ? canopy::payloadIf<canopy::ScratchpadArg>(*corners[0].action) : nullptr;
+  const auto* bare = corners[0].action ? mahogany::payloadIf<mahogany::ScratchpadArg>(*corners[0].action) : nullptr;
   const auto* explicitDefault =
-      corners[1].action ? canopy::payloadIf<canopy::ScratchpadArg>(*corners[1].action) : nullptr;
+      corners[1].action ? mahogany::payloadIf<mahogany::ScratchpadArg>(*corners[1].action) : nullptr;
   CHECK(bare != nullptr);
   CHECK(bare != nullptr && bare->name.empty());
   CHECK(explicitDefault != nullptr);
@@ -1072,7 +1072,7 @@ action = "scratchpad-focus-next missing"
 
 CANOPY_TEST(namedScratchpadHotCornersRequireAConfiguredName) {
   const TempConfig file;
-  ConfigStore& store = canopy::configStore();
+  ConfigStore& store = mahogany::configStore();
   store.setRootPath(file.path(), true);
 
   file.write(R"(
@@ -1097,7 +1097,7 @@ action = "window-restore-from-scratchpad missing"
   CHECK(!corners[0].action.has_value());
   CHECK(corners[1].action.has_value());
   CHECK(!corners[2].action.has_value());
-  const auto* configured = corners[1].action ? canopy::payloadIf<canopy::ScratchpadArg>(*corners[1].action) : nullptr;
+  const auto* configured = corners[1].action ? mahogany::payloadIf<mahogany::ScratchpadArg>(*corners[1].action) : nullptr;
   CHECK(configured != nullptr);
   CHECK(configured != nullptr && configured->name == "term");
   CHECK(containsDiagnostic(store, "ignoring hot_corners.top_left.action (scratchpad name required)"));
@@ -1106,7 +1106,7 @@ action = "window-restore-from-scratchpad missing"
 
 CANOPY_TEST(overviewBackgroundBlurLoads) {
   const TempConfig file;
-  ConfigStore& store = canopy::configStore();
+  ConfigStore& store = mahogany::configStore();
   store.setRootPath(file.path(), true);
 
   file.write("[overview]\nbackground_blur = false\n");
@@ -1116,7 +1116,7 @@ CANOPY_TEST(overviewBackgroundBlurLoads) {
 
 CANOPY_TEST(overviewScrollFactorLoadsIndependently) {
   const TempConfig file;
-  ConfigStore& store = canopy::configStore();
+  ConfigStore& store = mahogany::configStore();
   store.setRootPath(file.path(), true);
   file.write("[overview]\nscroll_factor_horizontal = 0.7\n");
   CHECK(store.reload().success);
@@ -1134,7 +1134,7 @@ CANOPY_TEST(overviewScrollFactorLoadsIndependently) {
 
 CANOPY_TEST(touchpadScrollFactorLoadsAsScalarOrTable) {
   const TempConfig file;
-  ConfigStore& store = canopy::configStore();
+  ConfigStore& store = mahogany::configStore();
   store.setRootPath(file.path(), true);
   file.write("[input.touchpad]\nscroll_factor = 1.5\n");
   CHECK(store.reload().success);
@@ -1159,25 +1159,25 @@ CANOPY_TEST(touchpadScrollFactorLoadsAsScalarOrTable) {
 
 CANOPY_TEST(overviewWorkspaceCurveLoadsAndFallsBackToItsSpring) {
   const TempConfig file;
-  ConfigStore& store = canopy::configStore();
+  ConfigStore& store = mahogany::configStore();
   store.setRootPath(file.path(), true);
   file.write("[animation.overview]\nworkspace_curve = \"easeout\"\n");
   CHECK(store.reload().success);
-  CHECK(store.config().animation.overview.workspaceCurve.easing == canopy::Easing::EaseOutCubic);
+  CHECK(store.config().animation.overview.workspaceCurve.easing == mahogany::Easing::EaseOutCubic);
   file.write("[animation.overview]\nworkspace_curve = \"spring:0.6,120\"\n");
   CHECK(store.reload().success);
-  CHECK(store.config().animation.overview.workspaceCurve.easing == canopy::Easing::Spring);
+  CHECK(store.config().animation.overview.workspaceCurve.easing == mahogany::Easing::Spring);
   CHECK_EQ(store.config().animation.overview.workspaceCurve.spring.damping, 0.6);
   CHECK_EQ(store.config().animation.overview.workspaceCurve.spring.stiffness, 120.0);
   file.write("[animation.overview]\nduration_ms = 300\n");
   CHECK(store.reload().success);
-  CHECK(store.config().animation.overview.workspaceCurve.easing == canopy::Easing::Spring);
+  CHECK(store.config().animation.overview.workspaceCurve.easing == mahogany::Easing::Spring);
   CHECK_EQ(store.config().animation.overview.workspaceCurve.spring.stiffness, 1000.0);
 }
 
 CANOPY_TEST(durationBesideASpringCurveIsReportedAsInert) {
   const TempConfig file;
-  ConfigStore& store = canopy::configStore();
+  ConfigStore& store = mahogany::configStore();
   store.setRootPath(file.path(), true);
 
   // A spring derives its own length, so the duration next to it reaches nothing and must not look honoured.
@@ -1208,7 +1208,7 @@ CANOPY_TEST(durationBesideASpringCurveIsReportedAsInert) {
 CANOPY_TEST(workspaceRevealRequiresAnAnimationShader) {
   const TempConfigTree tree;
   tree.write("wipe.glsl", "vec4 animation(vec2 uv) { return canopy_sample(uv); }");
-  ConfigStore& store = canopy::configStore();
+  ConfigStore& store = mahogany::configStore();
   store.setRootPath(tree.path("config.toml"), true);
   const std::string preset = "[effects.preset.wipe]\nkind = \"animation\"\nshader = \"wipe.glsl\"\n";
   tree.write("config.toml", preset + "[animation.workspaces]\nstyle = \"reveal\"\neffect = \"wipe\"\n");
@@ -1240,7 +1240,7 @@ CANOPY_TEST(workspaceRevealRequiresAnAnimationShader) {
 
 CANOPY_TEST(overviewWorkspaceWallpaperLoads) {
   const TempConfig file;
-  ConfigStore& store = canopy::configStore();
+  ConfigStore& store = mahogany::configStore();
   store.setRootPath(file.path(), true);
 
   file.write("[overview]\nzoom = 0.5\n");
@@ -1255,7 +1255,7 @@ CANOPY_TEST(overviewWorkspaceWallpaperLoads) {
 // Off by default so selecting from the overview keeps honoring layout.scrolling.center_focused.
 CANOPY_TEST(centerOnOverviewSelectLoads) {
   const TempConfig file;
-  ConfigStore& store = canopy::configStore();
+  ConfigStore& store = mahogany::configStore();
   store.setRootPath(file.path(), true);
 
   file.write("[layout.scrolling]\ncenter_focused = \"never\"\n");
@@ -1278,7 +1278,7 @@ center_on_overview_select = false
 
 CANOPY_TEST(overviewShortcutConfigurationLoads) {
   const TempConfig file;
-  ConfigStore& store = canopy::configStore();
+  ConfigStore& store = mahogany::configStore();
   store.setRootPath(file.path(), true);
 
   file.write("[overview]\nshortcuts = false\nshortcut_keys = \"asdf\"\n");
@@ -1289,7 +1289,7 @@ CANOPY_TEST(overviewShortcutConfigurationLoads) {
 
 CANOPY_TEST(overviewShortcutKeysRejectInvalidValues) {
   const TempConfig file;
-  ConfigStore& store = canopy::configStore();
+  ConfigStore& store = mahogany::configStore();
   store.setRootPath(file.path(), true);
 
   file.write("[overview]\nshortcut_keys = \"a\"\n");
@@ -1315,7 +1315,7 @@ CANOPY_TEST(overviewShortcutKeysRejectInvalidValues) {
 
 CANOPY_TEST(colorsSectionOwnsEveryColor) {
   const TempConfig file;
-  ConfigStore& store = canopy::configStore();
+  ConfigStore& store = mahogany::configStore();
   store.setRootPath(file.path(), true);
 
   file.write(
@@ -1341,7 +1341,7 @@ CANOPY_TEST(colorsSectionOwnsEveryColor) {
 // Per-window border colors override the global [colors.border] defaults and are read from window rules.
 CANOPY_TEST(windowRuleBorderColorsLoad) {
   const TempConfig file;
-  ConfigStore& store = canopy::configStore();
+  ConfigStore& store = mahogany::configStore();
   store.setRootPath(file.path(), true);
 
   file.write(
@@ -1378,10 +1378,10 @@ CANOPY_TEST(windowRuleBorderColorsLoad) {
 // unknown keys.
 CANOPY_TEST(colorKeysOutsideTheColorsSectionAreUnknown) {
   const TempConfig file;
-  ConfigStore& store = canopy::configStore();
+  ConfigStore& store = mahogany::configStore();
   store.setRootPath(file.path(), true);
 
-  const canopy::Config defaults;
+  const mahogany::Config defaults;
   file.write("[appearance]\nborder_focused = \"#FFFFFFFF\"\nbackdrop_color = \"#000000FF\"\n");
   CHECK(store.reload().success);
   CHECK_EQ(store.config().colors.border.focused[0], defaults.colors.border.focused[0]);
@@ -1397,9 +1397,9 @@ CANOPY_TEST(colorKeysOutsideTheColorsSectionAreUnknown) {
 
 CANOPY_TEST(colorsRejectInvalidValues) {
   const TempConfig file;
-  ConfigStore& store = canopy::configStore();
+  ConfigStore& store = mahogany::configStore();
   store.setRootPath(file.path(), true);
-  const canopy::Config defaults;
+  const mahogany::Config defaults;
 
   file.write("[colors.overview]\nbadge = \"not-a-color\"\n");
   CHECK(store.reload().success);
@@ -1409,7 +1409,7 @@ CANOPY_TEST(colorsRejectInvalidValues) {
 
 CANOPY_TEST(cornerRadiusClampsToItsRange) {
   const TempConfig file;
-  ConfigStore& store = canopy::configStore();
+  ConfigStore& store = mahogany::configStore();
   store.setRootPath(file.path(), true);
 
   file.write("[appearance]\ncorner_radius = 64\n");
@@ -1425,7 +1425,7 @@ CANOPY_TEST(cornerRadiusClampsToItsRange) {
 
 CANOPY_TEST(middleClickPasteLoadsAndDefaultsEnabled) {
   const TempConfig file;
-  ConfigStore& store = canopy::configStore();
+  ConfigStore& store = mahogany::configStore();
   store.setRootPath(file.path(), true);
 
   file.write("[input]\nmiddle_click_paste = false\n");
@@ -1443,7 +1443,7 @@ CANOPY_TEST(middleClickPasteLoadsAndDefaultsEnabled) {
 
 CANOPY_TEST(windowDragToggleReadsItsVocabularyAndDefaultsOff) {
   const TempConfig file;
-  ConfigStore& store = canopy::configStore();
+  ConfigStore& store = mahogany::configStore();
   store.setRootPath(file.path(), true);
 
   file.write("[input]\nwindow_drag_toggle = \"floating\"\n");
@@ -1471,7 +1471,7 @@ CANOPY_TEST(windowDragToggleReadsItsVocabularyAndDefaultsOff) {
 
 CANOPY_TEST(modRightDoubleClickReadsItsVocabularyAndDefaultsOff) {
   const TempConfig file;
-  ConfigStore& store = canopy::configStore();
+  ConfigStore& store = mahogany::configStore();
   store.setRootPath(file.path(), true);
 
   file.write("[input]\nmod_right_double_click = \"maximize\"\n");
@@ -1495,7 +1495,7 @@ CANOPY_TEST(modRightDoubleClickReadsItsVocabularyAndDefaultsOff) {
 
 CANOPY_TEST(hoverRaisesLoadsAndDefaultsEnabled) {
   const TempConfig file;
-  ConfigStore& store = canopy::configStore();
+  ConfigStore& store = mahogany::configStore();
   store.setRootPath(file.path(), true);
 
   file.write("[input.focus]\nhover_raises = false\n");
@@ -1522,7 +1522,7 @@ scale = 1.5
 scale = 2.0
 )");
 
-  ConfigStore& store = canopy::configStore();
+  ConfigStore& store = mahogany::configStore();
   store.setRootPath(file.path(), true);
   CHECK(store.reload().success);
   CHECK_EQ(store.config().outputs.size(), size_t{1});
@@ -1531,7 +1531,7 @@ scale = 2.0
 
 CANOPY_TEST(outputVrrPolicyLoadsAndDefaultsDisabled) {
   const TempConfig file;
-  ConfigStore& store = canopy::configStore();
+  ConfigStore& store = mahogany::configStore();
   store.setRootPath(file.path(), true);
 
   file.write("[output.DP-1]\nvrr = \"fullscreen\"\n");
@@ -1559,7 +1559,7 @@ CANOPY_TEST(outputVrrPolicyLoadsAndDefaultsDisabled) {
 
 CANOPY_TEST(outputTearingPermissionLoadsAndDefaultsDisabled) {
   const TempConfig file;
-  ConfigStore& store = canopy::configStore();
+  ConfigStore& store = mahogany::configStore();
   store.setRootPath(file.path(), true);
 
   file.write("[output.DP-1]\ntearing = true\n");
@@ -1583,7 +1583,7 @@ CANOPY_TEST(outputTearingPermissionLoadsAndDefaultsDisabled) {
 
 CANOPY_TEST(outputDirectScanoutPolicyLoadsAndDefaultsEnabled) {
   const TempConfig file;
-  ConfigStore& store = canopy::configStore();
+  ConfigStore& store = mahogany::configStore();
   store.setRootPath(file.path(), true);
 
   file.write("[output.DP-1]\ndirect_scanout = false\n");
@@ -1607,7 +1607,7 @@ CANOPY_TEST(outputDirectScanoutPolicyLoadsAndDefaultsEnabled) {
 
 CANOPY_TEST(outputHdrPolicyAndSdrWhiteLoad) {
   const TempConfig file;
-  ConfigStore& store = canopy::configStore();
+  ConfigStore& store = mahogany::configStore();
   store.setRootPath(file.path(), true);
 
   file.write("[output.DP-1]\nhdr = \"on\"\nsdr_white = 300\n");
@@ -1639,7 +1639,7 @@ CANOPY_TEST(outputHdrPolicyAndSdrWhiteLoad) {
 
 CANOPY_TEST(outputSdrTransferLoadsAndResetsToGamma22) {
   const TempConfig file;
-  ConfigStore& store = canopy::configStore();
+  ConfigStore& store = mahogany::configStore();
   store.setRootPath(file.path(), true);
 
   file.write("[output.DP-1]\n");
@@ -1677,7 +1677,7 @@ CANOPY_TEST(outputSdrTransferLoadsAndResetsToGamma22) {
 
 CANOPY_TEST(outputSdrTransferRejectsInvalidValuesWithoutUnknownKeyWarnings) {
   const TempConfig file;
-  ConfigStore& store = canopy::configStore();
+  ConfigStore& store = mahogany::configStore();
   store.setRootPath(file.path(), true);
 
   for (const char* value : {"true", "1", "1.0", "[]", "{}", "\"gamma2.2\"", "\"sRGB\"", "\"linear\""}) {
@@ -1698,7 +1698,7 @@ CANOPY_TEST(outputSdrTransferRejectsInvalidValuesWithoutUnknownKeyWarnings) {
 
 CANOPY_TEST(outputBitDepthLoadsAndDefaults8) {
   const TempConfig file;
-  ConfigStore& store = canopy::configStore();
+  ConfigStore& store = mahogany::configStore();
   store.setRootPath(file.path(), true);
 
   file.write("[output.DP-1]\n");
@@ -1727,7 +1727,7 @@ CANOPY_TEST(outputBitDepthLoadsAndDefaults8) {
 
 CANOPY_TEST(windowOutputPoliciesLoadAndRejectInvalidValues) {
   const TempConfig file;
-  ConfigStore& store = canopy::configStore();
+  ConfigStore& store = mahogany::configStore();
   store.setRootPath(file.path(), true);
 
   file.write("[[window_rule]]\nmatch.app_id = \"^game$\"\nvrr = \"always\"\n");
@@ -1753,14 +1753,14 @@ CANOPY_TEST(windowOutputPoliciesLoadAndRejectInvalidValues) {
 
 CANOPY_TEST(windowRuleWorkspaceTargetPreservesIntegerAndStringSelectors) {
   const TempConfig file;
-  ConfigStore& store = canopy::configStore();
+  ConfigStore& store = mahogany::configStore();
   store.setRootPath(file.path(), true);
 
   file.write("[[window_rule]]\ndefault_workspace = 2\n");
   CHECK(store.reload().success);
   CHECK_EQ(store.config().windowRules.size(), size_t{1});
   const auto& positionTarget = store.config().windowRules[0].defaultWorkspace;
-  const auto* position = positionTarget ? std::get_if<canopy::WorkspaceIndex>(&*positionTarget) : nullptr;
+  const auto* position = positionTarget ? std::get_if<mahogany::WorkspaceIndex>(&*positionTarget) : nullptr;
   CHECK(position != nullptr);
   CHECK(position != nullptr && position->value == 2);
   CHECK(!containsDiagnostic(store, "unknown key window_rule.default_workspace"));
@@ -1769,7 +1769,7 @@ CANOPY_TEST(windowRuleWorkspaceTargetPreservesIntegerAndStringSelectors) {
   CHECK(store.reload().success);
   CHECK_EQ(store.config().windowRules.size(), size_t{1});
   const auto& limitTarget = store.config().windowRules[0].defaultWorkspace;
-  const auto* limit = limitTarget ? std::get_if<canopy::WorkspaceIndex>(&*limitTarget) : nullptr;
+  const auto* limit = limitTarget ? std::get_if<mahogany::WorkspaceIndex>(&*limitTarget) : nullptr;
   CHECK(limit != nullptr);
   CHECK(limit != nullptr && limit->value == 64);
 
@@ -1777,7 +1777,7 @@ CANOPY_TEST(windowRuleWorkspaceTargetPreservesIntegerAndStringSelectors) {
   CHECK(store.reload().success);
   CHECK_EQ(store.config().windowRules.size(), size_t{1});
   const auto& nameTarget = store.config().windowRules[0].defaultWorkspace;
-  const auto* name = nameTarget ? std::get_if<canopy::WorkspaceName>(&*nameTarget) : nullptr;
+  const auto* name = nameTarget ? std::get_if<mahogany::WorkspaceName>(&*nameTarget) : nullptr;
   CHECK(name != nullptr);
   CHECK(name != nullptr && name->value == "CHAT");
 
@@ -1787,7 +1787,7 @@ CANOPY_TEST(windowRuleWorkspaceTargetPreservesIntegerAndStringSelectors) {
   CHECK(store.reload().success);
   CHECK_EQ(store.config().windowRules.size(), size_t{1});
   const auto& numericNameTarget = store.config().windowRules[0].defaultWorkspace;
-  const auto* numericName = numericNameTarget ? std::get_if<canopy::WorkspaceName>(&*numericNameTarget) : nullptr;
+  const auto* numericName = numericNameTarget ? std::get_if<mahogany::WorkspaceName>(&*numericNameTarget) : nullptr;
   CHECK(numericName != nullptr);
   CHECK(numericName != nullptr && numericName->value == "2");
 
@@ -1815,7 +1815,7 @@ CANOPY_TEST(windowRuleWorkspaceTargetPreservesIntegerAndStringSelectors) {
 
 CANOPY_TEST(windowRuleDefaultScratchpadTargetsConfiguredInventory) {
   const TempConfig file;
-  ConfigStore& store = canopy::configStore();
+  ConfigStore& store = mahogany::configStore();
   store.setRootPath(file.path(), true);
 
   file.write("[[window_rule]]\ndefault_scratchpad = \"terminal\"\n[[scratchpad]]\nname = \"terminal\"\n");
@@ -1862,7 +1862,7 @@ CANOPY_TEST(windowRuleDefaultScratchpadTargetsConfiguredInventory) {
 
 CANOPY_TEST(securityContextRulesLoadAndKeepTheManagerBlocked) {
   const TempConfig file;
-  ConfigStore& store = canopy::configStore();
+  ConfigStore& store = mahogany::configStore();
   store.setRootPath(file.path(), true);
 
   file.write(
@@ -1929,7 +1929,7 @@ CANOPY_TEST(securityContextRulesLoadAndKeepTheManagerBlocked) {
 
 CANOPY_TEST(windowContentTypeMatcherLoadsFixedVocabulary) {
   const TempConfig file;
-  ConfigStore& store = canopy::configStore();
+  ConfigStore& store = mahogany::configStore();
   store.setRootPath(file.path(), true);
 
   const auto checkValue = [&](const std::string& value, ContentType expected) {
@@ -1967,7 +1967,7 @@ CANOPY_TEST(windowContentTypeMatcherLoadsFixedVocabulary) {
 
 CANOPY_TEST(windowStartupMatcherLoadsBoolean) {
   const TempConfig file;
-  ConfigStore& store = canopy::configStore();
+  ConfigStore& store = mahogany::configStore();
   store.setRootPath(file.path(), true);
 
   file.write("[[window_rule]]\nmatch.at_startup = true\nopacity = 0.9\n");
@@ -1990,13 +1990,13 @@ CANOPY_TEST(windowStartupMatcherLoadsBoolean) {
 
 CANOPY_TEST(layerMatchersLoadLayerAndStartup) {
   const TempConfig file;
-  ConfigStore& store = canopy::configStore();
+  ConfigStore& store = mahogany::configStore();
   store.setRootPath(file.path(), true);
 
   file.write("[[layer_rule]]\nmatch.layer = \"top\"\nmatch.at_startup = true\nblur = true\n");
   CHECK(store.reload().success);
   CHECK_EQ(store.config().layerRules.size(), size_t{1});
-  CHECK(store.config().layerRules[0].matchLayer == canopy::LayerShellLayer::Top);
+  CHECK(store.config().layerRules[0].matchLayer == mahogany::LayerShellLayer::Top);
   CHECK(store.config().layerRules[0].matchAtStartup == true);
   CHECK(!containsDiagnostic(store, "unknown key layer_rule.match.layer"));
   CHECK(!containsDiagnostic(store, "unknown key layer_rule.match.at_startup"));
@@ -2009,7 +2009,7 @@ CANOPY_TEST(layerMatchersLoadLayerAndStartup) {
 
 CANOPY_TEST(windowStateMatchersLoadBooleans) {
   const TempConfig file;
-  ConfigStore& store = canopy::configStore();
+  ConfigStore& store = mahogany::configStore();
   store.setRootPath(file.path(), true);
 
   file.write(
@@ -2032,7 +2032,7 @@ CANOPY_TEST(windowStateMatchersLoadBooleans) {
 
 CANOPY_TEST(maximizedToEdgesMatcherLoadsStrictBoolean) {
   const TempConfig file;
-  ConfigStore& store = canopy::configStore();
+  ConfigStore& store = mahogany::configStore();
   store.setRootPath(file.path(), true);
   file.write("[[window_rule]]\nmatch.is_maximized_to_edges = true\ntitle_bar = \"off\"\n");
   CHECK(store.reload().success);
@@ -2050,13 +2050,13 @@ CANOPY_TEST(maximizedToEdgesMatcherLoadsStrictBoolean) {
 
 CANOPY_TEST(windowXdgTagMatcherLoadsRegexAndRejectsInvalidValues) {
   const TempConfig file;
-  ConfigStore& store = canopy::configStore();
+  ConfigStore& store = mahogany::configStore();
   store.setRootPath(file.path(), true);
 
   file.write("[[window_rule]]\nmatch.xdg_tag = \"^(game-launcher|game-running)$\"\nopacity = 0.9\n");
   CHECK(store.reload().success);
   CHECK_EQ(store.config().windowRules.size(), size_t{1});
-  const canopy::RegexPatterns& tag = store.config().windowRules[0].xdgTagPatterns;
+  const mahogany::RegexPatterns& tag = store.config().windowRules[0].xdgTagPatterns;
   CHECK(tag.patterns == std::vector<std::string>{"^(game-launcher|game-running)$"});
   CHECK(std::regex_search("game-launcher", tag.regexes[0]));
   CHECK(std::regex_search("game-running", tag.regexes[0]));
@@ -2110,7 +2110,7 @@ CANOPY_TEST(windowXdgTagMatcherLoadsRegexAndRejectsInvalidValues) {
 
 CANOPY_TEST(windowTearingOverrideLoadsAsAnOptionalBoolean) {
   const TempConfig file;
-  ConfigStore& store = canopy::configStore();
+  ConfigStore& store = mahogany::configStore();
   store.setRootPath(file.path(), true);
 
   file.write("[[window_rule]]\nmatch.app_id = \"^game$\"\ntearing = true\n");
@@ -2133,7 +2133,7 @@ CANOPY_TEST(windowTearingOverrideLoadsAsAnOptionalBoolean) {
 
 CANOPY_TEST(windowRuleFloatingSizeTablesLoadIndependentAxesAndClamp) {
   const TempConfig file;
-  ConfigStore& store = canopy::configStore();
+  ConfigStore& store = mahogany::configStore();
   store.setRootPath(file.path(), true);
 
   file.write(
@@ -2183,7 +2183,7 @@ CANOPY_TEST(windowRuleFloatingSizeTablesLoadIndependentAxesAndClamp) {
 
 CANOPY_TEST(outputEnabledFlagParsesAndDefaultsTrue) {
   const TempConfig file;
-  ConfigStore& store = canopy::configStore();
+  ConfigStore& store = mahogany::configStore();
   store.setRootPath(file.path(), true);
 
   file.write("[output.DP-1]\nenabled = false\n");
@@ -2207,7 +2207,7 @@ CANOPY_TEST(outputEnabledFlagParsesAndDefaultsTrue) {
 
 CANOPY_TEST(outputWorkspaceInventoryPreservesCountAndNames) {
   const TempConfig file;
-  ConfigStore& store = canopy::configStore();
+  ConfigStore& store = mahogany::configStore();
   store.setRootPath(file.path(), true);
 
   file.write("[output.DP-1]\nworkspaces = 9\n[output.DP-2]\nworkspaces = [\"3\", \"CHAT\"]\n");
@@ -2228,7 +2228,7 @@ CANOPY_TEST(outputWorkspaceInventoryPreservesCountAndNames) {
 
 CANOPY_TEST(outputMinWorkspacesLoadsAndRequiresDynamicWorkspaces) {
   const TempConfig file;
-  ConfigStore& store = canopy::configStore();
+  ConfigStore& store = mahogany::configStore();
   store.setRootPath(file.path(), true);
 
   file.write("[output.DP-1]\nmin_workspaces = 4\n");
@@ -2259,7 +2259,7 @@ CANOPY_TEST(outputMinWorkspacesLoadsAndRequiresDynamicWorkspaces) {
 // reload without the key, and rejects a non-boolean the way its neighbours do.
 CANOPY_TEST(outputCyclicWorkspacesLoadsAndDefaultsOff) {
   const TempConfig file;
-  ConfigStore& store = canopy::configStore();
+  ConfigStore& store = mahogany::configStore();
   store.setRootPath(file.path(), true);
 
   file.write("[output.DP-1]\ncyclic_workspaces = true\n");
@@ -2283,7 +2283,7 @@ CANOPY_TEST(outputCyclicWorkspacesLoadsAndDefaultsOff) {
 
 CANOPY_TEST(nvidiaSyncWorkaroundReloadsAndDefaultsOn) {
   const TempConfig file;
-  ConfigStore& store = canopy::configStore();
+  ConfigStore& store = mahogany::configStore();
   store.setRootPath(file.path(), true);
 
   file.write("[general]\n");
@@ -2317,7 +2317,7 @@ CANOPY_TEST(nvidiaSyncWorkaroundReloadsAndDefaultsOn) {
 
 CANOPY_TEST(xwaylandPrimaryOutputLoadsAndCanBeRemoved) {
   const TempConfig file;
-  ConfigStore& store = canopy::configStore();
+  ConfigStore& store = mahogany::configStore();
   store.setRootPath(file.path(), true);
 
   file.write("[general]\nxwayland_primary_output = \"DP-1\"\n");
@@ -2340,7 +2340,7 @@ CANOPY_TEST(xwaylandPrimaryOutputLoadsAndCanBeRemoved) {
 
 CANOPY_TEST(outputFocusAtStartupLoadsAndDefaultsOff) {
   const TempConfig file;
-  ConfigStore& store = canopy::configStore();
+  ConfigStore& store = mahogany::configStore();
   store.setRootPath(file.path(), true);
 
   file.write("[output.DP-1]\nfocus_at_startup = true\n");
@@ -2364,7 +2364,7 @@ CANOPY_TEST(outputFocusAtStartupLoadsAndDefaultsOff) {
 
 CANOPY_TEST(dynamicNamedWorkspaceDeclarationsReserveEmptySentinelCapacity) {
   const TempConfig file;
-  ConfigStore& store = canopy::configStore();
+  ConfigStore& store = mahogany::configStore();
   store.setRootPath(file.path(), true);
 
   const auto declarations = [](size_t count, std::string_view prefix, std::string_view output = {}) {
@@ -2410,9 +2410,9 @@ warning = "#51525354"
 error = "#61626364"
 )");
 
-  ConfigStore& store = canopy::configStore();
+  ConfigStore& store = mahogany::configStore();
   store.setRootPath(file.path(), true);
-  const canopy::ConfigReloadResult result = store.reload();
+  const mahogany::ConfigReloadResult result = store.reload();
   const auto& colors = store.config().colors;
 
   CHECK(result.success);
@@ -2431,16 +2431,16 @@ CANOPY_TEST(missingIncludesRemainPendingUntilTheyLoad) {
   const TempConfig file;
   file.write("[include]\nfiles = [\"" + file.includeName() + "\"]\n");
 
-  ConfigStore& store = canopy::configStore();
+  ConfigStore& store = mahogany::configStore();
   store.setRootPath(file.path(), true);
-  const canopy::ConfigReloadResult missing = store.reload();
+  const mahogany::ConfigReloadResult missing = store.reload();
 
   CHECK(missing.success);
   CHECK(store.missingIncludes());
   CHECK(containsDiagnostic(store, "include not found"));
 
   file.writeInclude("[colors]\naccent_primary = \"#123456FF\"\n");
-  const canopy::ConfigReloadResult loaded = store.reload();
+  const mahogany::ConfigReloadResult loaded = store.reload();
 
   CHECK(loaded.success);
   CHECK(!store.missingIncludes());
@@ -2455,11 +2455,11 @@ CANOPY_TEST(unknownIncludeKeysRejectReload) {
   file.write("[include]\nfiles = [\"" + file.includeName() + "\"]\ndirs = [\"themes\"]\n");
   file.writeInclude("[include]\npaths = []\n");
 
-  ConfigStore& store = canopy::configStore();
+  ConfigStore& store = mahogany::configStore();
   store.setRootPath(file.path(), true);
-  const canopy::Config previous = store.config();
+  const mahogany::Config previous = store.config();
   const uint64_t generation = store.generation();
-  const canopy::ConfigReloadResult loaded = store.reload();
+  const mahogany::ConfigReloadResult loaded = store.reload();
 
   CHECK(!loaded.success);
   CHECK(store.config() == previous);
@@ -2474,9 +2474,9 @@ CANOPY_TEST(missingOptionalIncludesAreSilentWatchedAndLoadWhenCreated) {
   const std::filesystem::path optional = tree.path("generated/colors.toml");
   tree.write("config.toml", "[include.optional]\nfiles = [\"generated/colors.toml\"]\n");
 
-  ConfigStore& store = canopy::configStore();
+  ConfigStore& store = mahogany::configStore();
   store.setRootPath(tree.path("config.toml"), true);
-  const canopy::ConfigReloadResult missing = store.reload();
+  const mahogany::ConfigReloadResult missing = store.reload();
 
   CHECK(missing.success);
   CHECK(!store.missingIncludes());
@@ -2484,7 +2484,7 @@ CANOPY_TEST(missingOptionalIncludesAreSilentWatchedAndLoadWhenCreated) {
   CHECK(std::ranges::find(store.watchPaths(), optional) != store.watchPaths().end());
 
   tree.write("generated/colors.toml", "[colors]\naccent_primary = \"#123456FF\"\n");
-  const canopy::ConfigReloadResult loaded = store.reload();
+  const mahogany::ConfigReloadResult loaded = store.reload();
 
   CHECK(loaded.success);
   CHECK(!store.missingIncludes());
@@ -2505,9 +2505,9 @@ CANOPY_TEST(optionalIncludesExpandPathsAndApplyAfterRequiredIncludes) {
       "[include.optional]\nfiles = [\"$CANOPY_OPTIONAL_INCLUDE\", \"~/override.toml\"]\n"
   );
 
-  ConfigStore& store = canopy::configStore();
+  ConfigStore& store = mahogany::configStore();
   store.setRootPath(tree.path("config.toml"), true);
-  const canopy::ConfigReloadResult loaded = store.reload();
+  const mahogany::ConfigReloadResult loaded = store.reload();
 
   CHECK(loaded.success);
   CHECK_EQ(store.config().layout.gap, 33);
@@ -2522,13 +2522,13 @@ CANOPY_TEST(malformedOptionalIncludeRejectsReload) {
       "[include.optional]\nfiles = [\"generated.toml\"]\n"
   );
 
-  ConfigStore& store = canopy::configStore();
+  ConfigStore& store = mahogany::configStore();
   store.setRootPath(tree.path("config.toml"), true);
   CHECK(store.reload().success);
   const uint64_t generation = store.generation();
 
   tree.write("generated.toml", "[layout\n");
-  const canopy::ConfigReloadResult malformed = store.reload();
+  const mahogany::ConfigReloadResult malformed = store.reload();
 
   CHECK(!malformed.success);
   CHECK_EQ(store.generation(), generation);
@@ -2552,9 +2552,9 @@ files = [")"
   );
   file.writeInclude("[colors]\naccent_primary = \"#123456FF\"\nbackground = \"#222222FF\"\n");
 
-  ConfigStore& store = canopy::configStore();
+  ConfigStore& store = mahogany::configStore();
   store.setRootPath(file.path(), true);
-  const canopy::ConfigReloadResult loaded = store.reload();
+  const mahogany::ConfigReloadResult loaded = store.reload();
 
   CHECK(loaded.success);
   CHECK_EQ(store.config().colors.accentPrimary[0], 171.0F / 255.0F);
@@ -2581,18 +2581,18 @@ CANOPY_TEST(ruleCollectionsAccumulateAcrossIncludesWhilePlainArraysReplace) {
       "[[window_rule]]\nmatch.app_id = \"^from-root$\"\n"
   );
 
-  ConfigStore& store = canopy::configStore();
+  ConfigStore& store = mahogany::configStore();
   store.setRootPath(tree.path("config.toml"), true);
-  const canopy::ConfigReloadResult loaded = store.reload();
+  const mahogany::ConfigReloadResult loaded = store.reload();
 
   std::vector<std::string> patterns;
-  for (const canopy::WindowRule& rule : store.config().windowRules) {
+  for (const mahogany::WindowRule& rule : store.config().windowRules) {
     for (const std::string& pattern : rule.appIdPatterns.patterns) {
       patterns.push_back(pattern);
     }
   }
   std::vector<std::string> namespaces;
-  for (const canopy::LayerRule& rule : store.config().layerRules) {
+  for (const mahogany::LayerRule& rule : store.config().layerRules) {
     for (const std::string& pattern : rule.namespacePatterns.patterns) {
       namespaces.push_back(pattern);
     }
@@ -2602,7 +2602,7 @@ CANOPY_TEST(ruleCollectionsAccumulateAcrossIncludesWhilePlainArraysReplace) {
   const std::vector<std::string> expectedAutostart{"from-root"};
   const std::array<int, 2> expectedPosition{3072, 0};
   const auto output =
-      std::ranges::find_if(store.config().outputs, [](const canopy::OutputRule& rule) { return rule.name == "DP-1"; });
+      std::ranges::find_if(store.config().outputs, [](const mahogany::OutputRule& rule) { return rule.name == "DP-1"; });
   const bool foundOutput = output != store.config().outputs.end();
 
   CHECK(loaded.success);
@@ -2627,16 +2627,16 @@ CANOPY_TEST(windowRuleDecorationKeysAreRead) {
       "shadow = false\n"
   );
 
-  ConfigStore& store = canopy::configStore();
+  ConfigStore& store = mahogany::configStore();
   store.setRootPath(file.path(), true);
-  const canopy::ConfigReloadResult loaded = store.reload();
+  const mahogany::ConfigReloadResult loaded = store.reload();
 
   CHECK(loaded.success);
   CHECK_EQ(store.config().windowRules.size(), size_t{1});
   if (store.config().windowRules.empty()) {
     return;
   }
-  const canopy::WindowRule& rule = store.config().windowRules.front();
+  const mahogany::WindowRule& rule = store.config().windowRules.front();
   CHECK(rule.borderWidth && *rule.borderWidth == 0);
   CHECK(rule.outerBorderWidth && *rule.outerBorderWidth == 6);
   CHECK(rule.cornerRadius && *rule.cornerRadius == 0);
@@ -2645,7 +2645,7 @@ CANOPY_TEST(windowRuleDecorationKeysAreRead) {
 }
 
 CANOPY_TEST(windowOpacityAnimationUsesBorderDefaultsAndIndependentTiming) {
-  const canopy::Config defaults;
+  const mahogany::Config defaults;
   CHECK(defaults.animation.windowsOpacity.enabled);
   CHECK_EQ(defaults.animation.windowsOpacity.durationMs, defaults.animation.border.durationMs);
   CHECK(defaults.animation.windowsOpacity.curve == defaults.animation.border.curve);
@@ -2654,28 +2654,28 @@ CANOPY_TEST(windowOpacityAnimationUsesBorderDefaultsAndIndependentTiming) {
       "[animation]\nduration_ms = 800\ncurve = 'linear'\n"
       "[animation.windows_opacity]\nenabled = false\nduration_ms = 350\ncurve = 'easeinoutsine'\n"
   );
-  ConfigStore& store = canopy::configStore();
+  ConfigStore& store = mahogany::configStore();
   store.setRootPath(file.path(), true);
   CHECK(store.reload().success);
   CHECK(!store.config().animation.windowsOpacity.enabled);
   CHECK_EQ(store.config().animation.windowsOpacity.durationMs, 350);
-  CHECK(store.config().animation.windowsOpacity.curve.easing == canopy::Easing::EaseInOutSine);
+  CHECK(store.config().animation.windowsOpacity.curve.easing == mahogany::Easing::EaseInOutSine);
   CHECK_EQ(store.config().animation.border.durationMs, 800);
-  CHECK(store.config().animation.border.curve.easing == canopy::Easing::Linear);
+  CHECK(store.config().animation.border.curve.easing == mahogany::Easing::Linear);
   CHECK(store.diagnostics().empty());
 
   file.write("[animation]\nduration_ms = 600\ncurve = 'easeinquad'\n");
   CHECK(store.reload().success);
   CHECK(store.config().animation.windowsOpacity.enabled);
   CHECK_EQ(store.config().animation.windowsOpacity.durationMs, 600);
-  CHECK(store.config().animation.windowsOpacity.curve.easing == canopy::Easing::EaseInQuad);
+  CHECK(store.config().animation.windowsOpacity.curve.easing == mahogany::Easing::EaseInQuad);
 
   file.write(
       "[animation.springs]\nsoft = { damping = 0.8, stiffness = 350 }\n"
       "[animation.windows_opacity]\ncurve = 'soft'\n"
   );
   CHECK(store.reload().success);
-  CHECK(store.config().animation.windowsOpacity.curve.easing == canopy::Easing::Spring);
+  CHECK(store.config().animation.windowsOpacity.curve.easing == mahogany::Easing::Spring);
   CHECK_EQ(store.config().animation.windowsOpacity.curve.spring.stiffness, 350.0);
   CHECK(store.diagnostics().empty());
 }
@@ -2685,9 +2685,9 @@ CANOPY_TEST(emptyRuleArrayDropsRulesFromIncludes) {
   file.write("window_rule = []\n[include]\nfiles = [\"" + file.includeName() + "\"]\n");
   file.writeInclude("[[window_rule]]\nmatch.app_id = \"^dropped$\"\ndefault_floating = true\n");
 
-  ConfigStore& store = canopy::configStore();
+  ConfigStore& store = mahogany::configStore();
   store.setRootPath(file.path(), true);
-  const canopy::ConfigReloadResult loaded = store.reload();
+  const mahogany::ConfigReloadResult loaded = store.reload();
 
   CHECK(loaded.success);
   CHECK(store.config().windowRules.empty());
@@ -2705,7 +2705,7 @@ CANOPY_TEST(duplicateDeviceRuleAcrossIncludesIsRejected) {
       "[[input.device]]\nname = \"Acme Mouse\"\nsensitivity = -0.5\n"
   );
 
-  ConfigStore& store = canopy::configStore();
+  ConfigStore& store = mahogany::configStore();
   store.setRootPath(tree.path("config.toml"), true);
   CHECK(store.reload().success);
   CHECK_EQ(store.config().input.devices.size(), size_t{2});
@@ -2717,7 +2717,7 @@ CANOPY_TEST(duplicateDeviceRuleAcrossIncludesIsRejected) {
       "[include]\nfiles = [\"input.toml\"]\n"
       "[[input.device]]\nname = \"Acme Keyboard\"\nrepeat_rate = 60\n"
   );
-  const canopy::ConfigReloadResult duplicate = store.reload();
+  const mahogany::ConfigReloadResult duplicate = store.reload();
 
   CHECK(!duplicate.success);
   CHECK(containsDiagnostic(store, "duplicates device 'Acme Keyboard'"));
@@ -2744,9 +2744,9 @@ match.app_id = "^centered$"
 default_position = { x = 0, y = 0 }
 )");
 
-  ConfigStore& store = canopy::configStore();
+  ConfigStore& store = mahogany::configStore();
   store.setRootPath(file.path(), true);
-  const canopy::ConfigReloadResult result = store.reload();
+  const mahogany::ConfigReloadResult result = store.reload();
 
   CHECK(result.success);
   CHECK(store.config().general.focusOnActivate);
@@ -2762,14 +2762,14 @@ default_position = { x = 0, y = 0 }
   CHECK(store.config().windowRules[0].defaultPosition.has_value());
   CHECK_EQ(store.config().windowRules[0].defaultPosition->x, 32);
   CHECK_EQ(store.config().windowRules[0].defaultPosition->y, 48);
-  CHECK(store.config().windowRules[0].defaultPosition->anchor == canopy::WindowPositionAnchor::BottomLeft);
+  CHECK(store.config().windowRules[0].defaultPosition->anchor == mahogany::WindowPositionAnchor::BottomLeft);
   CHECK(store.config().windowRules[1].defaultPosition.has_value());
-  CHECK(store.config().windowRules[1].defaultPosition->anchor == canopy::WindowPositionAnchor::Center);
+  CHECK(store.config().windowRules[1].defaultPosition->anchor == mahogany::WindowPositionAnchor::Center);
 }
 
 CANOPY_TEST(restoredMaximizePolicyLoadsAndDefaultsOff) {
   const TempConfig file;
-  ConfigStore& store = canopy::configStore();
+  ConfigStore& store = mahogany::configStore();
   store.setRootPath(file.path(), true);
 
   file.write("[general]\nhonor_restored_maximize = true\n");
@@ -2783,7 +2783,7 @@ CANOPY_TEST(restoredMaximizePolicyLoadsAndDefaultsOff) {
 
 CANOPY_TEST(modalDialogAttachmentLoadsGloballyAndPerWindow) {
   const TempConfig file;
-  ConfigStore& store = canopy::configStore();
+  ConfigStore& store = mahogany::configStore();
   store.setRootPath(file.path(), true);
 
   file.write("[general]\n");
@@ -2807,25 +2807,25 @@ CANOPY_TEST(modalDialogAttachmentLoadsGloballyAndPerWindow) {
 
 CANOPY_TEST(layoutClientMaximizeLoadsGloballyAndPerWorkspace) {
   const TempConfig file;
-  ConfigStore& store = canopy::configStore();
+  ConfigStore& store = mahogany::configStore();
   store.setRootPath(file.path(), true);
 
   file.write("[layout]\nclient_maximize = \"edges\"\n");
   CHECK(store.reload().success);
-  CHECK(store.config().layout.clientMaximize == canopy::ClientMaximize::Edges);
+  CHECK(store.config().layout.clientMaximize == mahogany::ClientMaximize::Edges);
 
   file.write("[layout]\n\n[[workspace]]\nname = \"dev\"\nlayout.client_maximize = \"edges\"\n");
   CHECK(store.reload().success);
-  CHECK(store.config().layout.clientMaximize == canopy::ClientMaximize::Column);
+  CHECK(store.config().layout.clientMaximize == mahogany::ClientMaximize::Column);
   CHECK(
       store.config().workspaceRules.size() == 1
-      && store.config().workspaceRules[0].layout.clientMaximize == canopy::ClientMaximize::Edges
+      && store.config().workspaceRules[0].layout.clientMaximize == mahogany::ClientMaximize::Edges
   );
 }
 
 CANOPY_TEST(screencastDynamicConfirmationDefaultsOnAndCanBeDisabled) {
   const TempConfig file;
-  ConfigStore& store = canopy::configStore();
+  ConfigStore& store = mahogany::configStore();
   store.setRootPath(file.path(), true);
 
   file.write("[screencast]\ndisable_dynamic_confirmation = true\n");
@@ -2897,14 +2897,14 @@ scroll_button = "MouseBack"
 scroll_button_lock = false
 )");
 
-  ConfigStore& store = canopy::configStore();
+  ConfigStore& store = mahogany::configStore();
   store.setRootPath(file.path(), true);
-  const canopy::ConfigReloadResult result = store.reload();
+  const mahogany::ConfigReloadResult result = store.reload();
   const auto& input = store.config().input;
 
   CHECK(result.success);
   CHECK(input.mouse.accelProfile.has_value());
-  CHECK(input.mouse.accelProfile->kind == canopy::AccelProfile::Kind::Custom);
+  CHECK(input.mouse.accelProfile->kind == mahogany::AccelProfile::Kind::Custom);
   CHECK_EQ(input.mouse.accelProfile->step, 0.2);
   CHECK_EQ(input.mouse.accelProfile->points, std::vector<double>({0.0, 0.5, 1.0, 2.0}));
   CHECK_EQ(input.mouse.sensitivity, 0.25);
@@ -2913,7 +2913,7 @@ scroll_button_lock = false
   CHECK(input.mouse.leftHanded == std::optional<bool>(true));
   CHECK(input.touchpad.accelProfile.has_value());
   if (input.touchpad.accelProfile.has_value()) {
-    CHECK(input.touchpad.accelProfile->kind == canopy::AccelProfile::Kind::Adaptive);
+    CHECK(input.touchpad.accelProfile->kind == mahogany::AccelProfile::Kind::Adaptive);
   }
   CHECK(input.touchpad.sensitivity == std::optional<double>(0.1));
   CHECK(input.touchpad.scrollFactor.has_value());
@@ -2922,10 +2922,10 @@ scroll_button_lock = false
   CHECK(input.touchpad.disableWhileTyping == std::optional<bool>(true));
   CHECK(input.touchpad.disableOnExternalMouse == std::optional<bool>(true));
   CHECK(input.touchpad.tapAndDrag == std::optional<bool>(true));
-  CHECK(input.touchpad.dragLock == std::optional(canopy::DragLock::Sticky));
-  CHECK(input.touchpad.scrollMethod == std::optional(canopy::ScrollMethod::Edge));
-  CHECK(input.touchpad.clickMethod == std::optional(canopy::ClickMethod::ButtonAreas));
-  CHECK(input.touchpad.tapButtonMap == std::optional(canopy::TapButtonMap::LeftMiddleRight));
+  CHECK(input.touchpad.dragLock == std::optional(mahogany::DragLock::Sticky));
+  CHECK(input.touchpad.scrollMethod == std::optional(mahogany::ScrollMethod::Edge));
+  CHECK(input.touchpad.clickMethod == std::optional(mahogany::ClickMethod::ButtonAreas));
+  CHECK(input.touchpad.tapButtonMap == std::optional(mahogany::TapButtonMap::LeftMiddleRight));
   CHECK(input.touchpad.leftHanded == std::optional<bool>(true));
   CHECK(!input.touchpad.enabled);
   CHECK_EQ(input.devices.size(), size_t{3});
@@ -2944,18 +2944,18 @@ scroll_button_lock = false
   if (touchpad != nullptr) {
     CHECK(touchpad->tap == std::optional<bool>(false));
     CHECK(touchpad->tapAndDrag == std::optional<bool>(false));
-    CHECK(touchpad->dragLock == std::optional(canopy::DragLock::Off));
+    CHECK(touchpad->dragLock == std::optional(mahogany::DragLock::Off));
     CHECK(touchpad->naturalScroll == std::optional<bool>(false));
     CHECK(touchpad->leftHanded == std::optional<bool>(false));
     CHECK(touchpad->accelProfile.has_value());
     if (touchpad->accelProfile.has_value()) {
-      CHECK(touchpad->accelProfile->kind == canopy::AccelProfile::Kind::Flat);
+      CHECK(touchpad->accelProfile->kind == mahogany::AccelProfile::Kind::Flat);
     }
     CHECK(touchpad->sensitivity == std::optional<double>(-0.5));
     CHECK(touchpad->disableWhileTyping == std::optional<bool>(false));
-    CHECK(touchpad->scrollMethod == std::optional(canopy::ScrollMethod::Edge));
-    CHECK(touchpad->clickMethod == std::optional(canopy::ClickMethod::ClickFinger));
-    CHECK(touchpad->tapButtonMap == std::optional(canopy::TapButtonMap::LeftRightMiddle));
+    CHECK(touchpad->scrollMethod == std::optional(mahogany::ScrollMethod::Edge));
+    CHECK(touchpad->clickMethod == std::optional(mahogany::ClickMethod::ClickFinger));
+    CHECK(touchpad->tapButtonMap == std::optional(mahogany::TapButtonMap::LeftRightMiddle));
     CHECK(touchpad->enabled == std::optional<bool>(true));
   }
 
@@ -2963,7 +2963,7 @@ scroll_button_lock = false
   CHECK(mouse != nullptr);
   if (mouse != nullptr) {
     CHECK(mouse->accelProfile.has_value());
-    CHECK(mouse->accelProfile->kind == canopy::AccelProfile::Kind::Flat);
+    CHECK(mouse->accelProfile->kind == mahogany::AccelProfile::Kind::Flat);
     CHECK(mouse->sensitivity == std::optional<double>(-0.5));
     CHECK(!mouse->clickMethod.has_value());
     CHECK(mouse->scrollButton == std::optional<uint32_t>(BTN_SIDE));
@@ -2977,25 +2977,25 @@ scroll_button_lock = false
 }
 
 CANOPY_TEST(mouseAccelerationPreservesDeviceProfileByDefault) {
-  const canopy::Config defaults;
+  const mahogany::Config defaults;
   CHECK(!defaults.input.mouse.accelProfile.has_value());
   CHECK_EQ(defaults.input.mouse.sensitivity, 0.0);
 }
 
 CANOPY_TEST(mouseScrollButtonDefaultsToUnset) {
-  const canopy::Config defaults;
+  const mahogany::Config defaults;
   CHECK(!defaults.input.mouse.scrollButton.has_value());
   CHECK(!defaults.input.mouse.scrollButtonLock.has_value());
 }
 
 CANOPY_TEST(touchpadAccelerationDefaultsToUnset) {
-  const canopy::Config defaults;
+  const mahogany::Config defaults;
   CHECK(!defaults.input.touchpad.accelProfile.has_value());
   CHECK(!defaults.input.touchpad.sensitivity.has_value());
 }
 
 CANOPY_TEST(touchpadScrollMethodDefaultsToUnset) {
-  const canopy::Config defaults;
+  const mahogany::Config defaults;
   CHECK(!defaults.input.touchpad.scrollMethod.has_value());
 }
 
@@ -3010,41 +3010,41 @@ name = "Acme Precision Touchpad"
 scroll_method = "None"
 )");
 
-  ConfigStore& store = canopy::configStore();
+  ConfigStore& store = mahogany::configStore();
   store.setRootPath(file.path(), true);
-  const canopy::ConfigReloadResult result = store.reload();
+  const mahogany::ConfigReloadResult result = store.reload();
   CHECK(result.success);
   const auto& input = store.config().input;
-  CHECK(input.touchpad.scrollMethod == std::optional(canopy::ScrollMethod::TwoFinger));
+  CHECK(input.touchpad.scrollMethod == std::optional(mahogany::ScrollMethod::TwoFinger));
   const auto* device = input.findDevice("Acme Precision Touchpad");
   CHECK(device != nullptr);
   if (device != nullptr) {
-    CHECK(device->scrollMethod == std::optional(canopy::ScrollMethod::None));
+    CHECK(device->scrollMethod == std::optional(mahogany::ScrollMethod::None));
   }
 }
 
 CANOPY_TEST(touchpadScrollFactorDefaultsToUnset) {
-  const canopy::Config defaults;
+  const mahogany::Config defaults;
   CHECK(!defaults.input.touchpad.scrollFactor.has_value());
 }
 
 CANOPY_TEST(touchpadDisableWhileTypingDefaultsToUnset) {
-  const canopy::Config defaults;
+  const mahogany::Config defaults;
   CHECK(!defaults.input.touchpad.disableWhileTyping.has_value());
 }
 
 CANOPY_TEST(touchpadDisableOnExternalMouseDefaultsToUnset) {
-  const canopy::Config defaults;
+  const mahogany::Config defaults;
   CHECK(!defaults.input.touchpad.disableOnExternalMouse.has_value());
 }
 
 CANOPY_TEST(touchpadTapDefaultsToEnabled) {
-  const canopy::Config defaults;
+  const mahogany::Config defaults;
   CHECK(defaults.input.touchpad.tap == std::optional<bool>(true));
 }
 
 CANOPY_TEST(cursorFollowsFocusDefaultsToDisabled) {
-  const canopy::Config defaults;
+  const mahogany::Config defaults;
   CHECK(!defaults.input.cursor.followsFocus);
 }
 
@@ -3057,9 +3057,9 @@ follows_focus = true
 hide_when_typing = true
 )");
 
-  ConfigStore& store = canopy::configStore();
+  ConfigStore& store = mahogany::configStore();
   store.setRootPath(file.path(), true);
-  const canopy::ConfigReloadResult result = store.reload();
+  const mahogany::ConfigReloadResult result = store.reload();
 
   CHECK(result.success);
   CHECK(!store.config().input.cursor.hardwareCursor);
@@ -3077,9 +3077,9 @@ CANOPY_TEST(cursorHideTimeoutLoads) {
 hide_timeout_ms = 1500
 )");
 
-  ConfigStore& store = canopy::configStore();
+  ConfigStore& store = mahogany::configStore();
   store.setRootPath(file.path(), true);
-  const canopy::ConfigReloadResult result = store.reload();
+  const mahogany::ConfigReloadResult result = store.reload();
 
   CHECK(result.success);
   CHECK_EQ(store.config().input.cursor.hideTimeoutMs, 1500);
@@ -3092,7 +3092,7 @@ hide_timeout_ms = 1500
 }
 
 CANOPY_TEST(dragEdgeScrollLoads) {
-  const canopy::Config defaults;
+  const mahogany::Config defaults;
   CHECK(defaults.input.dragEdgeScroll.enabled);
   CHECK_EQ(defaults.input.dragEdgeScroll.triggerZone, 30);
   CHECK_EQ(defaults.input.dragEdgeScroll.delayMs, 100);
@@ -3107,9 +3107,9 @@ delay_ms = 250
 max_speed = 900.0
 )");
 
-  ConfigStore& store = canopy::configStore();
+  ConfigStore& store = mahogany::configStore();
   store.setRootPath(file.path(), true);
-  const canopy::ConfigReloadResult result = store.reload();
+  const mahogany::ConfigReloadResult result = store.reload();
 
   CHECK(result.success);
   CHECK(!store.config().input.dragEdgeScroll.enabled);
@@ -3131,9 +3131,9 @@ CANOPY_TEST(invalidCustomAccelerationCurveIsRejected) {
 accel_profile = "custom 0.2 1.0"
 )");
 
-  ConfigStore& store = canopy::configStore();
+  ConfigStore& store = mahogany::configStore();
   store.setRootPath(file.path(), true);
-  const canopy::ConfigReloadResult result = store.reload();
+  const mahogany::ConfigReloadResult result = store.reload();
 
   CHECK(result.success);
   CHECK(!store.config().input.mouse.accelProfile.has_value());
@@ -3147,9 +3147,9 @@ CANOPY_TEST(invalidClickMethodIsRejectedAndStillClaimsTheKey) {
 click_method = "button-areas"
 )");
 
-  ConfigStore& store = canopy::configStore();
+  ConfigStore& store = mahogany::configStore();
   store.setRootPath(file.path(), true);
-  const canopy::ConfigReloadResult result = store.reload();
+  const mahogany::ConfigReloadResult result = store.reload();
 
   CHECK(result.success);
   CHECK(!store.config().input.touchpad.clickMethod.has_value());
@@ -3163,9 +3163,9 @@ CANOPY_TEST(invalidTapButtonMapIsRejectedAndStillClaimsTheKey) {
 tap_button_map = "lmr"
 )");
 
-  ConfigStore& store = canopy::configStore();
+  ConfigStore& store = mahogany::configStore();
   store.setRootPath(file.path(), true);
-  const canopy::ConfigReloadResult result = store.reload();
+  const mahogany::ConfigReloadResult result = store.reload();
 
   CHECK(result.success);
   CHECK(!store.config().input.touchpad.tapButtonMap.has_value());
@@ -3179,9 +3179,9 @@ CANOPY_TEST(scrollButtonRejectsEvdevCodesAndStillClaimsTheKey) {
 scroll_button = 275
 )");
 
-  ConfigStore& store = canopy::configStore();
+  ConfigStore& store = mahogany::configStore();
   store.setRootPath(file.path(), true);
-  const canopy::ConfigReloadResult result = store.reload();
+  const mahogany::ConfigReloadResult result = store.reload();
 
   CHECK(result.success);
   CHECK(!store.config().input.mouse.scrollButton.has_value());
@@ -3203,9 +3203,9 @@ scroll_button = "MouseBack"
 "Mod+MouseForward" = "overview-close"
 )");
 
-  ConfigStore& store = canopy::configStore();
+  ConfigStore& store = mahogany::configStore();
   store.setRootPath(file.path(), true);
-  const canopy::ConfigReloadResult result = store.reload();
+  const mahogany::ConfigReloadResult result = store.reload();
 
   CHECK(result.success);
   CHECK(store.config().input.mouse.scrollButton == std::optional<uint32_t>(BTN_SIDE));
@@ -3235,9 +3235,9 @@ layout = "us,fr"
 options = "grp:win_space_toggle"
 )");
 
-  ConfigStore& store = canopy::configStore();
+  ConfigStore& store = mahogany::configStore();
   store.setRootPath(file.path(), true);
-  const canopy::ConfigReloadResult result = store.reload();
+  const mahogany::ConfigReloadResult result = store.reload();
   const auto& input = store.config().input;
 
   CHECK(result.success);
@@ -3258,7 +3258,7 @@ CANOPY_TEST(keyboardTrackLayoutLoadsAndRejectsUnknownValues) {
   const TempConfig file;
   file.write("[input.keyboard]\ntrack_layout = \"window\"\n");
 
-  ConfigStore& store = canopy::configStore();
+  ConfigStore& store = mahogany::configStore();
   store.setRootPath(file.path(), true);
   CHECK(store.reload().success);
   CHECK_EQ(store.config().input.keyboard.trackLayout, TrackLayout::Window);
@@ -3281,9 +3281,9 @@ left_handed = true
 calibration_matrix = [1.0, 0.0, 0.0, 0.0, 1.0, 0.0]
 )");
 
-  ConfigStore& store = canopy::configStore();
+  ConfigStore& store = mahogany::configStore();
   store.setRootPath(file.path(), true);
-  const canopy::ConfigReloadResult result = store.reload();
+  const mahogany::ConfigReloadResult result = store.reload();
   const auto& tablet = store.config().input.tablet;
 
   CHECK(result.success);
@@ -3305,9 +3305,9 @@ CANOPY_TEST(tabletCalibrationMatrixRejectsWrongShape) {
 calibration_matrix = [1.0, 2.0, 3.0, 4.0, 5.0]
 )");
 
-  ConfigStore& store = canopy::configStore();
+  ConfigStore& store = mahogany::configStore();
   store.setRootPath(file.path(), true);
-  const canopy::ConfigReloadResult result = store.reload();
+  const mahogany::ConfigReloadResult result = store.reload();
 
   CHECK(result.success);
   CHECK(!store.config().input.tablet.calibrationMatrix.has_value());
@@ -3320,7 +3320,7 @@ calibration_matrix = [1.0, 2.0, 3.0, "x", 5.0, 6.0]
 )");
 
   store.setRootPath(stringElement.path(), true);
-  const canopy::ConfigReloadResult second = store.reload();
+  const mahogany::ConfigReloadResult second = store.reload();
 
   CHECK(second.success);
   CHECK(!store.config().input.tablet.calibrationMatrix.has_value());
@@ -3328,7 +3328,7 @@ calibration_matrix = [1.0, 2.0, 3.0, "x", 5.0, 6.0]
 }
 
 CANOPY_TEST(tabletConfigDefaults) {
-  const canopy::Config defaults;
+  const mahogany::Config defaults;
   const auto& tablet = defaults.input.tablet;
   CHECK(tablet.enabled);
   CHECK_EQ(tablet.mapToOutput, std::string{});
@@ -3350,7 +3350,7 @@ CANOPY_TEST(animationEffectsResolveIncludedPresetsAcrossAllEventsAndTrackContent
   tree.write("theme/animation.toml", theme);
   tree.write("theme/effect.glsl", "first shader");
   tree.write("effect.glsl", "wrong source directory");
-  ConfigStore& store = canopy::configStore();
+  ConfigStore& store = mahogany::configStore();
   store.setRootPath(tree.path("config.toml"), true);
   CHECK(store.reload().success);
   const auto& animation = store.config().animation;
@@ -3360,7 +3360,7 @@ CANOPY_TEST(animationEffectsResolveIncludedPresetsAcrossAllEventsAndTrackContent
   for (const auto* effect : effects) {
     CHECK_EQ(*effect, std::string("reveal"));
   }
-  const canopy::EffectPreset* reveal = canopy::findEffectPreset(store.config().effects, "reveal");
+  const mahogany::EffectPreset* reveal = mahogany::findEffectPreset(store.config().effects, "reveal");
   CHECK(reveal != nullptr);
   if (reveal != nullptr) {
     CHECK_EQ(reveal->shader.code, std::string("first shader"));
@@ -3374,7 +3374,7 @@ CANOPY_TEST(animationEffectsResolveIncludedPresetsAcrossAllEventsAndTrackContent
   CHECK(edited.success);
   CHECK(edited.effects.effects);
   CHECK(!edited.effects.animation);
-  reveal = canopy::findEffectPreset(store.config().effects, "reveal");
+  reveal = mahogany::findEffectPreset(store.config().effects, "reveal");
   CHECK(reveal != nullptr && reveal->shader.code == "edited shader");
 
   tree.write("theme/replacement.glsl", "replacement shader");
@@ -3387,13 +3387,13 @@ CANOPY_TEST(animationEffectsResolveIncludedPresetsAcrossAllEventsAndTrackContent
   CHECK(std::ranges::find(store.watchPaths(), tree.path("theme/effect.glsl")) == store.watchPaths().end());
   CHECK(store.config().animation.layers.effect.empty());
   CHECK_EQ(store.config().animation.windowsIn.effect, std::string("reveal"));
-  reveal = canopy::findEffectPreset(store.config().effects, "reveal");
+  reveal = mahogany::findEffectPreset(store.config().effects, "reveal");
   CHECK(reveal != nullptr && reveal->shader.code == "replacement shader");
 }
 
 CANOPY_TEST(removedAnimationShaderKeyIsUnknown) {
   const TempConfig file;
-  ConfigStore& store = canopy::configStore();
+  ConfigStore& store = mahogany::configStore();
   store.setRootPath(file.path(), true);
   file.write("[animation.windows_in]\nshader = \"reveal.glsl\"\n");
   CHECK(store.reload().success);
@@ -3437,28 +3437,28 @@ dim = 0.4
 blur = true
 )");
 
-  ConfigStore& store = canopy::configStore();
+  ConfigStore& store = mahogany::configStore();
   store.setRootPath(file.path(), true);
-  const canopy::ConfigReloadResult result = store.reload();
+  const mahogany::ConfigReloadResult result = store.reload();
   const auto& animation = store.config().animation;
 
   CHECK(result.success);
   CHECK(!animation.enabled);
   CHECK_EQ(animation.durationMs, 320);
-  CHECK(animation.curve.easing == canopy::Easing::Linear);
+  CHECK(animation.curve.easing == mahogany::Easing::Linear);
   CHECK(!animation.windowsIn.enabled);
   CHECK_EQ(animation.windowsIn.durationMs, 450);
-  CHECK(animation.windowsIn.curve.easing == canopy::Easing::CustomBezier);
+  CHECK(animation.windowsIn.curve.easing == mahogany::Easing::CustomBezier);
   CHECK_EQ(animation.windowsIn.style, std::string{"zoom"});
   CHECK_EQ(animation.windowsIn.scale, 0.7);
-  CHECK(animation.windowsOut.curve.easing == canopy::Easing::Spring);
+  CHECK(animation.windowsOut.curve.easing == mahogany::Easing::Spring);
   CHECK_EQ(animation.windowsOut.style, std::string{"popin"});
   CHECK_EQ(animation.windowsOut.scale, 0.6);
   CHECK(!animation.overview.enabled);
   CHECK_EQ(animation.overview.durationMs, 700);
-  CHECK(animation.overview.curve.easing == canopy::Easing::CustomBezier);
+  CHECK(animation.overview.curve.easing == mahogany::Easing::CustomBezier);
   // The shared curve reaches every duration-based event, but the filmstrip settle keeps its spring until asked.
-  CHECK(animation.overview.workspaceCurve.easing == canopy::Easing::Spring);
+  CHECK(animation.overview.workspaceCurve.easing == mahogany::Easing::Spring);
   CHECK_EQ(animation.overview.workspaceCurve.spring.stiffness, 1000.0);
   CHECK_EQ(animation.windowsMove.durationMs, 320);
   CHECK_EQ(animation.scratchpad.dim, 0.4);
@@ -3497,9 +3497,9 @@ WLR_DRM_DEVICES = "/dev/dri/card0"
 WLR_RENDER_DRM_DEVICE = "/dev/dri/renderD128"
 )");
 
-  ConfigStore& store = canopy::configStore();
+  ConfigStore& store = mahogany::configStore();
   store.setRootPath(file.path(), true);
-  const canopy::ConfigReloadResult result = store.reload();
+  const mahogany::ConfigReloadResult result = store.reload();
 
   CHECK(result.success);
   CHECK_EQ(store.config().environment.variables.size(), size_t{4});
@@ -3544,9 +3544,9 @@ ignored_devices = [
 ignored_pci_addresses = ["0000:01:00.0", "0000:01:00.0"]
 )");
 
-  ConfigStore& store = canopy::configStore();
+  ConfigStore& store = mahogany::configStore();
   store.setRootPath(file.path(), true);
-  const canopy::ConfigReloadResult result = store.reload();
+  const mahogany::ConfigReloadResult result = store.reload();
 
   CHECK(result.success);
   CHECK(store.config().drm.configured());
@@ -3567,7 +3567,7 @@ CANOPY_TEST(emptyDrmTableKeepsTheCompatibilityPath) {
   const TempConfig file;
   file.write("[drm]\n");
 
-  ConfigStore& store = canopy::configStore();
+  ConfigStore& store = mahogany::configStore();
   store.setRootPath(file.path(), true);
 
   CHECK(store.reload().success);
@@ -3581,7 +3581,7 @@ CANOPY_TEST(drmPathsPreserveSymlinkSensitiveComponents) {
 ignored_devices = ["/dev/dri/excluded/../card0"]
 )");
 
-  ConfigStore& store = canopy::configStore();
+  ConfigStore& store = mahogany::configStore();
   store.setRootPath(file.path(), true);
 
   CHECK(store.reload().success);
@@ -3595,10 +3595,10 @@ CANOPY_TEST(drmConfigurationRejectsUnsafeSelectors) {
 ignored_pci_addresses = ["0000:01:00.0"]
 )");
 
-  ConfigStore& store = canopy::configStore();
+  ConfigStore& store = mahogany::configStore();
   store.setRootPath(file.path(), true);
   CHECK(store.reload().success);
-  const canopy::Config previous = store.config();
+  const mahogany::Config previous = store.config();
 
   file.write(R"(
 [drm]
@@ -3608,7 +3608,7 @@ render_device = "/dev/dri/renderD128"
 surprise = true
 )");
 
-  const canopy::ConfigReloadResult result = store.reload();
+  const mahogany::ConfigReloadResult result = store.reload();
 
   CHECK(!result.success);
   CHECK(store.config() == previous);
@@ -3638,7 +3638,7 @@ CANOPY_TEST(initialConfigErrorsStartWithDefaults) {
     const TempConfig file;
     file.write(entry.config);
 
-    ConfigStore& store = canopy::configStore();
+    ConfigStore& store = mahogany::configStore();
     const uint64_t generation = store.generation();
 
     store.load(file.path().c_str());
@@ -3653,7 +3653,7 @@ CANOPY_TEST(initialIncludedSyntaxErrorsStartWithDefaults) {
   file.write("[include]\nfiles = [\"" + file.includeName() + "\"]\n");
   file.writeInclude("[drm]\nignored_pci_addresses = [\"0000:01:00.0\"\n");
 
-  ConfigStore& store = canopy::configStore();
+  ConfigStore& store = mahogany::configStore();
   const uint64_t generation = store.generation();
 
   store.load(file.path().c_str());
@@ -3668,9 +3668,9 @@ CANOPY_TEST(invalidIncludeDirectivesKeepPreviousConfigOnReload) {
   tree.write("hardware.toml", "[drm]\nignored_pci_addresses = [\"0000:01:00.0\"]\n");
   tree.write("config.toml", "[include]\nfiles = [\"hardware.toml\"]\n");
 
-  ConfigStore& store = canopy::configStore();
+  ConfigStore& store = mahogany::configStore();
   store.load(root.c_str());
-  const canopy::Config previous = store.config();
+  const mahogany::Config previous = store.config();
   const uint64_t generation = store.generation();
 
   constexpr std::array invalidIncludes{
@@ -3695,7 +3695,7 @@ CANOPY_TEST(initialUnreadableConfigStartsWithDefaults) {
   std::filesystem::permissions(file.path(), std::filesystem::perms::none);
   CHECK(access(file.path().c_str(), R_OK) != 0);
 
-  ConfigStore& store = canopy::configStore();
+  ConfigStore& store = mahogany::configStore();
   const uint64_t generation = store.generation();
 
   store.load(file.path().c_str());
@@ -3711,7 +3711,7 @@ CANOPY_TEST(initialInaccessibleConfigStartsWithDefaults) {
   const std::filesystem::path configPath = restricted / "config.toml";
   std::filesystem::permissions(restricted, std::filesystem::perms::none);
 
-  ConfigStore& store = canopy::configStore();
+  ConfigStore& store = mahogany::configStore();
   const uint64_t generation = store.generation();
   store.load(configPath.c_str());
   std::filesystem::permissions(restricted, std::filesystem::perms::owner_all);
@@ -3731,7 +3731,7 @@ CANOPY_TEST(defaultConfigLookupDoesNotSkipInaccessibleUserPolicy) {
   const ScopedEnvironment configDirs("XDG_CONFIG_DIRS", systemDir.string());
   std::filesystem::permissions(userConfig.parent_path(), std::filesystem::perms::none);
 
-  ConfigStore& store = canopy::configStore();
+  ConfigStore& store = mahogany::configStore();
   const uint64_t generation = store.generation();
   store.load(nullptr);
   std::filesystem::permissions(userConfig.parent_path(), std::filesystem::perms::owner_all);
@@ -3745,7 +3745,7 @@ CANOPY_TEST(missingPolicyIncludeRequiresRootDrmIntentMarker) {
   const TempConfig file;
   file.write("[include]\nfiles = [\"" + file.includeName() + "\"]\n\n[drm]\n");
 
-  ConfigStore& store = canopy::configStore();
+  ConfigStore& store = mahogany::configStore();
   const uint64_t generation = store.generation();
 
   store.load(file.path().c_str());
@@ -3759,7 +3759,7 @@ CANOPY_TEST(missingOptionalPolicyIncludeRequiresRootDrmIntentMarker) {
   const TempConfig file;
   file.write("[include.optional]\nfiles = [\"" + file.includeName() + "\"]\n\n[drm]\n");
 
-  ConfigStore& store = canopy::configStore();
+  ConfigStore& store = mahogany::configStore();
   const uint64_t generation = store.generation();
 
   store.load(file.path().c_str());
@@ -3776,7 +3776,7 @@ CANOPY_TEST(inaccessibleIncludeCannotBeTreatedAsMissing) {
   const std::filesystem::path restricted = tree.path("restricted");
   std::filesystem::permissions(restricted, std::filesystem::perms::none);
 
-  ConfigStore& store = canopy::configStore();
+  ConfigStore& store = mahogany::configStore();
   const uint64_t generation = store.generation();
   store.load(tree.path("config.toml").c_str());
   std::filesystem::permissions(restricted, std::filesystem::perms::owner_all);
@@ -3790,7 +3790,7 @@ CANOPY_TEST(initialMissingExplicitConfigStartsWithDefaults) {
   const TempConfig file;
   std::filesystem::remove(file.path());
 
-  ConfigStore& store = canopy::configStore();
+  ConfigStore& store = mahogany::configStore();
   const uint64_t generation = store.generation();
 
   store.load(file.path().c_str());
@@ -3807,9 +3807,9 @@ lid_close = "systemctl suspend"
 lid_open = "notify-send awake"
 )");
 
-  ConfigStore& store = canopy::configStore();
+  ConfigStore& store = mahogany::configStore();
   store.setRootPath(file.path(), true);
-  const canopy::ConfigReloadResult result = store.reload();
+  const mahogany::ConfigReloadResult result = store.reload();
 
   CHECK(result.success);
   CHECK_EQ(store.config().events.lidClose, std::string{"systemctl suspend"});
@@ -3818,12 +3818,12 @@ lid_open = "notify-send awake"
 }
 
 CANOPY_TEST(packagedAnimationDefaultsMatchCompiledDefaults) {
-  ConfigStore& store = canopy::configStore();
+  ConfigStore& store = mahogany::configStore();
   store.setRootPath(CANOPY_EXAMPLE_CONFIG, true);
-  const canopy::ConfigReloadResult result = store.reload();
+  const mahogany::ConfigReloadResult result = store.reload();
 
   CHECK(result.success);
-  CHECK(store.config().animation == canopy::Config{}.animation);
+  CHECK(store.config().animation == mahogany::Config{}.animation);
 }
 
 CANOPY_TEST(effectPresetsClaimOnlyTheirKindsKeys) {
@@ -3839,17 +3839,17 @@ CANOPY_TEST(effectPresetsClaimOnlyTheirKindsKeys) {
       "[effects.preset.pulse.light]\nspread = 40\nintensity = 2\nthreshold = 0.25\n"
       "[effects.preset.glow]\nkind = \"cursor\"\nshader = \"glow.glsl\"\nradius = 96\npadding = 3\n"
   );
-  ConfigStore& store = canopy::configStore();
+  ConfigStore& store = mahogany::configStore();
   store.setRootPath(tree.path("config.toml"), true);
   CHECK(store.reload().success);
   const auto& effects = store.config().effects;
   CHECK_EQ(effects.maxFps, 60);
   CHECK(effects.inCapture);
   CHECK_EQ(effects.presets.size(), size_t{2});
-  const canopy::EffectPreset* pulse = canopy::findEffectPreset(effects, "pulse");
+  const mahogany::EffectPreset* pulse = mahogany::findEffectPreset(effects, "pulse");
   CHECK(pulse != nullptr);
   if (pulse != nullptr) {
-    CHECK(pulse->kind == canopy::EffectKind::Border);
+    CHECK(pulse->kind == mahogany::EffectKind::Border);
     CHECK_EQ(pulse->padding, 12);
     CHECK(pulse->speed == 2.5F);
     CHECK(!pulse->animated);
@@ -3863,7 +3863,7 @@ CANOPY_TEST(effectPresetsClaimOnlyTheirKindsKeys) {
     CHECK(pulse->shader.file == tree.path("pulse.glsl"));
     CHECK(!pulse->inert());
   }
-  const canopy::EffectPreset* glow = canopy::findEffectPreset(effects, "glow");
+  const mahogany::EffectPreset* glow = mahogany::findEffectPreset(effects, "glow");
   CHECK(glow != nullptr);
   if (glow != nullptr) {
     CHECK_EQ(glow->radius, 96);
@@ -3875,21 +3875,21 @@ CANOPY_TEST(effectPresetsClaimOnlyTheirKindsKeys) {
 
 CANOPY_TEST(effectPresetsNeedAKindAndKeepTheirNameWithoutAShader) {
   const TempConfig file;
-  ConfigStore& store = canopy::configStore();
+  ConfigStore& store = mahogany::configStore();
   store.setRootPath(file.path(), true);
   file.write(
       "[effects.preset.nokind]\nshader = \"x.glsl\"\n[effects.preset.missing]\nkind = \"screen\"\nshader = "
       "\"absent.glsl\"\n[effects.preset.off]\nkind = \"screen\"\n"
   );
   CHECK(store.reload().success);
-  CHECK(canopy::findEffectPreset(store.config().effects, "nokind") == nullptr);
+  CHECK(mahogany::findEffectPreset(store.config().effects, "nokind") == nullptr);
   CHECK(
       containsDiagnostic(store, "ignoring effects.preset.nokind (kind must be animation|border|window|screen|cursor)")
   );
-  const canopy::EffectPreset* missing = canopy::findEffectPreset(store.config().effects, "missing");
+  const mahogany::EffectPreset* missing = mahogany::findEffectPreset(store.config().effects, "missing");
   CHECK(missing != nullptr && missing->inert());
   CHECK(containsDiagnostic(store, "cannot read shader file"));
-  CHECK(canopy::findEffectPreset(store.config().effects, "off") == nullptr);
+  CHECK(mahogany::findEffectPreset(store.config().effects, "off") == nullptr);
   CHECK(containsDiagnostic(store, "ignoring effects.preset.off ('off' is reserved)"));
 }
 
@@ -3914,7 +3914,7 @@ CANOPY_TEST(effectSelectorsLoadAtEveryLevel) {
       "[animation.windows_drag]\nphysics = true\nstiffness = 48.0\ndamping = 4.5\ncoupling = 120.0\n"
       "pointer_response = 1.5\nmax_displacement_px = 120.0\nsettle_after_pause_s = 0.4\n"
   );
-  ConfigStore& store = canopy::configStore();
+  ConfigStore& store = mahogany::configStore();
   store.setRootPath(tree.path("config.toml"), true);
   CHECK(store.reload().success);
   const auto& config = store.config();
@@ -3936,7 +3936,7 @@ CANOPY_TEST(effectSelectorsLoadAtEveryLevel) {
   CHECK_EQ(config.animation.windowsDrag.maxDisplacementPx, 120.0);
   CHECK_EQ(config.animation.windowsDrag.settleAfterPauseS, 0.4);
   CHECK(!containsDiagnostic(store, "unknown key"));
-  const canopy::EffectPreset* ring = canopy::findEffectPreset(config.effects, "ring");
+  const mahogany::EffectPreset* ring = mahogany::findEffectPreset(config.effects, "ring");
   CHECK(ring != nullptr && ring->overlay == "lines");
 }
 
@@ -3944,7 +3944,7 @@ CANOPY_TEST(windowsDragTuningDefaultsAndBounds) {
   {
     const TempConfigTree tree;
     tree.write("config.toml", "[animation.windows_drag]\nphysics = true\n");
-    ConfigStore& store = canopy::configStore();
+    ConfigStore& store = mahogany::configStore();
     store.setRootPath(tree.path("config.toml"), true);
     CHECK(store.reload().success);
     // The simulation's shipped values.
@@ -3963,7 +3963,7 @@ CANOPY_TEST(windowsDragTuningDefaultsAndBounds) {
         "[animation.windows_drag]\nstiffness = 20000.0\ndamping = -1.0\ncoupling = 20000.0\n"
         "pointer_response = 50.0\nmax_displacement_px = 0.0\nsettle_after_pause_s = 60.0\n"
     );
-    ConfigStore& store = canopy::configStore();
+    ConfigStore& store = mahogany::configStore();
     store.setRootPath(tree.path("config.toml"), true);
     CHECK(store.reload().success);
     const auto& drag = store.config().animation.windowsDrag;
@@ -3982,7 +3982,7 @@ CANOPY_TEST(windowsDragTuningDefaultsAndBounds) {
     tree.write(
         "config.toml", "[animation.windows_drag]\nstiffness = 0.0\ndamping = 0.0\nsettle_after_pause_s = 0.01\n"
     );
-    ConfigStore& store = canopy::configStore();
+    ConfigStore& store = mahogany::configStore();
     store.setRootPath(tree.path("config.toml"), true);
     CHECK(store.reload().success);
     const auto& drag = store.config().animation.windowsDrag;
@@ -4009,7 +4009,7 @@ CANOPY_TEST(screenCastSelectorsLoad) {
       "[output.\"HEADLESS-2\"]\nscreen_cast_effect = \"off\"\n"
       "[output.\"HEADLESS-3\"]\nscreen_cast_effect = \"ring\"\n"
   );
-  ConfigStore& store = canopy::configStore();
+  ConfigStore& store = mahogany::configStore();
   store.setRootPath(tree.path("config.toml"), true);
   CHECK(store.reload().success);
   const auto& config = store.config();
@@ -4043,7 +4043,7 @@ CANOPY_TEST(effectReferencesAreValidatedAfterEverySectionIsRead) {
       "[effects.preset.ring]\nkind = \"border\"\nshader = \"a.glsl\"\noverlay = \"nope\"\n"
       "[effects.preset.ring2]\nkind = \"border\"\nshader = \"a.glsl\"\noverlay = \"ring\"\n"
   );
-  ConfigStore& store = canopy::configStore();
+  ConfigStore& store = mahogany::configStore();
   store.setRootPath(tree.path("config.toml"), true);
   CHECK(store.reload().success);
   const auto& config = store.config();
@@ -4067,11 +4067,11 @@ CANOPY_TEST(effectReferencesAreValidatedAfterEverySectionIsRead) {
   CHECK(containsDiagnostic(
       store, "ignoring animation.windows_out.effect (effect 'ring' is a border preset, not an animation preset)"
   ));
-  const canopy::EffectPreset* ring = canopy::findEffectPreset(config.effects, "ring");
+  const mahogany::EffectPreset* ring = mahogany::findEffectPreset(config.effects, "ring");
   CHECK(ring != nullptr && ring->overlay.empty());
   CHECK(containsDiagnostic(store, "ignoring effects.preset.ring.overlay (unknown effect 'nope')"));
   // An overlay must name a window preset: a border preset is the wrong kind.
-  const canopy::EffectPreset* ring2 = canopy::findEffectPreset(config.effects, "ring2");
+  const mahogany::EffectPreset* ring2 = mahogany::findEffectPreset(config.effects, "ring2");
   CHECK(ring2 != nullptr && ring2->overlay.empty());
   CHECK(containsDiagnostic(
       store, "ignoring effects.preset.ring2.overlay (effect 'ring' is a border preset, not a window preset)"
@@ -4079,12 +4079,12 @@ CANOPY_TEST(effectReferencesAreValidatedAfterEverySectionIsRead) {
 }
 
 CANOPY_TEST(effectPaletteFollowsTheColorsSectionOrder) {
-  canopy::Config config;
+  mahogany::Config config;
   config.colors.accentPrimary = {1, 0, 0, 1};
   config.colors.accentSecondary = {0, 1, 0, 1};
   config.colors.warning = {0, 0, 1, 1};
   config.colors.error = {1, 1, 0, 1};
-  const auto palette = canopy::effectPalette(config.colors);
+  const auto palette = mahogany::effectPalette(config.colors);
   CHECK(palette[0] == config.colors.accentPrimary);
   CHECK(palette[1] == config.colors.accentSecondary);
   CHECK(palette[2] == config.colors.warning);
@@ -4099,7 +4099,7 @@ CANOPY_TEST(effectReloadsFlagOnlyEffectDependentState) {
       "[effects.preset.ring]\nkind = \"border\"\nshader = \"a.glsl\"\n[effects]\nborder = \"ring\"\n"
       "[output.\"HEADLESS-1\"]\nenabled = true\n"
   );
-  ConfigStore& store = canopy::configStore();
+  ConfigStore& store = mahogany::configStore();
   store.setRootPath(tree.path("config.toml"), true);
   CHECK(store.reload().success);
   const auto same = store.reload();
@@ -4126,7 +4126,7 @@ CANOPY_TEST(effectReloadsFlagOnlyEffectDependentState) {
 
 CANOPY_TEST(effectSelectorNonStringValueWarnsAndLeavesSettingUnset) {
   const TempConfig file;
-  ConfigStore& store = canopy::configStore();
+  ConfigStore& store = mahogany::configStore();
   store.setRootPath(file.path(), true);
   file.write("[[window_rule]]\nmatch.app_id = \"^foot$\"\nborder_effect = 3\n");
   CHECK(store.reload().success);
@@ -4140,7 +4140,7 @@ CANOPY_TEST(effectSelectorNonStringValueWarnsAndLeavesSettingUnset) {
 
 CANOPY_TEST(effectSelectorOnADroppedWindowRuleRecordsNoReference) {
   const TempConfig file;
-  ConfigStore& store = canopy::configStore();
+  ConfigStore& store = mahogany::configStore();
   store.setRootPath(file.path(), true);
   file.write("[[window_rule]]\nmatch.app_id = \"[\"\nborder_effect = \"off\"\n");
   CHECK(store.reload().success);
@@ -4159,13 +4159,13 @@ CANOPY_TEST(duplicateOutputSectionDoesNotCorruptASurvivingScreenEffectReference)
       "[output.\"HDMI-A-1\"]\nscreen_effect = \"vig\"\n"
       "[output.\"dp-1\"]\nenabled = true\n"
   );
-  ConfigStore& store = canopy::configStore();
+  ConfigStore& store = mahogany::configStore();
   store.setRootPath(tree.path("config.toml"), true);
   CHECK(store.reload().success);
   const auto& config = store.config();
   CHECK_EQ(config.outputs.size(), size_t{2});
   const auto hdmi =
-      std::ranges::find_if(config.outputs, [](const canopy::OutputRule& rule) { return rule.name == "HDMI-A-1"; });
+      std::ranges::find_if(config.outputs, [](const mahogany::OutputRule& rule) { return rule.name == "HDMI-A-1"; });
   CHECK(hdmi != config.outputs.end());
   if (hdmi != config.outputs.end()) {
     CHECK(hdmi->screenEffect == "vig");
@@ -4181,11 +4181,11 @@ CANOPY_TEST(duplicateEffectPresetsAcrossIncludesAreRejected) {
   tree.write("a.glsl", "vec4 border(vec2 uv) { return canopy_sample(uv); }");
   tree.write("theme.toml", "[effects.preset.ring]\nkind = \"border\"\nshader = \"a.glsl\"\n");
   tree.write("config.toml", "[include]\nfiles = [\"theme.toml\"]\n[effects]\nborder = \"ring\"\n");
-  ConfigStore& store = canopy::configStore();
+  ConfigStore& store = mahogany::configStore();
   store.setRootPath(tree.path("config.toml"), true);
   CHECK(store.reload().success);
   const uint64_t generation = store.generation();
-  const canopy::Config previous = store.config();
+  const mahogany::Config previous = store.config();
 
   tree.write(
       "config.toml",
@@ -4207,7 +4207,7 @@ CANOPY_TEST(initialDuplicateEffectPresetsKeepCompatibilityDefaults) {
   tree.write("theme.toml", preset);
   tree.write("config.toml", "[include]\nfiles = [\"theme.toml\"]\n" + preset);
 
-  ConfigStore& store = canopy::configStore();
+  ConfigStore& store = mahogany::configStore();
   const uint64_t generation = store.generation();
 
   store.load(tree.path("config.toml").c_str());
@@ -4227,7 +4227,7 @@ CANOPY_TEST(duplicateEffectPresetsInSiblingIncludesNameTheFirstSibling) {
   tree.write("second.toml", preset);
   tree.write("config.toml", "[include]\nfiles = [\"first.toml\", \"second.toml\"]\n");
 
-  ConfigStore& store = canopy::configStore();
+  ConfigStore& store = mahogany::configStore();
   store.setRootPath(tree.path("config.toml"), true);
   CHECK(!store.reload().success);
   const auto isDuplicate = [](const ConfigDiagnostic& diagnostic) {
@@ -4253,7 +4253,7 @@ CANOPY_TEST(bundledEffectPresetsDefineWithoutSelecting) {
   }
   includes += "]\n";
   tree.write("config.toml", includes);
-  ConfigStore& store = canopy::configStore();
+  ConfigStore& store = mahogany::configStore();
   store.setRootPath(tree.path("config.toml"), true);
   CHECK(store.reload().success);
   CHECK(!containsDiagnostic(store, "unknown key"));
@@ -4261,10 +4261,10 @@ CANOPY_TEST(bundledEffectPresetsDefineWithoutSelecting) {
   const auto& effects = store.config().effects;
   CHECK_EQ(effects.presets.size(), size_t{6});
   CHECK(effects.border.empty() && effects.window.empty() && effects.screen.empty() && effects.cursor.empty());
-  const canopy::EffectPreset* pulse = canopy::findEffectPreset(effects, "pulse");
-  CHECK(pulse != nullptr && pulse->kind == canopy::EffectKind::Border && pulse->light.has_value());
-  const canopy::EffectPreset* glow = canopy::findEffectPreset(effects, "glow");
-  CHECK(glow != nullptr && glow->kind == canopy::EffectKind::Cursor && glow->radius > 0);
+  const mahogany::EffectPreset* pulse = mahogany::findEffectPreset(effects, "pulse");
+  CHECK(pulse != nullptr && pulse->kind == mahogany::EffectKind::Border && pulse->light.has_value());
+  const mahogany::EffectPreset* glow = mahogany::findEffectPreset(effects, "glow");
+  CHECK(glow != nullptr && glow->kind == mahogany::EffectKind::Cursor && glow->radius > 0);
 }
 
 CANOPY_TEST(effectPoolsPreserveDeclarationsAcrossNestedIncludesAndValidateMembersSafely) {
@@ -4316,7 +4316,7 @@ window_effect = 'mpool'
 [animation.windows_in]
 effect = 'zpool'
 )");
-  auto& store = canopy::configStore();
+  auto& store = mahogany::configStore();
   store.setRootPath(tree.path("config.toml"), true);
   CHECK(store.reload().success);
   const auto& effects = store.config().effects;
@@ -4332,16 +4332,16 @@ effect = 'zpool'
     pools.push_back(pool.name);
   }
   CHECK(pools == std::vector<std::string>({"zpool", "apool", "mpool", "rpool"}));
-  const auto* zpool = canopy::findEffectPool(effects, "zpool");
+  const auto* zpool = mahogany::findEffectPool(effects, "zpool");
   CHECK(zpool != nullptr);
   if (zpool) {
     CHECK(zpool->members == std::vector<std::string>({"zulu", "alpha", "root"}));
-    CHECK(zpool->selection == canopy::EffectSelectionPolicy::RoundRobin);
+    CHECK(zpool->selection == mahogany::EffectSelectionPolicy::RoundRobin);
   }
   CHECK_EQ(effects.window, std::string("zpool"));
   CHECK(store.config().windowRules[0].windowEffect == "mpool");
   CHECK(store.config().animation.windowsIn.effect.empty());
-  CHECK(canopy::findEffectPreset(effects, "border")->overlay.empty());
+  CHECK(mahogany::findEffectPreset(effects, "border")->overlay.empty());
   CHECK(containsDiagnostic(store, "duplicate member"));
   CHECK(containsDiagnostic(store, "a preset is required"));
   CHECK(containsDiagnostic(store, "action delimiter; rename"));
@@ -4403,7 +4403,7 @@ choose = ['missing', 'off', '', false]
 [effects]
 border = 'invalid_members'
 )");
-  auto& store = canopy::configStore();
+  auto& store = mahogany::configStore();
   store.setRootPath(file.path(), true);
   CHECK(store.reload().success);
   const auto& effects = store.config().effects;
@@ -4412,7 +4412,7 @@ border = 'invalid_members'
   CHECK_EQ(effects.border, std::string("invalid_members"));
   for (const auto& pool : effects.pools) {
     CHECK(pool.members.empty());
-    CHECK(pool.selection == canopy::EffectSelectionPolicy::UnusedFirst);
+    CHECK(pool.selection == mahogany::EffectSelectionPolicy::UnusedFirst);
   }
   CHECK(containsDiagnostic(store, "choose is required and must be an array"));
   CHECK(containsDiagnostic(store, "selection must be unused_first|round_robin|random"));
@@ -4438,7 +4438,7 @@ choose = ['cursor']
 [output.HEADLESS-1]
 screen_effect = 'screens'
 )");
-  auto& store = canopy::configStore();
+  auto& store = mahogany::configStore();
   store.setRootPath(file.path(), true);
   CHECK(store.reload().success);
   CHECK_EQ(store.config().effects.screen, std::string("screens"));
@@ -4450,7 +4450,7 @@ CANOPY_TEST(duplicateEffectPoolsRejectReloadAndNameBothLocations) {
   const TempConfigTree tree;
   tree.write("theme.toml", "[effects.pool.shared]\nkind = 'border'\nchoose = []\n");
   tree.write("config.toml", "[include]\nfiles = ['theme.toml']\n");
-  auto& store = canopy::configStore();
+  auto& store = mahogany::configStore();
   store.setRootPath(tree.path("config.toml"), true);
   CHECK(store.reload().success);
   const auto previous = store.config();
@@ -4474,11 +4474,11 @@ CANOPY_TEST(effectPoolCollisionAcrossIncludesKeepsPresetRegardlessOfDeclarationO
     tree.write(
         "config.toml", "[include]\nfiles = ['theme.toml']\n[effects]\nwindow = 'shared'\n" + (poolFirst ? preset : pool)
     );
-    auto& store = canopy::configStore();
+    auto& store = mahogany::configStore();
     store.setRootPath(tree.path("config.toml"), true);
     CHECK(store.reload().success);
-    CHECK(canopy::findEffectPreset(store.config().effects, "shared") != nullptr);
-    CHECK(canopy::findEffectPool(store.config().effects, "shared") == nullptr);
+    CHECK(mahogany::findEffectPreset(store.config().effects, "shared") != nullptr);
+    CHECK(mahogany::findEffectPool(store.config().effects, "shared") == nullptr);
     CHECK_EQ(store.config().effects.window, std::string("shared"));
     CHECK(containsDiagnostic(store, "preset with this name declared at"));
   }
@@ -4513,7 +4513,7 @@ action = 'effect-screen-set window'
 enabled = true
 action = 'effect-window-cycle windows'
 )");
-  auto& store = canopy::configStore();
+  auto& store = mahogany::configStore();
   store.setRootPath(file.path(), true);
   CHECK(store.reload().success);
   CHECK(containsDiagnostic(store, "ignoring keybind 'Mod+F4'"));
@@ -4525,10 +4525,10 @@ action = 'effect-window-cycle windows'
   CHECK(store.config().hotCorners.corners[1].action.has_value());
   size_t valid = 0;
   for (const auto& bind : store.config().keybinds) {
-    if (bind.action == canopy::KeybindAction::EffectWindowSet
-        || bind.action == canopy::KeybindAction::EffectWindowCycle) {
+    if (bind.action == mahogany::KeybindAction::EffectWindowSet
+        || bind.action == mahogany::KeybindAction::EffectWindowCycle) {
       ++valid;
-      const auto reference = canopy::effectActionReference(bind);
+      const auto reference = mahogany::effectActionReference(bind);
       CHECK(!reference || reference->name == "window" || reference->name == "windows");
     }
   }
@@ -4557,12 +4557,12 @@ kind = 'window'
 enabled = false
 action = 'effect-window-set window'
 )");
-  auto& store = canopy::configStore();
+  auto& store = mahogany::configStore();
   store.setRootPath(file.path(), true);
   CHECK(store.reload().success);
   CHECK(!containsDiagnostic(store, "missing"));
   CHECK(store.config().hotCorners.corners[0].action.has_value());
-  CHECK(canopy::effectActionReference(*store.config().hotCorners.corners[0].action)->name == "window");
+  CHECK(mahogany::effectActionReference(*store.config().hotCorners.corners[0].action)->name == "window");
 }
 
 CANOPY_TEST(replaceAdoptsTheNewFileAndPinsLaterReloadsToIt) {
@@ -4570,12 +4570,12 @@ CANOPY_TEST(replaceAdoptsTheNewFileAndPinsLaterReloadsToIt) {
   tree.write("old.toml", "[layout]\ngap = 17\n");
   tree.write("new.toml", "[layout]\ngap = 23\n");
 
-  ConfigStore& store = canopy::configStore();
+  ConfigStore& store = mahogany::configStore();
   store.load(tree.path("old.toml").c_str());
   const uint64_t generation = store.generation();
 
   std::string errors;
-  const canopy::ConfigReloadResult result = store.replace(tree.path("new.toml"), errors);
+  const mahogany::ConfigReloadResult result = store.replace(tree.path("new.toml"), errors);
 
   CHECK(result.success);
   CHECK(errors.empty());
@@ -4599,7 +4599,7 @@ CANOPY_TEST(replaceMovesTheWatchSetToTheNewFileAndItsIncludes) {
   tree.write("new_inc.toml", "[layout]\ngap = 6\n");
   tree.write("new_config.toml", "[include]\nfiles = [\"new_inc.toml\"]\n");
 
-  ConfigStore& store = canopy::configStore();
+  ConfigStore& store = mahogany::configStore();
   store.load(tree.path("old_config.toml").c_str());
   CHECK(std::ranges::find(store.watchPaths(), tree.path("old_config.toml")) != store.watchPaths().end());
   CHECK(std::ranges::find(store.watchPaths(), tree.path("old_inc.toml")) != store.watchPaths().end());
@@ -4619,11 +4619,11 @@ CANOPY_TEST(replaceAcceptsAFileThatOnlyProducesWarnings) {
   tree.write("live.toml", "[layout]\ngap = 17\n");
   tree.write("warn.toml", "invalid_key = true\n[layout]\ngap = 23\n");
 
-  ConfigStore& store = canopy::configStore();
+  ConfigStore& store = mahogany::configStore();
   store.load(tree.path("live.toml").c_str());
 
   std::string errors;
-  const canopy::ConfigReloadResult result = store.replace(tree.path("warn.toml"), errors);
+  const mahogany::ConfigReloadResult result = store.replace(tree.path("warn.toml"), errors);
 
   CHECK(result.success);
   CHECK(errors.empty());
@@ -4637,12 +4637,12 @@ CANOPY_TEST(replaceRejectsAMissingFileAndLeavesTheLiveStateUntouched) {
   tree.write("live.toml", "[layout]\ngap = 17\n");
   const std::filesystem::path missing = tree.path("missing.toml");
 
-  ConfigStore& store = canopy::configStore();
+  ConfigStore& store = mahogany::configStore();
   store.load(tree.path("live.toml").c_str());
   const uint64_t generation = store.generation();
 
   std::string errors;
-  const canopy::ConfigReloadResult result = store.replace(missing, errors);
+  const mahogany::ConfigReloadResult result = store.replace(missing, errors);
 
   CHECK(!result.success);
   CHECK(errors.contains("config file not found: " + missing.string()));
@@ -4664,12 +4664,12 @@ CANOPY_TEST(replaceRejectsABrokenFileAndLeavesTheLiveStateUntouched) {
   tree.write("live.toml", "[layout]\ngap = 17\n");
   tree.write("broken.toml", "[layout\n");
 
-  ConfigStore& store = canopy::configStore();
+  ConfigStore& store = mahogany::configStore();
   store.load(tree.path("live.toml").c_str());
   const uint64_t generation = store.generation();
 
   std::string errors;
-  const canopy::ConfigReloadResult malformed = store.replace(tree.path("broken.toml"), errors);
+  const mahogany::ConfigReloadResult malformed = store.replace(tree.path("broken.toml"), errors);
 
   CHECK(!malformed.success);
   CHECK(!errors.empty());
@@ -4688,7 +4688,7 @@ CANOPY_TEST(replaceRejectsSemanticErrorsAndPreservesTheLiveState) {
   tree.write("rejected_inc.toml", "[layout]\ngap = 80\n");
   tree.write("invalid.toml", "[include]\nfiles = [\"rejected_inc.toml\"]\n[[workspace]]\nname = \"chat\"\nindex = 3\n");
 
-  ConfigStore& store = canopy::configStore();
+  ConfigStore& store = mahogany::configStore();
   store.load(tree.path("live.toml").c_str());
   CHECK(store.missingIncludes());
   const auto previousConfig = store.config();
@@ -4697,7 +4697,7 @@ CANOPY_TEST(replaceRejectsSemanticErrorsAndPreservesTheLiveState) {
   const uint64_t generation = store.generation();
 
   std::string errors;
-  const canopy::ConfigReloadResult result = store.replace(tree.path("invalid.toml"), errors);
+  const mahogany::ConfigReloadResult result = store.replace(tree.path("invalid.toml"), errors);
 
   CHECK(!result.success);
   CHECK(errors.contains(tree.path("invalid.toml").string()));
@@ -4730,7 +4730,7 @@ CANOPY_TEST(replaceRejectionRestoresPendingMissingIncludes) {
   const TempConfig file;
   file.write("[include]\nfiles = [\"" + file.includeName() + "\"]\n");
 
-  ConfigStore& store = canopy::configStore();
+  ConfigStore& store = mahogany::configStore();
   store.setRootPath(file.path(), true);
   store.load(file.path().c_str());
   const uint64_t generation = store.generation();
@@ -4753,7 +4753,7 @@ CANOPY_TEST(replaceRejectionDoesNotDisturbAnImplicitStore) {
   const ScopedEnvironment configHome("XDG_CONFIG_HOME", userHome.string());
   const ScopedEnvironment configDirs("XDG_CONFIG_DIRS", systemDir.string());
 
-  ConfigStore& store = canopy::configStore();
+  ConfigStore& store = mahogany::configStore();
   store.load(nullptr);
   const uint64_t generation = store.generation();
 
@@ -4796,17 +4796,17 @@ maximize_glyph_hover = "#FF00FFFF"
 minimize_glyph = "#FFFF00FF"
 minimize_glyph_hover = "#00FFFFFF"
 )");
-  auto& store = canopy::configStore();
+  auto& store = mahogany::configStore();
   store.setRootPath(file.path(), true);
   CHECK(store.reload().success);
   CHECK(store.diagnostics().empty());
   const auto& bar = store.config().appearance.titleBar;
-  CHECK_EQ(bar.mode, canopy::TitleBarMode::Forced);
+  CHECK_EQ(bar.mode, mahogany::TitleBarMode::Forced);
   CHECK_EQ(bar.height, 42);
   CHECK_EQ(bar.font, std::string("sans 12"));
-  CHECK_EQ(bar.buttonPosition, canopy::TitleBarButtonSide::Left);
+  CHECK_EQ(bar.buttonPosition, mahogany::TitleBarButtonSide::Left);
   CHECK_EQ(bar.buttonCornerRadius, 4);
-  CHECK_EQ(bar.buttonGlyph, canopy::TitleBarButtonGlyph::Never);
+  CHECK_EQ(bar.buttonGlyph, mahogany::TitleBarButtonGlyph::Never);
   CHECK_EQ(bar.buttonBackground, false);
   const auto& colors = store.config().colors.titleBar;
   CHECK_EQ(colors.background[0], 1.0F);
@@ -4843,14 +4843,14 @@ maximize_glyph_hover = false
 minimize_glyph = []
 minimize_glyph_hover = {}
 )");
-  auto& store = canopy::configStore();
+  auto& store = mahogany::configStore();
   store.setRootPath(file.path(), true);
   CHECK(store.reload().success);
-  CHECK_EQ(store.config().appearance.titleBar.mode, canopy::TitleBarMode::Off);
+  CHECK_EQ(store.config().appearance.titleBar.mode, mahogany::TitleBarMode::Off);
   CHECK_EQ(store.config().appearance.titleBar.height, 128);
-  CHECK_EQ(store.config().appearance.titleBar.buttonPosition, canopy::TitleBarButtonSide::Right);
+  CHECK_EQ(store.config().appearance.titleBar.buttonPosition, mahogany::TitleBarButtonSide::Right);
   CHECK_EQ(store.config().appearance.titleBar.buttonCornerRadius, 100);
-  CHECK_EQ(store.config().appearance.titleBar.buttonGlyph, canopy::TitleBarButtonGlyph::Hover);
+  CHECK_EQ(store.config().appearance.titleBar.buttonGlyph, mahogany::TitleBarButtonGlyph::Hover);
   CHECK_EQ(store.config().appearance.titleBar.buttonBackground, true);
   CHECK(containsDiagnostic(store, "appearance.title_bar.height = 500 out of range, clamped to 128"));
   CHECK(containsDiagnostic(store, "appearance.title_bar.button_position"));
@@ -4869,7 +4869,7 @@ minimize_glyph_hover = {}
 
 CANOPY_TEST(titleBarButtonRadiusHasValidatedBounds) {
   const TempConfig file;
-  auto& store = canopy::configStore();
+  auto& store = mahogany::configStore();
   store.setRootPath(file.path(), true);
   file.write("[appearance.title_bar]\n");
   CHECK(store.reload().success);
@@ -4896,14 +4896,14 @@ CANOPY_TEST(titleBarButtonRadiusHasValidatedBounds) {
 
 CANOPY_TEST(titleBarModesUseStrictVocabulary) {
   const TempConfig file;
-  auto& store = canopy::configStore();
+  auto& store = mahogany::configStore();
   store.setRootPath(file.path(), true);
   file.write("");
   CHECK(store.reload().success);
-  CHECK_EQ(store.config().appearance.titleBar.mode, canopy::TitleBarMode::Off);
+  CHECK_EQ(store.config().appearance.titleBar.mode, mahogany::TitleBarMode::Off);
   for (const auto& [name, mode] :
-       {std::pair{"forced", canopy::TitleBarMode::Forced}, std::pair{"on", canopy::TitleBarMode::On},
-        std::pair{"off", canopy::TitleBarMode::Off}, std::pair{"negotiated", canopy::TitleBarMode::Negotiated}}) {
+       {std::pair{"forced", mahogany::TitleBarMode::Forced}, std::pair{"on", mahogany::TitleBarMode::On},
+        std::pair{"off", mahogany::TitleBarMode::Off}, std::pair{"negotiated", mahogany::TitleBarMode::Negotiated}}) {
     file.write(std::string("[appearance.title_bar]\nmode = \"") + name + "\"\n");
     CHECK(store.reload().success);
     CHECK(store.diagnostics().empty());
@@ -4912,18 +4912,18 @@ CANOPY_TEST(titleBarModesUseStrictVocabulary) {
   for (const auto* const name : {"auto", "force", "on-demand"}) {
     file.write(std::string("[appearance.title_bar]\nmode = \"") + name + "\"\n");
     CHECK(store.reload().success);
-    CHECK_EQ(store.config().appearance.titleBar.mode, canopy::TitleBarMode::Off);
+    CHECK_EQ(store.config().appearance.titleBar.mode, mahogany::TitleBarMode::Off);
     CHECK(containsDiagnostic(store, "appearance.title_bar.mode"));
     CHECK(!containsDiagnostic(store, "unknown key"));
   }
   file.write("[appearance.title_bar]\nmode = true\n");
   CHECK(store.reload().success);
-  CHECK_EQ(store.config().appearance.titleBar.mode, canopy::TitleBarMode::Off);
+  CHECK_EQ(store.config().appearance.titleBar.mode, mahogany::TitleBarMode::Off);
   CHECK(containsDiagnostic(store, "appearance.title_bar.mode"));
   CHECK(!containsDiagnostic(store, "unknown key"));
   file.write("[appearance.title_bar]\nenabled = true\n");
   CHECK(store.reload().success);
-  CHECK_EQ(store.config().appearance.titleBar.mode, canopy::TitleBarMode::Off);
+  CHECK_EQ(store.config().appearance.titleBar.mode, mahogany::TitleBarMode::Off);
   CHECK(containsDiagnostic(store, "unknown key appearance.title_bar.enabled"));
 }
 
@@ -4939,15 +4939,15 @@ title_bar = "on"
 [[window_rule]]
 title_bar = "negotiated"
 )");
-  auto& store = canopy::configStore();
+  auto& store = mahogany::configStore();
   store.setRootPath(file.path(), true);
   CHECK(store.reload().success);
   CHECK(store.diagnostics().empty());
   CHECK_EQ(store.config().windowRules.size(), size_t{4});
-  CHECK_EQ(store.config().windowRules[0].titleBar, canopy::TitleBarMode::Forced);
-  CHECK_EQ(store.config().windowRules[1].titleBar, canopy::TitleBarMode::Off);
-  CHECK_EQ(store.config().windowRules[2].titleBar, canopy::TitleBarMode::On);
-  CHECK_EQ(store.config().windowRules[3].titleBar, canopy::TitleBarMode::Negotiated);
+  CHECK_EQ(store.config().windowRules[0].titleBar, mahogany::TitleBarMode::Forced);
+  CHECK_EQ(store.config().windowRules[1].titleBar, mahogany::TitleBarMode::Off);
+  CHECK_EQ(store.config().windowRules[2].titleBar, mahogany::TitleBarMode::On);
+  CHECK_EQ(store.config().windowRules[3].titleBar, mahogany::TitleBarMode::Negotiated);
   file.write(R"(
 [[window_rule]]
 title_bar = true
@@ -4971,13 +4971,13 @@ title_bar = "force"
 }
 
 CANOPY_TEST(titleBarButtonsKeepOrderAndSkipBadEntries) {
-  using canopy::TitleBarButton;
+  using mahogany::TitleBarButton;
   using Buttons = std::vector<TitleBarButton>;
   const Buttons defaults{TitleBarButton::Minimize, TitleBarButton::Maximize, TitleBarButton::Close};
   const Buttons reordered{TitleBarButton::Close, TitleBarButton::Minimize};
   const Buttons cleaned{TitleBarButton::Maximize, TitleBarButton::Close};
   const TempConfig file;
-  auto& store = canopy::configStore();
+  auto& store = mahogany::configStore();
   store.setRootPath(file.path(), true);
   file.write("");
   CHECK(store.reload().success);
@@ -5003,7 +5003,7 @@ CANOPY_TEST(titleBarButtonsKeepOrderAndSkipBadEntries) {
 }
 
 CANOPY_TEST(titleBarButtonsRuleOverridesOnlyWhenSet) {
-  using canopy::TitleBarButton;
+  using mahogany::TitleBarButton;
   using Buttons = std::vector<TitleBarButton>;
   const Buttons none;
   const Buttons closeOnly{TitleBarButton::Close};
@@ -5019,12 +5019,12 @@ title_bar = "forced"
 match.app_id = "^dialog$"
 title_bar_buttons = ["close"]
 )");
-  auto& store = canopy::configStore();
+  auto& store = mahogany::configStore();
   store.setRootPath(file.path(), true);
   CHECK(store.reload().success);
   CHECK(store.diagnostics().empty());
   const auto resolve = [&](const char* appId) {
-    return canopy::resolveWindowRules(store.config(), appId, "title", std::nullopt, canopy::ContentType::None, {}, 0);
+    return mahogany::resolveWindowRules(store.config(), appId, "title", std::nullopt, mahogany::ContentType::None, {}, 0);
   };
   // A later rule without the key leaves the earlier override in place.
   CHECK(resolve("bare").titleBarButtons == none);
@@ -5041,7 +5041,7 @@ mode = "stacking"
 name = "desk"
 layout.mode = "stacking"
 )");
-  ConfigStore& store = canopy::configStore();
+  ConfigStore& store = mahogany::configStore();
   store.setRootPath(file.path(), true);
   CHECK(store.reload().success);
   CHECK(store.config().layout.mode == LayoutMode::Stacking);
@@ -5052,18 +5052,18 @@ layout.mode = "stacking"
 CANOPY_TEST(stackingDropZonesDefaultOnAndRejectNonBooleans) {
   const TempConfig file;
   file.write("[layout.stacking]\n");
-  ConfigStore& store = canopy::configStore();
+  ConfigStore& store = mahogany::configStore();
   store.setRootPath(file.path(), true);
   CHECK(store.reload().success);
   CHECK(store.config().layout.stacking.dropZones);
-  CHECK(canopy::resolveGlobalLayout(store.config()).stacking.dropZones);
+  CHECK(mahogany::resolveGlobalLayout(store.config()).stacking.dropZones);
   file.write("[layout.stacking]\ndrop_zones = false\n");
   const auto disabled = store.reload();
   CHECK(disabled.success);
   CHECK(disabled.change.layout);
   CHECK(disabled.effects.workspaceLayout);
   CHECK(!store.config().layout.stacking.dropZones);
-  CHECK(!canopy::resolveGlobalLayout(store.config()).stacking.dropZones);
+  CHECK(!mahogany::resolveGlobalLayout(store.config()).stacking.dropZones);
   file.write("[layout.stacking]\ndrop_zones = 1\n");
   CHECK(store.reload().success);
   CHECK(store.config().layout.stacking.dropZones);
@@ -5087,11 +5087,11 @@ layout.stacking.drop_zones = false
 )");
   };
   write(false);
-  ConfigStore& store = canopy::configStore();
+  ConfigStore& store = mahogany::configStore();
   store.setRootPath(file.path(), true);
   CHECK(store.reload().success);
   const auto resolve = [&store](std::string_view name) {
-    return canopy::resolveWorkspaceLayout(
+    return mahogany::resolveWorkspaceLayout(
         store.config(), {.connector = "DP-1", .make = {}, .model = {}, .serial = {}}, name, 0
     );
   };
@@ -5127,11 +5127,11 @@ layout.mode = "floating"
 match.is_floating = true
 default_floating = true
 )");
-  ConfigStore& store = canopy::configStore();
+  ConfigStore& store = mahogany::configStore();
   store.setRootPath(file.path(), true);
   CHECK(store.reload().success);
   CHECK(store.config().layout.mode == LayoutMode::Stacking);
-  CHECK(store.config().layout.newExitsFullscreen == canopy::FullscreenExitScope::Floating);
+  CHECK(store.config().layout.newExitsFullscreen == mahogany::FullscreenExitScope::Floating);
   CHECK(!store.config().layout.stacking.dropZones);
   CHECK(store.config().input.windowDragToggle == WindowDragToggle::Floating);
   CHECK_EQ(store.config().workspaceRules.size(), size_t{1});
@@ -5146,7 +5146,7 @@ default_floating = true
 
 CANOPY_TEST(wideScrollingExtentsLoadUpToTheWideCeiling) {
   const TempConfig file;
-  ConfigStore& store = canopy::configStore();
+  ConfigStore& store = mahogany::configStore();
   store.setRootPath(file.path(), true);
 
   // Presets above 1.0 load unclamped: scrolling columns may span several viewports.

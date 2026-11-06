@@ -5,7 +5,7 @@
 #include <optional>
 #include <string_view>
 
-namespace canopy {
+namespace mahogany {
 
   enum class WindowPositionAnchor {
     TopLeft,
@@ -56,4 +56,4 @@ namespace canopy {
     const auto* found = std::ranges::find(kWindowPositionAnchorNames, anchor, &WindowPositionAnchorName::anchor);
     return found == kWindowPositionAnchorNames.end() ? std::string_view{} : found->name;
   }
-} // namespace canopy
+} // namespace mahogany

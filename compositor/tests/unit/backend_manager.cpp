@@ -167,8 +167,8 @@ namespace {
       }
     }
 
-    void start(const canopy::Config::Drm& config) {
-      manager = canopy::BackendManager::create(display, config);
+    void start(const mahogany::Config::Drm& config) {
+      manager = mahogany::BackendManager::create(display, config);
       CHECK(manager != nullptr);
       if (manager) {
         CHECK(wlr_backend_start(manager->backend()));
@@ -209,7 +209,7 @@ namespace {
 
     TestDevices inventory;
     wl_display* display = nullptr;
-    std::unique_ptr<canopy::BackendManager> manager;
+    std::unique_ptr<mahogany::BackendManager> manager;
 
   private:
     std::optional<std::string> m_backends;
@@ -411,7 +411,7 @@ CANOPY_TEST(unresolvedRenderSelectorFailsBeforeOpeningAnyGpu) {
   // The card is visible before its render-node link. Accepting the unresolved
   // selector here would open the GPU that the user intended to exclude.
   fixture.inventory.addGpu(5, "0000:01:00.0");
-  auto manager = canopy::BackendManager::create(
+  auto manager = mahogany::BackendManager::create(
       fixture.display, {.ignoredDevices = {"/dev/dri/by-path/pci-0000:01:00.0-render"}, .ignoredPciAddresses = {}}
   );
   CHECK(manager == nullptr);
@@ -422,11 +422,11 @@ CANOPY_TEST(allExcludedAndInvalidSelectorsFailWithoutOpeningAnyGpu) {
   Fixture fixture;
   auto& gpu = fixture.inventory.addGpu(0, "0000:00:02.0");
   CHECK(
-      canopy::BackendManager::create(fixture.display, {.ignoredDevices = {gpu.node}, .ignoredPciAddresses = {}})
+      mahogany::BackendManager::create(fixture.display, {.ignoredDevices = {gpu.node}, .ignoredPciAddresses = {}})
       == nullptr
   );
   CHECK(
-      canopy::BackendManager::create(fixture.display, {.ignoredDevices = {"/dev/null"}, .ignoredPciAddresses = {}})
+      mahogany::BackendManager::create(fixture.display, {.ignoredDevices = {"/dev/null"}, .ignoredPciAddresses = {}})
       == nullptr
   );
   CHECK(fixture.inventory.openedPci.empty());
@@ -439,8 +439,8 @@ CANOPY_TEST(descriptorAuditRejectsExcludedGpuWhenUdevMetadataDisappears) {
     auto& ignored = fixture.inventory.addGpu(1, "0000:01:00.0");
     auto& render = fixture.inventory.addRenderNode(ignored, 129);
     fixture.start(
-        usePciSelector ? canopy::Config::Drm{.ignoredDevices = {}, .ignoredPciAddresses = {"0000:01:00.0"}}
-                       : canopy::Config::Drm{.ignoredDevices = {ignored.node}, .ignoredPciAddresses = {}}
+        usePciSelector ? mahogany::Config::Drm{.ignoredDevices = {}, .ignoredPciAddresses = {"0000:01:00.0"}}
+                       : mahogany::Config::Drm{.ignoredDevices = {ignored.node}, .ignoredPciAddresses = {}}
     );
 
     CHECK(fixture.verifyOpenDevice(allowed.device));

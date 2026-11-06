@@ -5,20 +5,20 @@
 CANOPY_TEST(fullscreenCentersASmallerBuffer) {
   // A client that has not yet committed the fullscreen size sits centered in the
   // tile rather than pinned to a corner.
-  CHECK_EQ(canopy::fullscreenCenterOffset(1920, 1280), 320);
-  CHECK_EQ(canopy::fullscreenCenterOffset(1080, 800), 140);
+  CHECK_EQ(mahogany::fullscreenCenterOffset(1920, 1280), 320);
+  CHECK_EQ(mahogany::fullscreenCenterOffset(1080, 800), 140);
 }
 
 CANOPY_TEST(fullscreenCropsAnOversizedBufferEqually) {
   // Negative offset: the buffer is wider than the output, so it loses the same
   // amount from each side instead of being scaled.
-  CHECK_EQ(canopy::fullscreenCenterOffset(1920, 2560), -320);
+  CHECK_EQ(mahogany::fullscreenCenterOffset(1920, 2560), -320);
 }
 
 CANOPY_TEST(fullscreenOffsetIsZeroWithoutGeometry) {
   // A client with no committed geometry must not be shoved half an output over.
-  CHECK_EQ(canopy::fullscreenCenterOffset(1920, 0), 0);
-  CHECK_EQ(canopy::fullscreenCenterOffset(1920, -1), 0);
+  CHECK_EQ(mahogany::fullscreenCenterOffset(1920, 0), 0);
+  CHECK_EQ(mahogany::fullscreenCenterOffset(1920, -1), 0);
 }
 
 CANOPY_TEST(cropSelectsTheWholeBufferWhenNothingIsHidden) {
@@ -28,7 +28,7 @@ CANOPY_TEST(cropSelectsTheWholeBufferWhenNothingIsHidden) {
   const wlr_box content{0, 0, 1200, 900};
   const wlr_box clip{0, 0, 1200, 900};
 
-  const wlr_fbox src = canopy::croppedSourceBox(base, geometry, content, clip, 1200, 900);
+  const wlr_fbox src = mahogany::croppedSourceBox(base, geometry, content, clip, 1200, 900);
 
   CHECK_EQ(static_cast<int>(src.x), 0);
   CHECK_EQ(static_cast<int>(src.y), 0);
@@ -44,7 +44,7 @@ CANOPY_TEST(cropScalesTheSourceByThePresentedShrink) {
   const wlr_box content{0, 0, 600, 450};
   const wlr_box clip{0, 0, 600, 450};
 
-  const wlr_fbox src = canopy::croppedSourceBox(base, geometry, content, clip, 1200, 900);
+  const wlr_fbox src = mahogany::croppedSourceBox(base, geometry, content, clip, 1200, 900);
 
   CHECK_EQ(static_cast<int>(src.width), 1200);
   CHECK_EQ(static_cast<int>(src.height), 900);
@@ -57,7 +57,7 @@ CANOPY_TEST(cropSelectsOnlyTheVisibleHalf) {
   const wlr_box content{0, 0, 600, 450};
   const wlr_box clip{0, 0, 300, 450};
 
-  const wlr_fbox src = canopy::croppedSourceBox(base, geometry, content, clip, 1200, 900);
+  const wlr_fbox src = mahogany::croppedSourceBox(base, geometry, content, clip, 1200, 900);
 
   CHECK_EQ(static_cast<int>(src.x), 0);
   CHECK_EQ(static_cast<int>(src.width), 600);
@@ -71,7 +71,7 @@ CANOPY_TEST(cropHonoursTheSurfaceViewport) {
   const wlr_box content{0, 0, 1200, 900};
   const wlr_box clip{0, 0, 600, 900};
 
-  const wlr_fbox src = canopy::croppedSourceBox(base, geometry, content, clip, 1200, 900);
+  const wlr_fbox src = mahogany::croppedSourceBox(base, geometry, content, clip, 1200, 900);
 
   CHECK_EQ(static_cast<int>(src.width), 1200);
   CHECK_EQ(static_cast<int>(src.height), 1800);
@@ -84,7 +84,7 @@ CANOPY_TEST(cropNeverReachesOutsideTheBuffer) {
   const wlr_box content{0, 0, 1200, 900};
   const wlr_box clip{600, 0, 1200, 900};
 
-  const wlr_fbox src = canopy::croppedSourceBox(base, geometry, content, clip, 1200, 900);
+  const wlr_fbox src = mahogany::croppedSourceBox(base, geometry, content, clip, 1200, 900);
 
   CHECK(src.x >= base.x);
   CHECK(src.x + src.width <= base.x + base.width);
@@ -97,11 +97,11 @@ CANOPY_TEST(cropIsEmptyForDegenerateInput) {
   const wlr_box clip{0, 0, 100, 100};
 
   // A zero-width presented box would divide by zero.
-  CHECK(canopy::croppedSourceBox(base, geometry, {0, 0, 0, 900}, clip, 1200, 900).width <= 0);
+  CHECK(mahogany::croppedSourceBox(base, geometry, {0, 0, 0, 900}, clip, 1200, 900).width <= 0);
   // A surface that has committed nothing yet.
-  CHECK(canopy::croppedSourceBox(base, geometry, {0, 0, 600, 450}, clip, 0, 0).width <= 0);
+  CHECK(mahogany::croppedSourceBox(base, geometry, {0, 0, 600, 450}, clip, 0, 0).width <= 0);
   // A client with no geometry.
-  CHECK(canopy::croppedSourceBox(base, {0, 0, 0, 0}, {0, 0, 600, 450}, clip, 1200, 900).width <= 0);
+  CHECK(mahogany::croppedSourceBox(base, {0, 0, 0, 0}, {0, 0, 600, 450}, clip, 1200, 900).width <= 0);
 }
 
 int main() { return RUN_TESTS(); }

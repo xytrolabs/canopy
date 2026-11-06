@@ -12,7 +12,7 @@
 
 struct wl_event_source;
 
-namespace canopy {
+namespace mahogany {
 
   class Output;
   class Server;
@@ -115,4 +115,4 @@ namespace canopy {
     std::array<std::string, kEventCount> m_lastBroadcast;
   };
 
-} // namespace canopy
+} // namespace mahogany

@@ -12,14 +12,14 @@
 #include <wlr/util/edges.h>
 // clang-format on
 
-using canopy::CenterFocusedColumn;
-using canopy::Column;
-using canopy::Layout;
-using canopy::LayoutConstraints;
-using canopy::ResolvedLayoutConfig;
-using canopy::ScrollingDirection;
-using canopy::ScrollingLayout;
-using canopy::View;
+using mahogany::CenterFocusedColumn;
+using mahogany::Column;
+using mahogany::Layout;
+using mahogany::LayoutConstraints;
+using mahogany::ResolvedLayoutConfig;
+using mahogany::ScrollingDirection;
+using mahogany::ScrollingLayout;
+using mahogany::View;
 
 namespace {
 

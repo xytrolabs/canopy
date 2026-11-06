@@ -25,7 +25,7 @@ extern "C" {
 #include "workspace/workspace.h"
 #include "xwayland/xwayland.h"
 
-namespace canopy {
+namespace mahogany {
   namespace {
     constexpr Logger kLog("view");
     // Orders minimized windows across the session so the latest one can be restored first.
@@ -1113,4 +1113,4 @@ namespace canopy {
     }
     refreshStateRuleEffects();
   }
-} // namespace canopy
+} // namespace mahogany

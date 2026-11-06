@@ -5,7 +5,7 @@
 #include <cstdint>
 #include <functional>
 
-namespace canopy {
+namespace mahogany {
 
   enum class GammaOutputMode : uint8_t {
     Sdr,
@@ -24,4 +24,4 @@ namespace canopy {
   // with an explicit clear as the safe fallback if preparing it fails.
   [[nodiscard]] bool stageGammaForOutputMode(GammaOutputMode mode, const GammaTransitionOps& ops);
 
-} // namespace canopy
+} // namespace mahogany

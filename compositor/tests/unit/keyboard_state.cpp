@@ -201,10 +201,10 @@ CANOPY_TEST(remapsModifierNamesWhenVirtualModifierIndicesChange) {
   const xkb_mod_mask_t before = modifierMask(original.get(), "FirstLock");
   const xkb_mod_mask_t after = modifierMask(reordered.get(), "FirstLock");
   CHECK(before != after);
-  const auto names = canopy::keyboardModifierNames(original.get(), before);
+  const auto names = mahogany::keyboardModifierNames(original.get(), before);
   CHECK_EQ(names, std::vector<std::string>{"FirstLock"});
-  CHECK_EQ(canopy::keyboardModifierMask(reordered.get(), names), after);
-  CHECK_EQ(canopy::keyboardModifierMask(reordered.get(), std::vector<std::string>{"MissingLock"}), 0U);
+  CHECK_EQ(mahogany::keyboardModifierMask(reordered.get(), names), after);
+  CHECK_EQ(mahogany::keyboardModifierMask(reordered.get(), std::vector<std::string>{"MissingLock"}), 0U);
 }
 
 CANOPY_TEST(preservesCapsNumAndScrollAcrossKeymapReplacement) {
@@ -223,7 +223,7 @@ CANOPY_TEST(preservesCapsNumAndScrollAcrossKeymapReplacement) {
   CHECK_EQ(keyboard.leds().back(), allLeds);
   const size_t events = keyboard.modifiers().size();
 
-  CHECK(canopy::setKeyboardKeymapPreservingState(keyboard.get(), replacement.get()));
+  CHECK(mahogany::setKeyboardKeymapPreservingState(keyboard.get(), replacement.get()));
   CHECK_EQ(keyboard.get()->modifiers.locked, locked);
   CHECK_EQ(keyboard.leds().back(), allLeds);
   CHECK_EQ(keyboard.modifiers().size(), events + 1);
@@ -238,10 +238,10 @@ CANOPY_TEST(followsNumLockWhenItsBackingRealModifierChanges) {
   Keymap replacement("ScrollLock=Mod2, NumLock=Mod3, FirstLock=Mod4, SecondLock=Mod5", false, true);
   BackendKeyboard keyboard(original.get());
   keyboard.tap(69);
-  const auto names = canopy::keyboardModifierNames(original.get(), keyboard.get()->modifiers.locked);
+  const auto names = mahogany::keyboardModifierNames(original.get(), keyboard.get()->modifiers.locked);
   CHECK_EQ(names, std::vector<std::string>{"NumLock"});
 
-  CHECK(canopy::setKeyboardKeymapPreservingState(keyboard.get(), replacement.get()));
+  CHECK(mahogany::setKeyboardKeymapPreservingState(keyboard.get(), replacement.get()));
   CHECK_EQ(keyboard.get()->modifiers.locked, modifierMask(replacement.get(), "NumLock"));
   CHECK_EQ(keyboard.get()->modifiers.locked & modifierMask(replacement.get(), "ScrollLock"), 0U);
   CHECK_EQ(keyboard.leds().back(), uint32_t{WLR_LED_NUM_LOCK});
@@ -256,13 +256,13 @@ CANOPY_TEST(anUnchangedKeymapRetainsItsStateAndPendingActions) {
   BackendKeyboard keyboard(original.get());
   keyboard.tap(69);
   keyboard.key(42, WL_KEYBOARD_KEY_STATE_PRESSED);
-  canopy::setKeyboardLatchedLockedModifiers(
+  mahogany::setKeyboardLatchedLockedModifiers(
       keyboard.get(), modifierMask(original.get(), "Control"), keyboard.get()->modifiers.locked
   );
   xkb_state* state = keyboard.get()->xkb_state;
   const size_t events = keyboard.modifiers().size();
 
-  CHECK(canopy::setKeyboardKeymapPreservingState(keyboard.get(), identical.get()));
+  CHECK(mahogany::setKeyboardKeymapPreservingState(keyboard.get(), identical.get()));
   CHECK_EQ(keyboard.get()->xkb_state, state);
   CHECK_EQ(keyboard.modifiers().size(), events);
   CHECK_EQ(keyboard.get()->modifiers.latched, modifierMask(original.get(), "Control"));
@@ -282,7 +282,7 @@ CANOPY_TEST(releasesHeldModifiersAfterRestoringLocks) {
   keyboard.key(42, WL_KEYBOARD_KEY_STATE_PRESSED);
   CHECK_EQ(keyboard.get()->modifiers.depressed, modifierMask(original.get(), "Shift"));
 
-  CHECK(canopy::setKeyboardKeymapPreservingState(keyboard.get(), replacement.get()));
+  CHECK(mahogany::setKeyboardKeymapPreservingState(keyboard.get(), replacement.get()));
   CHECK_EQ(keyboard.get()->modifiers.depressed, modifierMask(replacement.get(), "Shift"));
   CHECK_EQ(keyboard.get()->modifiers.locked, modifierMask(replacement.get(), "Mod2"));
   keyboard.key(42, WL_KEYBOARD_KEY_STATE_RELEASED);
@@ -297,7 +297,7 @@ CANOPY_TEST(replaysHeldKeysWithTheirReplacementKeymapActions) {
   keyboard.tap(69);
   keyboard.key(42, WL_KEYBOARD_KEY_STATE_PRESSED);
 
-  CHECK(canopy::setKeyboardKeymapPreservingState(keyboard.get(), replacement.get()));
+  CHECK(mahogany::setKeyboardKeymapPreservingState(keyboard.get(), replacement.get()));
   CHECK_EQ(keyboard.get()->modifiers.depressed, modifierMask(replacement.get(), "Control"));
   CHECK_EQ(keyboard.get()->modifiers.locked, modifierMask(replacement.get(), "Mod2"));
   keyboard.key(42, WL_KEYBOARD_KEY_STATE_RELEASED);
@@ -308,10 +308,10 @@ CANOPY_TEST(preservesLatchedModifiersAndLetsTheNextKeyConsumeThem) {
   Keymap original;
   Keymap replacement(kReorderedModifiers);
   BackendKeyboard keyboard(original.get());
-  canopy::setKeyboardLatchedLockedModifiers(keyboard.get(), modifierMask(original.get(), "Shift"), 0);
+  mahogany::setKeyboardLatchedLockedModifiers(keyboard.get(), modifierMask(original.get(), "Shift"), 0);
   CHECK_EQ(keyboard.get()->modifiers.latched, modifierMask(original.get(), "Shift"));
 
-  CHECK(canopy::setKeyboardKeymapPreservingState(keyboard.get(), replacement.get()));
+  CHECK(mahogany::setKeyboardKeymapPreservingState(keyboard.get(), replacement.get()));
   CHECK_EQ(keyboard.get()->modifiers.latched, modifierMask(replacement.get(), "Shift"));
   keyboard.tap(30);
   CHECK_EQ(keyboard.get()->modifiers.latched, 0U);
@@ -326,7 +326,7 @@ CANOPY_TEST(restoringLocksPreservesAHeldGroupSwitchUntilItsRelease) {
   CHECK_EQ(keyboard.get()->modifiers.group, 1U);
   CHECK_EQ(xkb_state_serialize_layout(keyboard.get()->xkb_state, XKB_STATE_LAYOUT_DEPRESSED), 1U);
 
-  CHECK(canopy::setKeyboardKeymapPreservingState(keyboard.get(), replacement.get()));
+  CHECK(mahogany::setKeyboardKeymapPreservingState(keyboard.get(), replacement.get()));
   CHECK_EQ(keyboard.get()->modifiers.group, 1U);
   CHECK_EQ(xkb_state_serialize_layout(keyboard.get()->xkb_state, XKB_STATE_LAYOUT_DEPRESSED), 1U);
   CHECK_EQ(xkb_state_serialize_layout(keyboard.get()->xkb_state, XKB_STATE_LAYOUT_LOCKED), 0U);
@@ -342,7 +342,7 @@ CANOPY_TEST(keymapReplacementKeepsTheExistingLayoutResetPolicy) {
   wlr_keyboard_notify_modifiers(keyboard.get(), 0, 0, modifierMask(original.get(), "Mod2"), 1);
   CHECK_EQ(keyboard.get()->modifiers.group, 1U);
 
-  CHECK(canopy::setKeyboardKeymapPreservingState(keyboard.get(), replacement.get()));
+  CHECK(mahogany::setKeyboardKeymapPreservingState(keyboard.get(), replacement.get()));
   CHECK_EQ(keyboard.get()->modifiers.group, 0U);
   CHECK_EQ(keyboard.get()->modifiers.locked, modifierMask(replacement.get(), "Mod2"));
 }
@@ -360,7 +360,7 @@ CANOPY_TEST(aFailedKeymapReplacementKeepsTheOriginalState) {
   bool applied = true;
   {
     ClosedFdBudget noNewKeymapFd;
-    applied = canopy::setKeyboardKeymapPreservingState(keyboard.get(), replacement.get());
+    applied = mahogany::setKeyboardKeymapPreservingState(keyboard.get(), replacement.get());
   }
   CHECK(!applied);
   CHECK_EQ(keyboard.get()->keymap, keymap);
@@ -381,7 +381,7 @@ CANOPY_TEST(rejectsANullKeymapWithoutClearingTheCurrentState) {
   keyboard.tap(69);
   xkb_state* state = keyboard.get()->xkb_state;
 
-  CHECK(!canopy::setKeyboardKeymapPreservingState(keyboard.get(), nullptr));
+  CHECK(!mahogany::setKeyboardKeymapPreservingState(keyboard.get(), nullptr));
   CHECK_EQ(keyboard.get()->xkb_state, state);
   CHECK_EQ(keyboard.get()->keymap, original.get());
   CHECK_EQ(keyboard.get()->modifiers.locked, modifierMask(original.get(), "Mod2"));

@@ -7,7 +7,7 @@ extern "C" {
 #include <wlr/backend/session.h>
 }
 
-namespace canopy {
+namespace mahogany {
 
   enum class OutputFrameFollowup {
     None,
@@ -81,4 +81,4 @@ namespace canopy {
     bool m_regularCommitPending = false;
   };
 
-} // namespace canopy
+} // namespace mahogany

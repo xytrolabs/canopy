@@ -11,7 +11,7 @@
 
 #include <algorithm>
 
-namespace canopy {
+namespace mahogany {
 
   namespace {
     // The size a virtual output gets without a requested mode: what the backend gives the ones from
@@ -279,4 +279,4 @@ namespace canopy {
     return fullArea;
   }
 
-} // namespace canopy
+} // namespace mahogany

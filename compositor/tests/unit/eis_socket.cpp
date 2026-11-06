@@ -56,7 +56,7 @@ namespace {
     int relayFd = -1;
     std::vector<pid_t> authenticated;
     Fd backend;
-    std::unique_ptr<canopy::EisSocket> socket;
+    std::unique_ptr<mahogany::EisSocket> socket;
 
     Fixture() {
       if (const char* previous = std::getenv("XDG_RUNTIME_DIR")) {
@@ -73,7 +73,7 @@ namespace {
       if (loop == nullptr) {
         return;
       }
-      socket = std::make_unique<canopy::EisSocket>(
+      socket = std::make_unique<mahogany::EisSocket>(
           loop,
           [this](pid_t pid) {
             authenticated.push_back(pid);

@@ -52,14 +52,14 @@ namespace {
       }
     }
 
-    canopy::loadConfig(configPath);
-    const auto& diags = canopy::configDiagnostics();
+    mahogany::loadConfig(configPath);
+    const auto& diags = mahogany::configDiagnostics();
     if (json) {
       nlohmann::json diagnostics = nlohmann::json::array();
       for (const auto& d : diags) {
         const bool located = !d.file.empty();
         diagnostics.push_back({
-            {"severity", d.severity == canopy::ConfigDiagnostic::Severity::Error ? "error" : "warning"},
+            {"severity", d.severity == mahogany::ConfigDiagnostic::Severity::Error ? "error" : "warning"},
             {"message", d.message},
             {"file", located ? nlohmann::json(d.file) : nlohmann::json(nullptr)},
             {"line", located && d.line > 0 ? nlohmann::json(d.line) : nlohmann::json(nullptr)},
@@ -70,7 +70,7 @@ namespace {
           "{}",
           nlohmann::json{
               {"valid", diags.empty()},
-              {"path", canopy::configRootPath().string()},
+              {"path", mahogany::configRootPath().string()},
               {"diagnostics", std::move(diagnostics)},
           }
               .dump()
@@ -78,12 +78,12 @@ namespace {
       return diags.empty() ? EXIT_SUCCESS : EXIT_FAILURE;
     }
     if (diags.empty()) {
-      std::println("config: ok ({})", canopy::configRootPath().string());
+      std::println("config: ok ({})", mahogany::configRootPath().string());
       return EXIT_SUCCESS;
     }
     for (const auto& d : diags) {
       const std::string loc = d.location();
-      if (d.severity == canopy::ConfigDiagnostic::Severity::Error) {
+      if (d.severity == mahogany::ConfigDiagnostic::Severity::Error) {
         std::println(stderr, "error: {}{}", loc.empty() ? "" : loc + ": ", d.message);
       } else {
         std::println(stderr, "warning: {}{}", loc.empty() ? "" : loc + ": ", d.message);
@@ -94,18 +94,18 @@ namespace {
   }
 
   int printConfigSchema(bool json) {
-    const canopy::registry::Descriptions keys = canopy::registry::describeConfig(canopy::Config{});
+    const mahogany::registry::Descriptions keys = mahogany::registry::describeConfig(mahogany::Config{});
     if (!json) {
-      std::print("{}", canopy::configSchemaSummary(keys));
+      std::print("{}", mahogany::configSchemaSummary(keys));
       return EXIT_SUCCESS;
     }
     // Same rule as --version: a build outside git reports "unknown", which is no revision at all.
-    const std::string_view revision = canopy::build_info::revision();
+    const std::string_view revision = mahogany::build_info::revision();
     const bool knownRevision = !revision.empty() && revision != "unknown";
     std::print(
         "{}",
-        canopy::configSchemaJson(
-            keys, canopy::build_info::version(), knownRevision ? std::optional(revision) : std::nullopt
+        mahogany::configSchemaJson(
+            keys, mahogany::build_info::version(), knownRevision ? std::optional(revision) : std::nullopt
         )
     );
     return EXIT_SUCCESS;
@@ -116,8 +116,8 @@ namespace {
     auto row = [stream](std::string_view cmd, std::string_view desc) {
       std::println(stream, "  {:<30} {}", cmd, desc);
     };
-    auto specRows = [&row](canopy::IpcCommandGroup group) {
-      for (const auto& spec : canopy::ipcCommands()) {
+    auto specRows = [&row](mahogany::IpcCommandGroup group) {
+      for (const auto& spec : mahogany::ipcCommands()) {
         if (spec.group != group) {
           continue;
         }
@@ -130,7 +130,7 @@ namespace {
       }
     };
 
-    std::println(stream, "canopywc {}: a wayland compositor\n", canopy::build_info::version());
+    std::println(stream, "canopywc {}: a wayland compositor\n", mahogany::build_info::version());
     std::println(stream, "Usage: canopywc [-s <command>] [-c <config>]   run the compositor");
     std::println(stream, "       canopywc <command> [args...]            run a command");
 
@@ -140,13 +140,13 @@ namespace {
 
     heading("Control the running compositor");
     row("msg <action> [args...]", "send an action to the compositor");
-    specRows(canopy::IpcCommandGroup::Control);
+    specRows(mahogany::IpcCommandGroup::Control);
 
     heading("Inspect the running compositor");
-    specRows(canopy::IpcCommandGroup::Inspect);
+    specRows(mahogany::IpcCommandGroup::Inspect);
     {
       std::string names;
-      for (const auto& name : canopy::Ipc::kEventNames) {
+      for (const auto& name : mahogany::Ipc::kEventNames) {
         if (!names.empty()) {
           names += ", ";
         }
@@ -160,11 +160,11 @@ namespace {
     row("config validate [-c <config>]", "check the config file; --json lists diagnostics");
     row("config schema [--json]", "count or describe every config key");
 
-    if (std::ranges::any_of(canopy::ipcCommands(), [](const auto& spec) {
-          return spec.group == canopy::IpcCommandGroup::Harness;
+    if (std::ranges::any_of(mahogany::ipcCommands(), [](const auto& spec) {
+          return spec.group == mahogany::IpcCommandGroup::Harness;
         })) {
       heading("Test harness");
-      specRows(canopy::IpcCommandGroup::Harness);
+      specRows(mahogany::IpcCommandGroup::Harness);
     }
 
     heading("Other");
@@ -183,11 +183,11 @@ namespace {
         "Arguments follow the action as separate words; `spawn` runs the remaining words as one shell command."
     );
     std::println("Available actions, grouped as the cheatsheet groups them:");
-    for (const canopy::Group group : canopy::fixedGroupOrder()) {
+    for (const mahogany::Group group : mahogany::fixedGroupOrder()) {
       std::vector<std::string> names;
       std::vector<std::string_view> summaries;
-      for (const auto& actionSpec : canopy::actionSpecs()) {
-        if (canopy::groupForAction(actionSpec.action) != group) {
+      for (const auto& actionSpec : mahogany::actionSpecs()) {
+        if (mahogany::groupForAction(actionSpec.action) != group) {
           continue;
         }
         names.emplace_back(
@@ -206,7 +206,7 @@ namespace {
         width = std::max(width, name.size());
       }
       std::println("");
-      std::println("{}", canopy::groupTitle(group));
+      std::println("{}", mahogany::groupTitle(group));
       for (size_t i = 0; i < names.size(); ++i) {
         std::println("  {:<{}}  {}", names[i], width, summaries[i]);
       }
@@ -263,11 +263,11 @@ int main(int argc, char** argv) {
     }
     if (std::strcmp(argv[1], "--version") == 0 || std::strcmp(argv[1], "-v") == 0 || std::strcmp(argv[1], "-V") == 0) {
       constexpr std::string_view unknownRevision = "unknown";
-      const std::string_view revision = canopy::build_info::revision();
+      const std::string_view revision = mahogany::build_info::revision();
       if (!revision.empty() && revision != unknownRevision) {
-        std::println("canopywc {} ({})", canopy::build_info::version(), revision);
+        std::println("canopywc {} ({})", mahogany::build_info::version(), revision);
       } else {
-        std::println("canopywc {}", canopy::build_info::version());
+        std::println("canopywc {}", mahogany::build_info::version());
       }
       return EXIT_SUCCESS;
     }
@@ -306,7 +306,7 @@ int main(int argc, char** argv) {
         printHelp(stderr);
         return EXIT_FAILURE;
       }
-      return canopy::runIpcSubscribe(events);
+      return mahogany::runIpcSubscribe(events);
     }
 
     // Not an IpcCommandSpec: the words are parsed here and sent as a structured action request.
@@ -329,10 +329,10 @@ int main(int argc, char** argv) {
         printHelp(stderr);
         return EXIT_FAILURE;
       }
-      return canopy::runIpcAction(words, jf);
+      return mahogany::runIpcAction(words, jf);
     }
 
-    if (const auto* spec = canopy::findIpcCommand(argv[1])) {
+    if (const auto* spec = mahogany::findIpcCommand(argv[1])) {
       if (!spec->takesArgs) {
         bool jf = false;
         for (int i = 2; i < argc; ++i) {
@@ -347,7 +347,7 @@ int main(int argc, char** argv) {
             return EXIT_FAILURE;
           }
         }
-        return canopy::runIpcCommand(*spec, {}, jf);
+        return mahogany::runIpcCommand(*spec, {}, jf);
       }
 
       if (argc == 3 && isHelpFlag(argv[2])) {
@@ -371,7 +371,7 @@ int main(int argc, char** argv) {
         printHelp(stderr);
         return EXIT_FAILURE;
       }
-      return canopy::runIpcCommand(*spec, args, jf);
+      return mahogany::runIpcCommand(*spec, args, jf);
     }
   }
 
@@ -403,14 +403,14 @@ int main(int argc, char** argv) {
   }
 
   try {
-    kLog.info("starting canopywc version={} commit={}", canopy::build_info::version(), canopy::build_info::revision());
-    canopy::loadConfig(configPath);
-    canopy::Server server;
+    kLog.info("starting canopywc version={} commit={}", mahogany::build_info::version(), mahogany::build_info::revision());
+    mahogany::loadConfig(configPath);
+    mahogany::Server server;
 
     // SIGINT and SIGTERM are handled on the event loop by the server itself.
     // Exited children are reaped by a SIGCHLD handler. Every fork in Server
     // restores the default before exec.
-    canopy::installChildReaper();
+    mahogany::installChildReaper();
 
     if (!server.start(startupCmd)) {
       kLog.error("failed to start server");

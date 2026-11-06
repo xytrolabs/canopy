@@ -2,7 +2,7 @@
 
 #include <deque>
 
-namespace canopy {
+namespace mahogany {
 
   std::vector<std::string> shortcutLabels(size_t count, std::string_view keys) {
     if (keys.size() < 2) {
@@ -31,4 +31,4 @@ namespace canopy {
     return labels;
   }
 
-} // namespace canopy
+} // namespace mahogany

@@ -2,7 +2,7 @@
 
 #include "check.h"
 
-using canopy::maximizeRequestTargetsEdges;
+using mahogany::maximizeRequestTargetsEdges;
 
 CANOPY_TEST(freshClientMaximizeTargetsColumn) { CHECK(!maximizeRequestTargetsEdges(true, false, false)); }
 

@@ -4,7 +4,7 @@ extern "C" {
 #include <wlr/util/box.h>
 }
 
-namespace canopy {
+namespace mahogany {
 
   // One member of a layout transition: the box it leaves and the box it arrives at. Every member of a transition is
   // interpolated with the same progress, so two members separated along an axis in both `from` and `to` never cross.
@@ -25,4 +25,4 @@ namespace canopy {
   // a shared progress can never make them cross. False marks a pair whose side relation changes (a rearrangement).
   bool keepsSeparation(const MotionBox& a, const MotionBox& b);
 
-} // namespace canopy
+} // namespace mahogany

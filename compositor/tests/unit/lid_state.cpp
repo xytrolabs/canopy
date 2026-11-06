@@ -2,8 +2,8 @@
 
 #include "check.h"
 
-using canopy::LidState;
-using canopy::LidStateCoordinator;
+using mahogany::LidState;
+using mahogany::LidStateCoordinator;
 
 namespace {
 

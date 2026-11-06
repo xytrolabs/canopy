@@ -2,7 +2,7 @@
 
 #include <algorithm>
 
-namespace canopy {
+namespace mahogany {
 
   namespace {
     constexpr std::string_view kUnknown = "Unknown";
@@ -75,4 +75,4 @@ namespace canopy {
     return descriptorEquals(identity, configured) ? OutputNameMatch::Descriptor : OutputNameMatch::None;
   }
 
-} // namespace canopy
+} // namespace mahogany

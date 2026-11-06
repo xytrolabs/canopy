@@ -10,7 +10,7 @@ struct wlr_input_device;
 struct wlr_keyboard;
 struct wlr_keyboard_modifiers;
 
-namespace canopy {
+namespace mahogany {
 
   class Server;
 
@@ -44,4 +44,4 @@ namespace canopy {
     wlr_keyboard* sourceKeyboard() const;
   };
 
-} // namespace canopy
+} // namespace mahogany

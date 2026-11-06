@@ -2,7 +2,7 @@
 
 #include <cstdint>
 
-namespace canopy {
+namespace mahogany {
 
   enum class SceneNodeKind : uint8_t {
     View,
@@ -39,4 +39,4 @@ namespace canopy {
     return node;
   }
 
-} // namespace canopy
+} // namespace mahogany

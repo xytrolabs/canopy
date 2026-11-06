@@ -12,7 +12,7 @@
 #include <string_view>
 #include <vector>
 
-namespace canopy::test {
+namespace mahogany::test {
 
   struct Case {
     std::string_view name;
@@ -66,17 +66,17 @@ namespace canopy::test {
     return 1;
   }
 
-} // namespace canopy::test
+} // namespace mahogany::test
 
 #define CANOPY_TEST(name)                                                                                             \
   static void name();                                                                                                  \
-  static const ::canopy::test::Registrar kRegistrar##name(#name, &name);                                              \
+  static const ::mahogany::test::Registrar kRegistrar##name(#name, &name);                                              \
   static void name()
 
 #define CHECK(expr)                                                                                                    \
   do {                                                                                                                 \
     if (!static_cast<bool>(expr)) {                                                                                    \
-      ::canopy::test::reportFailure(__FILE__, __LINE__, "CHECK(" #expr ") failed");                                   \
+      ::mahogany::test::reportFailure(__FILE__, __LINE__, "CHECK(" #expr ") failed");                                   \
     }                                                                                                                  \
   } while (false)
 
@@ -85,11 +85,11 @@ namespace canopy::test {
     const auto& canopyCheckActual = (actualExpr);                                                                     \
     const auto& canopyCheckExpected = (expectedExpr);                                                                 \
     if (!(canopyCheckActual == canopyCheckExpected)) {                                                               \
-      ::canopy::test::reportFailure(                                                                                  \
+      ::mahogany::test::reportFailure(                                                                                  \
           __FILE__, __LINE__,                                                                                          \
           std::format(                                                                                                 \
               "CHECK_EQ({}, {}) failed: got {}, want {}", #actualExpr, #expectedExpr,                                  \
-              ::canopy::test::describe(canopyCheckActual), ::canopy::test::describe(canopyCheckExpected)           \
+              ::mahogany::test::describe(canopyCheckActual), ::mahogany::test::describe(canopyCheckExpected)           \
           )                                                                                                            \
       );                                                                                                               \
     }                                                                                                                  \
@@ -102,7 +102,7 @@ namespace canopy::test {
     const auto& canopyCheckExpected = (expectedExpr);                                                                 \
     const auto& canopyCheckTolerance = (toleranceExpr);                                                               \
     if (!(std::abs(canopyCheckActual - canopyCheckExpected) <= canopyCheckTolerance)) {                             \
-      ::canopy::test::reportFailure(                                                                                  \
+      ::mahogany::test::reportFailure(                                                                                  \
           __FILE__, __LINE__,                                                                                          \
           std::format(                                                                                                 \
               "CHECK_NEAR({}, {}, {}) failed: got {}, want {}", #actualExpr, #expectedExpr, #toleranceExpr,            \
@@ -112,4 +112,4 @@ namespace canopy::test {
     }                                                                                                                  \
   } while (false)
 
-#define RUN_TESTS() ::canopy::test::runAll()
+#define RUN_TESTS() ::mahogany::test::runAll()

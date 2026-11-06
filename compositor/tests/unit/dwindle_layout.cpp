@@ -13,11 +13,11 @@ extern "C" {
 }
 // clang-format on
 
-using canopy::DwindleLayout;
-using canopy::Layout;
-using canopy::LayoutConstraints;
-using canopy::ResolvedLayoutConfig;
-using canopy::View;
+using mahogany::DwindleLayout;
+using mahogany::Layout;
+using mahogany::LayoutConstraints;
+using mahogany::ResolvedLayoutConfig;
+using mahogany::View;
 
 namespace {
 
@@ -27,7 +27,7 @@ namespace {
 
   ResolvedLayoutConfig dwindleConfig() {
     ResolvedLayoutConfig config;
-    config.mode = canopy::LayoutMode::Dwindle;
+    config.mode = mahogany::LayoutMode::Dwindle;
     config.gap = 8;
     config.totalGap = 12;
     config.edgePad = 10;

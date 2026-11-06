@@ -4,7 +4,7 @@
 
 #include <algorithm>
 
-namespace canopy {
+namespace mahogany {
 
   // Out of line so the header needs only a forward declaration of View.
   ViewRegistry::ViewRegistry() = default;
@@ -34,4 +34,4 @@ namespace canopy {
   // clear() runs view destructors that scan the registry, by then holding the entries already destroyed as null.
   bool ViewRegistry::isPlacementRoot(const std::unique_ptr<View>& view) { return view != nullptr && !view->attached(); }
 
-} // namespace canopy
+} // namespace mahogany

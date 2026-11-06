@@ -2,19 +2,19 @@
 #include "config/change.h"
 #include "config/resolve.h"
 
-using canopy::AccelProfile;
-using canopy::Config;
-using canopy::ConfigChange;
-using canopy::ConfigEffects;
-using canopy::ContentType;
-using canopy::Keybind;
-using canopy::LayerRule;
-using canopy::ModifierKey;
-using canopy::OutputRule;
-using canopy::RegexPatterns;
-using canopy::SecurityContextRule;
-using canopy::WindowRule;
-using canopy::WorkspaceConfig;
+using mahogany::AccelProfile;
+using mahogany::Config;
+using mahogany::ConfigChange;
+using mahogany::ConfigEffects;
+using mahogany::ContentType;
+using mahogany::Keybind;
+using mahogany::LayerRule;
+using mahogany::ModifierKey;
+using mahogany::OutputRule;
+using mahogany::RegexPatterns;
+using mahogany::SecurityContextRule;
+using mahogany::WindowRule;
+using mahogany::WorkspaceConfig;
 
 CANOPY_TEST(anIdenticalConfigChangesNothing) {
   const Config before;
@@ -221,7 +221,7 @@ CANOPY_TEST(windowOpacityTimingRefreshesPresentationWithoutLayoutChanges) {
   CHECK(!effects.workspaceLayout);
 
   after = before;
-  after.animation.windowsOpacity.curve.easing = canopy::Easing::Linear;
+  after.animation.windowsOpacity.curve.easing = mahogany::Easing::Linear;
   CHECK(ConfigEffects::between(before, after).viewChrome);
 }
 
@@ -481,7 +481,7 @@ CANOPY_TEST(layoutStrutsOnlyRefreshWorkspaceLayout) {
 
 CANOPY_TEST(workspaceRuleStrutsOnlyRefreshWorkspaceLayout) {
   Config before;
-  canopy::WorkspaceConfig rule;
+  mahogany::WorkspaceConfig rule;
   rule.name = "dev";
   before.workspaceRules.push_back(rule);
   Config after = before;
@@ -532,11 +532,11 @@ CANOPY_TEST(workspaceRuleLayoutAndIndexEditsDoNotRefreshDynamicInventory) {
   WorkspaceConfig namedRule;
   namedRule.name = "dev";
   namedRule.output = "DP-1";
-  namedRule.layout.mode = canopy::LayoutMode::Scrolling;
+  namedRule.layout.mode = mahogany::LayoutMode::Scrolling;
   named.workspaceRules.push_back(std::move(namedRule));
 
   Config layoutChanged = named;
-  layoutChanged.workspaceRules[0].layout.mode = canopy::LayoutMode::Master;
+  layoutChanged.workspaceRules[0].layout.mode = mahogany::LayoutMode::Master;
   const ConfigEffects layoutEffects = ConfigEffects::between(named, layoutChanged);
   CHECK(layoutEffects.workspaceLayout);
   CHECK(!layoutEffects.workspaceInventory);
@@ -547,7 +547,7 @@ CANOPY_TEST(workspaceRuleLayoutAndIndexEditsDoNotRefreshDynamicInventory) {
   WorkspaceConfig indexRule;
   indexRule.index = 2;
   indexRule.output = "DP-1";
-  indexRule.layout.mode = canopy::LayoutMode::Dwindle;
+  indexRule.layout.mode = mahogany::LayoutMode::Dwindle;
   indexAdded.workspaceRules.push_back(std::move(indexRule));
   const ConfigEffects indexAddedEffects = ConfigEffects::between(named, indexAdded);
   CHECK(indexAddedEffects.workspaceLayout);
@@ -579,13 +579,13 @@ CANOPY_TEST(outputStateAndWorkspaceInventoryAreIndependent) {
   CHECK(!stateEffects.workspaceLayout);
 
   Config vrrChanged = before;
-  vrrChanged.outputs[0].vrr = canopy::VrrMode::Fullscreen;
+  vrrChanged.outputs[0].vrr = mahogany::VrrMode::Fullscreen;
   const ConfigEffects vrrEffects = ConfigEffects::between(before, vrrChanged);
   CHECK(vrrEffects.outputState);
   CHECK(!vrrEffects.workspaceInventory);
 
   Config hdrChanged = before;
-  hdrChanged.outputs[0].hdr = canopy::HdrMode::On;
+  hdrChanged.outputs[0].hdr = mahogany::HdrMode::On;
   const ConfigEffects hdrEffects = ConfigEffects::between(before, hdrChanged);
   CHECK(hdrEffects.outputState);
   CHECK(!hdrEffects.workspaceInventory);
@@ -644,7 +644,7 @@ CANOPY_TEST(outputSdrTransferReloadOnlyRefreshesOutputState) {
   before.outputs.push_back(original);
 
   Config after = before;
-  after.outputs[0].sdrTransfer = canopy::SdrTransfer::Srgb;
+  after.outputs[0].sdrTransfer = mahogany::SdrTransfer::Srgb;
   CHECK(ConfigChange::between(before, after).outputs);
   const ConfigEffects changed = ConfigEffects::between(before, after);
   CHECK(changed.outputState);
@@ -693,7 +693,7 @@ CANOPY_TEST(outputWorkspaceAxisOnlyRefreshesWorkspaceLayout) {
   before.outputs.push_back(output);
 
   Config after = before;
-  after.outputs[0].workspaceAxis = canopy::WorkspaceAxis::Horizontal;
+  after.outputs[0].workspaceAxis = mahogany::WorkspaceAxis::Horizontal;
 
   const ConfigEffects effects = ConfigEffects::between(before, after);
   CHECK(effects.workspaceLayout);
@@ -737,16 +737,16 @@ CANOPY_TEST(descriptorRuleWithoutSelectorInvalidatesDisplacedScreenOverride) {
   connector.name = "HDMI-A-1";
   connector.screenEffect = "connector-screen";
   before.outputs.push_back(connector);
-  const canopy::OutputIdentity identity{
+  const mahogany::OutputIdentity identity{
       .connector = "HDMI-A-1", .make = "Microstep", .model = "MSI G2712F", .serial = "CD6T084401192"
   };
-  CHECK(canopy::findOutputRule(before, identity)->screenEffect == "connector-screen");
+  CHECK(mahogany::findOutputRule(before, identity)->screenEffect == "connector-screen");
 
   Config after = before;
   OutputRule descriptor;
   descriptor.name = "Microstep MSI G2712F CD6T084401192";
   after.outputs.push_back(descriptor);
-  CHECK(!canopy::findOutputRule(after, identity)->screenEffect.has_value());
+  CHECK(!mahogany::findOutputRule(after, identity)->screenEffect.has_value());
   CHECK(ConfigEffects::between(before, after).effects);
   CHECK(ConfigEffects::between(after, before).effects);
 
@@ -923,21 +923,21 @@ CANOPY_TEST(directScanoutPolicyForcesOnlyItsRuntimeEffect) {
 }
 
 CANOPY_TEST(vrrPolicyTracksFullscreenOnlyWhenRequested) {
-  CHECK(!canopy::vrrEnabled(canopy::VrrMode::Disabled, false));
-  CHECK(!canopy::vrrEnabled(canopy::VrrMode::Disabled, true));
-  CHECK(canopy::vrrEnabled(canopy::VrrMode::Always, false));
-  CHECK(canopy::vrrEnabled(canopy::VrrMode::Always, true));
-  CHECK(!canopy::vrrEnabled(canopy::VrrMode::Fullscreen, false));
-  CHECK(canopy::vrrEnabled(canopy::VrrMode::Fullscreen, true));
+  CHECK(!mahogany::vrrEnabled(mahogany::VrrMode::Disabled, false));
+  CHECK(!mahogany::vrrEnabled(mahogany::VrrMode::Disabled, true));
+  CHECK(mahogany::vrrEnabled(mahogany::VrrMode::Always, false));
+  CHECK(mahogany::vrrEnabled(mahogany::VrrMode::Always, true));
+  CHECK(!mahogany::vrrEnabled(mahogany::VrrMode::Fullscreen, false));
+  CHECK(mahogany::vrrEnabled(mahogany::VrrMode::Fullscreen, true));
 }
 
 CANOPY_TEST(hdrPolicyTracksEligibilityForEachMode) {
-  CHECK(!canopy::hdrEnabled(canopy::HdrMode::Off, false, false));
-  CHECK(canopy::hdrEnabled(canopy::HdrMode::On, false, false));
-  CHECK(!canopy::hdrEnabled(canopy::HdrMode::Auto, true, false));
-  CHECK(canopy::hdrEnabled(canopy::HdrMode::Auto, true, true));
-  CHECK(!canopy::hdrEnabled(canopy::HdrMode::Fullscreen, false, false));
-  CHECK(canopy::hdrEnabled(canopy::HdrMode::Fullscreen, true, false));
+  CHECK(!mahogany::hdrEnabled(mahogany::HdrMode::Off, false, false));
+  CHECK(mahogany::hdrEnabled(mahogany::HdrMode::On, false, false));
+  CHECK(!mahogany::hdrEnabled(mahogany::HdrMode::Auto, true, false));
+  CHECK(mahogany::hdrEnabled(mahogany::HdrMode::Auto, true, true));
+  CHECK(!mahogany::hdrEnabled(mahogany::HdrMode::Fullscreen, false, false));
+  CHECK(mahogany::hdrEnabled(mahogany::HdrMode::Fullscreen, true, false));
 }
 
 CANOPY_TEST(blurRulesAndInputReachOnlyTheirConsumers) {
@@ -1050,7 +1050,7 @@ CANOPY_TEST(modKeyReloadRefreshesOnlyInternalUi) {
 }
 
 CANOPY_TEST(aFailedReloadResultCarriesNoChangesOrEffects) {
-  const canopy::ConfigReloadResult result;
+  const mahogany::ConfigReloadResult result;
   CHECK(!result.success);
   CHECK(!result.change.any());
   CHECK(!result.effects.any());
@@ -1058,10 +1058,10 @@ CANOPY_TEST(aFailedReloadResultCarriesNoChangesOrEffects) {
 
 CANOPY_TEST(effectPoolDefinitionsAndMemberOrderRaiseEffectsChange) {
   Config before;
-  before.effects.pools.push_back({.name = "borders", .kind = canopy::EffectKind::Border, .members = {"z", "a"}});
+  before.effects.pools.push_back({.name = "borders", .kind = mahogany::EffectKind::Border, .members = {"z", "a"}});
   Config after = before;
   CHECK(!ConfigEffects::between(before, after).effects);
-  after.effects.pools[0].selection = canopy::EffectSelectionPolicy::RoundRobin;
+  after.effects.pools[0].selection = mahogany::EffectSelectionPolicy::RoundRobin;
   CHECK(ConfigEffects::between(before, after).effects);
   after = before;
   after.effects.pools[0].members = {"a", "z"};
@@ -1074,10 +1074,10 @@ CANOPY_TEST(effectPoolDefinitionsAndMemberOrderRaiseEffectsChange) {
 CANOPY_TEST(effectActionRootChangesDrivePreparation) {
   Config before;
   Keybind selected;
-  CHECK(canopy::parseAction("effect-window-set pool --window window-1", selected));
+  CHECK(mahogany::parseAction("effect-window-set pool --window window-1", selected));
   before.keybinds = {selected};
   Config after = before;
-  CHECK(canopy::parseAction("effect-window-cycle pool --window window-2", after.keybinds.front()));
+  CHECK(mahogany::parseAction("effect-window-cycle pool --window window-2", after.keybinds.front()));
   CHECK(!ConfigEffects::between(before, after).effects);
   after.keybinds.front().cooldownMs = 100;
   after.keybinds.front().submap = "effects";
@@ -1089,15 +1089,15 @@ CANOPY_TEST(effectActionRootChangesDrivePreparation) {
   CHECK(!ConfigEffects::between(before, after).effects);
   after.hotCorners.corners[0].enabled = false;
   CHECK(ConfigEffects::between(before, after).effects);
-  CHECK(canopy::configuredEffectActionRoots(after).empty());
+  CHECK(mahogany::configuredEffectActionRoots(after).empty());
   after = before;
-  CHECK(canopy::parseAction("effect-window-set other", after.keybinds.front()));
+  CHECK(mahogany::parseAction("effect-window-set other", after.keybinds.front()));
   CHECK(ConfigEffects::between(before, after).effects);
   after = before;
-  CHECK(canopy::parseAction("effect-window-set off", after.keybinds.front()));
+  CHECK(mahogany::parseAction("effect-window-set off", after.keybinds.front()));
   CHECK(ConfigEffects::between(before, after).effects);
   after = before;
-  CHECK(canopy::parseAction("effect-window-cycle", after.keybinds.front()));
+  CHECK(mahogany::parseAction("effect-window-cycle", after.keybinds.front()));
   CHECK(ConfigEffects::between(before, after).effects);
 }
 
@@ -1106,12 +1106,12 @@ CANOPY_TEST(effectActionRootsAreUniqueAcrossKeybindsAndCorners) {
   config.keybinds.clear();
   for (const std::string action : {"effect-border-set zebra", "effect-screen-cycle alpha", "effect-border-set zebra"}) {
     Keybind bind;
-    CHECK(canopy::parseAction(action, bind));
+    CHECK(mahogany::parseAction(action, bind));
     config.keybinds.push_back(bind);
   }
   config.hotCorners.corners[0].enabled = true;
   config.hotCorners.corners[0].action = config.keybinds.front();
-  CHECK(canopy::configuredEffectActionRoots(config) == std::vector<std::string>({"alpha", "zebra"}));
+  CHECK(mahogany::configuredEffectActionRoots(config) == std::vector<std::string>({"alpha", "zebra"}));
 }
 
 CANOPY_TEST(titleBarGeometryReloadRearrangesWorkspaces) {
@@ -1121,7 +1121,7 @@ CANOPY_TEST(titleBarGeometryReloadRearrangesWorkspaces) {
   CHECK(ConfigEffects::between(before, after).workspaceLayout);
   CHECK(ConfigEffects::between(before, after).viewChrome);
   after = before;
-  after.appearance.titleBar.mode = canopy::TitleBarMode::Forced;
+  after.appearance.titleBar.mode = mahogany::TitleBarMode::Forced;
   CHECK(ConfigEffects::between(before, after).workspaceLayout);
   after = before;
   after.colors.titleBar.close[0] = 0.25F;

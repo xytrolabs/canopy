@@ -23,7 +23,7 @@ struct wlr_scene_tree;
 struct wlr_scene_node;
 struct fx_effect_shader;
 
-namespace canopy {
+namespace mahogany {
 
   class DwindleLayout;
   class MasterStackLayout;
@@ -508,4 +508,4 @@ namespace canopy {
     Slide m_slide;
   };
 
-} // namespace canopy
+} // namespace mahogany

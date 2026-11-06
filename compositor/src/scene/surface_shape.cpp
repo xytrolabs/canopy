@@ -6,7 +6,7 @@
 #include "wlr.h"
 // clang-format on
 
-namespace canopy {
+namespace mahogany {
 
   void applySurfaceShape(wlr_scene_buffer* buffer, wlr_surface* surface, const pixman_region32_t* shape) {
     if (shape == nullptr) {
@@ -68,4 +68,4 @@ namespace canopy {
     }
   }
 
-} // namespace canopy
+} // namespace mahogany

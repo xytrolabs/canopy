@@ -8,7 +8,7 @@
 
 struct wlr_scene_tree;
 
-namespace canopy {
+namespace mahogany {
   class Server;
 
   // Modal confirmation panel. Rendering only: key and button handling live in
@@ -51,4 +51,4 @@ namespace canopy {
     SurfaceShadow m_shadow;
   };
 
-} // namespace canopy
+} // namespace mahogany

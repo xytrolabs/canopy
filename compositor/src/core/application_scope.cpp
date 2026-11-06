@@ -9,7 +9,7 @@
 #include <string>
 #include <unistd.h>
 
-namespace canopy {
+namespace mahogany {
 
   bool isDirectSystemdService(pid_t currentPid, const char* systemdExecPid) {
     if (currentPid <= 0 || systemdExecPid == nullptr || systemdExecPid[0] == '\0') {
@@ -139,4 +139,4 @@ namespace canopy {
     _exit(1);
   }
 
-} // namespace canopy
+} // namespace mahogany

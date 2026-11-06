@@ -5,7 +5,7 @@ extern "C" {
 #include <wlr/util/box.h>
 }
 
-namespace canopy {
+namespace mahogany {
   // Offset centering a client buffer of `contentSize` in a fullscreen tile of `tileSize`. Negative when the buffer is
   // the larger of the two, which crops it equally on both sides; a fullscreen buffer is never scaled, because scaling a
   // client that is mid mode-change shows it at the wrong aspect ratio.
@@ -59,4 +59,4 @@ namespace canopy {
     }
     return src;
   }
-} // namespace canopy
+} // namespace mahogany

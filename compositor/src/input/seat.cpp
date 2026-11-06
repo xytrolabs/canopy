@@ -7,7 +7,7 @@
 #include "server/server.h"
 #include "wlr.h"
 
-namespace canopy {
+namespace mahogany {
 
   Seat::Seat(Server& server) : m_server(&server) {
     m_seat = wlr_seat_create(m_server->display(), "seat0");
@@ -267,4 +267,4 @@ namespace canopy {
     m_server->restoreActivatedViewKeyboardFocus();
   }
 
-} // namespace canopy
+} // namespace mahogany

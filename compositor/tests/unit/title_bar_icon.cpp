@@ -18,8 +18,8 @@ namespace {
     size_t stride = 0;
     bool accessible = false;
 
-    Pixels(canopy::TitleBarButton button, int size)
-        : buffer(canopy::renderTitleBarIcon(button, size, {1.0F, 1.0F, 1.0F, 1.0F})) {
+    Pixels(mahogany::TitleBarButton button, int size)
+        : buffer(mahogany::renderTitleBarIcon(button, size, {1.0F, 1.0F, 1.0F, 1.0F})) {
       accessible = wlr_buffer_begin_data_ptr_access(buffer, WLR_BUFFER_DATA_PTR_ACCESS_READ, &data, &format, &stride);
       CHECK(accessible);
       CHECK_EQ(format, DRM_FORMAT_ARGB8888);
@@ -42,7 +42,7 @@ namespace {
 } // namespace
 
 CANOPY_TEST(buttonSymbolsHaveDistinctGeometry) {
-  using canopy::TitleBarButton;
+  using mahogany::TitleBarButton;
   for (const int size : {8, 14, 18, 28, 64}) {
     const Pixels close(TitleBarButton::Close, size);
     const Pixels maximize(TitleBarButton::Maximize, size);
@@ -59,7 +59,7 @@ CANOPY_TEST(buttonSymbolsHaveDistinctGeometry) {
 }
 
 CANOPY_TEST(buttonSymbolsKeepTransparentAntialiasedEdges) {
-  using canopy::TitleBarButton;
+  using mahogany::TitleBarButton;
   for (const auto button : {TitleBarButton::Close, TitleBarButton::Maximize, TitleBarButton::Minimize}) {
     const Pixels image(button, 28);
     if (!image.accessible)

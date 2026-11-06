@@ -6,9 +6,9 @@
 #include <span>
 #include <vector>
 
-using canopy::interpolateBox;
-using canopy::keepsSeparation;
-using canopy::MotionBox;
+using mahogany::interpolateBox;
+using mahogany::keepsSeparation;
+using mahogany::MotionBox;
 
 namespace {
 

@@ -2,7 +2,7 @@
 
 #include "wlr.h"
 
-namespace canopy {
+namespace mahogany {
 
   ManualShortcutsInhibit::~ManualShortcutsInhibit() { clear(); }
 
@@ -41,4 +41,4 @@ namespace canopy {
     entry->owner->disable(entry->surface);
   }
 
-} // namespace canopy
+} // namespace mahogany
