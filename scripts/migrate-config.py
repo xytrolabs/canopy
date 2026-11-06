@@ -25,26 +25,35 @@ from pathlib import Path
 # (section, key, old value, new value). Values are compared as written, without
 # surrounding whitespace, so `0.92` and `0.92 ` both match but `1.0` does not.
 MIGRATIONS: list[tuple[str, str, str, str]] = [
-    # Fluent pass: one UI face, shipped with the shell.
-    ("shell", "font_family", '"Space Grotesk"', '"Inter"'),
+    # Canopy's face and signature accents. (Older configs were moved to Inter and
+    # neutral hairlines for a Fluent pass; those read as generic, so both come
+    # back.)
+    ("shell", "font_family", '"Inter"', '"Space Grotesk"'),
     # The menu bar carries the workspace switcher, the way every desktop does.
     ("bar.main", "start", '["launcher", "wordmark", "active_window"]',
      '["launcher", "wordmark", "workspaces", "active_window"]'),
     # Fluent elevation is a hint, not a halo.
     ("shell.shadow", "alpha", "0.45", "0.35"),
     # Neutral hairlines; the accent is for interaction.
-    ("bar.main", "border", '"primary"', '"outline_variant"'),
+    ("bar.main", "border", '"primary"', '"outline"'),
+    ("bar.main", "border", '"outline_variant"', '"outline"'),
+    ("bar.main", "thickness", "32", "34"),
+    # Floating sidebar capsule from the original design.
+    ("bar.tray", "thickness", "60", "56"),
+    ("bar.tray", "radius", "30", "28"),
     ("bar.main", "widget_spacing", "6", "8"),
     # Dock: icons fill the pill (56 in 76) instead of floating in padding.
     ("dock", "icon_size", "44", "56"),
     ("dock", "cross_axis_padding", "14", "4"),
     ("dock", "item_spacing", "16", "14"),
     ("dock", "inactive_scale", "0.92", "1.0"),
-    ("dock", "radius", "12", "8"),
-    ("dock", "radius_top_left", "12", "8"),
-    ("dock", "radius_top_right", "12", "8"),
-    ("dock", "radius_bottom_left", "12", "8"),
-    ("dock", "radius_bottom_right", "12", "8"),
+    ("dock", "radius", "8", "20"),
+    ("dock", "radius_top_left", "8", "20"),
+    ("dock", "radius_top_right", "8", "20"),
+    ("dock", "radius_bottom_left", "8", "20"),
+    ("dock", "radius_bottom_right", "8", "20"),
+    ("dock", "margin_edge", "10", "12"),
+    ("dock", "shadow", "true", "false"),
     # Acrylic toasts.
     ("notification", "background_opacity", "0.95", "0.92"),
 ]
@@ -64,8 +73,8 @@ MIGRATIONS_COMPOSITOR: list[tuple[str, str, str, str]] = [
     ("appearance.title_bar", "button_position", '"right"', '"left"'),
     ("appearance.title_bar", "button_corner_radius", "12", "100"),
     # Neutral outline instead of an accent ring around every focused window.
-    ("colors.border", "focused", '"#7C5CFCFF"', '"#3A3652FF"'),
-    ("colors.border", "unfocused", '"#2C2939FF"', '"#26243AFF"'),
+    ("colors.border", "focused", '"#3A3652FF"', '"#7C5CFCFF"'),
+    ("colors.border", "unfocused", '"#26243AFF"', '"#2C2939FF"'),
     ("colors.border", "outer", '"#1E1C29FF"', '"#14131CFF"'),
 ]
 
@@ -134,7 +143,9 @@ def _add_missing_keys(text: str) -> tuple[str, list[str]]:
 
 
 def _rewrite_values(text: str, migrations=MIGRATIONS) -> tuple[str, list[str]]:
-    wanted = {(section, key): (old, new) for section, key, old, new in migrations}
+    wanted: dict[tuple[str, str], list[tuple[str, str]]] = {}
+    for section, key, old, new in migrations:
+        wanted.setdefault((section, key), []).append((old, new))
     applied: list[str] = []
     section = ""
     out: list[str] = []
@@ -152,15 +163,18 @@ def _rewrite_values(text: str, migrations=MIGRATIONS) -> tuple[str, list[str]]:
             continue
 
         key = key_match.group("key")
-        rule = wanted.get((section, key))
+        rules = wanted.get((section, key))
+        if not rules:
+            out.append(line)
+            continue
+
+        current = key_match.group("value").strip()
+        rule = next(((old, new) for old, new in rules if current == old), None)
         if rule is None:
             out.append(line)
             continue
 
         old, new = rule
-        if key_match.group("value").strip() != old:
-            out.append(line)
-            continue
 
         rebuilt = (
             f"{key_match.group('indent')}{key}{key_match.group('sep')}{new}"

@@ -16,9 +16,9 @@
 
 [shell]
 corner_radius_scale     = 1.0
-# Fluent's face. Canopy ships Inter (Closest free match to Segoe UI) so the UI
-# renders the same on every machine instead of depending on what is installed.
-font_family             = "Inter"
+# Space Grotesk is part of what makes Canopy look like Canopy. Fluent geometry
+# and materials, our own face.
+font_family             = "Space Grotesk"
 time_format             = "{:%H:%M}"
 date_format             = "%a %d %b"
 polkit_agent            = true
@@ -112,15 +112,15 @@ position            = "top"
 # A menu bar spans the screen edge. The margins and radius this used to carry
 # are what made it look like a floating panel: radius rounds the corners and
 # the margins inset the whole rect from the edges.
-thickness           = 32
+thickness           = 34
 radius              = 0
 margin_ends         = 0
 margin_edge         = 0
 padding             = 12
 widget_spacing      = 8
-# Fluent hairlines are neutral; the accent belongs to the focused or active
-# item, not to the frame around everything.
-border              = "outline_variant"
+# A medium-grey hairline: the bar is charcoal with a separator, not an accent
+# frame. The accent belongs to what is active inside it.
+border              = "outline"
 border_width        = 1.0
 background_opacity  = 0.78
 compositor_blur     = true
@@ -146,8 +146,8 @@ position            = "left"
 # Cross size and padding decide how much air the island has around its icons.
 # 40 px with 4 px padding read as cramped; 48 with 8 keeps the pill slim but
 # stops the icons touching the edges.
-thickness           = 60
-radius              = 30
+thickness           = 56
+radius              = 28
 margin_ends         = 24
 margin_edge         = 10
 padding             = 12
@@ -216,14 +216,16 @@ cross_axis_padding  = 4
 item_spacing        = 14
 background_opacity  = 0.80
 compositor_blur     = true
-radius              = 8
-radius_top_left     = 8
-radius_top_right    = 8
-radius_bottom_left  = 8
-radius_bottom_right = 8
+# Floating dock, 20 px corners, no shadow: the reference lets the fill and the
+# hairline carry it instead of a drop shadow.
+radius              = 20
+radius_top_left     = 20
+radius_top_right    = 20
+radius_bottom_left  = 20
+radius_bottom_right = 20
 margin_ends         = 0
-margin_edge         = 10
-shadow              = true
+margin_edge         = 12
+shadow              = false
 show_running        = true
 # Three islands: pinned applications, running (unpinned), minimized windows.
 sections            = "islands"

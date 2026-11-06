@@ -242,7 +242,10 @@ namespace shell::dock {
         // pill's cross size, so the ends are true semicircles whatever the dock
         // thickness is. cfg.radius stays the radius of the unified dock panel.
         const float cross = vertical ? panelGeometry.panelW : panelGeometry.panelH;
-        box->setRadius(std::max(0.0F, cross * 0.5F));
+        // The island radius comes from the dock config (capped at half the cross
+        // size, where it becomes a pill). Hard-coding the cap made the islands
+        // ignore cfg.radius entirely, so a 20 px corner could never be drawn.
+        box->setRadius(std::max(0.0F, std::min(static_cast<float>(cfg.radius), cross * 0.5F)));
 
         // Pull each island's edges in towards its icons: two neighbouring islands
         // end up `sectionGap` pixels apart without a single icon moving.
