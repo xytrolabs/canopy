@@ -35,8 +35,8 @@ MIGRATIONS: list[tuple[str, str, str, str]] = [
     # Fluent elevation is a hint, not a halo.
     ("shell.shadow", "alpha", "0.45", "0.35"),
     # Neutral hairlines; the accent is for interaction.
-    ("bar.main", "border", '"primary"', '"outline"'),
-    ("bar.main", "border", '"outline_variant"', '"outline"'),
+    ("bar.main", "border", '"primary"', '"outline_variant"'),
+    ("bar.main", "border", '"outline"', '"outline_variant"'),
     ("bar.main", "thickness", "32", "34"),
     # Floating sidebar capsule from the original design.
     ("bar.tray", "thickness", "60", "56"),

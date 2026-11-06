@@ -104,7 +104,7 @@ namespace compositors {
     case CompositorKind::Kde:
       return "KDE";
     case CompositorKind::Umbriel:
-      return "Umbriel";
+      return "Mahogany";
     case CompositorKind::Unknown:
       return "Unknown";
     }

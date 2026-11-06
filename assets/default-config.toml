@@ -120,7 +120,7 @@ padding             = 12
 widget_spacing      = 8
 # A medium-grey hairline: the bar is charcoal with a separator, not an accent
 # frame. The accent belongs to what is active inside it.
-border              = "outline"
+border              = "outline_variant"
 border_width        = 1.0
 background_opacity  = 0.78
 compositor_blur     = true

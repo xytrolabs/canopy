@@ -390,7 +390,10 @@ namespace {
     case compositors::CompositorKind::Kde:
       return {"kwin_wayland", "--version"};
     case compositors::CompositorKind::Umbriel:
-      return {"umbriel", "-v"};
+      // Our compositor first. Upstream Umbriel can be installed on the same
+      // machine (it ships its own session), and probing it by name reported
+      // "Umbriel 0.1.0" while Mahogany was the compositor actually running.
+      return {"canopywc", "-v"};
     case compositors::CompositorKind::Unknown:
       break;
     }
