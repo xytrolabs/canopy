@@ -212,7 +212,7 @@ void Scrollbar::applyGeometry() {
       std::max(minThumbExtent, (m_viewportExtent * m_viewportExtent) / std::max(m_viewportExtent, m_contentExtent))
   );
   // A short dropdown can have less track than the minimum thumb extent.
-  // Leave room to drag while preserving Noctalia's normal thumb geometry.
+  // Leave room to drag while preserving Canopy's normal thumb geometry.
   if (m_maxScroll > 0.0F && thumbExtent >= trackExtent) {
     thumbExtent = trackExtent * 0.5F;
   }

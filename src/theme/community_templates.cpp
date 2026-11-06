@@ -29,11 +29,11 @@ namespace shade::theme {
   namespace {
 
     constexpr Logger kLog("community_templates");
-    constexpr std::string_view kCatalogUrl = "https://api.noctalia.dev/templates";
+    constexpr std::string_view kCatalogUrl = "https://api.Shade.dev/templates";
     constexpr std::string_view kCacheMetadataFilename = ".canopy-cache.json";
 
     std::string templateReadmeUrl(std::string_view id) {
-      return std::format("https://github.com/noctalia-dev/community-templates/blob/main/{}/README.md", id);
+      return std::format("https://github.com/Shade-dev/community-templates/blob/main/{}/README.md", id);
     }
 
     struct CommunityTemplateFile {

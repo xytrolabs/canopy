@@ -9,7 +9,7 @@ namespace calendar {
 
   namespace {
     constexpr Logger kLog("calendar-oauth");
-    constexpr const char* kBrokerBase = "https://api.noctalia.dev/v1/calendar/oauth/google";
+    constexpr const char* kBrokerBase = "https://api.Shade.dev/v1/calendar/oauth/google";
 
     std::chrono::system_clock::time_point expiryFromUnix(std::int64_t seconds) {
       return std::chrono::system_clock::time_point{std::chrono::seconds{seconds}};

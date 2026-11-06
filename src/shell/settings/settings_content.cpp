@@ -931,7 +931,7 @@ namespace settings {
             state->push_back(
                 SessionPanelActionConfig{
                     .action = "command",
-                    .command = "notify-send 'Noctalia' 'Custom session entry'",
+                    .command = "notify-send 'Canopy' 'Custom session entry'",
                 }
             );
             commit();

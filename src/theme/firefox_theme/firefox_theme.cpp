@@ -37,7 +37,7 @@ namespace shade::theme {
     namespace settings = firefox_theme::settings;
 
     // Wire names required by the Pywalfox Firefox/Thunderbird extension.
-    constexpr std::string_view kHostVersion = "noctalia-2.9.0-compat";
+    constexpr std::string_view kHostVersion = "Shade-2.9.0-compat";
 
     constexpr std::string_view kActionVersion = "debug:version";
     constexpr std::string_view kActionColors = "action:colors";
@@ -190,13 +190,13 @@ namespace shade::theme {
       return home / ".mozilla" / "native-messaging-hosts" / "pywalfox.json";
     }
 
-    [[nodiscard]] std::filesystem::path resolveNoctaliaExecutable() {
+    [[nodiscard]] std::filesystem::path resolveCanopyExecutable() {
       std::string self = selfExePath();
       if (!self.empty()) {
         return self;
       }
-#ifdef NOCTALIA_INSTALL_PREFIX
-      auto installed = std::filesystem::path(NOCTALIA_INSTALL_PREFIX) / "bin" / "canopy";
+#ifdef CANOPY_INSTALL_PREFIX
+      auto installed = std::filesystem::path(CANOPY_INSTALL_PREFIX) / "bin" / "canopy";
       std::error_code ec;
       if (std::filesystem::is_regular_file(installed, ec)) {
         return installed;
@@ -238,11 +238,11 @@ namespace shade::theme {
     }
 
     // Install only when absent or already owned by canopy — never clobber a foreign host.
-    bool ensureManifestOwnedByNoctalia(std::string* error, std::string* warning) {
-      const auto host = resolveNoctaliaExecutable();
+    bool ensureManifestOwnedByCanopy(std::string* error, std::string* warning) {
+      const auto host = resolveCanopyExecutable();
       if (host.empty()) {
         if (error != nullptr) {
-          *error = "noctalia executable not found";
+          *error = "Shade executable not found";
         }
         return false;
       }
@@ -571,7 +571,7 @@ namespace shade::theme {
 
     std::string ensureError;
     std::string ensureWarning;
-    if (!ensureManifestOwnedByNoctalia(&ensureError, &ensureWarning)) {
+    if (!ensureManifestOwnedByCanopy(&ensureError, &ensureWarning)) {
       result.error = ensureError;
       return result;
     }
@@ -721,7 +721,7 @@ namespace shade::theme {
       return runFirefoxNativeMessagingHost();
     }
     if (action == "install") {
-      const auto host = resolveNoctaliaExecutable();
+      const auto host = resolveCanopyExecutable();
       std::string err;
       if (!installManifest(host, &err)) {
         std::println(stderr, "install failed: {}", err);

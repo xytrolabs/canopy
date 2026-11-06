@@ -253,7 +253,7 @@ namespace scripting {
 
     [[nodiscard]] UnloadPluginSoundsHook unloadPluginSoundsHook() const { return m_unloadPluginSoundsHook; }
 
-    // noctalia.idle.watch()/unwatch(). Wired to PluginIdleWatches in Application; invoked only on
+    // Shade.idle.watch()/unwatch(). Wired to PluginIdleWatches in Application; invoked only on
     // the main thread (from dispatchSideEffects). The release hook runs when a Luau host dies.
     void setIdleWatchHook(IdleWatchHook hook) { m_idleWatchHook = std::move(hook); }
 
@@ -277,7 +277,7 @@ namespace scripting {
 
     [[nodiscard]] ReleaseIdleWatchesHook releaseIdleWatchesHook() const { return m_releaseIdleWatchesHook; }
 
-    // noctalia.layer.show()/hide()/configure(). Wired to PluginLayerHost in Application; main thread
+    // Shade.layer.show()/hide()/configure(). Wired to PluginLayerHost in Application; main thread
     // only (from dispatchSideEffects).
     void setLayerCommandHook(LayerCommandHook hook) { m_layerCommandHook = std::move(hook); }
 

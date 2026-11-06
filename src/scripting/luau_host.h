@@ -214,14 +214,14 @@ public:
   void scriptTogglePanel(std::string panelId);
   // Open the settings window at this plugin's own settings. Queued, applied on the main thread.
   void scriptOpenSettings();
-  // noctalia.idle.watch()/unwatch(): compositor idle notifications. The Wayland objects live on
+  // Shade.idle.watch()/unwatch(): compositor idle notifications. The Wayland objects live on
   // the main thread, so both are queued as side effects; watches are released with the host.
   // The callback ref doubles as the watch id returned to the script.
   [[nodiscard]] bool scriptIdleWatch(std::uint32_t timeoutMs, bool ignoreInhibitors, int callbackRef);
   [[nodiscard]] bool scriptIdleUnwatch(int watchId);
   bool callIdleWatchCallback(int callbackRef, bool idle, std::chrono::milliseconds budget);
   [[nodiscard]] bool hasIdleWatchCallback(int callbackRef) const;
-  // noctalia.layer.show()/hide()/configure() for this plugin's [[layer]] entry `localEntryId`.
+  // Shade.layer.show()/hide()/configure() for this plugin's [[layer]] entry `localEntryId`.
   // Queued, applied on the main thread.
   void scriptLayerCommand(
       scripting::PluginLayerCommand command, const std::string& localEntryId, scripting::PluginLayerConfigPatch patch

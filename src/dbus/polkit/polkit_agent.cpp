@@ -172,7 +172,7 @@ namespace {
 // signatures are defined by libpolkit-agent.
 // NOLINTBEGIN(readability-identifier-naming)
 
-using NoctaliaPolkitListener = struct _NoctaliaPolkitListener {
+using CanopyPolkitListener = struct _CanopyPolkitListener {
   PolkitAgentListener parent_instance;
   void* owner = nullptr;
   InitiateCallback initiate = nullptr;
@@ -180,7 +180,7 @@ using NoctaliaPolkitListener = struct _NoctaliaPolkitListener {
   gpointer registration_handle = nullptr;
 };
 
-using NoctaliaPolkitListenerClass = struct _NoctaliaPolkitListenerClass {
+using CanopyPolkitListenerClass = struct _CanopyPolkitListenerClass {
   PolkitAgentListenerClass parent_class;
 };
 
@@ -194,16 +194,16 @@ static gboolean canopy_polkit_listener_initiate_authentication_finish(
 );
 static void canopy_polkit_request_cancelled(GCancellable* cancellable, gpointer user_data) noexcept;
 
-G_DEFINE_TYPE(NoctaliaPolkitListener, canopy_polkit_listener, POLKIT_AGENT_TYPE_LISTENER)
+G_DEFINE_TYPE(CanopyPolkitListener, canopy_polkit_listener, POLKIT_AGENT_TYPE_LISTENER)
 
-static void canopy_polkit_listener_init(NoctaliaPolkitListener* self) {
+static void canopy_polkit_listener_init(CanopyPolkitListener* self) {
   self->owner = nullptr;
   self->initiate = nullptr;
   self->cancel = nullptr;
   self->registration_handle = nullptr;
 }
 
-static void canopy_polkit_listener_class_init(NoctaliaPolkitListenerClass* klass) {
+static void canopy_polkit_listener_class_init(CanopyPolkitListenerClass* klass) {
   auto* listenerClass = POLKIT_AGENT_LISTENER_CLASS(klass);
   listenerClass->initiate_authentication = canopy_polkit_listener_initiate_authentication;
   listenerClass->initiate_authentication_finish = canopy_polkit_listener_initiate_authentication_finish;
@@ -215,7 +215,7 @@ static void canopy_polkit_listener_initiate_authentication(
     GAsyncReadyCallback callback, gpointer user_data
 ) noexcept {
   guardPolkitCallback("initiate_authentication", [&] {
-    auto* self = reinterpret_cast<NoctaliaPolkitListener*>(listener);
+    auto* self = reinterpret_cast<CanopyPolkitListener*>(listener);
     auto request = std::make_unique<InternalAuthRequest>();
     request->actionId = action_id != nullptr ? action_id : "";
     request->message = message != nullptr ? message : "";
@@ -261,7 +261,7 @@ static void canopy_polkit_request_cancelled(GCancellable* /*cancellable*/, gpoin
     auto* request = static_cast<InternalAuthRequest*>(user_data);
     request->cancelHandlerId = 0;
     auto* source = G_IS_TASK(request->task) ? g_task_get_source_object(request->task) : nullptr;
-    auto* listener = source != nullptr ? reinterpret_cast<NoctaliaPolkitListener*>(source) : nullptr;
+    auto* listener = source != nullptr ? reinterpret_cast<CanopyPolkitListener*>(source) : nullptr;
     if (listener != nullptr && listener->cancel != nullptr && listener->owner != nullptr) {
       listener->cancel(listener->owner, request);
     }
@@ -273,7 +273,7 @@ static void canopy_polkit_request_cancelled(GCancellable* /*cancellable*/, gpoin
 struct PolkitAgent::Impl {
   StateCallback stateCallback;
   ReadyCallback readyCallback;
-  NoctaliaPolkitListener* listener = nullptr;
+  CanopyPolkitListener* listener = nullptr;
   PolkitAgentSession* session = nullptr;
   GMainContext* context = nullptr;
   GCancellable* registerCancellable = nullptr;
@@ -295,7 +295,7 @@ struct PolkitAgent::Impl {
   mutable int glibPollTimeoutMs = -1;
 
   Impl() : context(g_main_context_default()) {
-    listener = static_cast<NoctaliaPolkitListener*>(g_object_new(canopy_polkit_listener_get_type(), nullptr));
+    listener = static_cast<CanopyPolkitListener*>(g_object_new(canopy_polkit_listener_get_type(), nullptr));
     listener->owner = this;
     listener->initiate = &Impl::initiateBridge;
     listener->cancel = &Impl::cancelBridge;

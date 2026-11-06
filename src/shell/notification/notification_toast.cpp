@@ -62,7 +62,7 @@ namespace {
     const float baseRadius = Style::radiusMd * (iconSize / kNotificationIconReferenceSize);
     return std::min(iconSize * 0.5F, Style::scaledRadius(baseRadius, localScale));
   }
-  constexpr std::string_view kNoctaliaGlyphIconPrefix = "noctalia-glyph:";
+  constexpr std::string_view kCanopyGlyphIconPrefix = "Shade-glyph:";
   constexpr float kIconTextGap = Style::spaceSm;
   constexpr float kActionGap = Style::spaceXs;
   constexpr float kActionRowGap = Style::spaceSm;
@@ -2475,10 +2475,10 @@ InputArea* NotificationToast::buildCard(
   bool iconAssigned = false;
   if (entry.icon.has_value()) {
     const std::string& rawIcon = *entry.icon;
-    if (rawIcon.size() > kNoctaliaGlyphIconPrefix.size()
-        && std::string_view(rawIcon.data(), kNoctaliaGlyphIconPrefix.size()) == kNoctaliaGlyphIconPrefix) {
+    if (rawIcon.size() > kCanopyGlyphIconPrefix.size()
+        && std::string_view(rawIcon.data(), kCanopyGlyphIconPrefix.size()) == kCanopyGlyphIconPrefix) {
       const std::string_view glyphName(
-          rawIcon.data() + kNoctaliaGlyphIconPrefix.size(), rawIcon.size() - kNoctaliaGlyphIconPrefix.size()
+          rawIcon.data() + kCanopyGlyphIconPrefix.size(), rawIcon.size() - kCanopyGlyphIconPrefix.size()
       );
       if (!glyphName.empty()) {
         iconSlot->addChild(
@@ -3075,8 +3075,8 @@ std::string NotificationToast::resolveNotificationIconPath(const PopupEntry& ent
   if (!entry.icon.has_value() || entry.icon->empty()) {
     return {};
   }
-  if (entry.icon->size() > kNoctaliaGlyphIconPrefix.size()
-      && std::string_view(entry.icon->data(), kNoctaliaGlyphIconPrefix.size()) == kNoctaliaGlyphIconPrefix) {
+  if (entry.icon->size() > kCanopyGlyphIconPrefix.size()
+      && std::string_view(entry.icon->data(), kCanopyGlyphIconPrefix.size()) == kCanopyGlyphIconPrefix) {
     return {};
   }
 

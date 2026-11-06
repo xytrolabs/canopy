@@ -44,7 +44,7 @@ namespace shade::theme {
     struct ResolvedTheme {
       GeneratedPalette generated;
       Palette palette;
-      // Resolved [theme].mode (apps) and the mode Noctalia itself runs in.
+      // Resolved [theme].mode (apps) and the mode Canopy itself runs in.
       std::string mode;
       std::string shellMode;
     };
@@ -75,7 +75,7 @@ namespace shade::theme {
     ResolvedTheme resolveBuiltin(const ThemeConfig& cfg, std::string_view mode, std::string_view shellMode) {
       const auto* palette = findBuiltinPalette(cfg.builtinPalette);
       if (palette == nullptr) {
-        kLog.warn("unknown builtin palette '{}', falling back to Noctalia", cfg.builtinPalette);
+        kLog.warn("unknown builtin palette '{}', falling back to Canopy", cfg.builtinPalette);
         palette = findBuiltinPalette("Canopy");
       }
       const GeneratedPalette generated = expandBuiltinPalette(*palette);

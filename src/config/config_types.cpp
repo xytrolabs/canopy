@@ -62,10 +62,10 @@ std::vector<PluginSourceConfig> defaultPluginSources() {
   return {
       {.kind = PluginSourceKind::Git,
        .name = "official",
-       .location = "https://github.com/noctalia-dev/official-plugins"},
+       .location = "https://github.com/Shade-dev/official-plugins"},
       {.kind = PluginSourceKind::Git,
        .name = "community",
-       .location = "https://github.com/noctalia-dev/community-plugins"},
+       .location = "https://github.com/Shade-dev/community-plugins"},
   };
 }
 

@@ -153,7 +153,7 @@ namespace shade::theme {
       return root;
     }
 
-    // state.toml owner holding the template ids Noctalia has applied, one key per source.
+    // state.toml owner holding the template ids Canopy has applied, one key per source.
     constexpr std::string_view kStateOwner = "theme_templates";
 
     std::set<std::string> enabledBuiltinIds(const ThemeConfig::TemplatesConfig& templates) {

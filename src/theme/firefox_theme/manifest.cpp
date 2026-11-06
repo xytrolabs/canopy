@@ -8,7 +8,7 @@ namespace shade::theme::firefox_theme::manifest {
 
     constexpr std::string_view kLegacyDescription = "Canopy Pywalfox native messaging host";
 
-    [[nodiscard]] bool isNoctaliaDescription(std::string_view description) {
+    [[nodiscard]] bool isCanopyDescription(std::string_view description) {
       return description == kDescription || description == kLegacyDescription;
     }
 
@@ -35,8 +35,8 @@ namespace shade::theme::firefox_theme::manifest {
       }
       if (const auto description = root.find("description"); description != root.end()
           && description->is_string()
-          && isNoctaliaDescription(description->get_ref<const std::string&>())) {
-        result.ownership = Ownership::Noctalia;
+          && isCanopyDescription(description->get_ref<const std::string&>())) {
+        result.ownership = Ownership::Canopy;
       }
       return result;
     } catch (...) {
@@ -48,7 +48,7 @@ namespace shade::theme::firefox_theme::manifest {
   install(const std::filesystem::path& manifestPath, const std::filesystem::path& hostExecutable, std::string* error) {
     if (hostExecutable.empty() || !std::filesystem::is_regular_file(hostExecutable)) {
       if (error != nullptr) {
-        *error = "noctalia executable not found";
+        *error = "Shade executable not found";
       }
       return false;
     }

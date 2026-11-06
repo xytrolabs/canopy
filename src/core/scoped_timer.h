@@ -8,8 +8,8 @@
 #include <utility>
 
 // Lightweight, opt-in wall-clock profiling. Output is gated behind the
-// NOCTALIA_PROFILE env var so normal runs stay silent; set it to any non-empty
-// value to surface timing lines (e.g. `NOCTALIA_PROFILE=1 canopy`).
+// CANOPY_PROFILE env var so normal runs stay silent; set it to any non-empty
+// value to surface timing lines (e.g. `CANOPY_PROFILE=1 canopy`).
 namespace shade::profiling {
 
   // Evaluated once on first use.

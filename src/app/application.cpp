@@ -62,14 +62,14 @@
 #include <chrono>
 #include <cstring>
 #include <malloc.h>
-#ifdef NOCTALIA_USE_JEMALLOC
+#ifdef CANOPY_USE_JEMALLOC
 #include <jemalloc/jemalloc.h>
 #endif
 #include <string_view>
 
-#ifdef NOCTALIA_USE_JEMALLOC
-#define NOCTALIA_STRINGIFY_HELPER(x) #x
-#define NOCTALIA_STRINGIFY(x) NOCTALIA_STRINGIFY_HELPER(x)
+#ifdef CANOPY_USE_JEMALLOC
+#define CANOPY_STRINGIFY_HELPER(x) #x
+#define CANOPY_STRINGIFY(x) CANOPY_STRINGIFY_HELPER(x)
 #endif
 
 std::atomic<bool> Application::s_shutdownRequested{false};
@@ -229,10 +229,10 @@ void Application::run(const std::function<void()>& startupReadyCallback) {
 
 #ifdef __GLIBC__
   runStartupPhase("allocator_trim", [] {
-#ifdef NOCTALIA_USE_JEMALLOC
+#ifdef CANOPY_USE_JEMALLOC
     // jemalloc exports no malloc_trim; purge unused pages in every arena.
     const int purgeResult =
-        mallctl("arena." NOCTALIA_STRINGIFY(MALLCTL_ARENAS_ALL) ".purge", nullptr, nullptr, nullptr, 0);
+        mallctl("arena." CANOPY_STRINGIFY(MALLCTL_ARENAS_ALL) ".purge", nullptr, nullptr, nullptr, 0);
     if (purgeResult != 0) {
       kLog.warn("failed to purge jemalloc arenas: {}", std::strerror(purgeResult));
     }

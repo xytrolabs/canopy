@@ -4,7 +4,7 @@
 
 namespace shade::build_info {
 
-  std::string_view version() noexcept { return NOCTALIA_VERSION; }
+  std::string_view version() noexcept { return CANOPY_VERSION; }
 
   std::string_view revision() noexcept { return CANOPY_GIT_REVISION; }
 

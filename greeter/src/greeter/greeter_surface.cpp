@@ -3139,7 +3139,7 @@ void GreeterSurface::scrollSelectorMenu(int delta) {
 }
 
 void GreeterSurface::invalidateMenuPointers() {
-  // Rows are transient, but the shared Noctalia scrollbar stays alive through
+  // Rows are transient, but the shared Canopy scrollbar stays alive through
   // relayouts so its pointer capture and hover animation can continue.
   const MenuScroll* scroll = activeMenuScroll();
   m_inputDispatcher.invalidateTransientPointers(scroll != nullptr ? scroll->bar : nullptr);

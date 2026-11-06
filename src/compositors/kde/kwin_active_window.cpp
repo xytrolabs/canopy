@@ -63,7 +63,7 @@ function notify(window) {
   }
 }
 
-function isNoctaliaShellSurface(window) {
+function isCanopyShellSurface(window) {
   const resourceClass = (window.resourceClass || "").toLowerCase();
   if (resourceClass === "canopy") {
     return true;
@@ -88,7 +88,7 @@ function shouldTrack(window) {
   if (window.dialog || window.splash || window.utility || window.dropdownMenu || window.popupMenu) {
     return false;
   }
-  if (isNoctaliaShellSurface(window)) {
+  if (isCanopyShellSurface(window)) {
     return false;
   }
   return true;
@@ -262,7 +262,7 @@ syncWindows();
     return parts;
   }
 
-  [[nodiscard]] bool isNoctaliaShellSurface(const std::string& appId, const std::string& title) {
+  [[nodiscard]] bool isCanopyShellSurface(const std::string& appId, const std::string& title) {
     const std::string appLower = StringUtils::toLower(appId);
     if (appLower == "canopy") {
       return true;
@@ -348,7 +348,7 @@ namespace compositors::kde {
     ids.reserve(m_trackedWindows.size());
     for (const auto& window : m_trackedWindows) {
       if (window.appId.empty()
-          || isNoctaliaShellSurface(window.appId, window.title)
+          || isCanopyShellSurface(window.appId, window.title)
           || !seen.insert(window.appId).second) {
         continue;
       }
@@ -363,7 +363,7 @@ namespace compositors::kde {
     matched.reserve(m_trackedWindows.size());
     std::uint64_t order = 0;
     for (const auto& window : m_trackedWindows) {
-      if (window.appId.empty() || isNoctaliaShellSurface(window.appId, window.title)) {
+      if (window.appId.empty() || isCanopyShellSurface(window.appId, window.title)) {
         continue;
       }
       std::string appLower = window.appId;
@@ -396,7 +396,7 @@ namespace compositors::kde {
       }
       const std::string title = StringUtils::windowTitleSingleLine(window.title);
       const std::string appId = window.appId;
-      if (appId.empty() || isNoctaliaShellSurface(appId, title)) {
+      if (appId.empty() || isCanopyShellSurface(appId, title)) {
         continue;
       }
       if (window.desktopIds.empty()) {
@@ -729,7 +729,7 @@ for (const window of workspace.windowList()) {{
     } else {
       const std::string title = StringUtils::windowTitleSingleLine(caption);
       const std::string& appId = resourceClass;
-      if (isNoctaliaShellSurface(appId, title)) {
+      if (isCanopyShellSurface(appId, title)) {
         return;
       }
       std::string identifier;
@@ -796,7 +796,7 @@ for (const window of workspace.windowList()) {{
         kLog.warn("window-list snapshot requires a window UUID");
         continue;
       }
-      if (isNoctaliaShellSurface(window.appId, window.title)) {
+      if (isCanopyShellSurface(window.appId, window.title)) {
         continue;
       }
       next.push_back(std::move(window));

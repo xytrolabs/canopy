@@ -13,7 +13,7 @@ namespace shade::theme::firefox_theme::manifest {
 
   enum class Ownership : std::uint8_t {
     Missing,
-    Noctalia,
+    Canopy,
     Foreign,
   };
 

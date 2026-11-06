@@ -27,7 +27,7 @@
 #include <unistd.h>
 
 #ifdef __GLIBC__
-#ifdef NOCTALIA_USE_JEMALLOC
+#ifdef CANOPY_USE_JEMALLOC
 #include <jemalloc/jemalloc.h>
 #else
 #include <malloc.h>
@@ -242,7 +242,7 @@ namespace {
 
 } // namespace
 
-#ifdef NOCTALIA_USE_JEMALLOC
+#ifdef CANOPY_USE_JEMALLOC
 // jemalloc reads this before its first allocation; the background thread runs
 // decay even while the shell is idle.
 const char* malloc_conf = "background_thread:true,narenas:2,dirty_decay_ms:1000,muzzy_decay_ms:5000,lg_tcache_max:12";
@@ -250,7 +250,7 @@ const char* malloc_conf = "background_thread:true,narenas:2,dirty_decay_ms:1000,
 
 int main(int argc, char* argv[]) {
 
-#if defined(__GLIBC__) && !defined(NOCTALIA_USE_JEMALLOC)
+#if defined(__GLIBC__) && !defined(CANOPY_USE_JEMALLOC)
   mallopt(M_ARENA_MAX, 2);
 #endif
 

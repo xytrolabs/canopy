@@ -37,7 +37,7 @@ namespace shade::launcher {
 
   int runDmenuCli(int argc, char** argv) {
     auto parsed = cli::parseOrReport(
-        cli::kDmenuCmd, "noctalia dmenu", std::span<char* const>{argv + 2, static_cast<std::size_t>(argc - 2)}
+        cli::kDmenuCmd, "Shade dmenu", std::span<char* const>{argv + 2, static_cast<std::size_t>(argc - 2)}
     );
     if (!parsed)
       return 1;

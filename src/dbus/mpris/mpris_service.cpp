@@ -42,7 +42,7 @@ namespace {
   constexpr auto kPropertiesInterface = "org.freedesktop.DBus.Properties";
   constexpr auto kMprisRootInterface = "org.mpris.MediaPlayer2";
   constexpr auto kMprisPlayerInterface = "org.mpris.MediaPlayer2.Player";
-  constexpr auto kNoctaliaMprisInterface = "dev.canopy.Mpris";
+  constexpr auto kCanopyMprisInterface = "dev.canopy.Mpris";
   constexpr auto kPropertiesDebounceWindow = std::chrono::milliseconds{120};
   constexpr float kMediaVolumeStepDefault = 0.05F;
   constexpr auto kVolumeHoldWindow = std::chrono::milliseconds{800};
@@ -58,8 +58,8 @@ namespace {
   const sdbus::ServiceName kDbusName{"org.freedesktop.DBus"};
   const sdbus::ObjectPath kDbusPath{"/org/freedesktop/DBus"};
   const sdbus::ObjectPath kMprisPath{"/org/mpris/MediaPlayer2"};
-  const sdbus::ServiceName kNoctaliaMprisBusName{"dev.canopy.Mpris"};
-  const sdbus::ObjectPath kNoctaliaMprisObjectPath{"/dev/shade/Mpris"};
+  const sdbus::ServiceName kCanopyMprisBusName{"dev.canopy.Mpris"};
+  const sdbus::ObjectPath kCanopyMprisObjectPath{"/dev/shade/Mpris"};
 
   bool is_mpris_bus_name(std::string_view name) { return name.starts_with("org.mpris.MediaPlayer2."); }
 
@@ -1359,8 +1359,8 @@ const std::vector<std::string>& MprisService::preferredPlayers() const noexcept 
 const std::vector<std::string>& MprisService::blacklist() const noexcept { return m_blacklist; }
 
 void MprisService::registerControlApi() {
-  m_bus.connection().requestName(kNoctaliaMprisBusName);
-  m_controlObject = sdbus::createObject(m_bus.connection(), kNoctaliaMprisObjectPath);
+  m_bus.connection().requestName(kCanopyMprisBusName);
+  m_controlObject = sdbus::createObject(m_bus.connection(), kCanopyMprisObjectPath);
 
   m_controlObject
       ->addVTable(
@@ -1559,7 +1559,7 @@ void MprisService::registerControlApi() {
             return onPreviousActive();
           })
       )
-      .forInterface(kNoctaliaMprisInterface);
+      .forInterface(kCanopyMprisInterface);
 }
 
 void MprisService::emitPlayersChanged() {
@@ -1568,26 +1568,26 @@ void MprisService::emitPlayersChanged() {
     players.push_back(to_dbus_player(player));
   }
 
-  m_controlObject->emitSignal("PlayersChanged").onInterface(kNoctaliaMprisInterface).withArguments(players);
+  m_controlObject->emitSignal("PlayersChanged").onInterface(kCanopyMprisInterface).withArguments(players);
 }
 
 void MprisService::emitActivePlayerChanged() {
   const auto active = activePlayer();
   if (!active.has_value()) {
     m_controlObject->emitSignal("ActivePlayerChanged")
-        .onInterface(kNoctaliaMprisInterface)
+        .onInterface(kCanopyMprisInterface)
         .withArguments(false, std::map<std::string, sdbus::Variant>{});
     return;
   }
 
   m_controlObject->emitSignal("ActivePlayerChanged")
-      .onInterface(kNoctaliaMprisInterface)
+      .onInterface(kCanopyMprisInterface)
       .withArguments(true, to_dbus_player(*active));
 }
 
 void MprisService::emitTrackChanged(const MprisPlayerInfo& player) {
   m_controlObject->emitSignal("TrackChanged")
-      .onInterface(kNoctaliaMprisInterface)
+      .onInterface(kCanopyMprisInterface)
       .withArguments(player.busName, to_dbus_player(player));
 }
 

@@ -76,7 +76,7 @@ namespace shade::config {
 
     int runSettingsCount(int argc, char* argv[]) {
       auto parsed = cli::parseOrReport(
-          cli::kConfigSettingsCountCmd, "noctalia config settings-count",
+          cli::kConfigSettingsCountCmd, "Shade config settings-count",
           std::span<char* const>{argv + 3, static_cast<std::size_t>(argc - 3)}
       );
       if (!parsed)

@@ -5,7 +5,7 @@
 #include <string_view>
 
 // Formats local wall-clock time with the same bare strftime and C++ chrono
-// field syntax used by Noctalia (for example "%H:%M" and "{:%H:%M}").
+// field syntax used by Canopy (for example "%H:%M" and "{:%H:%M}").
 [[nodiscard]] std::string formatLocalTime(std::string_view format);
 
 // Timestamp overload used by deterministic callers and tests.

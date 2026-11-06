@@ -54,7 +54,7 @@ namespace {
     return std::nullopt;
   }
 
-  [[nodiscard]] bool containsNoctaliaGreeter(std::string_view command) {
+  [[nodiscard]] bool containsCanopyGreeter(std::string_view command) {
     return command.find("canopy-greeter") != std::string_view::npos;
   }
 
@@ -71,17 +71,17 @@ namespace {
 
     GreetdSessionScan result;
     std::string currentSection;
-    bool sectionHasNoctaliaCommand = false;
+    bool sectionHasCanopyCommand = false;
     std::optional<std::string> sectionUser;
 
     const auto flushSection = [&]() {
-      if (sectionHasNoctaliaCommand && sectionUser.has_value()) {
+      if (sectionHasCanopyCommand && sectionUser.has_value()) {
         result.shadeSessionUser = sectionUser;
       }
       if (currentSection == "default_session" && sectionUser.has_value()) {
         result.defaultSessionUser = sectionUser;
       }
-      sectionHasNoctaliaCommand = false;
+      sectionHasCanopyCommand = false;
       sectionUser.reset();
     };
 
@@ -111,8 +111,8 @@ namespace {
 
       if (key == "user") {
         sectionUser = value;
-      } else if (key == "command" && containsNoctaliaGreeter(*value)) {
-        sectionHasNoctaliaCommand = true;
+      } else if (key == "command" && containsCanopyGreeter(*value)) {
+        sectionHasCanopyCommand = true;
       }
     }
 

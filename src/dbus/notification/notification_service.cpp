@@ -611,5 +611,5 @@ void NotificationService::emitNotificationReplied(
 }
 
 std::tuple<std::string, std::string, std::string, std::string> NotificationService::onGetServerInformation() {
-  return {"canopy", "xytrolabs", NOCTALIA_VERSION, "1.2"};
+  return {"canopy", "xytrolabs", CANOPY_VERSION, "1.2"};
 }

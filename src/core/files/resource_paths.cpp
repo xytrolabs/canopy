@@ -18,11 +18,11 @@ namespace paths {
     constexpr Logger kLog("paths");
 
     std::filesystem::path installedAssetsRoot() {
-      const std::filesystem::path datadir(NOCTALIA_INSTALL_DATADIR);
+      const std::filesystem::path datadir(CANOPY_INSTALL_DATADIR);
       if (datadir.is_absolute()) {
         return datadir / "canopy" / "assets";
       }
-      return std::filesystem::path(NOCTALIA_INSTALL_PREFIX) / datadir / "canopy" / "assets";
+      return std::filesystem::path(CANOPY_INSTALL_PREFIX) / datadir / "canopy" / "assets";
     }
 
     bool isAssetRoot(const std::filesystem::path& root) {
@@ -74,7 +74,7 @@ namespace paths {
         appendUnique(candidates, exeDir / "assets");
         appendUnique(candidates, exeDir.parent_path() / "assets");
 
-        const std::filesystem::path datadir(NOCTALIA_INSTALL_DATADIR);
+        const std::filesystem::path datadir(CANOPY_INSTALL_DATADIR);
         if (!datadir.empty() && !datadir.is_absolute()) {
           appendUnique(candidates, exeDir.parent_path() / datadir / "canopy" / "assets");
         }

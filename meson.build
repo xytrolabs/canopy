@@ -113,7 +113,7 @@ if is_glibc
   jemalloc_dep = dependency('jemalloc', required: jemalloc_option)
   if jemalloc_dep.found()
     jemalloc_deps += [jemalloc_dep]
-    jemalloc_cpp_args += ['-DNOCTALIA_USE_JEMALLOC=1']
+    jemalloc_cpp_args += ['-DCANOPY_USE_JEMALLOC=1']
   endif
 endif
 
@@ -1155,9 +1155,9 @@ _canopy_test_dependencies = _canopy_system_dependencies + [
 ]
 
 _canopy_compile_definitions = [
-  '-DNOCTALIA_INSTALL_PREFIX="' + get_option('prefix') + '"',
-  '-DNOCTALIA_INSTALL_DATADIR="' + get_option('datadir') + '"',
-  '-DNOCTALIA_VERSION="' + meson.project_version() + '"',
+  '-DCANOPY_INSTALL_PREFIX="' + get_option('prefix') + '"',
+  '-DCANOPY_INSTALL_DATADIR="' + get_option('datadir') + '"',
+  '-DCANOPY_VERSION="' + meson.project_version() + '"',
 ] + jemalloc_cpp_args
 
 _canopy_cpp_args = [
@@ -1581,9 +1581,9 @@ if build_tests
   endif
 
   config_validate_env = environment()
-  config_validate_env.set('NOCTALIA_CONFIG_HOME', meson.current_source_dir() / 'tests/config_validate/config-home')
-  config_validate_env.set('NOCTALIA_STATE_HOME', meson.current_source_dir() / 'tests/config_validate/state-home')
-  config_validate_env.set('NOCTALIA_DATA_HOME', meson.current_source_dir() / 'tests/config_validate/data-home')
+  config_validate_env.set('CANOPY_CONFIG_HOME', meson.current_source_dir() / 'tests/config_validate/config-home')
+  config_validate_env.set('CANOPY_STATE_HOME', meson.current_source_dir() / 'tests/config_validate/state-home')
+  config_validate_env.set('CANOPY_DATA_HOME', meson.current_source_dir() / 'tests/config_validate/data-home')
 
   sh_program = find_program('sh')
   test('config_validate_cli',

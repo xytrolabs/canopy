@@ -100,7 +100,7 @@ namespace {
   }
 
   void focusExistingSettingsWindow(CompositorPlatform& platform, WaylandConnection& wayland, wl_surface* surface) {
-    static constexpr std::string_view kSettingsAppId = "dev.canopy.Noctalia";
+    static constexpr std::string_view kSettingsAppId = "dev.canopy.Canopy";
     wayland.activateSurface(surface);
     platform.activateToplevelForAppId(kSettingsAppId);
   }
@@ -503,7 +503,7 @@ void SettingsWindow::open(std::string context) {
       .minWidth = minWidth,
       .minHeight = minHeight,
       .title = i18n::tr("settings.window.native-title"),
-      .appId = "dev.canopy.Noctalia",
+      .appId = "dev.canopy.Canopy",
   };
 
   if (!m_surface->initialize(output, cfg)) {

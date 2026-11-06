@@ -1769,7 +1769,7 @@ namespace {
     return 0;
   }
 
-  const luaL_Reg kNoctaliaStateLib[] = {
+  const luaL_Reg kCanopyStateLib[] = {
       {"set", luau_state_set},
       {"get", luau_state_get},
       {"watch", luau_state_watch},
@@ -1781,7 +1781,7 @@ namespace {
     const double seconds = luaL_checknumber(L, 1);
     luaL_checktype(L, 2, LUA_TFUNCTION);
     if (!std::isfinite(seconds) || seconds <= 0.0 || seconds > kMaxIdleWatchSeconds) {
-      luaL_error(L, "noctalia.idle.watch: seconds must be a positive number");
+      luaL_error(L, "Shade.idle.watch: seconds must be a positive number");
     }
     bool ignoreInhibitors = false;
     if (!lua_isnoneornil(L, 3)) {
@@ -1808,7 +1808,7 @@ namespace {
     return 1;
   }
 
-  // noctalia.idle.unwatch(id) -> bool (false when the id is not an active watch)
+  // Shade.idle.unwatch(id) -> bool (false when the id is not an active watch)
   int luau_idle_unwatch(lua_State* L) {
     const int watchId = luaL_checkinteger(L, 1);
     auto* host = hostForState(L);
@@ -1816,7 +1816,7 @@ namespace {
     return 1;
   }
 
-  const luaL_Reg kNoctaliaIdleLib[] = {
+  const luaL_Reg kCanopyIdleLib[] = {
       {"watch", luau_idle_watch},
       {"unwatch", luau_idle_unwatch},
       {nullptr, nullptr},
@@ -1831,7 +1831,7 @@ namespace {
     const char* id = luaL_checklstring(L, 1, &len);
     const std::string_view view(id, len);
     if (view.empty() || view.contains(':') || view.contains('/')) {
-      luaL_error(L, "noctalia.layer.%s: expected the entry id of one of this plugin's [[layer]] entries", fn);
+      luaL_error(L, "Shade.layer.%s: expected the entry id of one of this plugin's [[layer]] entries", fn);
     }
     return std::string(view);
   }
@@ -1968,7 +1968,7 @@ namespace {
     return 0;
   }
 
-  const luaL_Reg kNoctaliaLayerLib[] = {
+  const luaL_Reg kCanopyLayerLib[] = {
       {"show", luau_layer_show},
       {"hide", luau_layer_hide},
       {"configure", luau_layer_configure},
@@ -2004,18 +2004,18 @@ namespace {
     }
   }
 
-  const luaL_Reg kNoctaliaSoundLib[] = {
+  const luaL_Reg kCanopySoundLib[] = {
       {"load", luau_sound_load},
       {"play", luau_sound_play},
       {nullptr, nullptr},
   };
 
-  const luaL_Reg kNoctaliaOsdLib[] = {
+  const luaL_Reg kCanopyOsdLib[] = {
       {"show", luau_osd_show},
       {nullptr, nullptr},
   };
 
-  const luaL_Reg kNoctaliaJsonLib[] = {
+  const luaL_Reg kCanopyJsonLib[] = {
       {"decode", luau_json_decode},
       {"encode", luau_json_encode},
       {nullptr, nullptr},
@@ -2045,7 +2045,7 @@ namespace {
     return 1;
   }
 
-  const luaL_Reg kNoctaliaStringLib[] = {
+  const luaL_Reg kCanopyStringLib[] = {
       {"trim", luau_string_trim},
       {"urlEncode", luau_string_urlEncode},
       {"urlDecode", luau_string_urlDecode},
@@ -2067,7 +2067,7 @@ namespace {
     return 1;
   }
 
-  const luaL_Reg kNoctaliaBaseLib[] = {
+  const luaL_Reg kCanopyBaseLib[] = {
       {"log", luau_log},
       {"runAsync", luau_runAsync},
       {"runStream", luau_runStream},
@@ -2129,35 +2129,35 @@ namespace {
       {nullptr, nullptr},
   };
 
-  void registerNoctaliaLib(lua_State* L) {
-    luaL_register(L, "canopy", kNoctaliaBaseLib);
+  void registerCanopyLib(lua_State* L) {
+    luaL_register(L, "canopy", kCanopyBaseLib);
     // canopy.state = { set, get, watch }
     lua_createtable(L, 0, 0);
-    luaL_register(L, nullptr, kNoctaliaStateLib);
+    luaL_register(L, nullptr, kCanopyStateLib);
     lua_setfield(L, -2, "state");
     // canopy.json = { decode, encode }
     lua_createtable(L, 0, 0);
-    luaL_register(L, nullptr, kNoctaliaJsonLib);
+    luaL_register(L, nullptr, kCanopyJsonLib);
     lua_setfield(L, -2, "json");
     // canopy.sound = { load, play }
     lua_createtable(L, 0, 0);
-    luaL_register(L, nullptr, kNoctaliaSoundLib);
+    luaL_register(L, nullptr, kCanopySoundLib);
     lua_setfield(L, -2, "sound");
     // canopy.osd = { show }
     lua_createtable(L, 0, 0);
-    luaL_register(L, nullptr, kNoctaliaOsdLib);
+    luaL_register(L, nullptr, kCanopyOsdLib);
     lua_setfield(L, -2, "osd");
     // canopy.string = { trim, urlEncode, urlDecode }
     lua_createtable(L, 0, 0);
-    luaL_register(L, nullptr, kNoctaliaStringLib);
+    luaL_register(L, nullptr, kCanopyStringLib);
     lua_setfield(L, -2, "string");
     // canopy.idle = { watch, unwatch }
     lua_createtable(L, 0, 0);
-    luaL_register(L, nullptr, kNoctaliaIdleLib);
+    luaL_register(L, nullptr, kCanopyIdleLib);
     lua_setfield(L, -2, "idle");
     // canopy.layer = { show, hide, configure }
     lua_createtable(L, 0, 0);
-    luaL_register(L, nullptr, kNoctaliaLayerLib);
+    luaL_register(L, nullptr, kCanopyLayerLib);
     lua_setfield(L, -2, "layer");
     lua_pop(L, 1);
   }
@@ -2201,7 +2201,7 @@ LuauHost::LuauHost(scripting::ScriptApiContext& api, std::string runtimeName, Co
   lua_callbacks(m_L)->userdata = this;
   lua_callbacks(m_L)->interrupt = budgetInterrupt;
   luaL_openlibs(m_L);
-  registerNoctaliaLib(m_L);
+  registerCanopyLib(m_L);
   lua_pushcfunction(m_L, &LuauHost::luauRequire, "require");
   lua_setglobal(m_L, "require");
   // Freeze main state's stdlib + globals. The thread we create next inherits

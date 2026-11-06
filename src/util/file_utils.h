@@ -389,9 +389,9 @@ namespace FileUtils {
   }
 
   [[nodiscard]] inline std::string stateDir() {
-    const char* noctalia = std::getenv("CANOPY_STATE_HOME");
-    if (noctalia != nullptr && noctalia[0] != '\0') {
-      return std::string(noctalia) + "/canopy";
+    const char* Shade = std::getenv("CANOPY_STATE_HOME");
+    if (Shade != nullptr && Shade[0] != '\0') {
+      return std::string(Shade) + "/canopy";
     }
     const char* xdg = std::getenv("XDG_STATE_HOME");
     if (xdg != nullptr && xdg[0] != '\0') {
@@ -405,9 +405,9 @@ namespace FileUtils {
   }
 
   [[nodiscard]] inline std::string dataDir() {
-    const char* noctalia = std::getenv("CANOPY_DATA_HOME");
-    if (noctalia != nullptr && noctalia[0] != '\0') {
-      return std::string(noctalia) + "/canopy";
+    const char* Shade = std::getenv("CANOPY_DATA_HOME");
+    if (Shade != nullptr && Shade[0] != '\0') {
+      return std::string(Shade) + "/canopy";
     }
     const char* xdg = std::getenv("XDG_DATA_HOME");
     if (xdg != nullptr && xdg[0] != '\0') {
@@ -441,7 +441,7 @@ namespace FileUtils {
   }
 
   // Persistent per-plugin data directory. Survives plugin updates (unlike the
-  // materialized runtime dir) and honors the NOCTALIA_STATE_HOME override.
+  // materialized runtime dir) and honors the CANOPY_STATE_HOME override.
   // Caller is responsible for creating it. Empty if no state home resolves.
   [[nodiscard]] inline std::string pluginDataDir(const std::string& pluginId) {
     const std::string base = stateDir();

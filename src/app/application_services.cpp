@@ -622,7 +622,7 @@ void Application::initStyleThemeAndWayland() {
 
   // Apply theme before any UI constructs palette-dependent scene nodes.
   auto syncScriptApiWallpaperDirectory = [this] {
-    // Wallpapers are a shell surface, so they follow Noctalia's own mode.
+    // Wallpapers are a shell surface, so they follow Canopy's own mode.
     const ThemeMode mode = m_themeService.isLightMode() ? ThemeMode::Light : ThemeMode::Dark;
     m_scriptApi.setWallpaperDirectory(
         wallpaper::resolveGlobalWallpaperDirectory(m_configService.config().wallpaper, mode)
@@ -1116,7 +1116,7 @@ void Application::initSystemBusServices() {
             m_screenTimeService.setSuspendPaused(true);
             // The readiness hook releases the delay inhibit after the revealed lock frames are acknowledged.
             if (m_skipLockOnNextSleep) {
-              // Noctalia-initiated suspend: skip lock-before-sleep (plain Suspend or already locked).
+              // Canopy-initiated suspend: skip lock-before-sleep (plain Suspend or already locked).
               m_skipLockOnNextSleep = false;
               m_releaseSleepDelayWhenLocked = false;
               if (m_logindService != nullptr) {
