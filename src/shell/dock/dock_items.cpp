@@ -939,6 +939,21 @@ namespace shell::dock {
     if (!cfg.magnification && instance.launcherIconNode != nullptr) {
       const float iconScale = cfg.inactiveScale;
       const auto iSize = static_cast<float>(cfg.iconSize);
+      // The launcher image is created once, before the first frame has a usable
+      // renderer; if that decode was dropped the button stayed empty forever.
+      // The bar's launcher re-syncs on every layout, which is why it worked and
+      // this one did not. Retry here until the bitmap actually exists.
+      if (!cfg.launcherCustomImage.empty()) {
+        if (auto* launcherImage = dynamic_cast<Image*>(instance.launcherIconNode);
+            launcherImage != nullptr && !launcherImage->hasImage()) {
+          const WidgetCustomImage source =
+              widget_custom_image::fromConfig(cfg.launcherCustomImage, cfg.launcherCustomImageColorize);
+          launcherImage->setSourceFile(renderer, source.path, dockIconDecodeTargetSize(cfg), true);
+          launcherImage->setForegroundTint(
+              source.colorize ? std::optional<ColorSpec>{colorSpecFromRole(ColorRole::OnSurface)} : std::nullopt
+          );
+        }
+      }
       instance.launcherIconNode->setPosition(kCellPad, launcherIconBaseY(cfg, iSize));
       if (instance.launcherVisualScale < 0.0F) {
         instance.launcherVisualScale = iconScale;

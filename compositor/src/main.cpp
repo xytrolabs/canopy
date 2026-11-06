@@ -130,7 +130,7 @@ namespace {
       }
     };
 
-    std::println(stream, "canopywc {}: a wayland compositor\n", mahogany::build_info::version());
+    std::println(stream, "Mahogany {}: the Canopy compositor\n", mahogany::build_info::version());
     std::println(stream, "Usage: canopywc [-s <command>] [-c <config>]   run the compositor");
     std::println(stream, "       canopywc <command> [args...]            run a command");
 
@@ -265,9 +265,9 @@ int main(int argc, char** argv) {
       constexpr std::string_view unknownRevision = "unknown";
       const std::string_view revision = mahogany::build_info::revision();
       if (!revision.empty() && revision != unknownRevision) {
-        std::println("canopywc {} ({})", mahogany::build_info::version(), revision);
+        std::println("Mahogany {} ({})", mahogany::build_info::version(), revision);
       } else {
-        std::println("canopywc {}", mahogany::build_info::version());
+        std::println("Mahogany {}", mahogany::build_info::version());
       }
       return EXIT_SUCCESS;
     }
