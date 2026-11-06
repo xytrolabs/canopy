@@ -135,21 +135,43 @@ for arg in "$@"; do
     esac
 done
 
-# Running from a terminal inside an existing desktop? Then this is a nested
-# session, not a new one: Labwc must render into a window on the running
-# compositor instead of trying to become the display server (which fails on the
-# VT and collides with the existing XWayland socket).
-if [ -z "$NESTED" ] && { [ -n "${WAYLAND_DISPLAY:-}" ] || [ -n "${DISPLAY:-}" ]; }; then
+# A live Wayland socket is evidence of an existing Wayland desktop. DISPLAY by
+# itself is not: SDDM's X11 greeter exports DISPLAY into a real Wayland login,
+# and treating that as nested makes canopywc connect to a nonexistent host
+# Wayland display instead of taking the VT. X11 nesting remains available via
+# the explicit --nested flag.
+wayland_socket=""
+if [ -n "${WAYLAND_DISPLAY:-}" ]; then
+    case "$WAYLAND_DISPLAY" in
+        /*) wayland_socket="$WAYLAND_DISPLAY" ;;
+        *) [ -n "${XDG_RUNTIME_DIR:-}" ] && wayland_socket="$XDG_RUNTIME_DIR/$WAYLAND_DISPLAY" ;;
+    esac
+fi
+if [ -z "$NESTED" ] && [ -n "$wayland_socket" ] && [ -S "$wayland_socket" ]; then
     NESTED=1
 fi
 
 if [ -n "$NESTED" ]; then
-    # wlroots must use the Wayland backend; auto-detection can pick DRM when
-    # DISPLAY is set, which hangs waiting for a seat it will never get.
-    export WLR_BACKENDS="${WLR_BACKENDS:-wayland}"
-    printf 'canopy-session: starting nested inside %s\n' "${WAYLAND_DISPLAY:-$DISPLAY}"
+    if [ -n "${WAYLAND_DISPLAY:-}" ] && [ -n "$wayland_socket" ] && [ -S "$wayland_socket" ]; then
+        export WLR_BACKENDS="${WLR_BACKENDS:-wayland}"
+        nested_display="$WAYLAND_DISPLAY"
+    elif [ -n "${DISPLAY:-}" ]; then
+        export WLR_BACKENDS="${WLR_BACKENDS:-x11}"
+        nested_display="$DISPLAY"
+    else
+        printf 'canopy-session: --nested requires a live WAYLAND_DISPLAY or DISPLAY\n' >&2
+        exit 2
+    fi
+    log_note "starting nested compositor=$COMPOSITOR_BIN backend=$WLR_BACKENDS display=$nested_display"
+    printf 'canopy-session: starting nested inside %s\n' "$nested_display"
     printf '  this is a window inside your current desktop, not a login session\n'
     printf '  for the real session: log out and choose Canopy, or run this from a TTY\n'
+elif [ -n "${DISPLAY:-}" ]; then
+    # SDDM's X11 greeter can export its DISPLAY into the Wayland session it
+    # starts. Do not let clients or wlroots mistake that retired greeter X
+    # server for this desktop's XWayland; Mahogany starts and publishes its own.
+    log_note "clearing inherited X11 DISPLAY=$DISPLAY for direct Wayland session"
+    unset DISPLAY
 fi
 
 if ! command -v "$COMPOSITOR_BIN" >/dev/null 2>&1; then
@@ -242,6 +264,7 @@ if [ "$COMPOSITOR" = "canopywc" ] || [ "$COMPOSITOR" = "umbriel" ]; then
         fi
         printf 'canopy-session: added the shell to autostart in %s\n' "$WC_CONFIG"
     fi
+    log_note "starting compositor=$COMPOSITOR_BIN nested=${NESTED:-no} backend=${WLR_BACKENDS:-auto} wayland=${WAYLAND_DISPLAY:-unset} display=${DISPLAY:-unset}"
     exec "$COMPOSITOR_BIN"
 fi
 
