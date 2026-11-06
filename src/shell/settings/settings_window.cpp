@@ -142,7 +142,7 @@ namespace {
   class SettingsProfileWatch {
   public:
     SettingsProfileWatch() {
-      if (noctalia::profiling::enabled()) {
+      if (shade::profiling::enabled()) {
         m_watch.emplace();
       }
     }
@@ -157,7 +157,7 @@ namespace {
     [[nodiscard]] double elapsedMs() const { return m_watch.has_value() ? m_watch->elapsedMs() : 0.0; }
 
   private:
-    std::optional<noctalia::profiling::StopWatch> m_watch;
+    std::optional<shade::profiling::StopWatch> m_watch;
   };
 
   void logSettingsProfile(std::string_view label, const SettingsProfileWatch& watch) {

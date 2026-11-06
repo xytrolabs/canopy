@@ -22,7 +22,7 @@
 class ConfigService;
 class IpcService;
 
-namespace noctalia::theme {
+namespace shade::theme {
 
   class HookRunner;
 
@@ -127,4 +127,4 @@ namespace noctalia::theme {
     mutable std::unique_ptr<HookRunner> m_hookRunner;
   };
 
-} // namespace noctalia::theme
+} // namespace shade::theme

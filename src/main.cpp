@@ -131,12 +131,12 @@ namespace {
 
   int runTopLevelFlag(const char* flag) {
     if (std::strcmp(flag, "--version") == 0 || std::strcmp(flag, "-v") == 0) {
-      const std::string version = noctalia::build_info::displayVersion();
+      const std::string version = shade::build_info::displayVersion();
       std::println("canopy {}", version);
       return 0;
     }
     if (std::strcmp(flag, "--help") == 0 || std::strcmp(flag, "-h") == 0) {
-      std::print("{}", noctalia::cli::renderHelp(noctalia::cli::kRootCmd, "canopy"));
+      std::print("{}", shade::cli::renderHelp(shade::cli::kRootCmd, "canopy"));
       return 0;
     }
     return -1;
@@ -275,25 +275,25 @@ int main(int argc, char* argv[]) {
   }
 
   if (argc >= 2) {
-    if (noctalia::theme::isFirefoxNativeMessagingLaunch(argc, argv))
-      return noctalia::theme::runFirefoxNativeMessagingHost();
+    if (shade::theme::isFirefoxNativeMessagingLaunch(argc, argv))
+      return shade::theme::runFirefoxNativeMessagingHost();
     if (std::strcmp(argv[1], "completions") == 0)
-      return noctalia::cli::runCompletionsCli(argc, argv);
+      return shade::cli::runCompletionsCli(argc, argv);
     if (std::strcmp(argv[1], "firefox-theme") == 0)
-      return noctalia::theme::runFirefoxThemeCli(argc, argv);
+      return shade::theme::runFirefoxThemeCli(argc, argv);
     if (std::strcmp(argv[1], "theme") == 0)
-      return noctalia::theme::runCli(argc, argv);
+      return shade::theme::runCli(argc, argv);
     if (std::strcmp(argv[1], "msg") == 0)
-      return noctalia::ipc::runCli(argc, argv);
+      return shade::ipc::runCli(argc, argv);
     // Internal mode for PAM authentication after re-exec.
     if (std::strcmp(argv[1], "pam-helper") == 0)
       return PamAuthenticator::runHelperMode(argc, argv);
     if (std::strcmp(argv[1], "config") == 0)
-      return noctalia::config::runCli(argc, argv);
+      return shade::config::runCli(argc, argv);
     if (std::strcmp(argv[1], "dmenu") == 0)
-      return noctalia::launcher::runDmenuCli(argc, argv);
+      return shade::launcher::runDmenuCli(argc, argv);
     if (std::strcmp(argv[1], "plugins") == 0)
-      return noctalia::plugins::runCli(argc, argv);
+      return shade::plugins::runCli(argc, argv);
   }
 
   for (int i = 1; i < argc; ++i) {

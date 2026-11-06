@@ -32,10 +32,10 @@ namespace {
 
     ConfigService config;
     HttpClient http;
-    noctalia::theme::ThemeService theme(config, http);
+    shade::theme::ThemeService theme(config, http);
 
     Resolution result;
-    theme.setResolvedCallback([&result](const noctalia::theme::GeneratedPalette&, std::string_view mode) {
+    theme.setResolvedCallback([&result](const shade::theme::GeneratedPalette&, std::string_view mode) {
       result.appliedMode = std::string(mode);
     });
     theme.apply();

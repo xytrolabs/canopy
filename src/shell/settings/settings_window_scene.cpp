@@ -71,7 +71,7 @@ namespace {
     return i18n::tr(std::format("settings.widgets.actions.commands.{}.{}", command, field));
   }
 
-  ColorSwatchPreview palettePreviewFromMetadata(const noctalia::theme::AvailablePalette::PreviewMode& metadata) {
+  ColorSwatchPreview palettePreviewFromMetadata(const shade::theme::AvailablePalette::PreviewMode& metadata) {
     ColorSwatchPreview preview;
     Color surface;
     if (tryParseHexColor(metadata.surface, surface)) {
@@ -87,7 +87,7 @@ namespace {
     return preview;
   }
 
-  ColorSwatchPreview availablePalettePreview(const noctalia::theme::AvailablePalette& palette, ThemeMode mode) {
+  ColorSwatchPreview availablePalettePreview(const shade::theme::AvailablePalette& palette, ThemeMode mode) {
     if (useLightPalettePreview(mode)) {
       ColorSwatchPreview preview = palettePreviewFromMetadata(palette.preview.light);
       if (!preview.empty()) {
@@ -402,7 +402,7 @@ namespace {
   }
 
   std::optional<toml::table> configSectionTable(const Config& cfg, std::string_view section) {
-    namespace schema = noctalia::config::schema;
+    namespace schema = shade::config::schema;
 
     if (section == "audio") {
       return schema::writeTable(cfg.audio, schema::audioSchema());
@@ -569,7 +569,7 @@ namespace {
   class SettingsProfileWatch {
   public:
     SettingsProfileWatch() {
-      if (noctalia::profiling::enabled()) {
+      if (shade::profiling::enabled()) {
         m_watch.emplace();
       }
     }
@@ -584,7 +584,7 @@ namespace {
     [[nodiscard]] double elapsedMs() const { return m_watch.has_value() ? m_watch->elapsedMs() : 0.0; }
 
   private:
-    std::optional<noctalia::profiling::StopWatch> m_watch;
+    std::optional<shade::profiling::StopWatch> m_watch;
   };
 
   void logSettingsProfile(std::string_view label, const SettingsProfileWatch& watch) {
@@ -773,7 +773,7 @@ settings::RegistryEnvironment SettingsWindow::buildRegistryEnvironment() const {
   env.greeterSyncAvailable =
       m_config != nullptr && greeter::appearanceSyncAvailable(m_config->config().shell.greeterSync);
   const ThemeMode previewMode = m_config != nullptr ? shellThemeMode(m_config->config().theme) : ThemeMode::Dark;
-  for (const auto& paletteInfo : noctalia::theme::availableCommunityPalettes()) {
+  for (const auto& paletteInfo : shade::theme::availableCommunityPalettes()) {
     env.communityPalettes.push_back(
         settings::SelectOption{
             .value = paletteInfo.name,
@@ -783,7 +783,7 @@ settings::RegistryEnvironment SettingsWindow::buildRegistryEnvironment() const {
         }
     );
   }
-  for (const auto& p : noctalia::theme::availableCustomPalettes()) {
+  for (const auto& p : shade::theme::availableCustomPalettes()) {
     env.customPalettes.push_back(
         settings::SelectOption{
             .value = p.name,
@@ -793,13 +793,13 @@ settings::RegistryEnvironment SettingsWindow::buildRegistryEnvironment() const {
         }
     );
   }
-  for (const auto& t : noctalia::theme::CommunityTemplateService::availableTemplates()) {
+  for (const auto& t : shade::theme::CommunityTemplateService::availableTemplates()) {
     env.communityTemplates.push_back(
         settings::SelectOption{
             .value = t.id,
             .label = t.displayName,
             .description = t.category,
-            .tooltip = noctalia::theme::formatTemplateTooltip(t)
+            .tooltip = shade::theme::formatTemplateTooltip(t)
         }
     );
   }
@@ -881,7 +881,7 @@ std::vector<settings::GestureActionOption> SettingsWindow::gestureActionCatalog(
   std::vector<settings::GestureActionOption> options;
   for (const auto& handler : m_ipcService->handlers()) {
     // `exec` and `none` are grammar keywords, not commands, and are offered as their own rows.
-    if (handler.command == noctalia::bar::kExecVerb || handler.command == noctalia::bar::kNoneVerb) {
+    if (handler.command == shade::bar::kExecVerb || handler.command == shade::bar::kNoneVerb) {
       continue;
     }
     if (handler.actionEditorVisibility == IpcService::ActionEditorVisibility::Hidden) {
@@ -1225,7 +1225,7 @@ void SettingsWindow::rebuildSettingsContent() {
   }
   logSettingsProfile("rebuildContent plugins", phaseProfileWatch);
   logSettingsProfile("rebuildContent total", totalProfileWatch);
-  if (noctalia::profiling::enabled()) {
+  if (shade::profiling::enabled()) {
     kLog.info(
         "profile rebuildContent visibleEntries={} registrySize={} selectedSection=\"{}\" searchActive={}",
         visibleEntries, m_settingsRegistry.size(), m_selectedSection, !m_searchQuery.empty()
@@ -2337,7 +2337,7 @@ void SettingsWindow::buildScene(std::uint32_t width, std::uint32_t height) {
   m_surface->setSceneRoot(m_sceneRoot.get());
   logSettingsProfile("buildScene input", phaseProfileWatch);
   logSettingsProfile("buildScene total", totalProfileWatch);
-  if (noctalia::profiling::enabled()) {
+  if (shade::profiling::enabled()) {
     kLog.info(
         "profile buildScene registrySize={} sections={} selectedSection=\"{}\" size={}x{}", m_settingsRegistry.size(),
         sections.size(), m_selectedSection, width, height

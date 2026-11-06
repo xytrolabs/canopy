@@ -90,9 +90,12 @@ backdrop = "#0B0A11FF"
 shadow = "#00000080"
 
 [colors.border]
-focused = "#7C5CFCFF"
-unfocused = "#2C2939FF"
-outer = "#1E1C29FF"
+# A hairline, not a highlight: Windows 11 and macOS both outline a focused window
+# with a neutral line and let the shadow do the work. A saturated accent ring
+# around every window is what made the old frame look like a 2015 tiling setup.
+focused = "#3A3652FF"
+unfocused = "#26243AFF"
+outer = "#14131CFF"
 
 [colors.title_bar]
 background = "#1E1C29FF"

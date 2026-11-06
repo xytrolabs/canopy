@@ -8,8 +8,8 @@
 #include <mutex>
 #include <string>
 
-Palette palette = noctalia::theme::mapGeneratedPaletteMode(
-    noctalia::theme::expandBuiltinPalette(*noctalia::theme::findBuiltinPalette("Canopy")).dark
+Palette palette = shade::theme::mapGeneratedPaletteMode(
+    shade::theme::expandBuiltinPalette(*shade::theme::findBuiltinPalette("Canopy")).dark
 );
 bool g_resolvedThemeLight = false;
 

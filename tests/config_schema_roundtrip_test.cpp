@@ -27,7 +27,7 @@
 #include <sstream>
 #include <string>
 
-using namespace noctalia::config::schema;
+using namespace shade::config::schema;
 
 namespace {
 

@@ -3,7 +3,7 @@
 #include <fstream>
 #include <nlohmann/json.hpp>
 
-namespace noctalia::theme::firefox_theme::manifest {
+namespace shade::theme::firefox_theme::manifest {
   namespace {
 
     constexpr std::string_view kLegacyDescription = "Canopy Pywalfox native messaging host";
@@ -84,4 +84,4 @@ namespace noctalia::theme::firefox_theme::manifest {
     return true;
   }
 
-} // namespace noctalia::theme::firefox_theme::manifest
+} // namespace shade::theme::firefox_theme::manifest

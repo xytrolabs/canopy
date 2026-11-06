@@ -1,12 +1,12 @@
 #include "shell/bar/widgets/volume_widget_definition.h"
 
-const noctalia::bar::WidgetDefinition<VolumeWidget::Options>& volumeWidgetDefinition() {
-  using noctalia::bar::field;
+const shade::bar::WidgetDefinition<VolumeWidget::Options>& volumeWidgetDefinition() {
+  using shade::bar::field;
   using Options = VolumeWidget::Options;
 
   static const settings::WidgetSettingVisibility showGlyph{"show_glyph", {"true"}};
 
-  static const noctalia::bar::WidgetDefinition<Options> definition{
+  static const shade::bar::WidgetDefinition<Options> definition{
       .type = "volume",
       .fields =
           {

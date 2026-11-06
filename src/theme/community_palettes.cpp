@@ -18,7 +18,7 @@
 #include <system_error>
 #include <utility>
 
-namespace noctalia::theme {
+namespace shade::theme {
 
   namespace {
 
@@ -173,4 +173,4 @@ namespace noctalia::theme {
     return std::string(kPaletteUrlBase) + "/" + StringUtils::urlEncode(name);
   }
 
-} // namespace noctalia::theme
+} // namespace shade::theme

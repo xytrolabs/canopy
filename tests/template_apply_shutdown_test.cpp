@@ -23,8 +23,8 @@
 namespace {
 
   using Clock = std::chrono::steady_clock;
-  using noctalia::theme::GeneratedPalette;
-  using noctalia::theme::TemplateApplyService;
+  using shade::theme::GeneratedPalette;
+  using shade::theme::TemplateApplyService;
 
   constexpr std::chrono::milliseconds kGrace{1500};
 

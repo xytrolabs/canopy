@@ -15,8 +15,8 @@
 
 namespace {
 
-  using noctalia::theme::HookRunner;
-  using noctalia::theme::TemplateEngine;
+  using shade::theme::HookRunner;
+  using shade::theme::TemplateEngine;
 
   const std::filesystem::path kRoot = std::filesystem::temp_directory_path() / "noctalia_hook_async_test";
 

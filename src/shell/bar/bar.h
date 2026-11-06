@@ -46,7 +46,7 @@ class UPowerService;
 class TrayService;
 class GammaService;
 class WeatherService;
-namespace noctalia::theme {
+namespace shade::theme {
   class ThemeService;
 }
 namespace scripting {
@@ -194,7 +194,7 @@ private:
   WeatherService* m_weatherService = nullptr;
   RenderContext* m_renderContext = nullptr;
   GammaService* m_nightLight = nullptr;
-  noctalia::theme::ThemeService* m_themeService = nullptr;
+  shade::theme::ThemeService* m_themeService = nullptr;
   BluetoothService* m_bluetooth = nullptr;
   BrightnessService* m_brightness = nullptr;
   LockKeysService* m_lockKeys = nullptr;
@@ -222,7 +222,7 @@ private:
   std::unordered_map<wl_surface*, BarInstance*> m_surfaceMap;
   BarInstance* m_hoveredInstance = nullptr;
   std::function<bool(const BarInstance&)> m_autoHideSuppressionCallback;
-  noctalia::bar::WidgetActionDispatcher m_actionDispatcher;
+  shade::bar::WidgetActionDispatcher m_actionDispatcher;
   Timer m_workspaceRevealDebounce;
   Timer m_workspacePeekHideTimer;
   std::unordered_set<std::uint32_t> m_pendingWorkspaceRevealOutputs;

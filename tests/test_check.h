@@ -8,7 +8,7 @@
 #error "Noctalia test targets must be compiled without NDEBUG"
 #endif
 
-namespace noctalia::test {
+namespace shade::test {
 
   [[noreturn]] inline void
   failCheck(const char* expression, std::source_location location = std::source_location::current()) {
@@ -18,11 +18,11 @@ namespace noctalia::test {
     std::exit(EXIT_FAILURE);
   }
 
-} // namespace noctalia::test
+} // namespace shade::test
 
 #define TEST_CHECK(expression)                                                                                         \
   do {                                                                                                                 \
     if (!(expression)) {                                                                                               \
-      ::noctalia::test::failCheck(#expression);                                                                        \
+      ::shade::test::failCheck(#expression);                                                                        \
     }                                                                                                                  \
   } while (false)

@@ -59,7 +59,7 @@ namespace {
   const sdbus::ObjectPath kDbusPath{"/org/freedesktop/DBus"};
   const sdbus::ObjectPath kMprisPath{"/org/mpris/MediaPlayer2"};
   const sdbus::ServiceName kNoctaliaMprisBusName{"dev.canopy.Mpris"};
-  const sdbus::ObjectPath kNoctaliaMprisObjectPath{"/dev/noctalia/Mpris"};
+  const sdbus::ObjectPath kNoctaliaMprisObjectPath{"/dev/shade/Mpris"};
 
   bool is_mpris_bus_name(std::string_view name) { return name.starts_with("org.mpris.MediaPlayer2."); }
 
@@ -736,8 +736,8 @@ void MprisService::refreshPlayers() {
 }
 
 void MprisService::registerIpc(IpcService& ipc) {
-  ipc.bindCycle(noctalia::cli::msg::media, [this](const std::string& args) -> std::string {
-    const auto parts = noctalia::ipc::splitWords(args);
+  ipc.bindCycle(shade::cli::msg::media, [this](const std::string& args) -> std::string {
+    const auto parts = shade::ipc::splitWords(args);
     if (parts.empty() || parts.size() > 2) {
       return "error: media requires an action "
              "<next|previous|toggle|play|pause|stop|next-player|previous-player|volume-up|volume-down|volume-set>\n";
@@ -748,7 +748,7 @@ void MprisService::registerIpc(IpcService& ipc) {
       if (parts.size() != 2) {
         return "error: media volume-set requires <value>\n";
       }
-      const auto amount = noctalia::ipc::parseNormalizedOrPercent(parts[1]);
+      const auto amount = shade::ipc::parseNormalizedOrPercent(parts[1]);
       if (!amount.has_value()) {
         return kMediaVolumeValueError;
       }
@@ -756,7 +756,7 @@ void MprisService::registerIpc(IpcService& ipc) {
     }
     if (action == "volume-up" || action == "volume-down") {
       const auto step = parts.size() == 1 ? std::optional<float>(kMediaVolumeStepDefault)
-                                          : noctalia::ipc::parseNormalizedOrPercent(parts[1]);
+                                          : shade::ipc::parseNormalizedOrPercent(parts[1]);
       if (!step.has_value()) {
         return kMediaVolumeStepError;
       }

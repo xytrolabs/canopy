@@ -27,6 +27,9 @@ from pathlib import Path
 MIGRATIONS: list[tuple[str, str, str, str]] = [
     # Fluent pass: one UI face, shipped with the shell.
     ("shell", "font_family", '"Space Grotesk"', '"Inter"'),
+    # The menu bar carries the workspace switcher, the way every desktop does.
+    ("bar.main", "start", '["launcher", "wordmark", "active_window"]',
+     '["launcher", "wordmark", "workspaces", "active_window"]'),
     # Fluent elevation is a hint, not a halo.
     ("shell.shadow", "alpha", "0.45", "0.35"),
     # Neutral hairlines; the accent is for interaction.
@@ -60,6 +63,10 @@ MIGRATIONS_COMPOSITOR: list[tuple[str, str, str, str]] = [
     ("appearance.title_bar", "height", "30", "28"),
     ("appearance.title_bar", "button_position", '"right"', '"left"'),
     ("appearance.title_bar", "button_corner_radius", "12", "100"),
+    # Neutral outline instead of an accent ring around every focused window.
+    ("colors.border", "focused", '"#7C5CFCFF"', '"#3A3652FF"'),
+    ("colors.border", "unfocused", '"#2C2939FF"', '"#26243AFF"'),
+    ("colors.border", "outer", '"#1E1C29FF"', '"#14131CFF"'),
 ]
 
 # Keys that did not exist in older configs. Added under their section when
@@ -72,7 +79,11 @@ ADDITIONS: list[tuple[str, str, str]] = [
 ]
 
 SECTION_RE = re.compile(r"^\s*\[([^\]]+)\]\s*$")
-KEY_RE = re.compile(r"^(?P<indent>\s*)(?P<key>[A-Za-z0-9_]+)(?P<sep>\s*=\s*)(?P<value>[^#\n]*?)(?P<rest>\s*(?:#.*)?)$")
+# A comment only starts at whitespace + '#': colours are written "#RRGGBBAA" and
+# an earlier version of this pattern ate them, silently skipping their keys.
+KEY_RE = re.compile(
+    r"^(?P<indent>\s*)(?P<key>[A-Za-z0-9_]+)(?P<sep>\s*=\s*)(?P<value>.*?)(?P<rest>\s+(?:#.*)?)?$"
+)
 
 
 def migrate_text(text: str, migrations=MIGRATIONS) -> tuple[str, list[str]]:
@@ -152,7 +163,8 @@ def _rewrite_values(text: str, migrations=MIGRATIONS) -> tuple[str, list[str]]:
             continue
 
         rebuilt = (
-            f"{key_match.group('indent')}{key}{key_match.group('sep')}{new}{key_match.group('rest')}"
+            f"{key_match.group('indent')}{key}{key_match.group('sep')}{new}"
+            f"{key_match.group('rest') or ''}"
         )
         out.append(rebuilt + ("\n" if line.endswith("\n") else ""))
         applied.append(f"[{section}] {key}: {old} -> {new}")

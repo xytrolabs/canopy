@@ -2,7 +2,7 @@
 
 #include "canopy_git_revision.h"
 
-namespace noctalia::build_info {
+namespace shade::build_info {
 
   std::string_view version() noexcept { return NOCTALIA_VERSION; }
 
@@ -22,4 +22,4 @@ namespace noctalia::build_info {
     return label;
   }
 
-} // namespace noctalia::build_info
+} // namespace shade::build_info

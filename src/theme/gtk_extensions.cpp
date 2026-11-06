@@ -13,7 +13,7 @@
 #include <set>
 #include <system_error>
 
-namespace noctalia::theme {
+namespace shade::theme {
 
   namespace {
 
@@ -176,4 +176,4 @@ namespace noctalia::theme {
     return true;
   }
 
-} // namespace noctalia::theme
+} // namespace shade::theme

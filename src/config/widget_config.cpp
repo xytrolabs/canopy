@@ -8,7 +8,7 @@
 #include <utility>
 #include <vector>
 
-namespace noctalia::config {
+namespace shade::config {
 
   std::optional<WidgetSettingValue> readWidgetSettingValue(const toml::node& node) {
     if (const auto* stringValue = node.as_string()) {
@@ -104,6 +104,12 @@ namespace noctalia::config {
     activeWindow.settings["title_scroll"] = std::string("none");
     seed("active_window", std::move(activeWindow));
 
+    // Workspaces are part of the desktop, not an optional extra widget: seeded
+    // so a bar lane can name it even when the user's config predates it.
+    WidgetConfig workspaces;
+    workspaces.type = "workspaces";
+    seed("workspaces", std::move(workspaces));
+
     WidgetConfig media;
     media.type = "media";
     media.settings["max_length"] = 220.0;
@@ -169,4 +175,4 @@ namespace noctalia::config {
     return wc;
   }
 
-} // namespace noctalia::config
+} // namespace shade::config

@@ -22,8 +22,8 @@
 
 namespace {
 
-  using noctalia::theme::GeneratedPalette;
-  using noctalia::theme::TemplateApplyService;
+  using shade::theme::GeneratedPalette;
+  using shade::theme::TemplateApplyService;
 
   GeneratedPalette paletteWith(std::uint32_t surface) {
     GeneratedPalette palette;

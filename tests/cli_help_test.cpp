@@ -9,30 +9,30 @@
 namespace {
 
   constexpr std::array kAlphaPositionals{
-      noctalia::cli::Positional{"path", {}, {}, false, false, false},
+      shade::cli::Positional{"path", {}, {}, false, false, false},
   };
   constexpr std::array kChildren{
-      noctalia::cli::Command{"zeta", "Run zeta", {}, {}, {}, {}, {}, false},
-      noctalia::cli::Command{"alpha", "Run alpha", {}, {}, {}, kAlphaPositionals, {}, false},
+      shade::cli::Command{"zeta", "Run zeta", {}, {}, {}, {}, {}, false},
+      shade::cli::Command{"alpha", "Run alpha", {}, {}, {}, kAlphaPositionals, {}, false},
   };
   constexpr std::array kGroupFlags{
-      noctalia::cli::Flag{"--verbose", {}, {}, "Enable verbose output", {}, {}, false, false},
+      shade::cli::Flag{"--verbose", {}, {}, "Enable verbose output", {}, {}, false, false},
   };
-  constexpr noctalia::cli::Command kGroup{
+  constexpr shade::cli::Command kGroup{
       "tools", "Tool commands", "Manage offline tools.", {}, kGroupFlags, {}, kChildren, false,
   };
 
   constexpr std::array<std::string_view, 2> kKinds{"full", "merged"};
   constexpr std::array kLeafPositionals{
-      noctalia::cli::Positional{"input", "Input file", {}, true, false, false},
-      noctalia::cli::Positional{"kind", {}, kKinds, false, false, false},
+      shade::cli::Positional{"input", "Input file", {}, true, false, false},
+      shade::cli::Positional{"kind", {}, kKinds, false, false, false},
   };
   constexpr std::array kLeafFlags{
-      noctalia::cli::Flag{{}, "-o", "<file>", "Write output", {}, {}, false, false},
-      noctalia::cli::Flag{"--mode", "-m", "<mode>", "Select mode", kKinds, "full", false, false},
-      noctalia::cli::Flag{"--force", {}, {}, "Overwrite output", {}, {}, false, false},
+      shade::cli::Flag{{}, "-o", "<file>", "Write output", {}, {}, false, false},
+      shade::cli::Flag{"--mode", "-m", "<mode>", "Select mode", kKinds, "full", false, false},
+      shade::cli::Flag{"--force", {}, {}, "Overwrite output", {}, {}, false, false},
   };
-  constexpr noctalia::cli::Command kLeaf{
+  constexpr shade::cli::Command kLeaf{
       "convert",
       "Convert input",
       "Convert a source file.\n\nThe output format is selected independently.",
@@ -55,7 +55,7 @@ namespace {
                                  "Options:\n"
                                  "      --verbose  Enable verbose output\n"
                                  "  -h, --help     Show this help message\n";
-    TEST_CHECK(noctalia::cli::renderHelp(kGroup, "noctalia tools") == expected);
+    TEST_CHECK(shade::cli::renderHelp(kGroup, "noctalia tools") == expected);
   }
 
   void checkLeafHelp() {
@@ -76,16 +76,16 @@ namespace {
                                  "  -h, --help         Show this help message\n"
                                  "\n"
                                  "See https://example.test for details.\n";
-    TEST_CHECK(noctalia::cli::renderHelp(kLeaf, "noctalia convert") == expected);
-    TEST_CHECK(noctalia::cli::renderArgsSpec(kLeaf) == "<input> [kind] [options]");
-    TEST_CHECK(noctalia::cli::renderArgsSpec(kGroup) == "<{zeta|alpha}> ...");
+    TEST_CHECK(shade::cli::renderHelp(kLeaf, "noctalia convert") == expected);
+    TEST_CHECK(shade::cli::renderArgsSpec(kLeaf) == "<input> [kind] [options]");
+    TEST_CHECK(shade::cli::renderArgsSpec(kGroup) == "<{zeta|alpha}> ...");
   }
 
 } // namespace
 
 int main() {
-  static_assert(noctalia::cli::validateCommand(kGroup));
-  static_assert(noctalia::cli::validateCommand(kLeaf));
+  static_assert(shade::cli::validateCommand(kGroup));
+  static_assert(shade::cli::validateCommand(kLeaf));
   checkGroupHelp();
   checkLeafHelp();
   return EXIT_SUCCESS;

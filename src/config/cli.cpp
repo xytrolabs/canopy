@@ -26,7 +26,7 @@
 #include <unistd.h>
 #include <vector>
 
-namespace noctalia::config {
+namespace shade::config {
   namespace {
 
     struct ReplayOptions {
@@ -476,4 +476,4 @@ namespace noctalia::config {
     return 1;
   }
 
-} // namespace noctalia::config
+} // namespace shade::config

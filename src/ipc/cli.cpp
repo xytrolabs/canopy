@@ -11,7 +11,7 @@
 #include <string>
 #include <string_view>
 
-namespace noctalia::ipc {
+namespace shade::ipc {
 
   int runCli(int argc, char* argv[]) {
     if (argc < 3) {
@@ -66,4 +66,4 @@ namespace noctalia::ipc {
     return IpcClient::send(cmd);
   }
 
-} // namespace noctalia::ipc
+} // namespace shade::ipc

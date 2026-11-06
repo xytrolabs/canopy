@@ -592,22 +592,22 @@ void GammaService::apply() {
 }
 
 void GammaService::registerIpc(IpcService& ipc) {
-  ipc.bind(noctalia::cli::msg::nightlightEnable, [this](const std::string&) -> std::string {
+  ipc.bind(shade::cli::msg::nightlightEnable, [this](const std::string&) -> std::string {
     setEnabled(true);
     return "ok\n";
   });
 
-  ipc.bind(noctalia::cli::msg::nightlightDisable, [this](const std::string&) -> std::string {
+  ipc.bind(shade::cli::msg::nightlightDisable, [this](const std::string&) -> std::string {
     setEnabled(false);
     return "ok\n";
   });
 
-  ipc.bind(noctalia::cli::msg::nightlightToggle, [this](const std::string&) -> std::string {
+  ipc.bind(shade::cli::msg::nightlightToggle, [this](const std::string&) -> std::string {
     toggleEnabled();
     return "ok\n";
   });
 
-  ipc.bind(noctalia::cli::msg::nightlightForceToggle, [this](const std::string&) -> std::string {
+  ipc.bind(shade::cli::msg::nightlightForceToggle, [this](const std::string&) -> std::string {
     toggleForceEnabled();
     return "ok\n";
   });

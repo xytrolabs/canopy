@@ -1,10 +1,10 @@
 #include "shell/bar/widgets/audio_visualizer_widget_definition.h"
 
-const noctalia::bar::WidgetDefinition<AudioVisualizerWidget::Options>& audioVisualizerWidgetDefinition() {
-  using noctalia::bar::field;
+const shade::bar::WidgetDefinition<AudioVisualizerWidget::Options>& audioVisualizerWidgetDefinition() {
+  using shade::bar::field;
   using Options = AudioVisualizerWidget::Options;
 
-  static const noctalia::bar::WidgetDefinition<Options> definition{
+  static const shade::bar::WidgetDefinition<Options> definition{
       .type = "audio_visualizer",
       .fields = {
           field<&Options::width>({

@@ -10,7 +10,7 @@
 // Lightweight, opt-in wall-clock profiling. Output is gated behind the
 // NOCTALIA_PROFILE env var so normal runs stay silent; set it to any non-empty
 // value to surface timing lines (e.g. `NOCTALIA_PROFILE=1 canopy`).
-namespace noctalia::profiling {
+namespace shade::profiling {
 
   // Evaluated once on first use.
   inline bool enabled() {
@@ -55,4 +55,4 @@ namespace noctalia::profiling {
     StopWatch m_watch;
   };
 
-} // namespace noctalia::profiling
+} // namespace shade::profiling

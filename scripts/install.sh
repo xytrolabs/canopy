@@ -227,8 +227,25 @@ install_session() {
     else
         run mkdir -p "$HOME/.local/bin" "$XDG_DATA_HOME/wayland-sessions"
         run install -m755 "$PROJECT_DIR/scripts/canopy-session" "$HOME/.local/bin/canopy-session"
-        run install -m644 "$PROJECT_DIR/config/canopy-session.desktop" \
-            "$XDG_DATA_HOME/wayland-sessions/canopy.desktop"
+        # Absolute Exec: a display manager resolves a bare command name against its
+        # own PATH, which puts /usr/local/bin first and can find an older system
+        # install of this script instead of the one we just wrote. When that old
+        # copy only knows labwc, every login starts labwc no matter what the new
+        # script defaults to.
+        if [ "$DRY_RUN" -eq 0 ]; then
+            sed -e "s|^Exec=.*|Exec=$HOME/.local/bin/canopy-session|" \
+                -e "s|^TryExec=.*|TryExec=$HOME/.local/bin/canopy-session|" \
+                "$PROJECT_DIR/config/canopy-session.desktop" \
+                > "$XDG_DATA_HOME/wayland-sessions/canopy.desktop"
+        fi
+        # A system-wide install shadows this one; say so instead of letting the
+        # next login quietly start the wrong compositor.
+        if [ -f /usr/local/bin/canopy-session ] && \
+           ! grep -q 'CANOPY_COMPOSITOR' /usr/local/bin/canopy-session 2>/dev/null; then
+            say "note: /usr/local/bin/canopy-session is an older system install and takes"
+            say "      precedence over this one in a display manager's PATH. Replace it with:"
+            say "        sudo install -m755 '$PROJECT_DIR/scripts/canopy-session' /usr/local/bin/canopy-session"
+        fi
         if [ "$WITH_MANGOWC" -eq 1 ]; then
             run install -m644 "$PROJECT_DIR/config/canopy-session-mangowc.desktop" \
                 "$XDG_DATA_HOME/wayland-sessions/canopy-mangowc.desktop"

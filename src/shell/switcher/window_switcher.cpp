@@ -647,8 +647,8 @@ void WindowSwitcher::initialize(
 }
 
 void WindowSwitcher::registerIpc(IpcService& ipc) {
-  ipc.bind(noctalia::cli::msg::windowSwitcher, [this](const std::string& args) -> std::string {
-    const std::vector<std::string> words = noctalia::ipc::splitWords(args);
+  ipc.bind(shade::cli::msg::windowSwitcher, [this](const std::string& args) -> std::string {
+    const std::vector<std::string> words = shade::ipc::splitWords(args);
     std::string_view action;
     std::optional<WindowSwitcherScope> scope;
     for (const std::string& word : words) {

@@ -4,7 +4,7 @@
 
 #include <array>
 
-namespace noctalia::cli {
+namespace shade::cli {
 
   inline constexpr std::array kPluginsLintPositionals{
       Positional{
@@ -44,4 +44,4 @@ namespace noctalia::cli {
       false,
   };
 
-} // namespace noctalia::cli
+} // namespace shade::cli

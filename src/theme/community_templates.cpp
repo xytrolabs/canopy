@@ -24,7 +24,7 @@
 #include <unordered_set>
 #include <utility>
 
-namespace noctalia::theme {
+namespace shade::theme {
 
   namespace {
 
@@ -934,4 +934,4 @@ namespace noctalia::theme {
     });
   }
 
-} // namespace noctalia::theme
+} // namespace shade::theme

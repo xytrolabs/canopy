@@ -41,8 +41,8 @@ namespace {
     return out.good();
   }
 
-  bool hasKey(const noctalia::config::schema::WidgetSettingSchema& schema, std::string_view key) {
-    return std::ranges::any_of(schema, [&](const noctalia::config::schema::WidgetSettingField& field) {
+  bool hasKey(const shade::config::schema::WidgetSettingSchema& schema, std::string_view key) {
+    return std::ranges::any_of(schema, [&](const shade::config::schema::WidgetSettingField& field) {
       return field.key == key;
     });
   }

@@ -33,11 +33,11 @@ namespace {
 
 } // namespace
 
-const noctalia::bar::WidgetDefinition<TaskbarWidgetOptions>& taskbarWidgetDefinition() {
-  using noctalia::bar::field;
+const shade::bar::WidgetDefinition<TaskbarWidgetOptions>& taskbarWidgetDefinition() {
+  using shade::bar::field;
   using Options = TaskbarWidgetOptions;
 
-  static const noctalia::
+  static const shade::
       bar::
           WidgetDefinition<Options>
               definition{

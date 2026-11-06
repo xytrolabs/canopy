@@ -37,7 +37,7 @@ public:
   void create() override;
 
 private:
-  void onGestureDispatch(noctalia::bar::Gesture gesture, const noctalia::bar::WidgetAction& action) override;
+  void onGestureDispatch(shade::bar::Gesture gesture, const shade::bar::WidgetAction& action) override;
   void doLayout(Renderer& renderer, float containerWidth, float containerHeight) override;
   void doUpdate(Renderer& renderer) override;
   void sync(Renderer& renderer);

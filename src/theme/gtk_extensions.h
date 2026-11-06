@@ -7,7 +7,7 @@
 #include <string_view>
 #include <vector>
 
-namespace noctalia::theme {
+namespace shade::theme {
 
   // Community templates can ship app-scoped GTK CSS by declaring `gtk_extension = "gtk3"` (or
   // "gtk4") on an entry. Noctalia owns where that CSS lands and how GTK loads it: the rendered
@@ -53,4 +53,4 @@ namespace noctalia::theme {
   // every other CSS file in the extension directory.
   bool syncGtkExtensions(const std::filesystem::path& gtkDir, std::vector<std::string> fileNames);
 
-} // namespace noctalia::theme
+} // namespace shade::theme

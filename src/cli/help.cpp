@@ -5,7 +5,7 @@
 #include <utility>
 #include <vector>
 
-namespace noctalia::cli {
+namespace shade::cli {
 
   namespace {
 
@@ -207,4 +207,4 @@ namespace noctalia::cli {
     return output;
   }
 
-} // namespace noctalia::cli
+} // namespace shade::cli

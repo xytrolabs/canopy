@@ -384,7 +384,7 @@ namespace settings {
 
       constexpr std::size_t kTemplateCardsPerRow = 5;
       auto selected = std::make_shared<std::vector<std::string>>(setting.selectedValues);
-      const auto options = std::make_shared<std::vector<noctalia::theme::AvailableTemplate>>(setting.options);
+      const auto options = std::make_shared<std::vector<shade::theme::AvailableTemplate>>(setting.options);
       const auto path = entry.path;
 
       auto commit = [setOverride = ctx.setOverride, path, options, selected] {
@@ -592,7 +592,7 @@ namespace settings {
           documentationButton->setOnLeave(syncTileState);
         }
         card->setOnClick([checkedState, setTileActive] mutable { setTileActive(!*checkedState); });
-        const std::string tooltip = noctalia::theme::formatTemplateTooltip(option);
+        const std::string tooltip = shade::theme::formatTemplateTooltip(option);
         if (!tooltip.empty()) {
           card->setTooltip(tooltip);
         }

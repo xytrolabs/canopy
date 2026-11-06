@@ -29,7 +29,7 @@
 #include <unistd.h>
 #include <vector>
 
-namespace noctalia::theme {
+namespace shade::theme {
   namespace {
 
     namespace css = firefox_theme::css;
@@ -761,4 +761,4 @@ namespace noctalia::theme {
     return 1;
   }
 
-} // namespace noctalia::theme
+} // namespace shade::theme

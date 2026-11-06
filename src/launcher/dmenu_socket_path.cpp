@@ -2,7 +2,7 @@
 
 #include <cstdlib>
 
-namespace noctalia::launcher {
+namespace shade::launcher {
 
   DmenuSocketPathResult resolveDmenuSocketPath() {
     const char* runtime = std::getenv("XDG_RUNTIME_DIR");
@@ -18,4 +18,4 @@ namespace noctalia::launcher {
     return {.path = std::string(runtime) + "/canopy-dmenu-" + display + ".sock", .error = {}};
   }
 
-} // namespace noctalia::launcher
+} // namespace shade::launcher

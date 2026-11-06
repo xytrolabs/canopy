@@ -20,8 +20,8 @@ headerbar.default-decoration {
   color: #f2f0f7;
   border: none;
   box-shadow: none;
-  min-height: 30px;
-  padding: 0 6px;
+  min-height: 28px;
+  padding: 0 8px;
 }
 
 /* Maximized / tiled windows keep the bar flat against the edges. */

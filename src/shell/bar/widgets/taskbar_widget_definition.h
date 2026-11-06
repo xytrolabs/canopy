@@ -3,4 +3,4 @@
 #include "shell/bar/widget_definition.h"
 #include "shell/bar/widgets/taskbar_widget.h"
 
-[[nodiscard]] const noctalia::bar::WidgetDefinition<TaskbarWidgetOptions>& taskbarWidgetDefinition();
+[[nodiscard]] const shade::bar::WidgetDefinition<TaskbarWidgetOptions>& taskbarWidgetDefinition();

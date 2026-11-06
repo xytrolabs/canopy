@@ -496,7 +496,7 @@ namespace scripting {
 
 } // namespace scripting
 
-namespace noctalia::plugins {
+namespace shade::plugins {
   namespace {
 
     // Resolve a CLI path argument to the plugin directories it covers: the path
@@ -643,4 +643,4 @@ namespace noctalia::plugins {
     return 1;
   }
 
-} // namespace noctalia::plugins
+} // namespace shade::plugins

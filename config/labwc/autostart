@@ -1,13 +1,16 @@
 # Canopy session autostart (Labwc)
 #
-# One shell, started after the compositor is up. The wrapper already clears a
-# stale instance, but keep this here so `labwc` can also be started by hand
-# without a leaked second panel.
+# One shell per compositor. There is deliberately no `pkill -x canopy` here:
+# that kills *every* shell on the machine, including the one belonging to the
+# session a nested Canopy is running inside - which is exactly how a nested
+# "canopy-session" used to take the host desktop down with it.
+#
+# The shell already refuses to start twice on the same display (it holds an
+# flock on $XDG_RUNTIME_DIR/canopy-<WAYLAND_DISPLAY>.lock), so a duplicate
+# instance exits by itself and leaves its log in ~/.cache/canopy-shell.log.
 #
 # ~/.cache does not exist on a fresh account; a redirect into a missing
 # directory aborts the line and the shell would never start.
 mkdir -p "$HOME/.cache"
 
-pkill -x canopy 2>/dev/null
-sleep 1
-canopy >"$HOME/.cache/canopy-shell.log" 2>&1 &
+canopy >>"$HOME/.cache/canopy-shell.log" 2>&1 &

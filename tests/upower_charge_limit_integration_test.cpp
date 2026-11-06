@@ -269,7 +269,7 @@ namespace {
       }
       std::this_thread::sleep_for(std::chrono::milliseconds(1));
     }
-    noctalia::test::failCheck("timed out waiting for D-Bus state");
+    shade::test::failCheck("timed out waiting for D-Bus state");
   }
 
   const UPowerDeviceInfo* findBattery(const UPowerService& service, const std::string& path) {

@@ -6,6 +6,7 @@
 #include "render/core/renderer.h"
 #include "render/scene/input_area.h"
 #include "render/scene/node.h"
+#include "shell/bar/widget_custom_image.h"
 #include "shell/dock/dock_geometry.h"
 #include "shell/dock/dock_instance.h"
 #include "shell/dock/dock_model.h"
@@ -423,15 +424,22 @@ namespace shell::dock {
     }
 
     if (!cfg.launcherCustomImage.empty()) {
+      // The configured path is written the way a user sees it
+      // (~/.local/share/icons/...), so it has to be expanded and, when that file
+      // is not there, resolved through the XDG data dirs - the same treatment the
+      // bar's launcher widget gets. Passing the raw string to the image loader
+      // silently produced no icon at all.
+      const WidgetCustomImage launcherImageSource =
+          widget_custom_image::fromConfig(cfg.launcherCustomImage, cfg.launcherCustomImageColorize);
       auto launcherImage = ui::image({
           .fit = ImageFit::Contain,
           .width = iSize,
           .height = iSize,
-          .configure = [&cfg, iSize, &renderer, iconDecodeTarget](Image& image) {
-            image.setSourceFile(renderer, cfg.launcherCustomImage, iconDecodeTarget, true);
+          .configure = [launcherImageSource, &cfg, iSize, &renderer, iconDecodeTarget](Image& image) {
+            image.setSourceFile(renderer, launcherImageSource.path, iconDecodeTarget, true);
             image.setForegroundTint(
-                cfg.launcherCustomImageColorize ? std::optional<ColorSpec>{colorSpecFromRole(ColorRole::OnSurface)}
-                                                : std::nullopt
+                launcherImageSource.colorize ? std::optional<ColorSpec>{colorSpecFromRole(ColorRole::OnSurface)}
+                                             : std::nullopt
             );
             image.setPosition(kCellPad, launcherIconBaseY(cfg, iSize));
           },

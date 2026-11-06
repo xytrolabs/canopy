@@ -10,7 +10,7 @@
 
 #include <array>
 
-namespace noctalia::cli {
+namespace shade::cli {
 
   inline constexpr std::array<std::string_view, 3> kCompletionShellChoices{"bash", "fish", "zsh"};
   inline constexpr std::array kCompletionsPositionals{
@@ -52,4 +52,4 @@ namespace noctalia::cli {
 
   static_assert(validateCommand(kRootCmd));
 
-} // namespace noctalia::cli
+} // namespace shade::cli

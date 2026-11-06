@@ -239,28 +239,28 @@ void OsdOverlay::initialize(
 }
 
 void OsdOverlay::registerIpc(IpcService& ipc) {
-  ipc.bind(noctalia::cli::msg::osdEnable, [this](const std::string& args) -> std::string {
-    if (!noctalia::ipc::splitWords(args).empty()) {
+  ipc.bind(shade::cli::msg::osdEnable, [this](const std::string& args) -> std::string {
+    if (!shade::ipc::splitWords(args).empty()) {
       return "error: osd-enable takes no arguments\n";
     }
     setEnabledOverride(true);
     return "ok\n";
   });
-  ipc.bind(noctalia::cli::msg::osdDisable, [this](const std::string& args) -> std::string {
-    if (!noctalia::ipc::splitWords(args).empty()) {
+  ipc.bind(shade::cli::msg::osdDisable, [this](const std::string& args) -> std::string {
+    if (!shade::ipc::splitWords(args).empty()) {
       return "error: osd-disable takes no arguments\n";
     }
     setEnabledOverride(false);
     return "ok\n";
   });
-  ipc.bind(noctalia::cli::msg::osdToggle, [this](const std::string& args) -> std::string {
-    if (!noctalia::ipc::splitWords(args).empty()) {
+  ipc.bind(shade::cli::msg::osdToggle, [this](const std::string& args) -> std::string {
+    if (!shade::ipc::splitWords(args).empty()) {
       return "error: osd-toggle takes no arguments\n";
     }
     setEnabledOverride(!isEnabled());
     return isEnabled() ? "on\n" : "off\n";
   });
-  ipc.bind(noctalia::cli::msg::osdShow, [this](const std::string& args) -> std::string {
+  ipc.bind(shade::cli::msg::osdShow, [this](const std::string& args) -> std::string {
     const std::string input = StringUtils::trim(args);
     if (input.empty()) {
       return "error: osd-show requires <icon> [value] or <json-payload>\n";

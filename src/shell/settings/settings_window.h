@@ -63,7 +63,7 @@ namespace scripting {
   class PluginRecommendations;
 }
 
-namespace noctalia::theme {
+namespace shade::theme {
   struct GeneratedPalette;
 }
 
@@ -106,7 +106,7 @@ public:
   [[nodiscard]] bool onPointerEvent(const PointerEvent& event);
   void onKeyboardEvent(const KeyboardEvent& event);
   void onThemeChanged();
-  void setResolvedPalette(const noctalia::theme::GeneratedPalette& generated, std::string_view mode);
+  void setResolvedPalette(const shade::theme::GeneratedPalette& generated, std::string_view mode);
   void onFontChanged();
   void requestRedraw();
   void onExternalOptionsChanged();

@@ -2,22 +2,17 @@
 # canopy-session — start a Canopy desktop session.
 #
 # This is what the display manager runs, and what you run from a TTY. It owns
-# the session environment, starts the Labwc compositor and lets the shell come
-# up on its own (labwc/autostart), so the shell can be restarted without
-# tearing the session down.
+# the session environment and starts the Canopy compositor, which starts the
+# shell through its own autostart, so the shell can be restarted without tearing
+# the session down.
 #
-#   canopy-session            start (or take over) the session
-#   canopy-session --nested   run nested inside an existing Wayland session
-#   canopy-session --compositor mangowc
-#   canopy-session --compositor umbriel
+#   canopy-session              start (or take over) the session
+#   canopy-session --nested     run nested inside an existing Wayland session
+#   canopy-session --compositor canopywc
 #
-# labwc is the default compositor. MangoWC is a second, beta session that runs
-# the same shell - it does not replace labwc anywhere. `umbriel` is Canopy's own
-# Canopy's own compositor (compositor/ in the source tree, binary `canopywc`)
-# is the direction the desktop is heading; labwc stays the default until the
-# Canopy runs on its own compositor, canopywc (compositor/ in the source tree).
-# labwc is still supported and is used automatically when canopywc is not
-# installed, so a half-built checkout never leaves you without a session.
+# Canopy runs on its own compositor, canopywc — the fork of Umbriel kept in
+# compositor/. labwc is not a Canopy session and there is no fallback to it: a
+# desktop that silently starts on a different compositor is not this desktop.
 # See docs/COMPOSITOR_FORK.md.
 set -eu
 
@@ -55,9 +50,9 @@ done
 
 compositor_binary() {
     case "$1" in
-        labwc) printf 'labwc\n' ;;
-        mangowc|mango) printf 'mangowc\n' ;;
-        umbriel|canopywc) canopywc_binary ;;
+        # Canopy runs on its own compositor. labwc is no longer a Canopy session.
+        canopywc|umbriel) canopywc_binary ;;
+        mango|mangowc) printf 'mangowc\n' ;;
         *) printf '\n' ;;
     esac
 }
@@ -84,26 +79,23 @@ canopywc_binary() {
 
 if [ "$PRINT_LIST" -eq 1 ]; then
     printf 'canopywc  the Canopy compositor (default)\n'
-    printf 'labwc     fallback session, server-side decorations\n'
     printf 'mangowc   beta tiling session (package: mangowm)\n'
     exit 0
 fi
 
 COMPOSITOR_BIN="$(compositor_binary "$COMPOSITOR")"
 if [ -z "$COMPOSITOR_BIN" ]; then
-    printf 'canopy-session: unknown compositor "%s" (use canopywc, labwc or mangowc)\n' "$COMPOSITOR" >&2
+    printf 'canopy-session: unknown compositor "%s" (use canopywc)\n' "$COMPOSITOR" >&2
     exit 2
 fi
 
-# A default that is not built yet must not cost you the session: fall back to
-# labwc, loudly, instead of exiting from a display manager that will not show
-# the message.
-if ! command -v "$COMPOSITOR_BIN" >/dev/null 2>&1 && [ "$COMPOSITOR" = "canopywc" ]; then
-    printf 'canopy-session: canopywc is not built or installed; falling back to labwc\n' >&2
+# There is no fallback compositor any more: Canopy is canopywc. Fail loudly
+# rather than starting a desktop it was not designed for.
+if ! command -v "$COMPOSITOR_BIN" >/dev/null 2>&1 && [ "$COMPOSITOR" != "mangowc" ]; then
+    printf 'canopy-session: canopywc is not built or installed\n' >&2
     printf '  build it with: sh scripts/build-compositor.sh\n' >&2
-    log_note "canopywc missing; fell back to labwc"
-    COMPOSITOR=labwc
-    COMPOSITOR_BIN=labwc
+    log_note "canopywc missing; session refused to start"
+    exit 1
 fi
 
 # --------------------------------------------------------------- environment --
@@ -182,10 +174,6 @@ if [ -z "$NESTED" ]; then
     sleep 0.3
 fi
 
-if [ -n "$NESTED" ] && [ "$COMPOSITOR" = "labwc" ]; then
-    exec labwc -S 'canopy' -t 'Canopy (nested)'
-fi
-
 if [ -n "$NESTED" ]; then
     case "$COMPOSITOR" in
         mangowc|mango)
@@ -217,19 +205,6 @@ if [ ! -f "$CONFIG_HOME/canopy/config.toml" ]; then
             break
         fi
     done
-fi
-
-# Session: labwc runs ~/.config/labwc/autostart, which starts the shell. When
-# that file is missing or does not mention canopy, pass the shell as the startup
-# command instead - passing both would run two shells, which is exactly what
-# produces a duplicated panel and a duplicated set of tray icons.
-AUTOSTART="${XDG_CONFIG_HOME:-$HOME/.config}/labwc/autostart"
-if [ "$COMPOSITOR" = "labwc" ] && [ -f "$AUTOSTART" ] && grep -q 'canopy' "$AUTOSTART" 2>/dev/null; then
-    exec labwc -t Canopy
-fi
-
-if [ "$COMPOSITOR" = "labwc" ]; then
-    exec labwc -S 'canopy' -t Canopy
 fi
 
 # ----------------------------------------------------------------- canopywc --

@@ -29,7 +29,7 @@
 #include <unordered_map>
 #include <vector>
 
-namespace noctalia::theme {
+namespace shade::theme {
 
   namespace {
 
@@ -53,7 +53,7 @@ namespace noctalia::theme {
 
     std::vector<TemplateListEntry> loadBuiltinTemplateList(std::string& err) {
       std::vector<TemplateListEntry> out;
-      const auto builtins = noctalia::theme::loadBuiltinTemplateInfo(&err);
+      const auto builtins = shade::theme::loadBuiltinTemplateInfo(&err);
       out.reserve(builtins.size());
       for (const auto& builtin : builtins) {
         out.push_back(
@@ -528,4 +528,4 @@ namespace noctalia::theme {
     return 0;
   }
 
-} // namespace noctalia::theme
+} // namespace shade::theme

@@ -42,7 +42,7 @@ namespace settings {
 
       void setContent(TemplateStoreContent* content) { m_content = content; }
       void setFilteredIndices(const std::vector<std::size_t>* indices) { m_indices = indices; }
-      void setCatalog(const std::vector<noctalia::theme::AvailableTemplate>* catalog) { m_catalog = catalog; }
+      void setCatalog(const std::vector<shade::theme::AvailableTemplate>* catalog) { m_catalog = catalog; }
       void setSelectedIds(const std::unordered_set<std::string>* ids) { m_selectedIds = ids; }
 
       [[nodiscard]] std::size_t itemCount() const override { return m_indices != nullptr ? m_indices->size() : 0; }
@@ -70,7 +70,7 @@ namespace settings {
         if (m_indices == nullptr || m_catalog == nullptr || index >= m_indices->size()) {
           return {};
         }
-        return noctalia::theme::formatTemplateTooltip((*m_catalog)[(*m_indices)[index]]);
+        return shade::theme::formatTemplateTooltip((*m_catalog)[(*m_indices)[index]]);
       }
 
       void onActivate(std::size_t index) override {
@@ -117,14 +117,14 @@ namespace settings {
       float m_scale;
       TemplateStoreContent* m_content = nullptr;
       const std::vector<std::size_t>* m_indices = nullptr;
-      const std::vector<noctalia::theme::AvailableTemplate>* m_catalog = nullptr;
+      const std::vector<shade::theme::AvailableTemplate>* m_catalog = nullptr;
       const std::unordered_set<std::string>* m_selectedIds = nullptr;
     };
 
   } // namespace
 
   TemplateStoreContent::TemplateStoreContent(
-      std::vector<noctalia::theme::AvailableTemplate> catalog, std::unordered_set<std::string> selectedIds,
+      std::vector<shade::theme::AvailableTemplate> catalog, std::unordered_set<std::string> selectedIds,
       ConfigService* config, TemplateStoreCallbacks callbacks
   )
       : m_catalog(std::move(catalog)), m_selectedIds(std::move(selectedIds)), m_config(config),

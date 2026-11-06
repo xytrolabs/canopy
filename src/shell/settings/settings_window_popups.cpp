@@ -2602,7 +2602,7 @@ void SettingsWindow::openCommunityTemplateStore() {
   }
 
   const float scale = uiScale();
-  auto catalog = noctalia::theme::CommunityTemplateService::availableTemplates();
+  auto catalog = shade::theme::CommunityTemplateService::availableTemplates();
   std::unordered_set<std::string> selectedIds(
       m_config->config().theme.templates.communityIds.begin(), m_config->config().theme.templates.communityIds.end()
   );

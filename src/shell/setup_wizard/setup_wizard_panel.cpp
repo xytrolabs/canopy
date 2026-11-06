@@ -79,8 +79,8 @@ namespace {
 
   std::vector<std::string> builtinPaletteNames() {
     std::vector<std::string> paletteNames;
-    paletteNames.reserve(noctalia::theme::builtinPalettes().size());
-    for (const auto& entry : noctalia::theme::builtinPalettes()) {
+    paletteNames.reserve(shade::theme::builtinPalettes().size());
+    for (const auto& entry : shade::theme::builtinPalettes()) {
       paletteNames.emplace_back(entry.name);
     }
     return paletteNames;
@@ -88,7 +88,7 @@ namespace {
 
   std::size_t selectedBuiltinPaletteIndex(std::string_view name) {
     std::size_t index = 0;
-    for (const auto& entry : noctalia::theme::builtinPalettes()) {
+    for (const auto& entry : shade::theme::builtinPalettes()) {
       if (entry.name == name) {
         return index;
       }

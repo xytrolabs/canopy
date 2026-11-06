@@ -120,7 +120,7 @@ namespace {
     std::int32_t value = 0;
     const auto* end = text.data() + text.size();
     const auto result = std::from_chars(text.data(), end, value);
-    const auto& range = noctalia::config::schema::kScreenshotQualityRange;
+    const auto& range = shade::config::schema::kScreenshotQualityRange;
     if (result.ec != std::errc{} || result.ptr != end || value < *range.min || value > *range.max) {
       return std::nullopt;
     }
@@ -717,7 +717,7 @@ namespace {
 } // namespace
 
 std::expected<ScreenshotIpcRequest, std::string> parseScreenshotIpcRequest(
-    const noctalia::cli::Command& command, std::string_view args, ScreenshotService::OutputOptions base,
+    const shade::cli::Command& command, std::string_view args, ScreenshotService::OutputOptions base,
     std::optional<std::string_view> callerCwd
 ) {
   auto tokens = StringUtils::splitShellWords(args);
@@ -730,12 +730,12 @@ std::expected<ScreenshotIpcRequest, std::string> parseScreenshotIpcRequest(
   for (std::string& token : *tokens) {
     pointers.push_back(token.data());
   }
-  const auto parsed = noctalia::cli::parseArgs(command, pointers);
+  const auto parsed = shade::cli::parseArgs(command, pointers);
   if (!parsed) {
     return std::unexpected(parsed.error() + "\n");
   }
   if (parsed->helpRequested) {
-    return std::unexpected(noctalia::cli::renderHelp(command, "noctalia msg " + std::string(command.name)));
+    return std::unexpected(shade::cli::renderHelp(command, "noctalia msg " + std::string(command.name)));
   }
 
   for (const ScreenshotBoolFlag& flag : kScreenshotBoolFlags) {
@@ -890,9 +890,9 @@ ScreenshotService::OutputOptions ScreenshotService::outputOptionsFromConfig(cons
 }
 
 void ScreenshotService::registerIpc(IpcService& ipc, const ConfigService& configService) {
-  ipc.bind(noctalia::cli::msg::screenshotRegion, [this, &ipc, &configService](const std::string& args) -> std::string {
+  ipc.bind(shade::cli::msg::screenshotRegion, [this, &ipc, &configService](const std::string& args) -> std::string {
     auto request = parseScreenshotIpcRequest(
-        noctalia::cli::msg::screenshotRegion, args, outputOptionsFromConfig(configService.config()), callerCwdOf(ipc)
+        shade::cli::msg::screenshotRegion, args, outputOptionsFromConfig(configService.config()), callerCwdOf(ipc)
     );
     if (!request) {
       return request.error();
@@ -912,9 +912,9 @@ void ScreenshotService::registerIpc(IpcService& ipc, const ConfigService& config
   });
 
   ipc.bind(
-      noctalia::cli::msg::screenshotFullscreen, [this, &ipc, &configService](const std::string& args) -> std::string {
+      shade::cli::msg::screenshotFullscreen, [this, &ipc, &configService](const std::string& args) -> std::string {
         auto request = parseScreenshotIpcRequest(
-            noctalia::cli::msg::screenshotFullscreen, args, outputOptionsFromConfig(configService.config()),
+            shade::cli::msg::screenshotFullscreen, args, outputOptionsFromConfig(configService.config()),
             callerCwdOf(ipc)
         );
         if (!request) {
@@ -960,9 +960,9 @@ void ScreenshotService::registerIpc(IpcService& ipc, const ConfigService& config
   );
 
   ipc.bind(
-      noctalia::cli::msg::screenshotAnnotate, [this, &ipc, &configService](const std::string& args) -> std::string {
+      shade::cli::msg::screenshotAnnotate, [this, &ipc, &configService](const std::string& args) -> std::string {
         auto request = parseScreenshotIpcRequest(
-            noctalia::cli::msg::screenshotAnnotate, args, outputOptionsFromConfig(configService.config()),
+            shade::cli::msg::screenshotAnnotate, args, outputOptionsFromConfig(configService.config()),
             callerCwdOf(ipc)
         );
         if (!request) {
@@ -983,9 +983,9 @@ void ScreenshotService::registerIpc(IpcService& ipc, const ConfigService& config
       }
   );
 
-  ipc.bind(noctalia::cli::msg::screenshotWindow, [this, &ipc, &configService](const std::string& args) -> std::string {
+  ipc.bind(shade::cli::msg::screenshotWindow, [this, &ipc, &configService](const std::string& args) -> std::string {
     auto request = parseScreenshotIpcRequest(
-        noctalia::cli::msg::screenshotWindow, args, outputOptionsFromConfig(configService.config()), callerCwdOf(ipc)
+        shade::cli::msg::screenshotWindow, args, outputOptionsFromConfig(configService.config()), callerCwdOf(ipc)
     );
     if (!request) {
       return request.error();
@@ -1013,9 +1013,9 @@ void ScreenshotService::registerIpc(IpcService& ipc, const ConfigService& config
 
   // The live annotator draws over running apps, so it opens without screencopy;
   // only its Freeze action needs capture support. With a path it edits that image instead.
-  ipc.bind(noctalia::cli::msg::annotate, [this, &ipc, &configService](const std::string& args) -> std::string {
+  ipc.bind(shade::cli::msg::annotate, [this, &ipc, &configService](const std::string& args) -> std::string {
     auto request = parseScreenshotIpcRequest(
-        noctalia::cli::msg::annotate, args, outputOptionsFromConfig(configService.config()), callerCwdOf(ipc)
+        shade::cli::msg::annotate, args, outputOptionsFromConfig(configService.config()), callerCwdOf(ipc)
     );
     if (!request) {
       return request.error();

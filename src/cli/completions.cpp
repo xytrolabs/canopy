@@ -9,7 +9,7 @@
 #include <string_view>
 #include <vector>
 
-namespace noctalia::cli {
+namespace shade::cli {
 
   namespace {
 
@@ -624,4 +624,4 @@ namespace noctalia::cli {
     return 0;
   }
 
-} // namespace noctalia::cli
+} // namespace shade::cli

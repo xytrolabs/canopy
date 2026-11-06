@@ -129,7 +129,7 @@ auto_hide           = false
 reserve_space       = true
 capsule             = false
 
-start  = ["launcher", "wordmark", "active_window"]
+start  = ["launcher", "wordmark", "workspaces", "active_window"]
 center = []
 # The side island already carries network, bluetooth and battery, so the menu
 # bar does not repeat them: media, clock, quick settings and power only.

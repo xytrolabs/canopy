@@ -12,11 +12,11 @@ namespace {
 
 } // namespace
 
-const noctalia::bar::WidgetDefinition<BluetoothWidget::Options>& bluetoothWidgetDefinition() {
-  using noctalia::bar::field;
+const shade::bar::WidgetDefinition<BluetoothWidget::Options>& bluetoothWidgetDefinition() {
+  using shade::bar::field;
   using Options = BluetoothWidget::Options;
 
-  static const noctalia::bar::WidgetDefinition<Options> definition{
+  static const shade::bar::WidgetDefinition<Options> definition{
       .type = "bluetooth",
       .fields = {
           field<&Options::showLabel>({

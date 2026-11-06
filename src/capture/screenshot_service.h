@@ -28,9 +28,9 @@ struct KeyboardEvent;
 struct PointerEvent;
 struct wl_output;
 
-namespace noctalia::cli {
+namespace shade::cli {
   struct Command;
-} // namespace noctalia::cli
+} // namespace shade::cli
 
 class ScreenshotService {
 public:
@@ -240,6 +240,6 @@ struct ScreenshotIpcRequest {
 // Applies `canopy msg <command>` flags on top of `base` (the [shell.screenshot] snapshot).
 // The error string is the complete IPC response: an "error: ...\n" line, or the help text.
 [[nodiscard]] std::expected<ScreenshotIpcRequest, std::string> parseScreenshotIpcRequest(
-    const noctalia::cli::Command& command, std::string_view args, ScreenshotService::OutputOptions base,
+    const shade::cli::Command& command, std::string_view args, ScreenshotService::OutputOptions base,
     std::optional<std::string_view> callerCwd
 );

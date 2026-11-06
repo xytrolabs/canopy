@@ -16,7 +16,7 @@
 #include <utility>
 #include <vector>
 
-namespace noctalia::theme {
+namespace shade::theme {
 
   namespace {
 
@@ -254,4 +254,4 @@ namespace noctalia::theme {
     return result;
   }
 
-} // namespace noctalia::theme
+} // namespace shade::theme

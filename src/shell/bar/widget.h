@@ -22,7 +22,7 @@ class Box;
 class InputArea;
 struct PointerEvent;
 
-namespace noctalia::bar {
+namespace shade::bar {
   class WidgetActionDispatcher;
 }
 
@@ -83,15 +83,15 @@ public:
   // Merges the four binding layers and installs handlers on the gesture area. Re-runs on reload.
   void resolveGestureBindings(
       std::string_view widgetType, const WidgetConfig* widgetConfig,
-      const noctalia::bar::WidgetActionBindings::ActionTable* barActions, std::string_view barContext,
-      const noctalia::bar::WidgetActionDispatcher* dispatcher
+      const shade::bar::WidgetActionBindings::ActionTable* barActions, std::string_view barContext,
+      const shade::bar::WidgetActionDispatcher* dispatcher
   );
   void applyCommonOptions(
       const CommonWidgetOptions& options, FontWeight barFontWeight, const std::string& barFontFamily,
       std::string_view logContext
   );
   void setActionContext(IpcInvocationContext context) { m_actionContext = std::move(context); }
-  [[nodiscard]] const noctalia::bar::WidgetActionBindings& gestureBindings() const noexcept {
+  [[nodiscard]] const shade::bar::WidgetActionBindings& gestureBindings() const noexcept {
     return m_gestureBindings;
   }
 
@@ -163,10 +163,10 @@ protected:
     m_gestureArea = nullptr;
   }
   // Runs the action bound to `gesture`, if any. Returns whether it was handled.
-  bool dispatchGesture(noctalia::bar::Gesture gesture);
+  bool dispatchGesture(shade::bar::Gesture gesture);
   // Called just before a bound action runs, so a widget can snapshot state for an optimistic
   // update. Match on `action` when the update only makes sense for one verb.
-  virtual void onGestureDispatch(noctalia::bar::Gesture gesture, const noctalia::bar::WidgetAction& action) {
+  virtual void onGestureDispatch(shade::bar::Gesture gesture, const shade::bar::WidgetAction& action) {
     (void)gesture;
     (void)action;
   }
@@ -197,7 +197,7 @@ protected:
 
 private:
   void installGestureHandlers();
-  [[nodiscard]] bool bindingRepeatsEveryScrollStep(noctalia::bar::Gesture gesture) const;
+  [[nodiscard]] bool bindingRepeatsEveryScrollStep(shade::bar::Gesture gesture) const;
   // An enabled InputArea captures hover (and the highlight) even with no accepted buttons, so the
   // wrapper stays inert until something is actually bound to it.
   void updateGestureAreaEnabled() noexcept;
@@ -215,8 +215,8 @@ private:
   InputArea* m_innerArea = nullptr;
   std::uint32_t m_innerBaseButtons = 0;
   std::uint32_t m_innerBaseScrollDirections = 0;
-  noctalia::bar::WidgetActionBindings m_gestureBindings;
-  noctalia::bar::ScrollRepeatMode m_scrollRepeatMode = noctalia::bar::ScrollRepeatMode::Auto;
-  const noctalia::bar::WidgetActionDispatcher* m_actionDispatcher = nullptr;
+  shade::bar::WidgetActionBindings m_gestureBindings;
+  shade::bar::ScrollRepeatMode m_scrollRepeatMode = shade::bar::ScrollRepeatMode::Auto;
+  const shade::bar::WidgetActionDispatcher* m_actionDispatcher = nullptr;
   IpcInvocationContext m_actionContext;
 };

@@ -257,10 +257,10 @@ private:
   ConfigService m_configService;
   HttpClient m_httpClient;
   FileWatcher m_fileWatcher;
-  noctalia::theme::CommunityPaletteService m_communityPaletteService{m_httpClient};
-  noctalia::theme::CommunityTemplateService m_communityTemplateService{m_httpClient};
-  noctalia::theme::ThemeService m_themeService{m_configService, m_httpClient};
-  noctalia::theme::TemplateApplyService m_templateApplyService{m_configService};
+  shade::theme::CommunityPaletteService m_communityPaletteService{m_httpClient};
+  shade::theme::CommunityTemplateService m_communityTemplateService{m_httpClient};
+  shade::theme::ThemeService m_themeService{m_configService, m_httpClient};
+  shade::theme::TemplateApplyService m_templateApplyService{m_configService};
   scripting::ScriptApiContext m_scriptApi;
   std::function<void()> m_syncScriptApiOutputs;
   scripting::PluginManager m_pluginManager{m_configService};

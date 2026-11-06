@@ -41,10 +41,10 @@ namespace scripting {
 
 } // namespace scripting
 
-namespace noctalia::plugins {
+namespace shade::plugins {
 
   // Entry point for `noctalia plugins <command> [paths]`. Returns a process exit
   // code. Offline author tool; does not start Application or talk to a running shell.
   int runCli(int argc, char* argv[]);
 
-} // namespace noctalia::plugins
+} // namespace shade::plugins

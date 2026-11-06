@@ -8,7 +8,7 @@
 
 namespace {
 
-  using namespace noctalia::theme;
+  using namespace shade::theme;
 
   const std::filesystem::path kRoot = std::filesystem::temp_directory_path() / "noctalia_gtk_extensions_test";
   const std::filesystem::path kGtk3 = kRoot / "gtk-3.0";

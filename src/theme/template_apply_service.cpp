@@ -27,7 +27,7 @@
 #include <utility>
 #include <vector>
 
-namespace noctalia::theme {
+namespace shade::theme {
 
   namespace {
 
@@ -302,7 +302,7 @@ namespace noctalia::theme {
   }
 
   void TemplateApplyService::registerIpc(IpcService& ipc) {
-    ipc.bind(noctalia::cli::msg::templatesApply, [this](const std::string& args) -> std::string {
+    ipc.bind(shade::cli::msg::templatesApply, [this](const std::string& args) -> std::string {
       if (!StringUtils::trim(args).empty()) {
         return "error: usage: templates-apply\n";
       }
@@ -716,4 +716,4 @@ namespace noctalia::theme {
     }
   }
 
-} // namespace noctalia::theme
+} // namespace shade::theme

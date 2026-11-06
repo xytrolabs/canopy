@@ -729,9 +729,9 @@ void Application::initStyleThemeAndWayland() {
   });
 
   m_themeService.setResolvedCallback([this, lastResolvedThemeMode = std::optional<std::string>{},
-                                      lastGeneratedPalette = std::optional<noctalia::theme::GeneratedPalette>{},
+                                      lastGeneratedPalette = std::optional<shade::theme::GeneratedPalette>{},
                                       syncScriptApiWallpaperDirectory](
-                                         const noctalia::theme::GeneratedPalette& generated, std::string_view mode
+                                         const shade::theme::GeneratedPalette& generated, std::string_view mode
                                      ) mutable {
     const std::string resolvedMode(mode);
     const std::string configuredMode(enumToKey(kThemeModes, m_themeService.configuredMode()));
