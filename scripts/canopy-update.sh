@@ -82,6 +82,7 @@ trap 'rm -rf "$TMP"' EXIT INT TERM
 LATEST=""
 REL_BASE=""
 REL_SOURCE=""
+GH_SHA256=""
 
 # GitHub: read the newest release tag, then build the asset URLs from it.
 # Constructing the URLs instead of parsing the asset list keeps this working
@@ -93,6 +94,16 @@ resolve_github() {
     _tag="$(sed -n 's/.*"tag_name"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' "$TMP/gh.json" | head -1)"
     [ -n "$_tag" ] || return 1
     LATEST="$(printf '%s' "$_tag" | sed 's/^v//')"
+    GH_SHA256="$(awk -v asset="canopy-$LATEST.run" '
+        /"name"[[:space:]]*:/ { in_asset = index($0, "\"" asset "\"") > 0 }
+        in_asset && /"digest"[[:space:]]*:/ {
+            line = $0
+            sub(/^.*sha256:/, "", line)
+            sub(/".*/, "", line)
+            if (length(line) == 64 && line !~ /[^0-9a-fA-F]/) print line
+            exit
+        }
+    ' "$TMP/gh.json")"
     REL_BASE="https://github.com/$GH_REPO/releases/download/$_tag"
     REL_SOURCE="github"
     return 0
@@ -175,20 +186,27 @@ fi
 say "downloading canopy-$LATEST.run from $REL_SOURCE"
 fetch "$REL_BASE/canopy-$LATEST.run" "$TMP/canopy.run" || die "download failed: $REL_BASE/canopy-$LATEST.run"
 
-# Verify before executing anything.
-if fetch "$REL_BASE/SHA256SUMS" "$TMP/SHA256SUMS" 2>/dev/null; then
+# Verify before executing anything. GitHub publishes the digest in release API
+# metadata, not as a separate SHA256SUMS asset. The static site mirror does
+# publish SHA256SUMS alongside the payload.
+EXPECTED=""
+if [ "$REL_SOURCE" = "github" ]; then
+    EXPECTED="$GH_SHA256"
+    [ -n "$EXPECTED" ] || die "GitHub release has no SHA-256 digest for canopy-$LATEST.run"
+elif fetch "$REL_BASE/SHA256SUMS" "$TMP/SHA256SUMS" 2>/dev/null; then
     EXPECTED="$(grep " canopy-$LATEST.run\$" "$TMP/SHA256SUMS" | awk '{print $1}')"
-    if [ -n "$EXPECTED" ]; then
-        if command -v sha256sum >/dev/null 2>&1; then
-            ACTUAL="$(sha256sum "$TMP/canopy.run" | awk '{print $1}')"
-        else
-            ACTUAL="$(shasum -a 256 "$TMP/canopy.run" | awk '{print $1}')"
-        fi
-        [ "$EXPECTED" = "$ACTUAL" ] || die "checksum mismatch — refusing to install"
-        say "sha256 verified"
+fi
+
+if [ -n "$EXPECTED" ]; then
+    if command -v sha256sum >/dev/null 2>&1; then
+        ACTUAL="$(sha256sum "$TMP/canopy.run" | awk '{print $1}')"
     else
-        say "warning: no checksum for canopy-$LATEST.run"
+        ACTUAL="$(shasum -a 256 "$TMP/canopy.run" | awk '{print $1}')"
     fi
+    [ "$EXPECTED" = "$ACTUAL" ] || die "checksum mismatch — refusing to install"
+    say "sha256 verified"
+else
+    say "warning: no checksum for canopy-$LATEST.run"
 fi
 
 say "installing"
