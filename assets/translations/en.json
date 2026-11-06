@@ -2214,6 +2214,31 @@
           "button": "Open Display Management",
           "description": "Arrange connected screens, rotate them, and adjust their scale in Control Center.",
           "label": "Display Management"
+        },
+        "position": {
+          "above": "Above",
+          "below": "Below",
+          "description": "Place this display relative to the other connected screen.",
+          "label": "Position",
+          "left": "Left",
+          "right": "Right"
+        },
+        "rotation": {
+          "clockwise": "Rotate 90° clockwise",
+          "counterclockwise": "Rotate 90° counterclockwise",
+          "description": "Rotate the display by 90 degrees.",
+          "label": "Rotation"
+        },
+        "scale": {
+          "decrease": "Decrease scale",
+          "description": "Change display scale in 25% steps.",
+          "increase": "Increase scale",
+          "label": "Scale"
+        },
+        "reset": {
+          "button": "Reset layout",
+          "description": "Remove the saved position, rotation, and scale overrides.",
+          "label": "Reset"
         }
       },
       "desktop": {

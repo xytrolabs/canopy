@@ -2,6 +2,7 @@
 
 #include "shell/control_center/tab.h"
 
+#include <cstdint>
 #include <memory>
 #include <string>
 #include <vector>
@@ -12,6 +13,22 @@ class Flex;
 class Label;
 class Renderer;
 class ScrollView;
+
+namespace display_management {
+
+  enum class Placement : std::uint8_t {
+    Left,
+    Right,
+    Above,
+    Below,
+  };
+
+  bool place(CompositorPlatform* platform, const std::string& output, Placement placement);
+  bool rotate(CompositorPlatform* platform, const std::string& output, int steps);
+  bool adjustScale(CompositorPlatform* platform, const std::string& output, double delta);
+  bool reset(const std::string& output);
+
+} // namespace display_management
 
 // Arranges physical outputs: side-by-side placement, rotation and scale.
 //

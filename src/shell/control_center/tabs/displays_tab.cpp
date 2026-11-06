@@ -423,82 +423,109 @@ void DisplaysTab::refreshCardText() {
 }
 
 void DisplaysTab::arrangeOutput(const std::string& name, int direction) {
-  if (m_platform == nullptr) {
+  if (direction < 0 || direction > 3) {
     return;
   }
-
-  const auto& outputs = m_platform->outputs();
-  const auto self = std::ranges::find_if(outputs, [&](const WaylandOutput& output) { return displayName(output) == name; });
-  if (self == outputs.end()) {
-    return;
-  }
-
-  // Reference: the first other output, which is the one the user is arranging
-  // around. With a single output there is nothing to arrange against.
-  const auto reference = std::ranges::find_if(outputs, [&](const WaylandOutput& output) {
-    return displayName(output) != name;
-  });
-  if (reference == outputs.end()) {
-    return;
-  }
-
-  int x = reference->logicalX;
-  int y = reference->logicalY;
-  switch (direction) {
-    case 0:
-      x -= effectiveWidth(*self);
-      break;
-    case 1:
-      x += effectiveWidth(*reference);
-      break;
-    case 2:
-      y -= effectiveHeight(*self);
-      break;
-    default:
-      y += effectiveHeight(*reference);
-      break;
-  }
-
-  patchOutput(name, [x, y](toml::table& table) {
-    toml::array position;
-    position.push_back(static_cast<std::int64_t>(x));
-    position.push_back(static_cast<std::int64_t>(y));
-    table.insert_or_assign("position", std::move(position));
-  });
+  display_management::place(m_platform, name, static_cast<display_management::Placement>(direction));
 }
 
 void DisplaysTab::rotateOutput(const std::string& name, int steps) {
-  if (m_platform == nullptr) {
-    return;
-  }
-
-  const auto& outputs = m_platform->outputs();
-  const auto self = std::ranges::find_if(outputs, [&](const WaylandOutput& output) { return displayName(output) == name; });
-  if (self == outputs.end()) {
-    return;
-  }
-
-  const int transform = ((self->effectiveTransform() + steps) % 4 + 4) % 4;
-  const char* value = transformName(transform);
-  patchOutput(name, [value](toml::table& table) { table.insert_or_assign("transform", std::string(value)); });
+  display_management::rotate(m_platform, name, steps);
 }
 
 void DisplaysTab::scaleOutput(const std::string& name, double delta) {
-  if (m_platform == nullptr) {
-    return;
-  }
-
-  const auto& outputs = m_platform->outputs();
-  const auto self = std::ranges::find_if(outputs, [&](const WaylandOutput& output) { return displayName(output) == name; });
-  if (self == outputs.end()) {
-    return;
-  }
-
-  const double current = self->configuredScale();
-  const double next = std::clamp(std::round((current + delta) / kScaleStep) * kScaleStep, kMinScale, kMaxScale);
-  patchOutput(name, [next](toml::table& table) { table.insert_or_assign("scale", next); });
+  display_management::adjustScale(m_platform, name, delta);
 }
 
 void DisplaysTab::resetOutput(const std::string& name) {
-  clearOutput(name);
+  display_management::reset(name);
 }
+
+namespace display_management {
+
+  bool place(CompositorPlatform* platform, const std::string& name, Placement placement) {
+    if (platform == nullptr) {
+      return false;
+    }
+
+    const auto& outputs = platform->outputs();
+    const auto self = std::ranges::find_if(outputs, [&](const WaylandOutput& output) {
+      return displayName(output) == name;
+    });
+    if (self == outputs.end()) {
+      return false;
+    }
+    // Positioning is relative to the first other connected output.
+    const auto reference = std::ranges::find_if(outputs, [&](const WaylandOutput& output) {
+      return displayName(output) != name;
+    });
+    if (reference == outputs.end()) {
+      return false;
+    }
+
+    int x = reference->logicalX;
+    int y = reference->logicalY;
+    switch (placement) {
+      case Placement::Left:
+        x -= effectiveWidth(*self);
+        break;
+      case Placement::Right:
+        x += effectiveWidth(*reference);
+        break;
+      case Placement::Above:
+        y -= effectiveHeight(*self);
+        break;
+      case Placement::Below:
+        y += effectiveHeight(*reference);
+        break;
+    }
+
+    return patchOutput(name, [x, y](toml::table& table) {
+      toml::array position;
+      position.push_back(static_cast<std::int64_t>(x));
+      position.push_back(static_cast<std::int64_t>(y));
+      table.insert_or_assign("position", std::move(position));
+    });
+  }
+
+  bool rotate(CompositorPlatform* platform, const std::string& name, int steps) {
+    if (platform == nullptr) {
+      return false;
+    }
+    const auto& outputs = platform->outputs();
+    const auto self = std::ranges::find_if(outputs, [&](const WaylandOutput& output) {
+      return displayName(output) == name;
+    });
+    if (self == outputs.end()) {
+      return false;
+    }
+
+    const int transform = ((self->effectiveTransform() + steps) % 4 + 4) % 4;
+    const char* value = transformName(transform);
+    return patchOutput(name, [value](toml::table& table) {
+      table.insert_or_assign("transform", std::string(value));
+    });
+  }
+
+  bool adjustScale(CompositorPlatform* platform, const std::string& name, double delta) {
+    if (platform == nullptr) {
+      return false;
+    }
+    const auto& outputs = platform->outputs();
+    const auto self = std::ranges::find_if(outputs, [&](const WaylandOutput& output) {
+      return displayName(output) == name;
+    });
+    if (self == outputs.end()) {
+      return false;
+    }
+
+    const double current = self->configuredScale();
+    const double next = std::clamp(std::round((current + delta) / kScaleStep) * kScaleStep, kMinScale, kMaxScale);
+    return patchOutput(name, [next](toml::table& table) { table.insert_or_assign("scale", next); });
+  }
+
+  bool reset(const std::string& name) {
+    return clearOutput(name);
+  }
+
+} // namespace display_management

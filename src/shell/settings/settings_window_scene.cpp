@@ -20,6 +20,7 @@
 #include "shell/bar/widget_action.h"
 #include "shell/greeter/greeter_appearance_sync.h"
 #include "shell/profile/avatar_path.h"
+#include "shell/control_center/tabs/displays_tab.h"
 #include "shell/settings/font_family_catalog.h"
 #include "shell/settings/settings_bar_management.h"
 #include "shell/settings/settings_content.h"
@@ -1577,20 +1578,93 @@ void SettingsWindow::refreshSettingsRegistry(const Config& cfg) {
   logSettingsProfile("refreshRegistry registry", phaseProfileWatch);
   phaseProfileWatch.reset();
 
-    m_settingsRegistry.push_back({
-      .section = settings::SettingsSection::Displays,
-      .group = "outputs",
-      .title = i18n::tr("settings.schema.displays.management.label"),
-      .subtitle = i18n::tr("settings.schema.displays.management.description"),
-      .path = {},
-      .control = settings::ButtonSetting{
-        .label = i18n::tr("settings.schema.displays.management.button"),
-        .action = [] { IpcClient::send("panel-toggle control-center displays"); },
-        .glyph = "device-desktop-analytics",
-        .variant = ButtonVariant::Secondary,
-      },
-      .searchText = "displays monitor output arrangement rotation scale workspace",
-    });
+      const auto addDisplayAction = [this](
+                       const std::string& output, std::string group, std::string title,
+                       std::string subtitle, std::string buttonLabel, std::string searchText,
+                       std::function<void()> action
+                     ) {
+      m_settingsRegistry.push_back({
+        .section = settings::SettingsSection::Displays,
+        .group = std::move(group),
+        .title = output + " · " + std::move(title),
+        .subtitle = std::move(subtitle),
+        .path = {},
+        .control = settings::ButtonSetting{
+          .label = std::move(buttonLabel),
+          .action = std::move(action),
+          .glyph = "device-desktop-analytics",
+          .variant = ButtonVariant::Secondary,
+        },
+        .searchText = output + " display monitor output arrangement rotation scale " + searchText,
+      });
+      };
+
+      if (m_platform == nullptr || m_platform->outputs().empty()) {
+      m_settingsRegistry.push_back({
+        .section = settings::SettingsSection::Displays,
+        .group = "display",
+        .title = i18n::tr("settings.schema.displays.management.label"),
+        .subtitle = i18n::tr("settings.schema.displays.management.description"),
+        .path = {},
+        .control = settings::ButtonSetting{
+          .label = i18n::tr("settings.schema.displays.management.button"),
+          .action = [] { IpcClient::send("panel-toggle control-center displays"); },
+          .glyph = "device-desktop-analytics",
+          .variant = ButtonVariant::Secondary,
+        },
+        .searchText = "displays monitor output arrangement rotation scale workspace",
+      });
+      } else {
+      for (const auto& output : m_platform->outputs()) {
+        const std::string name = output.connectorName.empty() ? "#" + std::to_string(output.name) : output.connectorName;
+        const std::string positionTitle = i18n::tr("settings.schema.displays.position.label");
+        const std::string positionDescription = i18n::tr("settings.schema.displays.position.description");
+        const std::string rotationTitle = i18n::tr("settings.schema.displays.rotation.label");
+        const std::string rotationDescription = i18n::tr("settings.schema.displays.rotation.description");
+        const std::string scaleTitle = i18n::tr("settings.schema.displays.scale.label");
+        const std::string scaleDescription = i18n::tr("settings.schema.displays.scale.description");
+        const std::string resetTitle = i18n::tr("settings.schema.displays.reset.label");
+        const std::string resetDescription = i18n::tr("settings.schema.displays.reset.description");
+        auto* platform = m_platform;
+
+        const std::array<std::pair<display_management::Placement, const char*>, 4> placements{{
+          {display_management::Placement::Left, "left"},
+          {display_management::Placement::Right, "right"},
+          {display_management::Placement::Above, "above"},
+          {display_management::Placement::Below, "below"},
+        }};
+        for (const auto& [placement, direction] : placements) {
+        const std::string key = std::string("settings.schema.displays.position.") + direction;
+        addDisplayAction(
+          name, "display", positionTitle, positionDescription, i18n::tr(key), "position " + std::string(direction),
+          [platform, name, placement] { display_management::place(platform, name, placement); }
+        );
+        }
+
+        addDisplayAction(
+          name, "display", rotationTitle, rotationDescription,
+          i18n::tr("settings.schema.displays.rotation.counterclockwise"), "rotation rotate counterclockwise",
+          [platform, name] { display_management::rotate(platform, name, -1); }
+        );
+        addDisplayAction(
+          name, "display", rotationTitle, rotationDescription,
+          i18n::tr("settings.schema.displays.rotation.clockwise"), "rotation rotate clockwise",
+          [platform, name] { display_management::rotate(platform, name, 1); }
+        );
+        addDisplayAction(
+          name, "display", scaleTitle, scaleDescription, i18n::tr("settings.schema.displays.scale.decrease"),
+          "scale decrease", [platform, name] { display_management::adjustScale(platform, name, -0.25); }
+        );
+        addDisplayAction(
+          name, "display", scaleTitle, scaleDescription, i18n::tr("settings.schema.displays.scale.increase"),
+          "scale increase", [platform, name] { display_management::adjustScale(platform, name, 0.25); }
+        );
+        addDisplayAction(
+          name, "display", resetTitle, resetDescription, i18n::tr("settings.schema.displays.reset.button"),
+          "reset automatic layout", [name] { display_management::reset(name); }
+        );
+      }
+      }
 
   for (auto& entry : m_settingsRegistry) {
     if (entry.section == settings::SettingsSection::Appearance && entry.path.empty() && entry.group == "theme") {
