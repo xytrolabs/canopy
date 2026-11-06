@@ -295,7 +295,7 @@ install_data(
 
 canopy_greeter_compositor_executable = executable('canopy-greeter-compositor',
   sources: files(
-    'src/compositor/noctalia_compositor.c',
+    'src/compositor/shade_compositor.c',
     'src/compositor/system_keyboard_config.c',
     'src/config/output_identity.c',
     'src/core/log.cpp',

@@ -1876,7 +1876,7 @@ void GreeterSurface::buildSchemeNames() {
     m_selectedScheme = 0;
   }
 
-  for (const auto& builtinPalette : noctalia::theme::builtinPalettes()) {
+  for (const auto& builtinPalette : shade::theme::builtinPalettes()) {
     m_schemeNames.emplace_back(builtinPalette.name);
     if (!m_syncedAppearance.has_value() && builtinPalette.name == "Canopy") {
       m_selectedScheme = m_schemeNames.size() - 1;
@@ -1971,7 +1971,7 @@ void GreeterSurface::applyScheme(const std::size_t schemeIndex) {
     return;
   }
 
-  if (const auto* builtinPalette = noctalia::theme::findBuiltinPalette(m_schemeNames[schemeIndex])) {
+  if (const auto* builtinPalette = shade::theme::findBuiltinPalette(m_schemeNames[schemeIndex])) {
     setPalette(builtinPalette->dark.palette);
   }
   Style::setCornerRadiusScale(1.0f);

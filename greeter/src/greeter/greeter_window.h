@@ -18,7 +18,7 @@ struct wp_viewport;
 struct xdg_surface;
 struct xdg_toplevel;
 
-// Wayland window using the same frame flow as noctalia-shell's
+// Wayland window using the same frame flow as Canopy shell's
 // Surface::render().
 class GreeterWindow {
 public:

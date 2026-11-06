@@ -60,7 +60,7 @@ namespace {
 
   struct GreetdSessionScan {
     std::optional<std::string> defaultSessionUser;
-    std::optional<std::string> noctaliaSessionUser;
+    std::optional<std::string> shadeSessionUser;
   };
 
   [[nodiscard]] std::optional<GreetdSessionScan> scanGreetdConfig(const std::filesystem::path& path) {
@@ -76,7 +76,7 @@ namespace {
 
     const auto flushSection = [&]() {
       if (sectionHasNoctaliaCommand && sectionUser.has_value()) {
-        result.noctaliaSessionUser = sectionUser;
+        result.shadeSessionUser = sectionUser;
       }
       if (currentSection == "default_session" && sectionUser.has_value()) {
         result.defaultSessionUser = sectionUser;
@@ -125,8 +125,8 @@ namespace {
     if (!scan.has_value()) {
       return std::nullopt;
     }
-    if (scan->noctaliaSessionUser.has_value()) {
-      return scan->noctaliaSessionUser;
+    if (scan->shadeSessionUser.has_value()) {
+      return scan->shadeSessionUser;
     }
     return scan->defaultSessionUser;
   }

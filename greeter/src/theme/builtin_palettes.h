@@ -5,7 +5,7 @@
 #include <span>
 #include <string_view>
 
-namespace noctalia::theme {
+namespace shade::theme {
 
   struct TerminalAnsiColors {
     ::Color black;
@@ -43,4 +43,4 @@ namespace noctalia::theme {
   std::span<const BuiltinPalette> builtinPalettes();
   const BuiltinPalette* findBuiltinPalette(std::string_view name);
 
-} // namespace noctalia::theme
+} // namespace shade::theme

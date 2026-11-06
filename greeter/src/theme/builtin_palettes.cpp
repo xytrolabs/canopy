@@ -3,7 +3,7 @@
 #include <array>
 #include <string_view>
 
-namespace noctalia::theme {
+namespace shade::theme {
 
   namespace {
 
@@ -1116,4 +1116,4 @@ namespace noctalia::theme {
     return nullptr;
   }
 
-} // namespace noctalia::theme
+} // namespace shade::theme

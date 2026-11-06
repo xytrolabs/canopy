@@ -52,7 +52,7 @@ public:
   static constexpr float borderWidthBase = 1.0f;
   [[nodiscard]] static float borderWidth() noexcept;
 
-  // Radii (1:2:3:4 ratio, matches noctalia Style)
+  // Radii (1:2:3:4 ratio, matches Shade Style)
   static constexpr float radiusSmBase = 3.0f;
   static constexpr float radiusMdBase = 6.0f;
   static constexpr float radiusLgBase = 9.0f;
@@ -78,7 +78,7 @@ public:
   static constexpr float animNormal = 250.0f;
   static constexpr float animSlow = 400.0f;
 
-  // Scrollbars (matches noctalia).
+  // Scrollbars (matches Shade).
   static constexpr float scrollWheelStep = 56.0f;
   static constexpr float scrollbarWidth = 6.0f;
   static constexpr float scrollbarHoverWidth = 12.0f;

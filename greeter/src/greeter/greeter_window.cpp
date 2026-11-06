@@ -84,7 +84,7 @@ bool GreeterWindow::createSurface() {
 
   xdg_toplevel_add_listener(m_toplevel, &kToplevelListener, this);
   xdg_toplevel_set_title(m_toplevel, "Canopy Greeter");
-  xdg_toplevel_set_app_id(m_toplevel, "dev.noctalia.Greeter");
+  xdg_toplevel_set_app_id(m_toplevel, "dev.canopy.Greeter");
 
   // Initial commit (shell ToplevelSurface::initialize).
   wl_surface_commit(m_wlSurface);
