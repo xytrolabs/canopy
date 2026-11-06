@@ -54,6 +54,15 @@ MIGRATIONS: list[tuple[str, str, str, str]] = [
     ("dock", "radius_bottom_right", "8", "20"),
     ("dock", "margin_edge", "10", "12"),
     ("dock", "shadow", "true", "false"),
+    # Launcher buttons go back to the traditional glyph. An image path here was
+    # silently dropped in the dock, and a font glyph cannot fail to resolve.
+    ("dock", "launcher_custom_image",
+     '"~/.local/share/icons/hicolor/scalable/apps/canopy.png"', '""'),
+    ("dock", "launcher_custom_image_colorize", "true", "false"),
+    ("widget.launcher", "custom_image",
+     '"~/.local/share/icons/hicolor/scalable/apps/canopy.png"', '""'),
+    ("widget.launcher", "custom_image_colorize", "true", "false"),
+    ("widget.launcher", "glyph", '"canopy"', '"grid-dots"'),
     # Acrylic toasts.
     ("notification", "background_opacity", "0.95", "0.92"),
 ]
@@ -81,11 +90,7 @@ MIGRATIONS_COMPOSITOR: list[tuple[str, str, str, str]] = [
 # Keys that did not exist in older configs. Added under their section when
 # missing, so a shipped default can appear without touching anything the user
 # wrote. (section, key, value)
-ADDITIONS: list[tuple[str, str, str]] = [
-    # The dock launcher was a generic grid glyph; it is the Canopy mark now.
-    ("dock", "launcher_custom_image", '"~/.local/share/icons/hicolor/scalable/apps/canopy.png"'),
-    ("dock", "launcher_custom_image_colorize", "true"),
-]
+ADDITIONS: list[tuple[str, str, str]] = []
 
 SECTION_RE = re.compile(r"^\s*\[([^\]]+)\]\s*$")
 # A comment only starts at whitespace + '#': colours are written "#RRGGBBAA" and

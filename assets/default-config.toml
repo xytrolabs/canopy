@@ -246,10 +246,12 @@ inactive_opacity    = 0.92
 show_dots           = true
 show_instance_count = false
 launcher_position   = "start"
-# The dock's launcher button is the Canopy mark, not a generic grid glyph.
+# Traditional launcher glyph, drawn from the icon font. An image path here
+# looked right in config and dropped silently in the dock; the glyph always
+# resolves.
 launcher_icon       = "grid-dots"
-launcher_custom_image = "~/.local/share/icons/hicolor/scalable/apps/canopy.png"
-launcher_custom_image_colorize = true
+launcher_custom_image = ""
+launcher_custom_image_colorize = false
 pinned              = ["firefox", "thunar", "kitty", "alacritty", "dev.canopy.Canopy"]
 
 # ── Quick Settings — right side ───────────────────────────────────────────────
@@ -305,8 +307,9 @@ type = "text"
 text = "Canopy"
 
 [widget.launcher]
-# The mark carries the accent, like a Start button that is actually branded.
+# The wordmark next to it already carries the brand; the button itself is the
+# familiar launcher glyph, tinted with the accent.
 color        = "primary"
-glyph        = "canopy"
-custom_image = "~/.local/share/icons/hicolor/scalable/apps/canopy.png"
-custom_image_colorize = true
+glyph        = "grid-dots"
+custom_image = ""
+custom_image_colorize = false
