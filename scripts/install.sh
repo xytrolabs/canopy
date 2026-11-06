@@ -737,6 +737,33 @@ verify_install() {
         fi
     }
 
+    # A file existing is not a binary that runs. A missing libseat (or a
+    # wlroots built against a different soname) leaves the compositor unable
+    # to load, and the only symptom is a session that dies before it paints:
+    # SDDM bounces back to the greeter and a terminal prints nothing useful.
+    # Name the missing libraries here instead.
+    _check_runs() {
+        _bin="$1"
+        _label="$2"
+        if [ ! -x "$_bin" ]; then
+            say "  MISS  $_label ($_bin)"
+            _fail=$((_fail + 1))
+            return
+        fi
+        _missing="$(ldd "$_bin" 2>/dev/null | awk '/not found/ {print $1}' | tr '\n' ' ')"
+        if [ -n "$_missing" ]; then
+            say "  BROKEN $_label - missing libraries: $_missing"
+            _fail=$((_fail + 1))
+            return
+        fi
+        if ! "$_bin" --version >/dev/null 2>&1 && ! "$_bin" -v >/dev/null 2>&1; then
+            say "  BROKEN $_label - will not start"
+            _fail=$((_fail + 1))
+            return
+        fi
+        say "  ok    $_label starts"
+    }
+
     say ""
     say "verifying the install:"
     if [ "$is_system" -eq 1 ]; then
@@ -765,11 +792,28 @@ verify_install() {
         _check "theme" "$XDG_DATA_HOME/themes/canopy"
         _check "fonts" "$XDG_DATA_HOME/fonts/canopy/SpaceGrotesk-Regular.ttf"
     fi
-    if [ "$_fail" -gt 0 ]; then
-        say "  $_fail component(s) missing - re-run this installer"
+    # The two binaries the session actually executes.
+    if [ "$is_system" -eq 1 ]; then
+        _check_runs /usr/local/bin/canopywc "compositor"
+        _check_runs /usr/local/bin/canopy "shell"
     else
-        say "  all components present"
+        _check_runs "$HOME/.local/bin/canopywc" "compositor"
+        _check_runs "$HOME/.local/bin/canopy" "shell"
     fi
+
+    if [ "$_fail" -gt 0 ]; then
+        say ""
+        say "  $_fail check(s) failed."
+        if [ -n "${_missing:-}" ]; then
+            say "  Missing shared libraries mean the session cannot start."
+            say "  Install the runtime packages for $(canopy_distro_name):"
+            canopy_install_hint | sed 's/^/    /'
+            say "    (libseat comes from seatd on Arch/Fedora; Debian and openSUSE ship libseat1)"
+        fi
+        return 1
+    fi
+    say "  all components present and the binaries start"
+    return 0
 }
 
 install_binary
@@ -785,7 +829,12 @@ seed_assets
 seed_icon_theme
 repair_icon_theme_index
 ensure_dependencies
-verify_install
+if ! verify_install; then
+    say ""
+    say "Canopy $VERSION is installed but incomplete: the session will not start."
+    say "Install the packages listed above and re-run this installer."
+    exit 1
+fi
 
 say ""
 if [ "$is_system" -eq 1 ]; then
