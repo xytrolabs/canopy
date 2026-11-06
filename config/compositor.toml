@@ -131,6 +131,7 @@ badge = "#7C5CFCFF"
 "Mod+I" = { action = "spawn canopy msg settings-open", repeat = false }
 "Mod+L" = { action = "spawn canopy msg session lock", repeat = false }
 "Mod+O" = { action = "overview-toggle", repeat = false }
+"Mod+K" = { action = "cheatsheet-toggle", repeat = false }
 
 # Applications
 "Mod+Return" = { action = "spawn sh -c 'xdg-terminal-exec 2>/dev/null || alacritty 2>/dev/null || kitty 2>/dev/null || foot'", repeat = false }

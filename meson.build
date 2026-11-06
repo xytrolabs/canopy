@@ -693,6 +693,7 @@ _canopy_sources = files(
   'src/shell/control_center/tabs/bluetooth_tab.cpp',
   'src/shell/control_center/control_center_panel.cpp',
   'src/shell/control_center/tabs/monitor_tab.cpp',
+  'src/shell/control_center/tabs/displays_tab.cpp',
   'src/shell/control_center/tabs/media_tab.cpp',
   'src/shell/control_center/tabs/network_tab.cpp',
   'src/shell/control_center/tabs/notifications_tab.cpp',

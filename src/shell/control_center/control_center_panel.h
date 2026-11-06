@@ -6,6 +6,7 @@
 #include "shell/control_center/tabs/audio_tab.h"
 #include "shell/control_center/tabs/bluetooth_tab.h"
 #include "shell/control_center/tabs/calendar_tab.h"
+#include "shell/control_center/tabs/displays_tab.h"
 #include "shell/control_center/tabs/home_tab.h"
 #include "shell/control_center/tabs/media_tab.h"
 #include "shell/control_center/tabs/monitor_tab.h"
@@ -111,6 +112,7 @@ private:
     Media,
     Audio,
     Monitor,
+    Displays,
     System,
     Network,
     Bluetooth,
@@ -135,6 +137,7 @@ private:
       {TabId::Media, "media", "control-center.tabs.media", "disc"},
       {TabId::Audio, "audio", "control-center.tabs.audio", "volume"},
       {TabId::Monitor, "monitor", "control-center.tabs.monitor", "device-desktop"},
+      {TabId::Displays, "displays", "control-center.tabs.displays", "device-desktop-analytics"},
       {TabId::System, "system", "control-center.tabs.system", "activity-heartbeat"},
       {TabId::Power, "power", "control-center.tabs.power", "battery-charging-2"},
       {TabId::Network, "network", "control-center.tabs.network", "wifi"},
