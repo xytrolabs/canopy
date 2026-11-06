@@ -54,8 +54,14 @@ ensure_dependencies() {
     [ "${CANOPY_SKIP_DEPS:-0}" = "1" ] && return 0
 
     _missing=""
-    for b in labwc; do
-        command -v "$b" >/dev/null 2>&1 || _missing="$_missing $b"
+    for b in canopywc canopy; do
+        _bin="$(command -v "$b" 2>/dev/null || true)"
+        if [ -z "$_bin" ]; then
+            _missing="$_missing $b"
+        elif command -v ldd >/dev/null 2>&1; then
+            _libs="$(ldd "$_bin" 2>/dev/null | awk '/not found/ {print $1}' | tr '\n' ' ')"
+            [ -z "$_libs" ] || _missing="$_missing $b(shared:$_libs)"
+        fi
     done
     for p in xdg-desktop-portal xdg-desktop-portal-gtk xdg-desktop-portal-wlr; do
         canopy_pkg_available "$p" >/dev/null 2>&1 || _missing="$_missing $p"
@@ -127,9 +133,9 @@ install_compositor() {
         done
     fi
     if [ -z "$_bin" ] || [ ! -x "$_bin" ]; then
-        say "note: canopywc is not built or packaged; the Canopy session will fall back to labwc"
+        say "error: canopywc is not built or packaged; Canopy requires its Mahogany compositor"
         say "      build it with: sh scripts/build-compositor.sh"
-        return 0
+        return 1
     fi
     if [ "$is_system" -eq 1 ]; then
         run install -Dm755 "$_bin" /usr/local/bin/canopywc
@@ -812,7 +818,8 @@ verify_install() {
         _check "runtime assets" "$XDG_DATA_HOME/canopy/assets"
         _check "session launcher" "$HOME/.local/bin/canopy-session"
         _check "user config" "$XDG_CONFIG_HOME/canopy/config.toml"
-        _check "labwc rc.xml" "$XDG_CONFIG_HOME/labwc/rc.xml"
+        _check "compositor binary" "$HOME/.local/bin/canopywc"
+        _check "compositor config" "$XDG_DATA_HOME/canopy/compositor.toml"
         _check "icon theme alias" "$XDG_DATA_HOME/icons/canopy/index.theme"
         _check "theme" "$XDG_DATA_HOME/themes/canopy"
         _check "fonts" "$XDG_DATA_HOME/fonts/canopy/SpaceGrotesk-Regular.ttf"

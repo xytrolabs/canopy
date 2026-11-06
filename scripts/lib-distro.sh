@@ -77,7 +77,7 @@ canopy_pkgs() {
         arch:runtime)
             # libseat is provided by seatd on Arch, not by a package called
             # "libseat": naming it directly breaks the install.
-            printf '%s\n' "wlroots0.20 seatd libdrm libxkbcommon libinput mesa wayland wayland-protocols xorg-xwayland pipewire wireplumber networkmanager bluez upower polkit polkit-gnome grim slurp wl-clipboard xdg-desktop-portal xdg-desktop-portal-wlr xdg-desktop-portal-gtk" ;;
+            printf '%s\n' "wlroots0.20 seatd libdrm libxkbcommon libinput mesa wayland wayland-protocols xorg-xwayland pipewire wireplumber networkmanager bluez upower polkit polkit-gnome grim slurp wl-clipboard xdg-desktop-portal xdg-desktop-portal-wlr xdg-desktop-portal-gtk tomlplusplus sdbus-cpp libical" ;;
         # Optional second session (beta). Install with: install.sh --with-mangowc
         arch:mangowc)
             printf '%s\n' "mangowm" ;;
@@ -86,7 +86,7 @@ canopy_pkgs() {
 
         # -------------------------------------------------------------- fedora
         fedora:runtime)
-            printf '%s\n' "wlroots seatd libdrm libxkbcommon libinput mesa-dri-drivers xorg-x11-server-Xwayland NetworkManager pipewire wireplumber bluez upower polkit polkit-gnome grim slurp wl-clipboard xdg-desktop-portal xdg-desktop-portal-gtk xdg-desktop-portal-wlr" ;;
+            printf '%s\n' "wlroots seatd libdrm libxkbcommon libinput mesa-dri-drivers xorg-x11-server-Xwayland NetworkManager pipewire wireplumber bluez upower polkit polkit-gnome grim slurp wl-clipboard xdg-desktop-portal xdg-desktop-portal-gtk xdg-desktop-portal-wlr tomlplusplus sdbus-c++ libical" ;;
         fedora:build)
             printf '%s\n' "meson gcc-c++ just git wayland-devel wayland-protocols-devel libEGL-devel mesa-libGLES-devel freetype-devel fontconfig-devel cairo-devel pango-devel harfbuzz-devel libxkbcommon-devel glib2-devel libsecret-devel libsodium-devel sdbus-cpp-devel pipewire-devel wireplumber-devel pam-devel polkit-devel libcurl-devel libwebp-devel libjxl-devel libsndfile-devel librsvg2-devel libqalculate-devel libxml2-devel md4c-devel tomlplusplus-devel libical-devel json-devel stb_image_resize2-devel stb_image_write-devel jemalloc-devel" ;;
         # MangoWC is not packaged for this family; build it from source.
@@ -95,13 +95,13 @@ canopy_pkgs() {
 
         # -------------------------------------------------------------- debian
         debian:runtime)
-            printf '%s\n' "seatd libseat1 libdrm2 libxkbcommon0 libinput10 libegl1 xwayland pipewire wireplumber network-manager bluez upower polkitd polkit-gnome grim slurp wl-clipboard xdg-desktop-portal xdg-desktop-portal-gtk xdg-desktop-portal-wlr" ;;
+            printf '%s\n' "seatd libseat1 libdrm2 libxkbcommon0 libinput10 libegl1 xwayland pipewire wireplumber network-manager bluez upower polkitd polkit-gnome grim slurp wl-clipboard xdg-desktop-portal xdg-desktop-portal-gtk xdg-desktop-portal-wlr libtomlplusplus3 libsdbus-c++2 libical3" ;;
         debian:build)
             printf '%s\n' "build-essential meson ninja-build just git libwayland-dev wayland-protocols libegl-dev libgles-dev libfreetype-dev libfontconfig-dev libcairo2-dev libpango1.0-dev libharfbuzz-dev libxkbcommon-dev libglib2.0-dev libsecret-1-dev libsodium-dev libsdbus-c++-dev libpipewire-0.3-dev libwireplumber-0.5-dev libpam0g-dev libpolkit-agent-1-dev libpolkit-gobject-1-dev libcurl4-openssl-dev libwebp-dev libjxl-dev libsndfile1-dev librsvg2-dev libqalculate-dev libxml2-dev libmd4c-dev libtomlplusplus-dev libical-dev nlohmann-json3-dev libstb-dev libjemalloc-dev" ;;
 
         # ---------------------------------------------------------------- suse
         suse:runtime)
-            printf '%s\n' "seatd libseat1 libdrm2 libxkbcommon0 libinput10 Mesa-libEGL1 xwayland pipewire wireplumber NetworkManager bluez upower polkit polkit-gnome grim slurp wl-clipboard xdg-desktop-portal xdg-desktop-portal-gtk xdg-desktop-portal-wlr" ;;
+            printf '%s\n' "seatd libseat1 libdrm2 libxkbcommon0 libinput10 Mesa-libEGL1 xwayland pipewire wireplumber NetworkManager bluez upower polkit polkit-gnome grim slurp wl-clipboard xdg-desktop-portal xdg-desktop-portal-gtk xdg-desktop-portal-wlr tomlplusplus sdbus-c++ libical3" ;;
         suse:build)
             printf '%s\n' "meson gcc-c++ just git wayland-devel wayland-protocols-devel Mesa-libEGL-devel Mesa-libGLESv2-devel freetype2-devel fontconfig-devel cairo-devel pango-devel harfbuzz-devel libxkbcommon-devel glib2-devel libsecret-devel libsodium-devel sdbus-cpp-devel pipewire-devel wireplumber-devel pam-devel polkit-devel libcurl-devel libwebp-devel libjxl-devel libsndfile-devel librsvg-devel libqalculate-devel libxml2-devel md4c-devel tomlplusplus-devel libical-devel nlohmann_json-devel stb-devel jemalloc-devel" ;;
         # MangoWC is not packaged for this family; build it from source.

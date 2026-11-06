@@ -1501,6 +1501,7 @@
         "calendar": "Calendar",
         "control-center": "Quick settings",
         "desktop": "Desktop",
+        "displays": "Displays",
         "dock": "Taskbar",
         "hooks": "Automation",
         "keybinds": "Keyboard",
@@ -2206,6 +2207,13 @@
         "widget-spacing": {
           "description": "Space between bar widgets",
           "label": "Widget Spacing"
+        }
+      },
+      "displays": {
+        "management": {
+          "button": "Open Display Management",
+          "description": "Arrange connected screens, rotate them, and adjust their scale in Control Center.",
+          "label": "Display Management"
         }
       },
       "desktop": {

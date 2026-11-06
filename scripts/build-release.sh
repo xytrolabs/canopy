@@ -62,7 +62,8 @@ if [ -x "$COMPOSITOR_BUILD/canopywc" ]; then
     mkdir -p "$STAGE/compositor"
     cp "$COMPOSITOR_BUILD/canopywc" "$STAGE/compositor/canopywc"
 else
-    say "warning: canopywc is not built; the package will fall back to labwc"
+    say "error: canopywc is required in every Canopy release but is missing" >&2
+    exit 1
 fi
 cp -a "$PROJECT_DIR"/assets/. "$STAGE/assets/"
 cp -a "$PROJECT_DIR"/config/. "$STAGE/config/"
@@ -149,7 +150,7 @@ echo "  sh scripts/uninstall.sh      # remove it again"
 # Only mention dependencies when something is actually missing: printing a
 # warning on a machine that already has them reads like the install failed.
 _missing_deps=""
-command -v labwc >/dev/null 2>&1 || _missing_deps="$_missing_deps labwc"
+command -v canopywc >/dev/null 2>&1 || _missing_deps="$_missing_deps canopywc"
 command -v xdg-desktop-portal >/dev/null 2>&1 || _missing_deps="$_missing_deps xdg-desktop-portal"
 if [ -n "$_missing_deps" ]; then
     echo ""

@@ -46,6 +46,8 @@ die() { printf 'canopy-update: %s\n' "$*" >&2; exit 1; }
 # system install keeps it in /usr/local/share/canopy.
 shell_dir() {
     for d in \
+        "${XDG_CONFIG_HOME:-$HOME/.config}/canopy" \
+        "$HOME/.config/canopy" \
         "${XDG_CONFIG_HOME:-$HOME/.config}/noctalia" \
         "${XDG_CONFIG_HOME:-$HOME/.config}/quickshell/canopy" \
         "$HOME/.config/noctalia" \
@@ -201,4 +203,4 @@ if [ -n "$NEW_DIR" ]; then
 fi
 
 say "done — installed $LATEST"
-say "restart the shell to pick it up: pkill -x quickshell"
+say "restart the shell to pick it up: pkill -x canopy"

@@ -30,8 +30,13 @@ check_bin() { command -v "$1" >/dev/null 2>&1; }
 # activated on demand and noticed by the shell if it is missing.
 MISSING_BIN=""
 PRESENT_BIN=""
-for b in labwc canopy; do
+for b in canopywc canopy; do
     if check_bin "$b"; then PRESENT_BIN="$PRESENT_BIN $b"; else MISSING_BIN="$MISSING_BIN $b"; fi
+    if check_bin "$b" && command -v ldd >/dev/null 2>&1; then
+        _bin_path="$(command -v "$b")"
+        _missing_libs="$(ldd "$_bin_path" 2>/dev/null | awk '/not found/ {print $1}' | tr '\n' ' ')"
+        [ -z "$_missing_libs" ] || MISSING_BIN="$MISSING_BIN $b(shared:$_missing_libs)"
+    fi
 done
 
 MISSING_PORTAL=""

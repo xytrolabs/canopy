@@ -11,6 +11,7 @@
 #include "core/ui_phase.h"
 #include "dbus/upower/upower_service.h"
 #include "i18n/i18n.h"
+#include "ipc/ipc_client.h"
 #include "ipc/ipc_service.h"
 #include "notification/notification_manager.h"
 #include "render/render_context.h"
@@ -1575,6 +1576,21 @@ void SettingsWindow::refreshSettingsRegistry(const Config& cfg) {
   m_settingsRegistry = settings::buildSettingsRegistry(cfg, nullptr, nullptr, env);
   logSettingsProfile("refreshRegistry registry", phaseProfileWatch);
   phaseProfileWatch.reset();
+
+    m_settingsRegistry.push_back({
+      .section = settings::SettingsSection::Displays,
+      .group = "outputs",
+      .title = i18n::tr("settings.schema.displays.management.label"),
+      .subtitle = i18n::tr("settings.schema.displays.management.description"),
+      .path = {},
+      .control = settings::ButtonSetting{
+        .label = i18n::tr("settings.schema.displays.management.button"),
+        .action = [] { IpcClient::send("panel-toggle control-center displays"); },
+        .glyph = "device-desktop-analytics",
+        .variant = ButtonVariant::Secondary,
+      },
+      .searchText = "displays monitor output arrangement rotation scale workspace",
+    });
 
   for (auto& entry : m_settingsRegistry) {
     if (entry.section == settings::SettingsSection::Appearance && entry.path.empty() && entry.group == "theme") {
