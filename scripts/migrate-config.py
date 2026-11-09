@@ -92,6 +92,32 @@ MIGRATIONS_COMPOSITOR: list[tuple[str, str, str, str]] = [
 # wrote. (section, key, value)
 ADDITIONS: list[tuple[str, str, str]] = []
 
+# Default keybinds added after the compositor config was first seeded. A chord
+# the user already bound (to anything, including a different action) is left
+# alone, so rebinding always wins. (chord, value)
+KEYBIND_ADDITIONS: list[tuple[str, str]] = [
+    # Screenshots.
+    ("Print", '{ action = "spawn canopy msg screenshot-region", repeat = false }'),
+    ("Shift+Print", '{ action = "spawn canopy msg screenshot-fullscreen", repeat = false }'),
+    ("Mod+Print", '{ action = "spawn canopy msg screenshot-window", repeat = false }'),
+    ("Mod+Shift+Print", '{ action = "spawn canopy msg screenshot-annotate", repeat = false }'),
+    # Laptop hardware keys wlroots forwards but nothing was bound to.
+    ("XF86KbdBrightnessUp",
+     '{ action = "spawn canopy msg keyboard-backlight-up", allow_when_locked = true }'),
+    ("XF86KbdBrightnessDown",
+     '{ action = "spawn canopy msg keyboard-backlight-down", allow_when_locked = true }'),
+    ("XF86AudioMicMute",
+     '{ action = "spawn canopy msg mic-mute", allow_when_locked = true, repeat = false }'),
+    # Daily toggles: the shell owns the state, these just ask it.
+    ("Mod+Shift+N", '{ action = "spawn canopy msg notification-dnd-toggle", repeat = false }'),
+    ("Mod+Shift+L", '{ action = "spawn canopy msg nightlight-toggle", repeat = false }'),
+    ("Mod+Shift+C", '{ action = "spawn canopy msg caffeine-toggle", repeat = false }'),
+    ("Mod+Shift+D", '{ action = "spawn canopy msg theme-mode-toggle", repeat = false }'),
+    # Alt+Tab stays the fast cycle; the visual switcher gets its own chord.
+    ("Mod+Tab", '{ action = "spawn canopy msg window-switcher", repeat = false }'),
+    ("Mod+Control+L", '{ action = "spawn canopy msg lock-and-suspend", repeat = false }'),
+]
+
 SECTION_RE = re.compile(r"^\s*\[([^\]]+)\]\s*$")
 # A comment only starts at whitespace + '#': colours are written "#RRGGBBAA" and
 # an earlier version of this pattern ate them, silently skipping their keys.
@@ -100,10 +126,70 @@ KEY_RE = re.compile(
 )
 
 
-def migrate_text(text: str, migrations=MIGRATIONS) -> tuple[str, list[str]]:
+def migrate_text(text: str, migrations=MIGRATIONS, keybinds=False) -> tuple[str, list[str]]:
     updated, applied = _rewrite_values(text, migrations)
     updated, added = _add_missing_keys(updated)
+    if keybinds:
+        updated, binds = _add_missing_keybinds(updated)
+        added += binds
     return updated, applied + added
+
+
+def _section_bounds(lines: list[str], header: str) -> tuple[int | None, int]:
+    """Return (header line index, exclusive end) for a TOML table."""
+    start = None
+    for index, line in enumerate(lines):
+        if line.strip() == header:
+            start = index
+            break
+    if start is None:
+        return None, 0
+
+    for index in range(start + 1, len(lines)):
+        if SECTION_RE.match(lines[index]):
+            return start, index
+    return start, len(lines)
+
+
+def _add_missing_keybinds(text: str) -> tuple[str, list[str]]:
+    """Append shipped default keybinds whose chord is not already present."""
+    lines = text.splitlines(keepends=True)
+    applied: list[str] = []
+    if not KEYBIND_ADDITIONS:
+        return text, applied
+
+    start, _ = _section_bounds(lines, "[keybinds]")
+    if start is None:
+        return text, applied
+
+    missing = []
+    for chord, value in KEYBIND_ADDITIONS:
+        pattern = re.compile(r'^\s*"' + re.escape(chord) + r'"\s*=')
+        _, end = _section_bounds(lines, "[keybinds]")
+        if any(pattern.match(line) for line in lines[start + 1 : end]):
+            continue
+        missing.append((chord, value))
+
+    if not missing:
+        return text, applied
+
+    # Insert after the last setting in the table, before any trailing blanks or
+    # comments, so the block stays with the rest of the binds.
+    start, end = _section_bounds(lines, "[keybinds]")
+    insert_at = end
+    for index in range(end - 1, start, -1):
+        stripped = lines[index].strip()
+        if stripped.startswith("#") or not stripped:
+            continue
+        insert_at = index + 1
+        break
+    else:
+        insert_at = start + 1
+
+    block = [f'"{chord}" = {value}\n' for chord, value in missing]
+    lines[insert_at:insert_at] = block
+    applied.extend(f"[keybinds] {chord}: added" for chord, _ in missing)
+    return "".join(lines), applied
 
 
 def _add_missing_keys(text: str) -> tuple[str, list[str]]:
@@ -193,7 +279,8 @@ def _rewrite_values(text: str, migrations=MIGRATIONS) -> tuple[str, list[str]]:
 
 def main(argv: list[str]) -> int:
     dry_run = "--dry-run" in argv
-    migrations = MIGRATIONS_COMPOSITOR if "--compositor" in argv else MIGRATIONS
+    compositor = "--compositor" in argv
+    migrations = MIGRATIONS_COMPOSITOR if compositor else MIGRATIONS
     paths = [a for a in argv[1:] if not a.startswith("-")]
     if not paths:
         print("migrate-config: no path given", file=sys.stderr)
@@ -206,7 +293,7 @@ def main(argv: list[str]) -> int:
             continue
 
         original = path.read_text(encoding="utf-8")
-        updated, applied = migrate_text(original, migrations)
+        updated, applied = migrate_text(original, migrations, keybinds=compositor)
         if not applied:
             print(f"migrate-config: {path} is up to date")
             continue

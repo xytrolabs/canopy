@@ -15,7 +15,7 @@ namespace shade::ipc {
 
   int runCli(int argc, char* argv[]) {
     if (argc < 3) {
-      std::fputs("error: msg requires a command (try: Shade msg --help)\n", stderr);
+      std::fputs("error: msg requires a command (try: canopy msg --help)\n", stderr);
       return 1;
     }
 

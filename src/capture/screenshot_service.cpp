@@ -735,7 +735,7 @@ std::expected<ScreenshotIpcRequest, std::string> parseScreenshotIpcRequest(
     return std::unexpected(parsed.error() + "\n");
   }
   if (parsed->helpRequested) {
-    return std::unexpected(shade::cli::renderHelp(command, "Shade msg " + std::string(command.name)));
+    return std::unexpected(shade::cli::renderHelp(command, "canopy msg " + std::string(command.name)));
   }
 
   for (const ScreenshotBoolFlag& flag : kScreenshotBoolFlags) {

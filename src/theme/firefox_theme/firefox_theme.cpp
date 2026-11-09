@@ -242,7 +242,7 @@ namespace shade::theme {
       const auto host = resolveCanopyExecutable();
       if (host.empty()) {
         if (error != nullptr) {
-          *error = "Shade executable not found";
+          *error = "canopy executable not found";
         }
         return false;
       }

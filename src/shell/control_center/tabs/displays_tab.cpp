@@ -528,4 +528,13 @@ namespace display_management {
     return clearOutput(name);
   }
 
+  std::string describe(const WaylandOutput& output) {
+    const int percent = static_cast<int>(std::lround(output.configuredScale() * 100.0));
+    std::string text = std::to_string(effectiveWidth(output)) + "x" + std::to_string(effectiveHeight(output));
+    text += "  \xC2\xB7  " + std::to_string(percent) + "%";
+    text += "  \xC2\xB7  " + rotationLabel(output);
+    text += "  \xC2\xB7  (" + std::to_string(output.logicalX) + ", " + std::to_string(output.logicalY) + ")";
+    return text;
+  }
+
 } // namespace display_management

@@ -13,6 +13,7 @@ class Flex;
 class Label;
 class Renderer;
 class ScrollView;
+struct WaylandOutput;
 
 namespace display_management {
 
@@ -27,6 +28,10 @@ namespace display_management {
   bool rotate(CompositorPlatform* platform, const std::string& output, int steps);
   bool adjustScale(CompositorPlatform* platform, const std::string& output, double delta);
   bool reset(const std::string& output);
+
+  // One-line summary of an output's live layout, e.g. "2560x1440  ·  150%  ·  90°  ·  (0, 0)".
+  // Shared so Control Center and Settings always describe a display the same way.
+  [[nodiscard]] std::string describe(const WaylandOutput& output);
 
 } // namespace display_management
 

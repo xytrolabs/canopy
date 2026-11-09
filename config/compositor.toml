@@ -180,6 +180,27 @@ badge = "#7C5CFCFF"
 "XF86MonBrightnessUp" = { action = "spawn canopy msg brightness-up", allow_when_locked = true }
 "XF86MonBrightnessDown" = { action = "spawn canopy msg brightness-down", allow_when_locked = true }
 
+# Screenshots. The capture backend decides the region.
+"Print" = { action = "spawn canopy msg screenshot-region", repeat = false }
+"Shift+Print" = { action = "spawn canopy msg screenshot-fullscreen", repeat = false }
+"Mod+Print" = { action = "spawn canopy msg screenshot-window", repeat = false }
+"Mod+Shift+Print" = { action = "spawn canopy msg screenshot-annotate", repeat = false }
+
+# Laptop hardware keys that wlroots forwards but nothing was bound to.
+"XF86KbdBrightnessUp" = { action = "spawn canopy msg keyboard-backlight-up", allow_when_locked = true }
+"XF86KbdBrightnessDown" = { action = "spawn canopy msg keyboard-backlight-down", allow_when_locked = true }
+"XF86AudioMicMute" = { action = "spawn canopy msg mic-mute", allow_when_locked = true, repeat = false }
+
+# Toggles people reach for daily. The shell owns the state; these just ask it.
+"Mod+Shift+N" = { action = "spawn canopy msg notification-dnd-toggle", repeat = false }
+"Mod+Shift+L" = { action = "spawn canopy msg nightlight-toggle", repeat = false }
+"Mod+Shift+C" = { action = "spawn canopy msg caffeine-toggle", repeat = false }
+"Mod+Shift+D" = { action = "spawn canopy msg theme-mode-toggle", repeat = false }
+
+# Alt+Tab is the fast cycle; the visual switcher gets its own chord.
+"Mod+Tab" = { action = "spawn canopy msg window-switcher", repeat = false }
+"Mod+Control+L" = { action = "spawn canopy msg lock-and-suspend", repeat = false }
+
 # ── Rules ────────────────────────────────────────────────────────────────────
 # Canopy's own windows: settings is a dialog, the annotator floats over the
 # window it is drawing on.

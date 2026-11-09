@@ -1617,6 +1617,9 @@ void SettingsWindow::refreshSettingsRegistry(const Config& cfg) {
       } else {
       for (const auto& output : m_platform->outputs()) {
         const std::string name = output.connectorName.empty() ? "#" + std::to_string(output.name) : output.connectorName;
+        // Each output gets its own card whose header is the live layout, so the
+        // current arrangement is readable before pressing anything.
+        const std::string group = name + "  \xC2\xB7  " + display_management::describe(output);
         const std::string positionTitle = i18n::tr("settings.schema.displays.position.label");
         const std::string positionDescription = i18n::tr("settings.schema.displays.position.description");
         const std::string rotationTitle = i18n::tr("settings.schema.displays.rotation.label");
@@ -1636,31 +1639,31 @@ void SettingsWindow::refreshSettingsRegistry(const Config& cfg) {
         for (const auto& [placement, direction] : placements) {
         const std::string key = std::string("settings.schema.displays.position.") + direction;
         addDisplayAction(
-          name, "display", positionTitle, positionDescription, i18n::tr(key), "position " + std::string(direction),
+          name, group, positionTitle, positionDescription, i18n::tr(key), "position " + std::string(direction),
           [platform, name, placement] { display_management::place(platform, name, placement); }
         );
         }
 
         addDisplayAction(
-          name, "display", rotationTitle, rotationDescription,
+          name, group, rotationTitle, rotationDescription,
           i18n::tr("settings.schema.displays.rotation.counterclockwise"), "rotation rotate counterclockwise",
           [platform, name] { display_management::rotate(platform, name, -1); }
         );
         addDisplayAction(
-          name, "display", rotationTitle, rotationDescription,
+          name, group, rotationTitle, rotationDescription,
           i18n::tr("settings.schema.displays.rotation.clockwise"), "rotation rotate clockwise",
           [platform, name] { display_management::rotate(platform, name, 1); }
         );
         addDisplayAction(
-          name, "display", scaleTitle, scaleDescription, i18n::tr("settings.schema.displays.scale.decrease"),
+          name, group, scaleTitle, scaleDescription, i18n::tr("settings.schema.displays.scale.decrease"),
           "scale decrease", [platform, name] { display_management::adjustScale(platform, name, -0.25); }
         );
         addDisplayAction(
-          name, "display", scaleTitle, scaleDescription, i18n::tr("settings.schema.displays.scale.increase"),
+          name, group, scaleTitle, scaleDescription, i18n::tr("settings.schema.displays.scale.increase"),
           "scale increase", [platform, name] { display_management::adjustScale(platform, name, 0.25); }
         );
         addDisplayAction(
-          name, "display", resetTitle, resetDescription, i18n::tr("settings.schema.displays.reset.button"),
+          name, group, resetTitle, resetDescription, i18n::tr("settings.schema.displays.reset.button"),
           "reset automatic layout", [name] { display_management::reset(name); }
         );
       }
