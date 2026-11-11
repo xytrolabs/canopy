@@ -30,7 +30,10 @@ namespace shade::theme {
     std::string fileName;
   };
 
-  inline constexpr std::string_view kGtkExtensionIndexFile = "Shade-extensions.css";
+  // Must match what the shipped templates import (assets/templates/gtk/gtk[34].css) and what
+  // the undo scripts remove. It said "Shade-extensions.css", so the generated index was written
+  // under a name GTK never loads and template extensions silently did nothing.
+  inline constexpr std::string_view kGtkExtensionIndexFile = "canopy-extensions.css";
   inline constexpr std::string_view kGtkExtensionDir = "canopy-extensions";
 
   // $XDG_CONFIG_HOME/gtk-3.0 or $XDG_CONFIG_HOME/gtk-4.0.

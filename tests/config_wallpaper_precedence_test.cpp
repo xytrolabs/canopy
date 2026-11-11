@@ -108,13 +108,13 @@ namespace {
 
     {
       std::ofstream out(root / "config" / "canopy" / "config.toml", std::ios::trunc);
-      out << "[wallpaper]\nenabled = true\ndirectory = \"$NOCTALIA_WP_TEST/pics\"\n";
+      out << "[wallpaper]\nenabled = true\ndirectory = \"$CANOPY_WP_TEST/pics\"\n";
     }
 
     ConfigService config;
     expect(
         config.config().wallpaper.directory == "/tmp/wp-root/pics",
-        "wallpaper.directory did not expand $NOCTALIA_WP_TEST"
+        "wallpaper.directory did not expand $CANOPY_WP_TEST"
     );
 
     ::unsetenv("CANOPY_WP_TEST");

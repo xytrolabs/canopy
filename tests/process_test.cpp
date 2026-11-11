@@ -131,7 +131,7 @@ namespace {
     options.env.push_back({"CANOPY_PROCESS_UNSET_TEST", std::nullopt});
 
     const auto result = process::runSync(
-        {"/bin/sh", "-lc", R"(printf '%s/%s' "$NOCTALIA_PROCESS_SET_TEST" "${NOCTALIA_PROCESS_UNSET_TEST-unset}")"},
+        {"/bin/sh", "-lc", R"(printf '%s/%s' "$CANOPY_PROCESS_SET_TEST" "${CANOPY_PROCESS_UNSET_TEST-unset}")"},
         options
     );
     ::unsetenv("CANOPY_PROCESS_UNSET_TEST");
@@ -157,7 +157,7 @@ namespace {
     ::setenv("CANOPY_WALLPAPER_PATH", "/tmp/canopy test/wallpaper.png", 1);
     ::setenv("CANOPY_WALLPAPER_CONNECTOR", "DP-1", 1);
 
-    const std::string command = R"(printf '%s\n%s' "$NOCTALIA_WALLPAPER_PATH" "$NOCTALIA_WALLPAPER_CONNECTOR" > )"
+    const std::string command = R"(printf '%s\n%s' "$CANOPY_WALLPAPER_PATH" "$CANOPY_WALLPAPER_CONNECTOR" > )"
         + shellQuote(outPath.string());
     const bool launched = process::runAsync(command);
     ::unsetenv("CANOPY_WALLPAPER_PATH");

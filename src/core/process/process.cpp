@@ -633,8 +633,13 @@ namespace {
     }
 
     if (!activationToken.empty()) {
+      // XDG_ACTIVATION_TOKEN is the xdg-activation-v1 token. DESKTOP_STARTUP_ID is the older
+      // startup-notification id and expects "app_pid_time", not this token: Steam's SDL calls
+      // unsetenv("DESKTOP_STARTUP_ID") when it cannot parse it, and aborts with
+      // "unsafe call to unsetenv" followed by a segfault. Setting only the XDG token keeps
+      // activation working without poisoning startup-notification consumers.
       ::setenv("XDG_ACTIVATION_TOKEN", activationToken.c_str(), 1);
-      ::setenv("DESKTOP_STARTUP_ID", activationToken.c_str(), 1);
+      ::unsetenv("DESKTOP_STARTUP_ID");
     }
 
     attachStdioToDevNull();
@@ -700,12 +705,12 @@ namespace {
     process::RunOptions runOptions;
 
     if (!activationToken.empty()) {
+      // See doubleForkExecDetached: DESKTOP_STARTUP_ID must carry a startup-notification id,
+      // not the activation token. Passing the token breaks Steam (unsetenv abort + segfault).
       systemdArgs.emplace_back("-E");
       systemdArgs.emplace_back("XDG_ACTIVATION_TOKEN");
-      systemdArgs.emplace_back("-E");
-      systemdArgs.emplace_back("DESKTOP_STARTUP_ID");
       runOptions.env.push_back({"XDG_ACTIVATION_TOKEN", activationToken});
-      runOptions.env.push_back({"DESKTOP_STARTUP_ID", activationToken});
+      runOptions.env.push_back({"DESKTOP_STARTUP_ID", std::nullopt});
     }
 
     // App should inherit our environment.

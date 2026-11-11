@@ -8,8 +8,12 @@
 
 namespace shade::cli {
 
-  inline constexpr std::array<std::string_view, 10> kBuiltinPaletteNames{
-      "Ayu", "Catppuccin", "Dracula", "Eldritch", "Gruvbox", "Kanagawa", "Canopy", "Nord", "Rosé Pine", "Tokyo-Night",
+  // Must stay in step with shade::theme::builtinPalettes(); cli_schema_test compares the
+  // two. "Willow" was missing here, so a palette Canopy ships could not be selected from
+  // the command line even though the Settings UI could pick it.
+  inline constexpr std::array<std::string_view, 11> kBuiltinPaletteNames{
+      "Ayu",  "Catppuccin", "Dracula", "Eldritch",  "Gruvbox", "Kanagawa",
+      "Canopy", "Willow",   "Nord",    "Rosé Pine", "Tokyo-Night",
   };
 
   inline constexpr std::array kMsgColorSchemeSetBuiltinPositionals{

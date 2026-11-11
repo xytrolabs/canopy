@@ -11,6 +11,10 @@ text/plain=org.gnome.TextEditor.desktop
 application/pdf=org.gnome.Papers.desktop
 audio/mpeg=org.gnome.Decibels.desktop
 video/mp4=org.gnome.Showtime.desktop
+# Steam launches games by URL (steam://rungameid/<id>). Without these the request has no
+# handler and a game click does nothing at all, which is why Steam games would not start.
+x-scheme-handler/steam=steam.desktop
+x-scheme-handler/steamlink=steam.desktop
 
 [Added Associations]
 text/html=firefox.desktop;

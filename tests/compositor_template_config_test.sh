@@ -43,13 +43,13 @@ configure_case() {
     umbriel)
       primary_relative=umbriel/config.toml
       theme_relative=umbriel/canopy.toml
-      integration='files = ["noctalia.toml"]'
+      integration='files = ["canopy.toml"]'
       manual_directive="files = [\"$XDG_CONFIG_HOME/$theme_relative\"]"
       ;;
     niri)
       primary_relative=niri/config.kdl
       theme_relative=niri/canopy.kdl
-      integration='include "noctalia.kdl"'
+      integration='include "canopy.kdl"'
       manual_directive="include \"$XDG_CONFIG_HOME/$theme_relative\""
       ;;
     sway|scroll)

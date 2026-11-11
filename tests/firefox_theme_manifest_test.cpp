@@ -64,7 +64,7 @@ int main() {
   const std::filesystem::path staleNixHost = "/nix/store/old-canopy-5.1.0/bin/.canopy-wrapped";
   writeManifest(manifestPath, manifest::kDescription, staleNixHost);
   auto inspection = manifest::inspect(manifestPath);
-  TEST_CHECK(inspection.ownership == manifest::Ownership::Noctalia);
+  TEST_CHECK(inspection.ownership == manifest::Ownership::Canopy);
   TEST_CHECK(inspection.hostPath == staleNixHost);
 
   const auto currentNixHost = temp.path() / ".canopy-wrapped";
@@ -75,11 +75,11 @@ int main() {
   std::string error;
   TEST_CHECK(manifest::install(manifestPath, currentNixHost, &error));
   inspection = manifest::inspect(manifestPath);
-  TEST_CHECK(inspection.ownership == manifest::Ownership::Noctalia);
+  TEST_CHECK(inspection.ownership == manifest::Ownership::Canopy);
   TEST_CHECK(inspection.hostPath == std::filesystem::weakly_canonical(currentNixHost));
 
   writeManifest(manifestPath, "Noctalia Pywalfox native messaging host", "/usr/bin/canopy-pywalfox");
-  TEST_CHECK(manifest::inspect(manifestPath).ownership == manifest::Ownership::Noctalia);
+  TEST_CHECK(manifest::inspect(manifestPath).ownership == manifest::Ownership::Canopy);
 
   writeManifest(manifestPath, "Automatically theme Firefox with Pywal", "/usr/bin/pywalfox");
   inspection = manifest::inspect(manifestPath);

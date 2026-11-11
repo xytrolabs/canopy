@@ -20,7 +20,7 @@
 namespace scripting {
   namespace {
     constexpr Logger kLog("plugin-recommendations");
-    constexpr std::string_view kApi = "https://api.Shade.dev";
+    constexpr std::string_view kApi = "https://api.noctalia.dev";
     constexpr std::string_view kOwner = "plugin_store";
     using Clock = std::chrono::steady_clock;
 
@@ -115,7 +115,10 @@ namespace scripting {
         || encodeToken(bytes.bytes()) != secret) {
       return std::nullopt;
     }
-    constexpr char prefix[] = "canopy-recommend-v1\0";
+    // Must stay "noctalia-recommend-v1": this is a wire protocol shared with the recommendation
+    // server, not branding. Renaming it to "canopy-recommend-v1" made every vote token
+    // unverifiable server-side, so plugin recommendations silently never counted.
+    constexpr char prefix[] = "noctalia-recommend-v1\0";
     std::string message(prefix, sizeof(prefix) - 1);
     message += key;
     std::array<std::uint8_t, crypto_auth_hmacsha256_BYTES> digest{};

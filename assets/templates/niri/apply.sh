@@ -22,7 +22,7 @@ config_file="$config_dir/config.kdl"
 output_file="$config_dir/canopy.kdl"
 include_line='include "canopy.kdl"'
 
-has_noctalia_include() {
+has_canopy_include() {
     grep -Eq '^[[:space:]]*include([[:space:]].*)?"([^"]*/)?canopy\.kdl"([[:space:]]|$)' "$config_file"
 }
 
@@ -30,7 +30,7 @@ apply_include() {
     mkdir -p "$config_dir"
 
     if [ ! -f "$config_file" ]; then
-        printf 'Warning: %s is missing; add the Noctalia theme include to your active niri configuration manually:\ninclude "%s"\n' "$config_file" "$output_file" >&2
+        printf 'Warning: %s is missing; add the Canopy theme include to your active niri configuration manually:\ninclude "%s"\n' "$config_file" "$output_file" >&2
         return 1
     fi
 

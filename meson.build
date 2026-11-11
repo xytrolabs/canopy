@@ -1570,7 +1570,7 @@ if build_tests
 
   notification_reply_integration_exe = executable('notification_reply_integration_test',
     sources: files('tests/notification_reply_integration_test.cpp'),
-    dependencies: noctalia_core_dep,
+    dependencies: canopy_core_dep,
     override_options: ['b_ndebug=false'],
   )
   if dbus_run_session.found()
@@ -1589,8 +1589,8 @@ if build_tests
   sh_program = find_program('sh')
   test('config_validate_cli',
     sh_program,
-    args: ['tests/config_validate_cli_test.sh', noctalia_exe.full_path()],
-    depends: noctalia_exe,
+    args: ['tests/config_validate_cli_test.sh', canopy_exe.full_path()],
+    depends: canopy_exe,
     workdir: meson.current_source_dir(),
     env: config_validate_env,
   )

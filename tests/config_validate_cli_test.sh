@@ -2,7 +2,7 @@
 
 set -eu
 
-noctalia_bin=$1
+canopy_bin=$1
 
 fail() {
   printf '%s\n' "config_validate_cli_test: FAIL: $*" >&2

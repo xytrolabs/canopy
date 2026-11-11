@@ -15,7 +15,7 @@ include_line="include $include_dir/sway/canopy"
 mkdir -p "$(dirname "$config_file")"
 
 if [ ! -f "$config_file" ]; then
-    printf 'Warning: %s is missing; add the Noctalia theme include to your active Sway configuration manually:\ninclude "%s/sway/noctalia"\n' "$config_file" "$config_dir" >&2
+    printf 'Warning: %s is missing; add the Canopy theme include to your active Sway configuration manually:\ninclude "%s/sway/canopy"\n' "$config_file" "$config_dir" >&2
     exit 1
 fi
 

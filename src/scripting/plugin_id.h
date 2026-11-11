@@ -60,7 +60,7 @@ namespace scripting {
     if (!subdir.has_value()) {
       return std::nullopt;
     }
-    return "https://Shade.dev/plugins/" + std::string(source) + "/" + *subdir;
+    return "https://noctalia.dev/plugins/" + std::string(source) + "/" + *subdir;
   }
 
 } // namespace scripting

@@ -4,7 +4,9 @@ set -euo pipefail
 kitty_config_dir="${XDG_CONFIG_HOME:-$HOME/.config}/kitty"
 config_file="$kitty_config_dir/kitty.conf"
 theme_file="$kitty_config_dir/themes/canopy.conf"
-include_line='include themes/noctalia.conf'
+# Must match theme_file above: this pointed at themes/noctalia.conf, so kitty imported a
+# file the template never writes and never picked up the palette.
+include_line='include themes/canopy.conf'
 
 # kitty loads only the first kitty.conf it finds, so a new user file would hide one in XDG_CONFIG_DIRS.
 find_system_config() {

@@ -59,13 +59,16 @@ std::vector<ShortcutConfig> defaultControlCenterShortcuts() {
 }
 
 std::vector<PluginSourceConfig> defaultPluginSources() {
+  // The rename replaced "noctalia" with "Shade" here, pointing both defaults at
+  // repos that do not exist (Shade-dev/* is a 404). Plugin auto-update and the
+  // community catalog therefore failed for every user with default settings.
   return {
       {.kind = PluginSourceKind::Git,
        .name = "official",
-       .location = "https://github.com/Shade-dev/official-plugins"},
+       .location = "https://github.com/noctalia-dev/official-plugins"},
       {.kind = PluginSourceKind::Git,
        .name = "community",
-       .location = "https://github.com/Shade-dev/community-plugins"},
+       .location = "https://github.com/noctalia-dev/community-plugins"},
   };
 }
 

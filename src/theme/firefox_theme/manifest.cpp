@@ -8,8 +8,15 @@ namespace shade::theme::firefox_theme::manifest {
 
     constexpr std::string_view kLegacyDescription = "Canopy Pywalfox native messaging host";
 
+    // The rename left real manifests behind: anything installed before Canopy took the
+    // 5.x branch still describes itself as Noctalia. Without this those installs are
+    // classified as Foreign and never get upgraded, so the Firefox theme silently stops
+    // working after an update.
+    constexpr std::string_view kRenamedDescription = "Noctalia Pywalfox native messaging host";
+
     [[nodiscard]] bool isCanopyDescription(std::string_view description) {
-      return description == kDescription || description == kLegacyDescription;
+      return description == kDescription || description == kLegacyDescription
+          || description == kRenamedDescription;
     }
 
   } // namespace

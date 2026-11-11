@@ -55,7 +55,7 @@ namespace {
                                  "Options:\n"
                                  "      --verbose  Enable verbose output\n"
                                  "  -h, --help     Show this help message\n";
-    TEST_CHECK(shade::cli::renderHelp(kGroup, "noctalia tools") == expected);
+    TEST_CHECK(shade::cli::renderHelp(kGroup, "canopy tools") == expected);
   }
 
   void checkLeafHelp() {
@@ -76,7 +76,7 @@ namespace {
                                  "  -h, --help         Show this help message\n"
                                  "\n"
                                  "See https://example.test for details.\n";
-    TEST_CHECK(shade::cli::renderHelp(kLeaf, "noctalia convert") == expected);
+    TEST_CHECK(shade::cli::renderHelp(kLeaf, "canopy convert") == expected);
     TEST_CHECK(shade::cli::renderArgsSpec(kLeaf) == "<input> [kind] [options]");
     TEST_CHECK(shade::cli::renderArgsSpec(kGroup) == "<{zeta|alpha}> ...");
   }

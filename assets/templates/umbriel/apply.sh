@@ -21,7 +21,10 @@ config_file="$config_dir/config.toml"
 mkdir -p "$config_dir"
 
 if [ ! -f "$config_file" ]; then
-    printf 'Warning: %s is missing; add the Noctalia theme include to your active Umbriel configuration manually:\n[include.optional]\nfiles = ["%s/noctalia.toml"]\n' "$config_file" "$config_dir" >&2
+    # Writes canopy.toml because that is where this template puts the theme. The message
+    # used to name noctalia.toml, so anyone following it added an include for a file that
+    # does not exist and the theme never applied.
+    printf 'Warning: %s is missing; add the Canopy theme include to your active Umbriel configuration manually:\n[include.optional]\nfiles = ["%s/canopy.toml"]\n' "$config_file" "$config_dir" >&2
     exit 1
 fi
 

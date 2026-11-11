@@ -421,6 +421,21 @@ seed_toolkits() {
     else
         run cp "$PROJECT_DIR/config/mimeapps.list" "$XDG_CONFIG_HOME/mimeapps.list"
     fi
+
+    # Steam launches games by URL (steam://rungameid/<id>), and with no handler registered the
+    # request went nowhere: clicking a Steam game did nothing. Register the scheme for this
+    # session even when the user already has a mimeapps.list, and never overwrite their choices.
+    if command -v steam >/dev/null 2>&1 && [ -f "$XDG_CONFIG_HOME/mimeapps.list" ]; then
+        if grep -q '^x-scheme-handler/steam=' "$XDG_CONFIG_HOME/mimeapps.list"; then
+            say "steam:// handler already registered"
+        elif [ "$DRY_RUN" -eq 0 ]; then
+            printf 'x-scheme-handler/steam=steam.desktop\nx-scheme-handler/steamlink=steam.desktop\n' \
+                >>"$XDG_CONFIG_HOME/mimeapps.list"
+            say "registered the steam:// handler (Steam games can now launch)"
+        else
+            say "would register the steam:// handler"
+        fi
+    fi
 }
 
 seed_assets() {

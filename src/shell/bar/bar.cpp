@@ -155,6 +155,116 @@ namespace {
     return {InputRect{0, 0, surfW, strip}};
   }
 
+  // A revealed auto-hide bar should only catch clicks where it actually draws something.
+  //
+  // The bar surface spans the whole edge, but a side bar paints a single capsule that hugs
+  // its widgets. Claiming the full surface made every transparent pixel around the island
+  // swallow the click, so whatever sat at the screen edge behind it became unclickable
+  // until the island slid away on its own.
+  //
+  // The region is therefore the union of:
+  //   1. the edge strip that reveals a hidden bar, so it can still be summoned, and
+  //   2. the rects of the capsule runs that are actually painted.
+  // `fallback` covers the moment before the first layout has produced any runs.
+  [[nodiscard]] std::vector<InputRect> barAutoHideRevealedInputRegion(
+      const BarConfig& cfg, int surfW, int surfH, const std::vector<InputRect>& painted, const InputRect& fallback
+  ) {
+    const bool isVertical = cfg.position == "left" || cfg.position == "right";
+    const int surfaceCross = isVertical ? surfW : surfH;
+    if (surfaceCross <= 0 || surfW <= 0 || surfH <= 0) {
+      return {};
+    }
+
+    std::vector<InputRect> rects;
+
+    const int strip = std::min(kAutoHideTriggerPx, surfaceCross);
+    if (isVertical) {
+      rects.push_back(InputRect{cfg.position == "right" ? surfW - strip : 0, 0, strip, surfH});
+    } else {
+      rects.push_back(InputRect{0, cfg.position == "bottom" ? surfH - strip : 0, surfW, strip});
+    }
+
+    if (painted.empty()) {
+      rects.push_back(fallback);
+    } else {
+      rects.insert(rects.end(), painted.begin(), painted.end());
+    }
+
+    return rects;
+  }
+
+  // Capsule runs that are painted this frame, as surface-local input rects.
+  [[nodiscard]] std::vector<InputRect> capsuleRunInputRects(const BarInstance& instance) {
+    std::vector<InputRect> rects;
+
+    const auto append = [&rects](const std::vector<BarCapsuleRun>& runs) {
+      for (const auto& run : runs) {
+        if (run.shell == nullptr || !run.shell->visible() || run.shell->opacity() <= 0.01F) {
+          continue;
+        }
+        float shellX = 0.0F;
+        float shellY = 0.0F;
+        Node::absolutePosition(run.shell, shellX, shellY);
+        if (run.shell->width() <= 0.0F || run.shell->height() <= 0.0F) {
+          continue;
+        }
+        rects.push_back(
+            InputRect{
+                static_cast<int>(std::lround(shellX)), static_cast<int>(std::lround(shellY)),
+                std::max(1, static_cast<int>(std::lround(run.shell->width()))),
+                std::max(1, static_cast<int>(std::lround(run.shell->height()))),
+            }
+        );
+      }
+    };
+
+    append(instance.startCapsuleRuns);
+    append(instance.centerCapsuleRuns);
+    append(instance.endCapsuleRuns);
+    return rects;
+  }
+
+  // Is this surface point over a painted capsule (or within the reveal strip on the edge)?
+  //
+  // The bar surface spans the full edge so the auto-hide slide has somewhere to travel. That
+  // makes "pointer is on the bar surface" useless as a reveal trigger: any contact with the
+  // edge counted, so the island slid out and then captured the click. The trigger is the
+  // capsule band plus a small tolerance, which is what the user is aiming at.
+  [[nodiscard]] bool pointerIsOnCapsuleBand(const BarInstance& instance, float sx, float sy) {
+    constexpr float kRevealTolerance = 6.0F;
+
+    const auto rects = capsuleRunInputRects(instance);
+    if (rects.empty()) {
+      // Before the first layout there is no band to test; fall back to the edge strip so the
+      // bar can still be revealed while a scene is being rebuilt.
+      return true;
+    }
+
+    for (const auto& rect : rects) {
+      const float left = static_cast<float>(rect.x) - kRevealTolerance;
+      const float top = static_cast<float>(rect.y) - kRevealTolerance;
+      const float right = static_cast<float>(rect.x + rect.width) + kRevealTolerance;
+      const float bottom = static_cast<float>(rect.y + rect.height) + kRevealTolerance;
+      if (sx >= left && sx <= right && sy >= top && sy <= bottom) {
+        return true;
+      }
+    }
+
+    // The strip itself stays live along the capsule's cross axis, so a pointer resting on the
+    // edge beside the island does not need to move onto the pill to summon it.
+    const bool isVertical = instance.barConfig.position == "left" || instance.barConfig.position == "right";
+    for (const auto& rect : rects) {
+      if (isVertical) {
+        if (sy >= static_cast<float>(rect.y) && sy <= static_cast<float>(rect.y + rect.height)) {
+          return true;
+        }
+      } else if (sx >= static_cast<float>(rect.x) && sx <= static_cast<float>(rect.x + rect.width)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   bool pointInsideNode(const Node* node, float sceneX, float sceneY) {
     if (node == nullptr) {
       return false;
@@ -700,6 +810,10 @@ namespace {
         }
       }
     } else {
+      // Vertical bar. The surface spans the edge (see positionToAnchor: Top|Bottom anchor),
+      // which is what the slide animation expects. The "edge is unclickable" bug is fixed
+      // where the pointer is judged, not here: only the capsule band counts as the bar, so
+      // touching the edge away from the island neither reveals it nor swallows the click.
       spec.marginTop = std::max(0, mEnds - sb.up - insetT);
       spec.marginBottom = std::max(0, mEnds - sb.down - insetB);
       if (isRight) {
@@ -3217,12 +3331,26 @@ void Bar::syncBarAutoHideInputRegion(BarInstance& instance) const {
     return;
   }
   if (barConfigUsesSlideSurface(instance.barConfig)) {
-    const bool fullSurface = instance.pointerInside
-        || instance.attachedPopupCount > 0
-        || instance.hideOpacity > 0.5F
+    const bool fullSurface =
+        instance.pointerInside || instance.attachedPopupCount > 0
         || (instance.barConfig.smartAutoHide && instance.smartAutoHidePinnedVisible);
     instance.clickThroughInputRegion.reset();
-    instance.surface->setInputRegion(barAutoHideSurfaceInputRegion(instance.barConfig, surfW, surfH, fullSurface));
+    if (fullSurface) {
+      // The pointer is on the bar or one of its popups owns it: take the whole surface so
+      // dragging along the bar and dismissing a popup both keep working.
+      instance.surface->setInputRegion({InputRect{0, 0, surfW, surfH}});
+    } else if (instance.hideOpacity > 0.01F) {
+      // Open, opening, or closing: claim only the pill itself plus the reveal strip, so the
+      // transparent area around a side island stops eating clicks aimed at whatever sits at
+      // the screen edge behind it. This also covers the reveal animation, where the pointer
+      // has not yet entered the surface and hideOpacity is still below one.
+      const auto fallback = barContentInputRegion(instance.barConfig, m_config->config().shell.shadow, surfW, surfH);
+      instance.surface->setInputRegion(
+          barAutoHideRevealedInputRegion(instance.barConfig, surfW, surfH, capsuleRunInputRects(instance), fallback)
+      );
+    } else {
+      instance.surface->setInputRegion(barAutoHideSurfaceInputRegion(instance.barConfig, surfW, surfH, false));
+    }
     return;
   }
   const auto barRect = barContentInputRegion(instance.barConfig, m_config->config().shell.shadow, surfW, surfH);
@@ -3258,10 +3386,10 @@ void Bar::revealAutoHideBar(BarInstance& instance) {
 
   constexpr float kSettledThreshold = 0.999F;
   if (current >= kSettledThreshold) {
-    const int surfW = static_cast<int>(instance.surface->width());
-    const int surfH = static_cast<int>(instance.surface->height());
-    instance.clickThroughInputRegion.reset();
-    instance.surface->setInputRegion(barAutoHideSurfaceInputRegion(instance.barConfig, surfW, surfH, true));
+    // Already open: take the whole surface for as long as the pointer is on it, then fall
+    // back to the painted pill once it leaves. Letting the sync decide keeps the reveal
+    // path from claiming the full edge, which is what made the screen edge unclickable.
+    syncBarAutoHideInputRegion(instance);
     syncBarSurfaceChrome(instance);
     instance.surface->requestRedraw();
     notifyAttachedPanel();
@@ -3277,10 +3405,7 @@ void Bar::revealAutoHideBar(BarInstance& instance) {
       },
       notifyAttachedPanel, instance.slideRoot
   );
-  const int surfW = static_cast<int>(instance.surface->width());
-  const int surfH = static_cast<int>(instance.surface->height());
-  instance.clickThroughInputRegion.reset();
-  instance.surface->setInputRegion(barAutoHideSurfaceInputRegion(instance.barConfig, surfW, surfH, true));
+  syncBarAutoHideInputRegion(instance);
   syncBarSurfaceChrome(instance);
   instance.surface->requestRedraw();
 }
@@ -3625,7 +3750,9 @@ void Bar::updateWidgets(BarInstance& instance) {
   updateSection(instance.centerWidgets);
   updateSection(instance.endWidgets);
   layoutBarSections(instance, renderer, barAreaW, barAreaH, padding, isVertical);
-  if (instance.barConfig.deadZone.clickThrough) {
+  // An auto-hide bar derives its region from the capsule geometry laid out just above, so it
+  // must resync on every update, not only when click-through is enabled.
+  if (instance.barConfig.deadZone.clickThrough || barSupportsSlideBehavior(instance.barConfig)) {
     syncBarAutoHideInputRegion(instance);
   }
 }
@@ -3761,7 +3888,19 @@ bool Bar::onPointerEvent(const PointerEvent& event) {
       break;
     }
     if (barSupportsSlideBehavior(m_hoveredInstance->barConfig) && m_hoveredInstance->sceneRoot != nullptr) {
-      revealAutoHideBar(*m_hoveredInstance);
+      // Only the island reveals the bar. The surface spans the whole edge so the hide/show
+      // slide has somewhere to travel, but treating a pointer anywhere on that surface as
+      // "over the bar" meant brushing the screen edge pulled the island out and then ate the
+      // click. Gate on the capsule band so the rest of the edge belongs to the app behind it.
+      //
+      // m_hoveredInstance stays set even when the pointer is off the band: Motion events only
+      // route to a hovered instance, so clearing it here would make the island unreachable
+      // until the pointer left the edge entirely. The Motion handler applies the same gate.
+      if (pointerIsOnCapsuleBand(*m_hoveredInstance, entered->lastPointerSx, entered->lastPointerSy)) {
+        revealAutoHideBar(*m_hoveredInstance);
+      } else {
+        entered->pointerInside = false;
+      }
     }
     break;
   }
@@ -3785,6 +3924,19 @@ bool Bar::onPointerEvent(const PointerEvent& event) {
     BarInstance* const hovered = m_hoveredInstance;
     hovered->lastPointerSx = static_cast<float>(event.sx);
     hovered->lastPointerSy = static_cast<float>(event.sy);
+    // Same gate as Enter: crossing the edge away from the island must not summon it. The
+    // surface spans the whole edge, so without this the island still appeared whenever the
+    // pointer travelled anywhere along it.
+    if (barSupportsSlideBehavior(hovered->barConfig)) {
+      const bool onBand = pointerIsOnCapsuleBand(*hovered, hovered->lastPointerSx, hovered->lastPointerSy);
+      if (!onBand && !hovered->pointerInside) {
+        break;
+      }
+      if (onBand && !hovered->pointerInside) {
+        hovered->pointerInside = true;
+        revealAutoHideBar(*hovered);
+      }
+    }
     hovered->inputDispatcher.pointerMotion(static_cast<float>(event.sx), static_cast<float>(event.sy), 0);
     // pointerMotion can re-enter the Wayland event loop (tooltip popup work),
     // which may clear or change m_hoveredInstance before we dereference it.
