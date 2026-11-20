@@ -1189,6 +1189,11 @@ canopy_exe = executable('canopy',
   include_directories: _canopy_inc,
   cpp_args: _canopy_cpp_args,
   objects: canopy_core_lib.extract_all_objects(recursive: false),
+  # Release payloads bundle their libraries in ../lib next to the binary. A
+  # relative rpath lets the same executable work both installed system-wide
+  # (where the loader finds the system copies normally) and from a payload.
+  install_rpath: '$ORIGIN/../lib',
+  build_rpath: '$ORIGIN/../lib',
   install: true,
 )
 

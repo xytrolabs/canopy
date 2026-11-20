@@ -924,6 +924,9 @@ canopywc = executable(
   ['src/main.cpp', 'src/core/build_info.cpp', canopy_git_revision_h],
   cpp_args: jemalloc_cpp_args + ['-DCANOPY_VERSION="' + meson.project_version() + '"'],
   dependencies: [canopy_core_dep] + jemalloc_deps,
+  # Release payloads bundle their libraries in ../lib next to the binary.
+  install_rpath: '$ORIGIN/../lib',
+  build_rpath: '$ORIGIN/../lib',
   install: true,
 )
 

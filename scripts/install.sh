@@ -63,9 +63,22 @@ ensure_dependencies() {
             [ -z "$_libs" ] || _missing="$_missing $b(shared:$_libs)"
         fi
     done
+    # Check that the portal packages are actually INSTALLED, not merely
+    # available in the repository. canopy_pkg_available() answers "could I
+    # install this", which is true on a fresh machine that has none of them.
     for p in xdg-desktop-portal xdg-desktop-portal-gtk xdg-desktop-portal-wlr; do
-        canopy_pkg_available "$p" >/dev/null 2>&1 || _missing="$_missing $p"
+        canopy_pkg_installed "$p" || _missing="$_missing $p"
     done
+
+    # The compositor needs a working EGL/Mesa stack and a seat provider.
+    # Neither can be bundled in the release payload, so verify both.
+    if ! { canopy_pkg_installed seatd || canopy_pkg_installed libseat1; }; then
+        _missing="$_missing seatd"
+    fi
+    if ! canopy_pkg_installed mesa && ! canopy_pkg_installed mesa-dri-drivers \
+       && ! canopy_pkg_installed Mesa-libEGL1; then
+        _missing="$_missing mesa"
+    fi
 
     [ -n "$_missing" ] || return 0
 
@@ -85,19 +98,44 @@ ensure_dependencies() {
     fi
 
     say "installing them now:"
+    _rc=0
     case "$(canopy_family)" in
-        arch)   $_sudo pacman -S --needed --noconfirm $_pkgs ;;
-        fedora) $_sudo dnf install -y --skip-unavailable $_pkgs ;;
-        debian) $_sudo apt-get update && $_sudo apt-get install -y $_pkgs ;;
-        suse)   $_sudo zypper install -y $_pkgs ;;
-        *) say "unknown distribution - install these yourself: $_pkgs" >&2 ;;
+        arch)   $_sudo pacman -S --needed --noconfirm $_pkgs || _rc=$? ;;
+        fedora) $_sudo dnf install -y --skip-unavailable $_pkgs || _rc=$? ;;
+        debian) $_sudo apt-get update || _rc=$?; [ "$_rc" -ne 0 ] || $_sudo apt-get install -y $_pkgs || _rc=$? ;;
+        suse)   $_sudo zypper install -y $_pkgs || _rc=$? ;;
+        *) say "unknown distribution - install these yourself: $_pkgs" >&2; return 0 ;;
     esac
+
+    if [ "$_rc" -ne 0 ]; then
+        say "the package manager reported an error (exit $_rc)." >&2
+        say "install these yourself, then re-run this installer:" >&2
+        canopy_install_hint runtime | sed 's/^/  /' >&2
+        return 1
+    fi
+
+    # Report what is still absent rather than assuming the install worked.
+    _still=""
+    for p in xdg-desktop-portal xdg-desktop-portal-gtk xdg-desktop-portal-wlr; do
+        canopy_pkg_installed "$p" || _still="$_still $p"
+    done
+    if [ -n "$_still" ]; then
+        say "still not installed:$_still" >&2
+        say "the session may not start without them." >&2
+        return 1
+    fi
+    say "runtime dependencies are present."
+    return 0
 }
 
 # ---------------------------------------------------------------- binary -----
 install_binary() {
+    # A release payload keeps the shell in bin/ so its $ORIGIN/../lib rpath finds the
+    # bundled lib/; a source checkout or build directory has it at the root.
+    _shell="$BUILD_DIR/canopy"
+    [ -x "$_shell" ] || _shell="$BUILD_DIR/bin/canopy"
     if [ "$is_system" -eq 1 ]; then
-        if [ -x "$BUILD_DIR/canopy" ]; then
+        if [ -x "$_shell" ]; then
             # A release payload carries a finished binary, not a meson build tree, so
             # `meson install` cannot be used here: it looks for build.ninja and aborts
             # with "Install data not found. Run this command in build directory root."
@@ -105,9 +143,13 @@ install_binary() {
             if [ -f "$BUILD_DIR/build.ninja" ]; then
                 run meson install --no-rebuild -C "$BUILD_DIR"
             else
-                # Release payload: drop the finished binary and assets into place.
-                run mkdir -p /usr/local/bin /usr/local/share/canopy/assets
-                run install -m755 "$BUILD_DIR/canopy" /usr/local/bin/canopy
+                # Release payload: drop the finished binary, its bundled libraries and
+                # the assets into place.
+                run mkdir -p /usr/local/bin /usr/local/share/canopy/assets /usr/local/lib/canopy
+                run install -m755 "$_shell" /usr/local/bin/canopy
+                if [ -d "$BUILD_DIR/lib" ]; then
+                    run cp -a "$BUILD_DIR/lib/." /usr/local/lib/canopy/
+                fi
                 run rm -rf /usr/local/share/canopy/assets
                 run cp -a "$PROJECT_DIR/assets/." /usr/local/share/canopy/assets/
             fi
@@ -118,12 +160,12 @@ install_binary() {
             exit 1
         fi
     else
-        [ -x "$BUILD_DIR/canopy" ] || {
-            say "error: $BUILD_DIR/canopy is missing; run 'just build release' first" >&2
+        [ -x "$_shell" ] || {
+            say "error: no canopy binary found in $BUILD_DIR; run 'just build release' first" >&2
             exit 1
         }
         run mkdir -p "$HOME/.local/bin" "$XDG_DATA_HOME/canopy"
-        run install -m755 "$BUILD_DIR/canopy" "$HOME/.local/bin/canopy"
+        run install -m755 "$_shell" "$HOME/.local/bin/canopy"
         run rm -rf "$XDG_DATA_HOME/canopy/assets"
         run cp -a "$PROJECT_DIR/assets" "$XDG_DATA_HOME/canopy/assets"
     fi
@@ -899,7 +941,14 @@ seed_toolkits
 seed_assets
 seed_icon_theme
 repair_icon_theme_index
-ensure_dependencies
+ensure_dependencies || _deps_failed=1
+if [ "${_deps_failed:-0}" -eq 1 ]; then
+    say ""
+    say "Canopy $VERSION is installed, but its runtime dependencies could not be"
+    say "installed automatically. Install them by hand and re-run this installer:"
+    canopy_install_hint runtime | sed 's/^/  /'
+    exit 1
+fi
 if ! verify_install; then
     say ""
     say "Canopy $VERSION is installed but incomplete: the session will not start."

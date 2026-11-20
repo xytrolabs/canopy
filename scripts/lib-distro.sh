@@ -160,6 +160,28 @@ canopy_pkg_available() {
     esac
 }
 
+# True only when the package is INSTALLED on this machine.
+# canopy_pkg_available() answers a different question ("is it in the repo?"),
+# which is true on a fresh install that has none of the packages yet.
+canopy_pkg_installed() {
+    _pi_pkg="$1"
+    case "$(canopy_family)" in
+        arch)
+            command -v pacman >/dev/null 2>&1 || return 1
+            pacman -Q "$_pi_pkg" >/dev/null 2>&1 ;;
+        fedora)
+            command -v rpm >/dev/null 2>&1 || return 1
+            rpm -q "$_pi_pkg" >/dev/null 2>&1 ;;
+        debian)
+            command -v dpkg >/dev/null 2>&1 || return 1
+            dpkg -s "$_pi_pkg" >/dev/null 2>&1 ;;
+        suse)
+            command -v rpm >/dev/null 2>&1 || return 1
+            rpm -q "$_pi_pkg" >/dev/null 2>&1 ;;
+        *) return 1 ;;
+    esac
+}
+
 # Best icon theme present, so Qt/GTK never point at a theme we do not have.
 canopy_icon_theme() {
     for _it_t in kora Win11-black Win11-black-dark McMojave-circle Papirus Papirus-Dark breeze breeze-dark Adwaita hicolor; do

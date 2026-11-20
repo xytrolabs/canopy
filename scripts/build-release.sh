@@ -73,6 +73,59 @@ cp "$PROJECT_DIR/LICENSE" "$STAGE/share/LICENSE" 2>/dev/null || true
 cp "$PROJECT_DIR/docs/CANOPY_DESIGN.md" "$STAGE/share/CANOPY_DESIGN.md" 2>/dev/null || true
 printf '%s\n' "$VERSION" > "$STAGE/VERSION"
 
+# ---- Bundle shared libraries ---------------------------------------------
+# A release has to run on a machine that has none of the build-time libraries.
+# Copy every .so both binaries link against and point them at the bundle with an
+# $ORIGIN rpath, so the payload carries its own copy instead of depending on the
+# distribution's versions.
+#
+# glibc and the dynamic loader are deliberately excluded: bundling them breaks
+# NSS and dlopen in ways that are much worse than the problem being solved, and
+# every supported distribution has them. Graphics drivers (Mesa, libdrm) are also
+# left out here because they must match the running kernel and GPU; the installer
+# still checks those.
+bundle_libraries() {
+    _bin="$1"
+    _dest="$2"
+    [ -x "$_bin" ] || return 0
+    _exclude='^/(usr/lib64/)?ld-linux|libc\.so|libm\.so|libpthread\.so|librt\.so|libdl\.so|libresolv\.so|libutil\.so'
+    ldd "$_bin" 2>/dev/null \
+        | awk '/=>/ { print $3 }' \
+        | grep -v '^$' \
+        | sort -u \
+        | while IFS= read -r _lib; do
+            [ -f "$_lib" ] || continue
+            # Resolve symlinks so the real soname is copied, then keep the name.
+            _name="$(basename "$_lib")"
+            printf '%s\n' "$_lib" | grep -Eq "$_exclude" && continue
+            [ -f "$_dest/$_name" ] || cp -L "$_lib" "$_dest/$_name" 2>/dev/null || true
+        done
+}
+
+say ">> bundling shared libraries"
+mkdir -p "$STAGE/lib"
+bundle_libraries "$STAGE/bin/canopy" "$STAGE/lib"
+bundle_libraries "$STAGE/compositor/canopywc" "$STAGE/lib"
+_BUNDLED="$(find "$STAGE/lib" -type f 2>/dev/null | wc -l)"
+say "   $_BUNDLED libraries ($(du -sh "$STAGE/lib" 2>/dev/null | cut -f1))"
+
+# Point both binaries at the bundle. patchelf is a build-time tool; if it is
+# missing the payload still works on a machine with the libraries installed, so
+# this is a warning rather than a hard failure.
+if command -v patchelf >/dev/null 2>&1; then
+    for _target in "$STAGE/bin/canopy" "$STAGE/compositor/canopywc"; do
+        [ -x "$_target" ] || continue
+        patchelf --set-rpath '$ORIGIN/../lib' "$_target" 2>/dev/null || true
+    done
+    # Libraries dlopen each other; give them the bundle path too.
+    for _lib in "$STAGE/lib"/*.so*; do
+        [ -f "$_lib" ] || continue
+        patchelf --set-rpath '$ORIGIN' "$_lib" 2>/dev/null || true
+    done
+else
+    say "   warning: patchelf not found; the payload will rely on system libraries"
+fi
+
 # The login greeter is part of the desktop, so it ships in the same payload when
 # it has been built. `install.sh --with-greeter` picks it up from greeter/build.
 GREETER_BUILD="${CANOPY_GREETER_BUILD:-$PROJECT_DIR/greeter/build}"
@@ -87,9 +140,11 @@ if [ -x "$GREETER_BUILD/canopy-greeter" ]; then
     cp -a "$PROJECT_DIR"/greeter/assets/. "$STAGE/greeter/assets/" 2>/dev/null || true
 fi
 
-# The payload's installer expects the layout of a source tree.
-mv "$STAGE/bin/canopy" "$STAGE/canopy"
-rmdir "$STAGE/bin"
+# The payload keeps bin/canopy in place: the binary's RUNPATH is $ORIGIN/../lib,
+# which only resolves to the bundled lib/ from inside bin/. Flattening it to the
+# root made the loader look one directory too high and fall back to system
+# libraries, which is exactly what the bundle exists to avoid.
+ln -sf bin/canopy "$STAGE/canopy" 2>/dev/null || true
 
 # ---- Header --------------------------------------------------------------
 cat > "$OUT" <<'HEADER'
