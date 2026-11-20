@@ -98,9 +98,19 @@ ensure_dependencies() {
 install_binary() {
     if [ "$is_system" -eq 1 ]; then
         if [ -x "$BUILD_DIR/canopy" ]; then
-            # meson lays out bin/canopy and share/canopy/assets; the assets tree
-            # is required at runtime, the binary alone is not enough.
-            run meson install --no-rebuild -C "$BUILD_DIR"
+            # A release payload carries a finished binary, not a meson build tree, so
+            # `meson install` cannot be used here: it looks for build.ninja and aborts
+            # with "Install data not found. Run this command in build directory root."
+            # Only reach for meson when BUILD_DIR really is a configured build directory.
+            if [ -f "$BUILD_DIR/build.ninja" ]; then
+                run meson install --no-rebuild -C "$BUILD_DIR"
+            else
+                # Release payload: drop the finished binary and assets into place.
+                run mkdir -p /usr/local/bin /usr/local/share/canopy/assets
+                run install -m755 "$BUILD_DIR/canopy" /usr/local/bin/canopy
+                run rm -rf /usr/local/share/canopy/assets
+                run cp -a "$PROJECT_DIR/assets/." /usr/local/share/canopy/assets/
+            fi
         elif [ -x /usr/local/bin/canopy ]; then
             say "using the already installed binary in /usr/local/bin"
         else
