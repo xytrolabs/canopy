@@ -188,6 +188,19 @@ namespace mahogany {
     m_clientCursorClientCommit.link.next = nullptr;
     m_clientCursorCommit.notify = onClientCursorCommit;
     m_clientCursorCommit.link.next = nullptr;
+
+    // A manager has to be loaded before set_cursor_image can resolve a name. Without this the
+    // struct is valid but holds no images, so every shape request (resize, text, wait, grab)
+    // silently fell back to the default arrow and pointer feedback was lost everywhere.
+    // Scale 1.0 matches what wlr_cursor_set_xcursor resolves against for this manager.
+    constexpr float kCursorBaseScale = 1.0F;
+    if (m_xcursorManager != nullptr && !wlr_xcursor_manager_load(m_xcursorManager, kCursorBaseScale)) {
+      wlr_xcursor_manager_destroy(m_xcursorManager);
+      m_xcursorManager = wlr_xcursor_manager_create(nullptr, m_xcursorSize);
+      if (m_xcursorManager != nullptr) {
+        wlr_xcursor_manager_load(m_xcursorManager, kCursorBaseScale);
+      }
+    }
     updateHideTimer();
   }
 
@@ -255,6 +268,12 @@ namespace mahogany {
     wlr_xcursor_manager* manager =
         wlr_xcursor_manager_create(configured.theme.empty() ? nullptr : configured.theme.c_str(), configured.size);
     if (manager == nullptr) {
+      return;
+    }
+    // Same requirement as the constructor: an unloaded manager has no images, so a theme
+    // change would silently drop every cursor shape back to the default arrow.
+    if (!wlr_xcursor_manager_load(manager, 1.0F)) {
+      wlr_xcursor_manager_destroy(manager);
       return;
     }
 

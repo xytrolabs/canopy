@@ -114,6 +114,23 @@ trap 'rm -rf "$WORKDIR"' EXIT
 echo ">> extracting Canopy..."
 tail -n +"$PAYLOAD_LINE" "$0" | tar -xzf - -C "$WORKDIR"
 
+# install.sh locates the binaries through CANOPY_BUILD_DIR and expects them at the root of
+# that directory, while the payload stages them under bin/ and compositor/. Copy (not
+# symlink) so the layout survives the system install's relocation to /usr/local/share.
+if [ -x "$WORKDIR/bin/canopy" ]; then
+    cp -f "$WORKDIR/bin/canopy" "$WORKDIR/canopy"
+fi
+if [ -x "$WORKDIR/compositor/canopywc" ] && [ ! -x "$WORKDIR/canopywc" ]; then
+    cp -f "$WORKDIR/compositor/canopywc" "$WORKDIR/canopywc"
+fi
+
+# Fail loudly and specifically if the payload is malformed, rather than letting a
+# generic error from a deeper script appear after a successful checksum.
+if [ ! -x "$WORKDIR/canopy" ]; then
+    echo "error: this payload has no canopy binary; it is not a complete Canopy release." >&2
+    exit 1
+fi
+
 # The payload is laid out like a source tree, which is what install.sh expects.
 if [ "$(id -u)" -eq 0 ]; then
     DEST=/usr/local/share/canopy-src
@@ -147,20 +164,49 @@ echo "  canopy-update check          # is there a newer release?"
 echo "  canopy-session               # start the desktop"
 echo "  sh scripts/uninstall.sh      # remove it again"
 
-# Only mention dependencies when something is actually missing: printing a
-# warning on a machine that already has them reads like the install failed.
+# Runtime dependencies come from the distribution's own package manager, so this
+# is one command rather than a "now go install these 20 packages" list. It only
+# runs when something is actually missing, and stops at the first failure rather
+# than leaving a half-working desktop.
+if [ "${CANOPY_SKIP_DEPS:-0}" != "1" ] && [ -x "$WORKDIR/scripts/deps.sh" ]; then
+    echo ""
+    echo ">> checking runtime dependencies"
+    # deps.sh plan always exits 0 (it is a report), so look at what it says rather than
+    # at the status. "missing      : nothing on this machine" is the satisfied case.
+    _deps_report="$(sh "$WORKDIR/scripts/deps.sh" plan 2>/dev/null || true)"
+    if printf '%s\n' "$_deps_report" | grep -q 'missing      : nothing on this machine'; then
+        echo "   all runtime pieces present"
+    else
+        echo "   some runtime pieces are missing."
+        _missing_list="$(printf '%s\n' "$_deps_report" | awk '/^missing      :/ { sub(/^[^:]*: */, ""); print }')"
+        [ -n "$_missing_list" ] && echo "   missing:$_missing_list"
+        if [ "$(id -u)" -eq 0 ] || command -v sudo >/dev/null 2>&1; then
+            printf '   install them now with the system package manager? [Y/n] '
+            read -r _answer </dev/tty 2>/dev/null || _answer=y
+            case "${_answer:-y}" in
+                [Nn]*) echo "   skipped: run 'sh scripts/deps.sh install' yourself." ;;
+                *)     sh "$WORKDIR/scripts/deps.sh" install || {
+                           echo "error: dependency install failed; fix the packages above and re-run." >&2
+                           exit 1
+                       } ;;
+            esac
+        else
+            echo "   install them with: sh scripts/deps.sh install"
+        fi
+    fi
+fi
+
 _missing_deps=""
 command -v canopywc >/dev/null 2>&1 || _missing_deps="$_missing_deps canopywc"
 command -v xdg-desktop-portal >/dev/null 2>&1 || _missing_deps="$_missing_deps xdg-desktop-portal"
 if [ -n "$_missing_deps" ]; then
     echo ""
     echo "missing runtime pieces:$_missing_deps"
-    echo "  sh scripts/deps.sh plan     # what is missing, and how to install it"
+    echo "  sh scripts/deps.sh install   # install them now"
 fi
 echo ""
 echo "Done."
 exit 0
-
 __CANOPY_PAYLOAD_BELOW__
 HEADER
 
