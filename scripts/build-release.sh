@@ -119,6 +119,32 @@ bundle_libraries "$STAGE/compositor/canopywc" "$STAGE/lib"
 _BUNDLED="$(find "$STAGE/lib" -type f 2>/dev/null | wc -l)"
 say "   $_BUNDLED libraries ($(du -sh "$STAGE/lib" 2>/dev/null | cut -f1))"
 
+# Refuse to ship a GPU/vendor driver library.
+#
+# This is the failure that shipped as 2026.11.18 and earlier: the payload
+# carried libEGL/libGLESv2/libwayland-egl built against the build machine's
+# NVIDIA stack. On a machine with an Intel or AMD GPU libglvnd then could not
+# load the vendor driver, the shell never got a surface, and the user saw a
+# black screen with only the compositor's keybind cheatsheet. Nothing in the
+# build failed, and install.sh reported "shell starts: ok" because the binary
+# loaded fine -- it just could not render.
+#
+# Checked rather than trusted to the exclusion regex above: a pattern typo or a
+# future refactor would otherwise reintroduce it silently.
+_gpu_leak="$(find "$STAGE/lib" -maxdepth 1 -type f \
+    \( -name 'libEGL.so*' -o -name 'libGLESv2.so*' -o -name 'libGLX.so*' \
+       -o -name 'libGL.so*' -o -name 'libglvnd.so*' -o -name 'libwayland-egl.so*' \
+       -o -name 'libgbm.so*' -o -name 'libdrm.so*' -o -name 'libvulkan.so*' \
+       -o -name 'libnvidia*' -o -name 'libgallium*' -o -name 'libMesa*' \) 2>/dev/null)"
+if [ -n "$_gpu_leak" ]; then
+    say "error: the graphics driver stack must not be bundled:" >&2
+    printf '%s\n' "$_gpu_leak" | sed 's/^/  /' >&2
+    say "  these load the target machine's vendor driver and are tied to its" >&2
+    say "  kernel DRM driver. A payload carrying the build machine's copies" >&2
+    say "  renders nothing on hardware from a different vendor." >&2
+    exit 1
+fi
+
 # Point both binaries at the bundle, and give every bundled library $ORIGIN so
 # the libraries can find each other.
 #
