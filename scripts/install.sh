@@ -145,10 +145,17 @@ install_binary() {
             else
                 # Release payload: drop the finished binary, its bundled libraries and
                 # the assets into place.
-                run mkdir -p /usr/local/bin /usr/local/share/canopy/assets /usr/local/lib/canopy
+                #
+                # The binary's RUNPATH is $ORIGIN/../lib. Installed to /usr/local/bin
+                # that resolves to /usr/local/lib -- NOT /usr/local/lib/canopy. Putting
+                # the libraries in a canopy/ subdirectory left the loader looking in the
+                # right place for nothing, so it silently fell back to system libraries
+                # and a soname the distro no longer ships (libjxl.so.0.12) made the
+                # binary fail to start with "cannot open shared object file".
+                run mkdir -p /usr/local/bin /usr/local/share/canopy /usr/local/lib
                 run install -m755 "$_shell" /usr/local/bin/canopy
                 if [ -d "$BUILD_DIR/lib" ]; then
-                    run cp -a "$BUILD_DIR/lib/." /usr/local/lib/canopy/
+                    run cp -a "$BUILD_DIR/lib/." /usr/local/lib/
                 fi
                 run rm -rf /usr/local/share/canopy/assets
                 run cp -a "$PROJECT_DIR/assets/." /usr/local/share/canopy/assets/
@@ -164,7 +171,14 @@ install_binary() {
             say "error: no canopy binary found in $BUILD_DIR; run 'just build release' first" >&2
             exit 1
         }
-        run mkdir -p "$HOME/.local/bin" "$XDG_DATA_HOME/canopy"
+        run mkdir -p "$HOME/.local/bin" "$XDG_DATA_HOME/canopy" "$HOME/.local/lib"
+        # The binary's RUNPATH is $ORIGIN/../lib, which for ~/.local/bin/canopy is
+        # ~/.local/lib. The libraries must land exactly there: a canopy/ subdirectory
+        # is not on the search path, so the loader would ignore the bundle entirely and
+        # depend on whatever soname the distro happens to ship.
+        if [ -d "$BUILD_DIR/lib" ]; then
+            run cp -a "$BUILD_DIR/lib/." "$HOME/.local/lib/"
+        fi
         run install -m755 "$_shell" "$HOME/.local/bin/canopy"
         run rm -rf "$XDG_DATA_HOME/canopy/assets"
         run cp -a "$PROJECT_DIR/assets" "$XDG_DATA_HOME/canopy/assets"
