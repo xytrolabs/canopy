@@ -1340,9 +1340,8 @@ namespace mahogany {
       spawn(startupCmd);
     }
     for (const std::string& command : config().general.autostart) {
-      spawn(command.c_str());
-    }
-    return true;
+      spawn(command.c_str(), command.c_str());
+    }    return true;
   }
 
   void Server::showConfigDiagnostics() {
@@ -1614,6 +1613,12 @@ namespace mahogany {
 
     if (launchToken != nullptr) {
       trackActivationToken(launchToken, true, pid);
+    }
+    // An autostart entry that dies immediately is a startup failure: the
+    // compositor carries on and draws its cheatsheet, so without this the user
+    // sees an empty desktop and the log says nothing at all.
+    if (description != nullptr) {
+      watchChildForStartupFailure(pid, description);
     }
     if (scopeRequired) {
       wlr_log(

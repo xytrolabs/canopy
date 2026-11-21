@@ -88,7 +88,17 @@ bundle_libraries() {
     _bin="$1"
     _dest="$2"
     [ -x "$_bin" ] || return 0
+    # glibc and the dynamic loader: bundling them breaks NSS and dlopen.
     _exclude='^/(usr/lib64/)?ld-linux|libc\.so|libm\.so|libpthread\.so|librt\.so|libdl\.so|libresolv\.so|libutil\.so'
+    # The graphics stack. libglvnd/libEGL/libGLESv2/libGL dispatch to whichever
+    # vendor driver the machine actually has (Mesa, NVIDIA, AMD), and libdrm,
+    # libgbm and the GBM/EGL backends are tied to the running kernel's DRM
+    # driver. Copying the build machine's versions onto a machine with different
+    # graphics does not make the bundle portable: the shipped dispatcher loads a
+    # vendor driver that expects a different ABI, the GPU is never initialised,
+    # and the compositor renders nothing but its own cheatsheet. These must come
+    # from the target system; install.sh checks that they are present.
+    _exclude="$_exclude|libEGL\.so|libGLESv2\.so|libGLX\.so|libGL\.so|libglvnd\.so|libwayland-egl\.so|libgbm\.so|libdrm\.so|libvulkan\.so|_drirc|libnvidia|libMesa|libgallium|libLLVM"
     ldd "$_bin" 2>/dev/null \
         | awk '/=>/ { print $3 }' \
         | grep -v '^$' \

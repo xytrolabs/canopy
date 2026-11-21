@@ -174,6 +174,61 @@ elif [ -n "${DISPLAY:-}" ]; then
     unset DISPLAY
 fi
 
+# ------------------------------------------------------------ runtime dir ----
+# The compositor publishes its IPC socket at $XDG_RUNTIME_DIR/canopywc-*.sock and
+# advertises it as CANOPY_SOCKET; the shell uses that variable to decide which
+# desktop it is running on. If XDG_RUNTIME_DIR is unset the path collapses to
+# /canopywc-*.sock at the filesystem root, which is not writable -- the socket is
+# never created and the shell starts with no desktop to draw on: a black screen
+# with the compositor's keybind cheatsheet and nothing else.
+#
+# A display manager normally exports it, but a bare TTY login, a hand-written
+# session file or an su/sudo chain can lose it, so establish it here rather than
+# letting the failure surface later as a blank screen with no explanation.
+if [ -z "${XDG_RUNTIME_DIR:-}" ] || [ ! -d "$XDG_RUNTIME_DIR" ]; then
+    _uid="$(id -u)"
+    for _candidate in "${XDG_RUNTIME_DIR:-}" "/run/user/$_uid" "/var/run/user/$_uid" "${TMPDIR:-/tmp}/canopy-runtime-$_uid"; do
+        [ -n "$_candidate" ] || continue
+        [ -d "$_candidate" ] || mkdir -p "$_candidate" 2>/dev/null || continue
+        [ -w "$_candidate" ] || continue
+        XDG_RUNTIME_DIR="$_candidate"
+        break
+    done
+    if [ -z "${XDG_RUNTIME_DIR:-}" ]; then
+        printf 'canopy-session: no writable XDG_RUNTIME_DIR; cannot create the compositor socket\n' >&2
+        printf '  set XDG_RUNTIME_DIR to a directory only you can write to (normally /run/user/%s)\n' "$_uid" >&2
+        log_note "no writable XDG_RUNTIME_DIR; session refused to start"
+        exit 1
+    fi
+    export XDG_RUNTIME_DIR
+    chmod 700 "$XDG_RUNTIME_DIR" 2>/dev/null || true
+    log_note "XDG_RUNTIME_DIR was unset or missing; using $XDG_RUNTIME_DIR"
+    printf 'canopy-session: using XDG_RUNTIME_DIR=%s\n' "$XDG_RUNTIME_DIR"
+fi
+
+# The shell is spawned by the compositor through general.autostart, which is a
+# bare "canopy" resolved on PATH. A display manager hands us a minimal PATH that
+# does not include ~/.local/bin, so a user install is invisible and the spawn
+# silently does nothing. Find it up front and fail with an actionable message
+# instead of leaving the user on a black screen.
+if ! command -v canopy >/dev/null 2>&1; then
+    _shell_hint=""
+    for _c in "$HOME/.local/bin/canopy" /usr/local/bin/canopy /usr/bin/canopy; do
+        if [ -x "$_c" ]; then _shell_hint="$_c"; break; fi
+    done
+    printf 'canopy-session: the canopy shell is not on PATH\n' >&2
+    if [ -n "$_shell_hint" ]; then
+        printf '  found it at %s but not on PATH=%s\n' "$_shell_hint" "$PATH" >&2
+        printf '  the compositor autostarts "canopy" by name and would find nothing,\n' >&2
+        printf '  leaving a black screen with only the keybind cheatsheet\n' >&2
+    else
+        printf '  install it, then re-run this command\n' >&2
+    fi
+    log_note "canopy shell missing from PATH=$PATH"
+    exit 1
+fi
+log_note "shell=$(command -v canopy) - PATH=$PATH"
+
 if ! command -v "$COMPOSITOR_BIN" >/dev/null 2>&1; then
     printf 'canopy-session: %s is not installed\n' "$COMPOSITOR_BIN" >&2
     case "$COMPOSITOR" in

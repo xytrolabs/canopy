@@ -2,6 +2,7 @@
 
 #include <string>
 #include <string_view>
+#include <sys/types.h>
 
 namespace mahogany {
 
@@ -14,6 +15,11 @@ namespace mahogany {
   // the compositor's libraries launch start with the default disposition: Xwayland waits for its own xkbcomp child and
   // cannot start when SIGCHLD is ignored. wlroots tolerates its Xwayland launcher being reaped here.
   void installChildReaper();
+
+  // Remember a freshly spawned child by name, so an early non-zero exit is logged as a startup failure instead of
+  // being reaped silently. Without this a shell that fails to start leaves the compositor running and drawing its
+  // keybind cheatsheet over an empty desktop, with nothing in the log to say why.
+  void watchChildForStartupFailure(pid_t pid, std::string_view description);
 
   // Run a shell command to completion without racing the global child reaper.
   // The command's output goes to stderr; false means it did not complete successfully.

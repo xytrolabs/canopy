@@ -2,13 +2,17 @@
 
 #include "core/fdlimit.h"
 
+#include <algorithm>
 #include <cerrno>
+#include <chrono>
 #include <climits>
 #include <csignal>
 #include <cstddef>
 #include <cstdlib>
 #include <cstring>
+#include <deque>
 #include <fcntl.h>
+#include <mutex>
 #include <string>
 #include <sys/resource.h>
 #include <sys/socket.h>
@@ -21,13 +25,92 @@ extern "C" int canopyCloseRange(unsigned int first, unsigned int last, int flags
 namespace mahogany {
 
   namespace {
+    // The shell is spawned through the compositor's autostart list, and when it
+    // fails to start nothing else happens: the compositor keeps running and
+    // draws its keybind cheatsheet, so the user sees a black screen with a list
+    // of shortcuts and no way to tell why. Reporting the exit is what turns that
+    // into a named failure.
+    //
+    // Anything that exits non-zero within a few seconds of being spawned is
+    // almost certainly a startup failure; later exits are normal application
+    // lifecycles and stay quiet.
+    constexpr int kStartupFailureWindowMs = 5000;
+
+    struct ChildWatch {
+      pid_t pid;
+      std::chrono::steady_clock::time_point started;
+      std::string description;
+    };
+
+    std::mutex gChildWatchMutex;
+    std::deque<ChildWatch> gChildWatch;
+
+    std::string describeExit(int status) {
+      if (WIFEXITED(status)) {
+        return std::format("exit status {}", WEXITSTATUS(status));
+      }
+      if (WIFSIGNALED(status)) {
+        const int signal = WTERMSIG(status);
+        const char* name = strsignal(signal);
+        return std::format("killed by signal {} ({})", signal, name != nullptr ? name : "unknown");
+      }
+      return "ended";
+    }
+
     void reapChildren(int /*signal*/) {
       const int savedErrno = errno;
-      while (waitpid(-1, nullptr, WNOHANG) > 0) {
+      int status = 0;
+      pid_t pid = 0;
+      while ((pid = waitpid(-1, &status, WNOHANG)) > 0) {
+        std::string description;
+        bool earlyExit = false;
+        {
+          std::scoped_lock lock(gChildWatchMutex);
+          const auto it = std::ranges::find_if(gChildWatch, [pid](const ChildWatch& w) { return w.pid == pid; });
+          if (it != gChildWatch.end()) {
+            description = it->description;
+            const auto elapsed = std::chrono::steady_clock::now() - it->started;
+            earlyExit = elapsed < std::chrono::milliseconds(kStartupFailureWindowMs);
+            gChildWatch.erase(it);
+          }
+        }
+        if (!description.empty() && earlyExit && (!WIFEXITED(status) || WEXITSTATUS(status) != 0)) {
+          // Signal-handler context. logMessage() takes a mutex and formats, and
+          // wlr_log is not linked into this unit, so build the line by hand and
+          // write(2) it: both are async-signal-safe, and stderr is already
+          // redirected to ~/.cache/canopy/canopy-stderr.log by initLogFile().
+          const std::string line =
+              "canopywc: '" + description + "' exited during startup (" + describeExit(status) + ")\n";
+          const char* p = line.data();
+          size_t remaining = line.size();
+          while (remaining > 0) {
+            const ssize_t written = write(STDERR_FILENO, p, remaining);
+            if (written <= 0) {
+              break;
+            }
+            p += written;
+            remaining -= static_cast<size_t>(written);
+          }
+        }
       }
       errno = savedErrno;
     }
   } // namespace
+
+  void watchChildForStartupFailure(pid_t pid, std::string_view description) {
+    if (pid <= 0) {
+      return;
+    }
+    std::scoped_lock lock(gChildWatchMutex);
+    gChildWatch.push_back(
+        ChildWatch{pid, std::chrono::steady_clock::now(), std::string(description)}
+    );
+    // Bound the list: a long session spawns many children and only recent ones
+    // can still be inside the startup window.
+    while (gChildWatch.size() > 64) {
+      gChildWatch.pop_front();
+    }
+  }
 
   void installChildReaper() {
     struct sigaction action{};
