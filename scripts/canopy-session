@@ -166,6 +166,7 @@ if [ -n "$NESTED" ]; then
     printf 'canopy-session: starting nested inside %s\n' "$nested_display"
     printf '  this is a window inside your current desktop, not a login session\n'
     printf '  for the real session: log out and choose Canopy, or run this from a TTY\n'
+    printf '  compositor: %s\n' "$COMPOSITOR_BIN"
 elif [ -n "${DISPLAY:-}" ]; then
     # SDDM's X11 greeter can export its DISPLAY into the Wayland session it
     # starts. Do not let clients or wlroots mistake that retired greeter X

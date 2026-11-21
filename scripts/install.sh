@@ -823,6 +823,22 @@ install_helpers() {
         run cp -f "$PROJECT_DIR/assets/canopy-update.desktop" \
             "$XDG_DATA_HOME/applications/canopy-update.desktop"
     fi
+    # The application launcher itself. verify_install() checks for it under
+    # /usr/local/share/applications on a system install, but nothing ever put it
+    # there: only canopy-update.desktop was installed, so the check could never
+    # pass and every system install reported an incomplete desktop.
+    for _app in "$PROJECT_DIR"/assets/dev.canopy.Canopy*.desktop; do
+        [ -f "$_app" ] || continue
+        if [ "$is_system" -eq 1 ]; then
+            run install -Dm644 "$_app" "/usr/local/share/applications/$(basename "$_app")"
+        else
+            run mkdir -p "$XDG_DATA_HOME/applications"
+            run cp -f "$_app" "$XDG_DATA_HOME/applications/$(basename "$_app")"
+        fi
+    done
+    if [ "$DRY_RUN" -eq 0 ] && command -v update-desktop-database >/dev/null 2>&1; then
+        update-desktop-database "$XDG_DATA_HOME/applications" >/dev/null 2>&1 || true
+    fi
     # Helper copies of the distribution knowledge, so `deps.sh` still works
     # after the release payload has been extracted to a temporary directory.
     run mkdir -p "$XDG_DATA_HOME/canopy/scripts"
