@@ -109,21 +109,63 @@ bundle_libraries "$STAGE/compositor/canopywc" "$STAGE/lib"
 _BUNDLED="$(find "$STAGE/lib" -type f 2>/dev/null | wc -l)"
 say "   $_BUNDLED libraries ($(du -sh "$STAGE/lib" 2>/dev/null | cut -f1))"
 
-# Point both binaries at the bundle. patchelf is a build-time tool; if it is
-# missing the payload still works on a machine with the libraries installed, so
-# this is a warning rather than a hard failure.
-if command -v patchelf >/dev/null 2>&1; then
+# Point both binaries at the bundle, and give every bundled library $ORIGIN so
+# the libraries can find each other.
+#
+# The second half matters more than it looks: glibc does not inherit RUNPATH.
+# The shell's own RUNPATH finds libjxl.so.0.12 in the bundle, but when that
+# library asks for libjxl_cms.so.0.12 the search falls back to the default
+# system paths -- so the bundled copy is ignored and a distro that ships a
+# different soname breaks startup. Each bundled library therefore needs its own
+# $ORIGIN, which is what this loop sets.
+#
+# patchelf is the only reliable way to do that on an existing ELF (objcopy has
+# no --add-rpath, and hand-editing the dynamic section corrupts the file). It is
+# not part of a base install, so fetch a static build when it is missing rather
+# than shipping a payload whose bundle silently does not work.
+CANOPY_PATCHELF="${CANOPY_PATCHELF:-$(command -v patchelf 2>/dev/null || true)}"
+if [ -z "$CANOPY_PATCHELF" ]; then
+    _pf_dir="$PROJECT_DIR/build-release/.tools"
+    _pf_bin="$_pf_dir/patchelf"
+    if [ ! -x "$_pf_bin" ]; then
+        mkdir -p "$_pf_dir"
+        _pf_url="https://github.com/NixOS/patchelf/releases/download/0.18.0/patchelf-0.18.0-x86_64.tar.gz"
+        say ">> patchelf not found; fetching a static build"
+        if command -v curl >/dev/null 2>&1; then
+            curl -fsSL -o "$_pf_dir/patchelf.tar.gz" "$_pf_url" 2>/dev/null || true
+        elif command -v wget >/dev/null 2>&1; then
+            wget -qO "$_pf_dir/patchelf.tar.gz" "$_pf_url" 2>/dev/null || true
+        fi
+        if [ -s "$_pf_dir/patchelf.tar.gz" ] &&
+           tar -xzf "$_pf_dir/patchelf.tar.gz" -C "$_pf_dir" 2>/dev/null &&
+           [ -x "$_pf_dir/bin/patchelf" ]; then
+            mv "$_pf_dir/bin/patchelf" "$_pf_bin"
+            rm -rf "$_pf_dir/bin" "$_pf_dir/share" "$_pf_dir/patchelf.tar.gz"
+        fi
+    fi
+    [ -x "$_pf_bin" ] && CANOPY_PATCHELF="$_pf_bin"
+fi
+
+if [ -n "$CANOPY_PATCHELF" ] && [ -x "$CANOPY_PATCHELF" ]; then
     for _target in "$STAGE/bin/canopy" "$STAGE/compositor/canopywc"; do
         [ -x "$_target" ] || continue
-        patchelf --set-rpath '$ORIGIN/../lib' "$_target" 2>/dev/null || true
+        "$CANOPY_PATCHELF" --set-rpath '$ORIGIN/../lib' "$_target" 2>/dev/null || true
     done
-    # Libraries dlopen each other; give them the bundle path too.
+    # Libraries load each other; each needs $ORIGIN to look in the bundle first.
+    _rpath_fail=0
     for _lib in "$STAGE/lib"/*.so*; do
         [ -f "$_lib" ] || continue
-        patchelf --set-rpath '$ORIGIN' "$_lib" 2>/dev/null || true
+        [ -L "$_lib" ] && continue
+        "$CANOPY_PATCHELF" --set-rpath '$ORIGIN' "$_lib" 2>/dev/null || _rpath_fail=$((_rpath_fail + 1))
     done
+    if [ "$_rpath_fail" -gt 0 ]; then
+        say "   warning: could not set RUNPATH on $_rpath_fail bundled libraries" >&2
+    fi
 else
-    say "   warning: patchelf not found; the payload will rely on system libraries"
+    say "   WARNING: no patchelf available, so the bundled libraries will not" >&2
+    say "            find each other. The payload will work only on a machine" >&2
+    say "            whose system libraries match the build host." >&2
+    say "            Install patchelf or set CANOPY_PATCHELF=/path/to/patchelf." >&2
 fi
 
 # The login greeter is part of the desktop, so it ships in the same payload when
