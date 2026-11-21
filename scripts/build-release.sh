@@ -172,16 +172,39 @@ tail -n +"$PAYLOAD_LINE" "$0" | tar -xzf - -C "$WORKDIR"
 # install.sh locates the binaries through CANOPY_BUILD_DIR and expects them at the root of
 # that directory, while the payload stages them under bin/ and compositor/. Copy (not
 # symlink) so the layout survives the system install's relocation to /usr/local/share.
-if [ -x "$WORKDIR/bin/canopy" ]; then
-    cp -f "$WORKDIR/bin/canopy" "$WORKDIR/canopy"
-fi
-if [ -x "$WORKDIR/compositor/canopywc" ] && [ ! -x "$WORKDIR/canopywc" ]; then
-    cp -f "$WORKDIR/compositor/canopywc" "$WORKDIR/canopywc"
+#
+# The staged tree also carries $STAGE/canopy as a symlink to bin/canopy, so that a
+# directly-executed payload still finds its RUNPATH ($ORIGIN/../lib). After extraction
+# that symlink is present, and copying bin/canopy onto it is copying a file onto itself:
+# cp aborts with "are the same file" and the install stops. Materialise the real file by
+# resolving the link first, and leave an already-correct layout alone.
+materialise_root_binary() {
+    _src="$1"
+    _dst="$2"
+    [ -x "$_src" ] || return 0
+    if [ -e "$_dst" ] && [ "$_src" -ef "$_dst" ]; then
+        # Already the same inode through the symlink. Replace the link with a real
+        # copy so relocation to /usr/local/share cannot leave a dangling target.
+        rm -f "$_dst" || return 1
+    fi
+    cp -f "$_src" "$_dst"
+}
+
+materialise_root_binary "$WORKDIR/bin/canopy" "$WORKDIR/canopy" || {
+    echo "error: could not place the canopy binary at the payload root." >&2
+    exit 1
+}
+if [ ! -x "$WORKDIR/canopywc" ]; then
+    materialise_root_binary "$WORKDIR/compositor/canopywc" "$WORKDIR/canopywc" || {
+        echo "error: could not place the compositor at the payload root." >&2
+        exit 1
+    }
 fi
 
 # Fail loudly and specifically if the payload is malformed, rather than letting a
-# generic error from a deeper script appear after a successful checksum.
-if [ ! -x "$WORKDIR/canopy" ]; then
+# generic error from a deeper script appear after a successful checksum. Test for a
+# regular file, not merely something executable: a dangling symlink must not pass.
+if [ ! -f "$WORKDIR/canopy" ] || [ -L "$WORKDIR/canopy" ]; then
     echo "error: this payload has no canopy binary; it is not a complete Canopy release." >&2
     exit 1
 fi
